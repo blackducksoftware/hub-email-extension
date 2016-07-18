@@ -26,9 +26,9 @@ repositories {
 dependencies {
 	compile 'org.apache.commons:commons-lang3:3.4'
 	compile 'org.springframework.boot:spring-boot-starter-web'
-	compile 'com.blackducksoftware.integration.hub-api-data-model:1.0.0-SNAPSHOT'
+	compile 'org.codehaus.groovy:groovy-all:2.4.4'
 	compile 'com.blackducksoftware.integration:hub-common:1.4.2'
-	compile group: 'com.squareup.okhttp', name: 'okhttp', version: '2.7.5'
-
+	compile 'com.google.code.gson:gson:2.7'
+	
 	testCompile 'junit:junit:4.12'
 }
