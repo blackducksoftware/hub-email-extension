@@ -1,9 +1,11 @@
 package com.blackducksoftware.integration.email.dto;
 
+import java.util.List;
+
 public class ConfigurationElement {
 	private String name;
 	private String type;
-	private String[] values;
+	private List<String> values;
 
 	public String getName() {
 		return name;
@@ -21,11 +23,11 @@ public class ConfigurationElement {
 		this.type = type;
 	}
 
-	public String[] getValues() {
+	public List<String> getValues() {
 		return values;
 	}
 
-	public void setValues(final String[] values) {
+	public void setValues(final List<String> values) {
 		this.values = values;
 	}
 
