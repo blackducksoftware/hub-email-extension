@@ -1,0 +1,51 @@
+{
+  "configurationElements": [
+    {
+      "name": "optIn",
+      "type": "boolean",
+      "values": [
+        "true"
+      ]
+    },
+    {
+      "name": "emailFrequency",
+      "type": "string",
+      "values": [
+        "daily"
+      ]
+    },
+    {
+      "name": "templateName",
+      "type": "string",
+      "values": [
+        "borderOfDaises.vm"
+      ]
+    },
+    {
+      "name": "emailTriggers",
+      "type": "array",
+      "values": [
+        "Policy Violation",
+        "Override Policy Violation"
+      ]
+    },
+    {
+      "name": "emailTriggeringProjects",
+      "type": "array",
+      "values": [
+        "Project 1",
+        "Project 7",
+        "Project 23"
+      ]
+    },
+    {
+      "name": "emailTriggeringPolicies",
+      "type": "array",
+      "values": [
+        "policy2",
+        "policy4",
+        "policy6"
+      ]
+    }
+  ]
+}

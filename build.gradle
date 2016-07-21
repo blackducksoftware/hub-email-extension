@@ -25,10 +25,10 @@ repositories {
 
 dependencies {
 	compile 'org.apache.commons:commons-lang3:3.4'
+	compile 'commons-io:commons-io:2.5'
 	compile 'org.springframework.boot:spring-boot-starter-web'
-	compile 'org.codehaus.groovy:groovy-all:2.4.4'
 	compile 'com.blackducksoftware.integration:hub-common:1.4.2'
 	compile 'com.google.code.gson:gson:2.7'
-	
-	testCompile 'junit:junit:4.12'
+
+	testCompile 'org.springframework.boot:spring-boot-starter-test'
 }
