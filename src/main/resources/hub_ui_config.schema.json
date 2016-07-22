@@ -64,6 +64,14 @@
             "items": {
               "type": "string"
             }
+          },
+          "defaultValues": {
+            "title": "Default Values",
+            "type": "array",
+            "description": "a set of default string values, most often it will be an array of size = 1",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [

@@ -2,7 +2,7 @@ package com.blackducksoftware.integration.email.model;
 
 import java.util.List;
 
-public class EmailConfiguration {
+public class EmailSystemConfiguration {
 	private boolean optIn;
 	private String templateName;
 	private EmailFrequencyEnum emailFrequency;

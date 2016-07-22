@@ -9,8 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.blackducksoftware.integration.email.dto.ConfigurationElement;
 import com.blackducksoftware.integration.email.dto.ConfigurationResponse;
-import com.blackducksoftware.integration.email.model.EmailConfiguration;
 import com.blackducksoftware.integration.email.model.EmailFrequencyEnum;
+import com.blackducksoftware.integration.email.model.EmailSystemConfiguration;
 import com.blackducksoftware.integration.email.model.EmailTriggerEnum;
 import com.google.gson.Gson;
 
@@ -18,10 +18,10 @@ public class ConfigurationResponseParser {
 	@Autowired
 	private Gson gson;
 
-	public EmailConfiguration fromJson(final String json) {
+	public EmailSystemConfiguration fromJson(final String json) {
 		final ConfigurationResponse configurationResponse = gson.fromJson(json, ConfigurationResponse.class);
 
-		final EmailConfiguration emailConfiguration = new EmailConfiguration();
+		final EmailSystemConfiguration emailSystemConfiguration = new EmailSystemConfiguration();
 		for (final ConfigurationElement element : configurationResponse.getConfigurationElements()) {
 			final String fieldName = element.getName();
 			if (null == fieldName) {
@@ -33,43 +33,50 @@ public class ConfigurationResponseParser {
 				values = Collections.emptyList();
 			}
 
-			if ("optIn".equals(fieldName)) {
-				populateOptIn(emailConfiguration, element.getValues().get(0));
-			} else if ("templateName".equals(fieldName)) {
-				populateTemplateName(emailConfiguration, element.getValues().get(0));
-			} else if ("emailFrequency".equals(fieldName)) {
-				populateEmailFrequency(emailConfiguration, element.getValues().get(0));
-			} else if ("emailTriggers".equals(fieldName)) {
-				populateEmailTriggers(emailConfiguration, element.getValues());
-			} else if ("emailTriggeringProjects".equals(fieldName)) {
-				populateEmailTriggeringProjects(emailConfiguration, element.getValues());
-			} else if ("emailTriggeringPolicies".equals(fieldName)) {
-				populateEmailTriggeringPolicies(emailConfiguration, element.getValues());
-			}
+			populateField(emailSystemConfiguration, element, fieldName);
 		}
 
-		return emailConfiguration;
+		return emailSystemConfiguration;
 	}
 
-	private void populateOptIn(final EmailConfiguration emailConfiguration, final String optInValue) {
-		emailConfiguration.setOptIn(Boolean.valueOf(optInValue));
+	private void populateField(final EmailSystemConfiguration emailSystemConfiguration,
+			final ConfigurationElement element, final String fieldName) {
+		if ("optIn".equals(fieldName)) {
+			populateOptIn(emailSystemConfiguration, element.getValues().get(0));
+		} else if ("templateName".equals(fieldName)) {
+			populateTemplateName(emailSystemConfiguration, element.getValues().get(0));
+		} else if ("emailFrequency".equals(fieldName)) {
+			populateEmailFrequency(emailSystemConfiguration, element.getValues().get(0));
+		} else if ("emailTriggers".equals(fieldName)) {
+			populateEmailTriggers(emailSystemConfiguration, element.getValues());
+		} else if ("emailTriggeringProjects".equals(fieldName)) {
+			populateEmailTriggeringProjects(emailSystemConfiguration, element.getValues());
+		} else if ("emailTriggeringPolicies".equals(fieldName)) {
+			populateEmailTriggeringPolicies(emailSystemConfiguration, element.getValues());
+		}
 	}
 
-	private void populateTemplateName(final EmailConfiguration emailConfiguration, final String templateNameValue) {
-		emailConfiguration.setTemplateName(templateNameValue);
+	private void populateOptIn(final EmailSystemConfiguration emailSystemConfiguration, final String optInValue) {
+		emailSystemConfiguration.setOptIn(Boolean.valueOf(optInValue));
 	}
 
-	private void populateEmailFrequency(final EmailConfiguration emailConfiguration, String emailFrequencyValue) {
+	private void populateTemplateName(final EmailSystemConfiguration emailSystemConfiguration,
+			final String templateNameValue) {
+		emailSystemConfiguration.setTemplateName(templateNameValue);
+	}
+
+	private void populateEmailFrequency(final EmailSystemConfiguration emailSystemConfiguration,
+			String emailFrequencyValue) {
 		emailFrequencyValue = cleanString(emailFrequencyValue);
 		for (final EmailFrequencyEnum enumValue : EmailFrequencyEnum.values()) {
 			final String cleanedEnumValue = cleanString(enumValue.toString());
 			if (emailFrequencyValue.equals(cleanedEnumValue)) {
-				emailConfiguration.setEmailFrequency(enumValue);
+				emailSystemConfiguration.setEmailFrequency(enumValue);
 			}
 		}
 	}
 
-	private void populateEmailTriggers(final EmailConfiguration emailConfiguration,
+	private void populateEmailTriggers(final EmailSystemConfiguration emailSystemConfiguration,
 			final List<String> emailTriggersValue) {
 		final List<EmailTriggerEnum> emailTriggers = new ArrayList<>();
 		for (String emailTriggerValue : emailTriggersValue) {
@@ -82,17 +89,17 @@ public class ConfigurationResponseParser {
 			}
 		}
 
-		emailConfiguration.setEmailTriggers(emailTriggers);
+		emailSystemConfiguration.setEmailTriggers(emailTriggers);
 	}
 
-	private void populateEmailTriggeringProjects(final EmailConfiguration emailConfiguration,
+	private void populateEmailTriggeringProjects(final EmailSystemConfiguration emailSystemConfiguration,
 			final List<String> emailTriggeringProjectsValue) {
-		emailConfiguration.setEmailTriggeringProjects(emailTriggeringProjectsValue);
+		emailSystemConfiguration.setEmailTriggeringProjects(emailTriggeringProjectsValue);
 	}
 
-	private void populateEmailTriggeringPolicies(final EmailConfiguration emailConfiguration,
+	private void populateEmailTriggeringPolicies(final EmailSystemConfiguration emailSystemConfiguration,
 			final List<String> emailTriggeringPoliciesValue) {
-		emailConfiguration.setEmailTriggeringPolicies(emailTriggeringPoliciesValue);
+		emailSystemConfiguration.setEmailTriggeringPolicies(emailTriggeringPoliciesValue);
 	}
 
 	private String cleanString(final String s) {

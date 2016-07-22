@@ -24,11 +24,14 @@ repositories {
 }
 
 dependencies {
+	compile 'com.blackducksoftware.integration:hub-common:1.4.2'
+
+	compile 'org.springframework.boot:spring-boot-starter-web'
+
 	compile 'org.apache.commons:commons-lang3:3.4'
 	compile 'commons-io:commons-io:2.5'
-	compile 'org.springframework.boot:spring-boot-starter-web'
-	compile 'com.blackducksoftware.integration:hub-common:1.4.2'
 	compile 'com.google.code.gson:gson:2.7'
+	compile 'javax.mail:mail:1.4'
 
 	testCompile 'org.springframework.boot:spring-boot-starter-test'
 }
