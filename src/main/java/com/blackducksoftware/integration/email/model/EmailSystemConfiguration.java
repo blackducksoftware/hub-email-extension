@@ -3,6 +3,9 @@ package com.blackducksoftware.integration.email.model;
 import java.util.List;
 
 public class EmailSystemConfiguration {
+	private String smtpHost;
+	private String smtpUsername;
+	private String smtpPassword;
 	private boolean optIn;
 	private String templateName;
 	private EmailFrequencyEnum emailFrequency;

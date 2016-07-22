@@ -1,0 +1,25 @@
+{
+  "configurationElements": [
+    {
+      "name": "optIn",
+      "type": "boolean",
+      "values": [
+        "false"
+      ]
+    },
+    {
+      "name": "emailFrequency",
+      "type": "string",
+      "values": [
+        "daily"
+      ]
+    },
+    {
+      "name": "templateName",
+      "type": "string",
+      "values": [
+        "defaultDailyDigest.vm"
+      ]
+    }
+  ]
+}
