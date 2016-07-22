@@ -1,10 +1,10 @@
 package com.blackducksoftware.integration.email.notifier;
 
+import com.blackducksoftware.integration.email.messaging.events.MessageEvent;
+import com.blackducksoftware.integration.email.messaging.events.MessageEventListener;
 import com.blackducksoftware.integration.email.model.EmailConfiguration;
 import com.blackducksoftware.integration.email.model.EmailMessage;
-import com.blackducksoftware.integration.hub.api.notification.NotificationItem;
-import com.blackducksoftware.integration.hub.messaging.events.MessageEvent;
-import com.blackducksoftware.integration.hub.messaging.events.MessageEventListener;
+import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
 
 public class NotificationRouter implements MessageEventListener<NotificationItem> {
 

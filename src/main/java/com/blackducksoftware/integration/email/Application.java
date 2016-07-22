@@ -1,5 +1,7 @@
 package com.blackducksoftware.integration.email;
 
+import java.util.Properties;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -29,4 +31,13 @@ public class Application {
 		return new ConfigurationResponseParser();
 	}
 
+	private boolean doesPropertiesExist(final String path) {
+		return true;
+	}
+
+	private void generatePropertiesFile() {
+		final Properties properties = new Properties();
+		properties.setProperty("", "");
+
+	}
 }

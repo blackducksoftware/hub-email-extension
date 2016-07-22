@@ -27,7 +27,6 @@ dependencies {
 	compile 'org.apache.commons:commons-lang3:3.4'
 	compile 'commons-io:commons-io:2.5'
 	compile 'org.springframework.boot:spring-boot-starter-web'
-	compile 'com.blackducksoftware.integration:hub-api-data-model:1.0.0-SNAPSHOT'
 	compile 'com.blackducksoftware.integration:hub-common:1.4.4-SNAPSHOT'
 	compile 'com.google.code.gson:gson:2.7'
 
