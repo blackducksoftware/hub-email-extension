@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.junit.After;
 import org.junit.Test;
 
 import com.blackducksoftware.integration.email.service.properties.ServicePropertiesBuilder;
@@ -16,72 +17,13 @@ import com.blackducksoftware.integration.email.service.properties.ServicePropert
 
 public class ServicePropertiesBuilderTest {
 
-	@Test
-	public void testGeneratePropFileDefault() throws Exception {
-		final ServicePropertiesBuilder propBuilder = new ServicePropertiesBuilder();
-		final Properties props = propBuilder.build();
+	private File generatedFile;
 
-		for (final ServicePropertyDescriptor descriptor : ServicePropertyDescriptor.values()) {
-			assertEquals(descriptor.getDefaultValue(), props.getProperty(descriptor.getKey()));
-		}
-
-		final File generatedFile = new File(ServicePropertiesBuilder.DEFAULT_PROP_FILE_NAME);
-
+	@After
+	public void deleteGeneratedFile() {
 		if (generatedFile.exists()) {
 			generatedFile.delete();
 		}
-	}
-
-	@Test
-	public void testGeneratePropFileWithDirectoryPath() throws Exception {
-		final String directory = "build/resources/test";
-		final ServicePropertiesBuilder propBuilder = new ServicePropertiesBuilder();
-		propBuilder.setFilePath(directory);
-		final Properties props = propBuilder.build();
-		final File generatedFile = new File(propBuilder.getFilePath(), ServicePropertiesBuilder.DEFAULT_PROP_FILE_NAME);
-
-		assertTrue(generatedFile.exists());
-
-		for (final ServicePropertyDescriptor descriptor : ServicePropertyDescriptor.values()) {
-			assertEquals(descriptor.getDefaultValue(), props.getProperty(descriptor.getKey()));
-		}
-
-		generatedFile.delete();
-	}
-
-	@Test
-	public void testGeneratePropFilePath() throws Exception {
-		final String path = "build/resources/test/email.props";
-		final ServicePropertiesBuilder propBuilder = new ServicePropertiesBuilder();
-		propBuilder.setFilePath(path);
-		final Properties props = propBuilder.build();
-		final File generatedFile = new File(propBuilder.getFilePath());
-
-		assertTrue(generatedFile.exists());
-
-		for (final ServicePropertyDescriptor descriptor : ServicePropertyDescriptor.values()) {
-			assertEquals(descriptor.getDefaultValue(), props.getProperty(descriptor.getKey()));
-		}
-
-		generatedFile.delete();
-	}
-
-	@Test
-	public void testReadPropertiesFile() throws Exception {
-		final String path = "build/resources/test/readTest.props";
-		final ServicePropertiesBuilder propBuilder = new ServicePropertiesBuilder();
-		propBuilder.setFilePath(path);
-		final File file = new File(propBuilder.getFilePath());
-		final Properties existingProps = createTestPropertiesFile(file);
-
-		final Properties props = propBuilder.build();
-		for (final ServicePropertyDescriptor descriptor : ServicePropertyDescriptor.values()) {
-			final String existing = existingProps.getProperty(descriptor.getKey());
-			final String readProperty = props.getProperty(descriptor.getKey());
-			assertEquals(existing, readProperty);
-		}
-
-		file.delete();
 	}
 
 	private Properties createTestPropertiesFile(final File file) throws FileNotFoundException, IOException {
@@ -98,4 +40,74 @@ public class ServicePropertiesBuilderTest {
 		return props;
 	}
 
+	@Test
+	public void testGeneratePropFileDefault() throws Exception {
+		final ServicePropertiesBuilder propBuilder = new ServicePropertiesBuilder();
+		final Properties props = propBuilder.build();
+
+		for (final ServicePropertyDescriptor descriptor : ServicePropertyDescriptor.values()) {
+			assertEquals(descriptor.getDefaultValue(), props.getProperty(descriptor.getKey()));
+		}
+		generatedFile = new File(ServicePropertiesBuilder.DEFAULT_PROP_FILE_NAME);
+	}
+
+	@Test
+	public void testGeneratePropFileWithDirectoryPath() throws Exception {
+		final String directory = "build/resources/test";
+		final ServicePropertiesBuilder propBuilder = new ServicePropertiesBuilder();
+		propBuilder.setFilePath(directory);
+		final Properties props = propBuilder.build();
+		generatedFile = new File(propBuilder.getFilePath(), ServicePropertiesBuilder.DEFAULT_PROP_FILE_NAME);
+
+		assertTrue(generatedFile.exists());
+
+		for (final ServicePropertyDescriptor descriptor : ServicePropertyDescriptor.values()) {
+			assertEquals(descriptor.getDefaultValue(), props.getProperty(descriptor.getKey()));
+		}
+	}
+
+	@Test
+	public void testGeneratePropFilePath() throws Exception {
+		final String path = "build/resources/test/email.props";
+		final ServicePropertiesBuilder propBuilder = new ServicePropertiesBuilder();
+		propBuilder.setFilePath(path);
+		final Properties props = propBuilder.build();
+		generatedFile = new File(propBuilder.getFilePath());
+
+		assertTrue(generatedFile.exists());
+
+		for (final ServicePropertyDescriptor descriptor : ServicePropertyDescriptor.values()) {
+			assertEquals(descriptor.getDefaultValue(), props.getProperty(descriptor.getKey()));
+		}
+	}
+
+	@Test
+	public void testReadPropertiesFile() throws Exception {
+		final String path = "build/resources/test/readTest.props";
+		final ServicePropertiesBuilder propBuilder = new ServicePropertiesBuilder();
+		propBuilder.setFilePath(path);
+		generatedFile = new File(propBuilder.getFilePath());
+		final Properties existingProps = createTestPropertiesFile(generatedFile);
+
+		final Properties props = propBuilder.build();
+		for (final ServicePropertyDescriptor descriptor : ServicePropertyDescriptor.values()) {
+			final String existing = existingProps.getProperty(descriptor.getKey());
+			final String readProperty = props.getProperty(descriptor.getKey());
+			assertEquals(existing, readProperty);
+		}
+	}
+
+	@Test
+	public void testReadDefaultPropertiesFile() throws Exception {
+		final ServicePropertiesBuilder propBuilder = new ServicePropertiesBuilder();
+		generatedFile = new File(ServicePropertiesBuilder.DEFAULT_PROP_FILE_NAME);
+		final Properties existingProps = createTestPropertiesFile(generatedFile);
+
+		final Properties props = propBuilder.build();
+		for (final ServicePropertyDescriptor descriptor : ServicePropertyDescriptor.values()) {
+			final String existing = existingProps.getProperty(descriptor.getKey());
+			final String readProperty = props.getProperty(descriptor.getKey());
+			assertEquals(existing, readProperty);
+		}
+	}
 }
