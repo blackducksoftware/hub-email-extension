@@ -41,36 +41,72 @@ public class EmailSystemProperties {
 		return smtpHost;
 	}
 
+	public void setSmtpHost(final String smtpHost) {
+		this.smtpHost = smtpHost;
+	}
+
 	public String getSmtpPort() {
 		return smtpPort;
+	}
+
+	public void setSmtpPort(final String smtpPort) {
+		this.smtpPort = smtpPort;
 	}
 
 	public String getSmtpAuth() {
 		return smtpAuth;
 	}
 
+	public void setSmtpAuth(final String smtpAuth) {
+		this.smtpAuth = smtpAuth;
+	}
+
 	public String getSmtpUsername() {
 		return smtpUsername;
+	}
+
+	public void setSmtpUsername(final String smtpUsername) {
+		this.smtpUsername = smtpUsername;
 	}
 
 	public String getSmtpPassword() {
 		return smtpPassword;
 	}
 
+	public void setSmtpPassword(final String smtpPassword) {
+		this.smtpPassword = smtpPassword;
+	}
+
 	public String getEmailFromAddress() {
 		return emailFromAddress;
+	}
+
+	public void setEmailFromAddress(final String emailFromAddress) {
+		this.emailFromAddress = emailFromAddress;
 	}
 
 	public String getEmailReplyToAddress() {
 		return emailReplyToAddress;
 	}
 
+	public void setEmailReplyToAddress(final String emailReplyToAddress) {
+		this.emailReplyToAddress = emailReplyToAddress;
+	}
+
 	public String getTemplateName() {
 		return templateName;
 	}
 
+	public void setTemplateName(final String templateName) {
+		this.templateName = templateName;
+	}
+
 	public String getPropertyFilePath() {
 		return propertyFilePath;
+	}
+
+	public void setPropertyFilePath(final String propertyFilePath) {
+		this.propertyFilePath = propertyFilePath;
 	}
 
 }
