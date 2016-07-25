@@ -10,16 +10,17 @@ import java.util.Properties;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.blackducksoftware.integration.email.model.EmailSystemProperties;
 
 @Component
 public class ServicePropertiesBuilder {
 
 	public final static String DEFAULT_PROP_FILE_NAME = "service.properties";
-
-	@Value("${propertyFile}")
-	private String filePath;
+	@Autowired
+	private EmailSystemProperties systemProperties;
 
 	@PostConstruct
 	public Properties build() throws FileNotFoundException, IOException {
@@ -42,7 +43,7 @@ public class ServicePropertiesBuilder {
 	}
 
 	public String getFilePath() {
-		return filePath;
+		return systemProperties.getPropertyFilePath();
 	}
 
 	private Properties generatePropertiesFile(final File file) throws IOException {

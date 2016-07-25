@@ -10,21 +10,42 @@ import java.io.IOException;
 import java.util.Properties;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.blackducksoftware.integration.email.Application;
+import com.blackducksoftware.integration.email.model.EmailSystemProperties;
 import com.blackducksoftware.integration.email.service.properties.ServicePropertiesBuilder;
 import com.blackducksoftware.integration.email.service.properties.ServicePropertyDescriptor;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringApplicationConfiguration(Application.class)
 public class ServicePropertiesBuilderTest {
-
 	private File generatedFile;
+	@Autowired
+	private ServicePropertiesBuilder propBuilder;
+	@Autowired
+	private EmailSystemProperties systemProperties;
+
+	private String oldPropFilePath;
+
+	@Before
+	public void initTest() {
+		oldPropFilePath = systemProperties.getPropertyFilePath();
+	}
 
 	@After
 	public void deleteGeneratedFile() {
 		if (generatedFile.exists()) {
 			generatedFile.delete();
 		}
+
+		systemProperties.setPropertyFilePath(oldPropFilePath);
 	}
 
 	private Properties createTestPropertiesFile(final File file) throws FileNotFoundException, IOException {
@@ -43,8 +64,8 @@ public class ServicePropertiesBuilderTest {
 
 	@Test
 	public void testGeneratePropFileDefault() throws Exception {
-		ServicePropertiesBuilder propBuilder = new ServicePropertiesBuilder();
 		propBuilder = Mockito.spy(propBuilder);
+		systemProperties.setPropertyFilePath(null);
 		final Properties props = propBuilder.build();
 
 		for (final ServicePropertyDescriptor descriptor : ServicePropertyDescriptor.values()) {
@@ -56,9 +77,7 @@ public class ServicePropertiesBuilderTest {
 	@Test
 	public void testGeneratePropFileWithDirectoryPath() throws Exception {
 		final String directory = "build/resources/test";
-		ServicePropertiesBuilder propBuilder = new ServicePropertiesBuilder();
-		propBuilder = Mockito.spy(propBuilder);
-		Mockito.doReturn(directory).when(propBuilder).getFilePath();
+		systemProperties.setPropertyFilePath(directory);
 		final Properties props = propBuilder.build();
 		generatedFile = new File(propBuilder.getFilePath(), ServicePropertiesBuilder.DEFAULT_PROP_FILE_NAME);
 
@@ -72,9 +91,7 @@ public class ServicePropertiesBuilderTest {
 	@Test
 	public void testGeneratePropFilePath() throws Exception {
 		final String path = "build/resources/test/email.props";
-		ServicePropertiesBuilder propBuilder = new ServicePropertiesBuilder();
-		propBuilder = Mockito.spy(propBuilder);
-		Mockito.doReturn(path).when(propBuilder).getFilePath();
+		systemProperties.setPropertyFilePath(path);
 		final Properties props = propBuilder.build();
 		generatedFile = new File(propBuilder.getFilePath());
 
@@ -88,9 +105,7 @@ public class ServicePropertiesBuilderTest {
 	@Test
 	public void testReadPropertiesFile() throws Exception {
 		final String path = "build/resources/test/readTest.props";
-		ServicePropertiesBuilder propBuilder = new ServicePropertiesBuilder();
-		propBuilder = Mockito.spy(propBuilder);
-		Mockito.doReturn(path).when(propBuilder).getFilePath();
+		systemProperties.setPropertyFilePath(path);
 		generatedFile = new File(propBuilder.getFilePath());
 		final Properties existingProps = createTestPropertiesFile(generatedFile);
 
@@ -104,10 +119,9 @@ public class ServicePropertiesBuilderTest {
 
 	@Test
 	public void testReadDefaultPropertiesFile() throws Exception {
-		final ServicePropertiesBuilder propBuilder = new ServicePropertiesBuilder();
 		generatedFile = new File(ServicePropertiesBuilder.DEFAULT_PROP_FILE_NAME);
 		final Properties existingProps = createTestPropertiesFile(generatedFile);
-
+		systemProperties.setPropertyFilePath(null);
 		final Properties props = propBuilder.build();
 		for (final ServicePropertyDescriptor descriptor : ServicePropertyDescriptor.values()) {
 			final String existing = existingProps.getProperty(descriptor.getKey());
