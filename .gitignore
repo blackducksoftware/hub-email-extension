@@ -4,3 +4,4 @@
 .settings/
 build/
 bin/
+application-default.properties
