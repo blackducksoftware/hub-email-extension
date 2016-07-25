@@ -14,8 +14,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 
-import com.blackducksoftware.integration.email.service.ConfigurationResponseParser;
-import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.service.properties.ServicePropertiesBuilder;
 import com.google.gson.Gson;
 
@@ -50,16 +48,6 @@ public class Application {
 	@Bean
 	public Gson gson() {
 		return new Gson();
-	}
-
-	@Bean
-	public ConfigurationResponseParser configurationResponseParser() {
-		return new ConfigurationResponseParser();
-	}
-
-	@Bean
-	public EmailMessagingService emailMessagingService() {
-		return new EmailMessagingService();
 	}
 
 	private static Options createCommandLineOptions() {

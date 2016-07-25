@@ -10,13 +10,17 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.blackducksoftware.integration.email.model.EmailSystemConfiguration;
-import com.blackducksoftware.integration.email.model.SmtpProperties;
+import com.blackducksoftware.integration.email.model.SmtpConfiguration;
 
 @Service
 public class EmailMessagingService {
+	@Autowired
+	private SmtpConfiguration smtpConfiguration;
+
 	public static void test(final String[] args) {
 		final Properties props = new Properties();
 		props.put("mail.smtp.host", "mailrelay.blackducksoftware.com");
@@ -39,9 +43,7 @@ public class EmailMessagingService {
 	}
 
 	public void sendEmailMessage(final EmailSystemConfiguration emailSystemConfiguration) {
-		final SmtpProperties smtpProperties = emailSystemConfiguration.getSmtpProperties();
-
-		final Map<String, String> sessionProps = smtpProperties.getPropertiesForSession();
+		final Map<String, String> sessionProps = smtpConfiguration.getPropertiesForSession();
 		final Properties props = System.getProperties();
 		props.putAll(sessionProps);
 
@@ -54,8 +56,8 @@ public class EmailMessagingService {
 			message.setSubject("Testing Hub Email Extension");
 			message.setText("We are as Midas.");
 
-			if (smtpProperties.isAuth()) {
-				sendAuthenticated(message, session, smtpProperties);
+			if (smtpConfiguration.isAuth()) {
+				sendAuthenticated(message, session, smtpConfiguration);
 			} else {
 				Transport.send(message);
 			}
@@ -64,12 +66,12 @@ public class EmailMessagingService {
 		}
 	}
 
-	private void sendAuthenticated(final Message message, final Session session, final SmtpProperties smtpProperties)
-			throws MessagingException {
-		final String host = smtpProperties.getHost();
-		final int port = smtpProperties.getPort();
-		final String username = smtpProperties.getUsername();
-		final String password = smtpProperties.getPassword();
+	private void sendAuthenticated(final Message message, final Session session,
+			final SmtpConfiguration smtpConfiguration) throws MessagingException {
+		final String host = smtpConfiguration.getHost();
+		final int port = smtpConfiguration.getPort();
+		final String username = smtpConfiguration.getUsername();
+		final String password = smtpConfiguration.getPassword();
 
 		final Transport transport = session.getTransport("smtp");
 		try {
