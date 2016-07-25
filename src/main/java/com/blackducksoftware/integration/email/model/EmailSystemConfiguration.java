@@ -3,15 +3,21 @@ package com.blackducksoftware.integration.email.model;
 import java.util.List;
 
 public class EmailSystemConfiguration {
-	private String smtpHost;
-	private String smtpUsername;
-	private String smtpPassword;
+	private SmtpProperties smtpProperties;
 	private boolean optIn;
 	private String templateName;
 	private EmailFrequencyEnum emailFrequency;
 	private List<EmailTriggerEnum> emailTriggers;
 	private List<String> emailTriggeringProjects;
 	private List<String> emailTriggeringPolicies;
+
+	public SmtpProperties getSmtpProperties() {
+		return smtpProperties;
+	}
+
+	public void setSmtpProperties(final SmtpProperties smtpProperties) {
+		this.smtpProperties = smtpProperties;
+	}
 
 	public boolean isOptIn() {
 		return optIn;
@@ -60,4 +66,5 @@ public class EmailSystemConfiguration {
 	public void setEmailTriggeringPolicies(final List<String> emailTriggeringPolicies) {
 		this.emailTriggeringPolicies = emailTriggeringPolicies;
 	}
+
 }

@@ -2,67 +2,163 @@ package com.blackducksoftware.integration.email.service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.blackducksoftware.integration.email.dto.ConfigurationElement;
 import com.blackducksoftware.integration.email.dto.ConfigurationResponse;
+import com.blackducksoftware.integration.email.model.ConfigurationFieldEnum;
 import com.blackducksoftware.integration.email.model.EmailFrequencyEnum;
 import com.blackducksoftware.integration.email.model.EmailSystemConfiguration;
 import com.blackducksoftware.integration.email.model.EmailTriggerEnum;
+import com.blackducksoftware.integration.email.model.SmtpProperties;
 import com.google.gson.Gson;
 
 public class ConfigurationResponseParser {
+	private final Logger log = LoggerFactory.getLogger(ConfigurationResponseParser.class);
+
 	@Autowired
 	private Gson gson;
 
 	public EmailSystemConfiguration fromJson(final String json) {
 		final ConfigurationResponse configurationResponse = gson.fromJson(json, ConfigurationResponse.class);
 
-		final EmailSystemConfiguration emailSystemConfiguration = new EmailSystemConfiguration();
+		final Map<ConfigurationFieldEnum, List<String>> fieldToValues = new HashMap<>();
 		for (final ConfigurationElement element : configurationResponse.getConfigurationElements()) {
 			final String fieldName = element.getName();
 			if (null == fieldName) {
 				throw new RuntimeException("No name property is specifed - json is invalid.");
 			}
+			final ConfigurationFieldEnum field = ConfigurationFieldEnum.valueOf(fieldName);
 
-			List<String> values = element.getValues();
-			if (null == values) {
-				values = Collections.emptyList();
-			}
-
-			populateField(emailSystemConfiguration, element, fieldName);
+			fieldToValues.put(field, element.getValues());
 		}
+
+		final SmtpProperties smtpProperties = new SmtpProperties();
+		populateSmtpProperties(smtpProperties, fieldToValues);
+
+		final EmailSystemConfiguration emailSystemConfiguration = new EmailSystemConfiguration();
+		emailSystemConfiguration.setSmtpProperties(smtpProperties);
+		populateEmailSystemConfiguration(emailSystemConfiguration, fieldToValues);
 
 		return emailSystemConfiguration;
 	}
 
-	private void populateField(final EmailSystemConfiguration emailSystemConfiguration,
-			final ConfigurationElement element, final String fieldName) {
-		if ("optIn".equals(fieldName)) {
-			populateOptIn(emailSystemConfiguration, element.getValues().get(0));
-		} else if ("templateName".equals(fieldName)) {
-			populateTemplateName(emailSystemConfiguration, element.getValues().get(0));
-		} else if ("emailFrequency".equals(fieldName)) {
-			populateEmailFrequency(emailSystemConfiguration, element.getValues().get(0));
-		} else if ("emailTriggers".equals(fieldName)) {
-			populateEmailTriggers(emailSystemConfiguration, element.getValues());
-		} else if ("emailTriggeringProjects".equals(fieldName)) {
-			populateEmailTriggeringProjects(emailSystemConfiguration, element.getValues());
-		} else if ("emailTriggeringPolicies".equals(fieldName)) {
-			populateEmailTriggeringPolicies(emailSystemConfiguration, element.getValues());
+	private void populateSmtpProperties(final SmtpProperties smtpProperties,
+			final Map<ConfigurationFieldEnum, List<String>> fieldToValues) {
+		if (checkFieldValue(ConfigurationFieldEnum.smtpAuth, fieldToValues)) {
+			smtpProperties.setAuth(getBoolean(ConfigurationFieldEnum.smtpAuth, fieldToValues));
+		}
+		if (checkFieldValue(ConfigurationFieldEnum.smtpEnableTls, fieldToValues)) {
+			smtpProperties.setEnableTls(getBoolean(ConfigurationFieldEnum.smtpEnableTls, fieldToValues));
+		}
+		if (checkFieldValue(ConfigurationFieldEnum.smtpHost, fieldToValues)) {
+			smtpProperties.setHost(getString(ConfigurationFieldEnum.smtpHost, fieldToValues));
+		}
+		if (checkFieldValue(ConfigurationFieldEnum.smtpPassword, fieldToValues)) {
+			smtpProperties.setPassword(getString(ConfigurationFieldEnum.smtpPassword, fieldToValues));
+		}
+		if (checkFieldValue(ConfigurationFieldEnum.smtpPort, fieldToValues)) {
+			smtpProperties.setPort(getInt(ConfigurationFieldEnum.smtpPort, fieldToValues));
+		}
+		if (checkFieldValue(ConfigurationFieldEnum.smtpSocketFactoryClass, fieldToValues)) {
+			smtpProperties
+					.setSocketFactoryClass(getString(ConfigurationFieldEnum.smtpSocketFactoryClass, fieldToValues));
+		}
+		if (checkFieldValue(ConfigurationFieldEnum.smtpUsername, fieldToValues)) {
+			smtpProperties.setUsername(getString(ConfigurationFieldEnum.smtpUsername, fieldToValues));
 		}
 	}
 
-	private void populateOptIn(final EmailSystemConfiguration emailSystemConfiguration, final String optInValue) {
-		emailSystemConfiguration.setOptIn(Boolean.valueOf(optInValue));
+	private void populateEmailSystemConfiguration(final EmailSystemConfiguration emailSystemConfiguration,
+			final Map<ConfigurationFieldEnum, List<String>> fieldToValues) {
+		if (checkFieldValue(ConfigurationFieldEnum.emailFrequency, fieldToValues)) {
+			populateEmailFrequency(emailSystemConfiguration,
+					getString(ConfigurationFieldEnum.emailFrequency, fieldToValues));
+		}
+
+		if (checkFieldValue(ConfigurationFieldEnum.emailTriggeringPolicies, fieldToValues)) {
+			emailSystemConfiguration.setEmailTriggeringPolicies(
+					getStringList(ConfigurationFieldEnum.emailTriggeringPolicies, fieldToValues));
+		}
+
+		if (checkFieldValue(ConfigurationFieldEnum.emailTriggeringProjects, fieldToValues)) {
+			emailSystemConfiguration.setEmailTriggeringProjects(
+					getStringList(ConfigurationFieldEnum.emailTriggeringProjects, fieldToValues));
+		}
+
+		if (checkFieldValue(ConfigurationFieldEnum.emailTriggers, fieldToValues)) {
+			populateEmailTriggers(emailSystemConfiguration,
+					getStringList(ConfigurationFieldEnum.emailTriggers, fieldToValues));
+		}
+
+		if (checkFieldValue(ConfigurationFieldEnum.optIn, fieldToValues)) {
+			emailSystemConfiguration.setOptIn(getBoolean(ConfigurationFieldEnum.optIn, fieldToValues));
+		}
+
+		if (checkFieldValue(ConfigurationFieldEnum.templateName, fieldToValues)) {
+			emailSystemConfiguration.setTemplateName(getString(ConfigurationFieldEnum.templateName, fieldToValues));
+		}
 	}
 
-	private void populateTemplateName(final EmailSystemConfiguration emailSystemConfiguration,
-			final String templateNameValue) {
-		emailSystemConfiguration.setTemplateName(templateNameValue);
+	private boolean checkFieldValue(final ConfigurationFieldEnum field,
+			final Map<ConfigurationFieldEnum, List<String>> fieldToValues) {
+		return fieldToValues.containsKey(field) && null != fieldToValues.get(field)
+				&& fieldToValues.get(field).size() > 0;
+	}
+
+	private boolean getBoolean(final ConfigurationFieldEnum field,
+			final Map<ConfigurationFieldEnum, List<String>> fieldToValues) {
+		final List<String> values = fieldToValues.get(field);
+		try {
+			return Boolean.parseBoolean(values.get(0));
+		} catch (final Exception e) {
+			log.warn(String.format("Couldn't get boolean for %s from %s: %s"), field.toString(),
+					StringUtils.join(values, ", "), e.getMessage());
+		}
+		return false;
+	}
+
+	private int getInt(final ConfigurationFieldEnum field,
+			final Map<ConfigurationFieldEnum, List<String>> fieldToValues) {
+		final List<String> values = fieldToValues.get(field);
+		try {
+			return Integer.parseInt(values.get(0));
+		} catch (final Exception e) {
+			log.warn(String.format("Couldn't get int for %s from %s: %s"), field.toString(),
+					StringUtils.join(values, ", "), e.getMessage());
+		}
+		return 0;
+	}
+
+	private String getString(final ConfigurationFieldEnum field,
+			final Map<ConfigurationFieldEnum, List<String>> fieldToValues) {
+		final List<String> values = fieldToValues.get(field);
+		try {
+			return values.get(0);
+		} catch (final Exception e) {
+			log.warn(String.format("Couldn't get String for %s from %s: %s"), field.toString(),
+					StringUtils.join(values, ", "), e.getMessage());
+		}
+		return "";
+	}
+
+	private List<String> getStringList(final ConfigurationFieldEnum field,
+			final Map<ConfigurationFieldEnum, List<String>> fieldToValues) {
+		final List<String> values = fieldToValues.get(field);
+		try {
+			return values;
+		} catch (final Exception e) {
+			log.warn(String.format("Couldn't get List<String> for %s from %s: %s"), field.toString(),
+					StringUtils.join(values, ", "), e.getMessage());
+		}
+		return Collections.emptyList();
 	}
 
 	private void populateEmailFrequency(final EmailSystemConfiguration emailSystemConfiguration,
@@ -90,16 +186,6 @@ public class ConfigurationResponseParser {
 		}
 
 		emailSystemConfiguration.setEmailTriggers(emailTriggers);
-	}
-
-	private void populateEmailTriggeringProjects(final EmailSystemConfiguration emailSystemConfiguration,
-			final List<String> emailTriggeringProjectsValue) {
-		emailSystemConfiguration.setEmailTriggeringProjects(emailTriggeringProjectsValue);
-	}
-
-	private void populateEmailTriggeringPolicies(final EmailSystemConfiguration emailSystemConfiguration,
-			final List<String> emailTriggeringPoliciesValue) {
-		emailSystemConfiguration.setEmailTriggeringPolicies(emailTriggeringPoliciesValue);
 	}
 
 	private String cleanString(final String s) {

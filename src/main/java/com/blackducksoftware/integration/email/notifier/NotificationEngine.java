@@ -1,6 +1,6 @@
 package com.blackducksoftware.integration.email.notifier;
 
-import com.blackducksoftware.integration.email.model.EmailConfiguration;
+import com.blackducksoftware.integration.email.model.EmailSystemConfiguration;
 
 public class NotificationEngine {
 
@@ -13,9 +13,9 @@ public class NotificationEngine {
 	}
 
 	public void configure() {
-		final EmailConfiguration config = new EmailConfiguration();
+		final EmailSystemConfiguration emailSystemConfiguration = new EmailSystemConfiguration();
 		consumer.addListener(router);
-		router.configure(config);
+		router.configure(emailSystemConfiguration);
 	}
 
 	public void start() {

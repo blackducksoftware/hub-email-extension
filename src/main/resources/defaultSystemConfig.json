@@ -4,7 +4,7 @@
       "name": "optIn",
       "type": "boolean",
       "values": [
-        "false"
+        "true"
       ]
     },
     {
@@ -19,6 +19,20 @@
       "type": "string",
       "values": [
         "defaultDailyDigest.vm"
+      ]
+    },
+    {
+      "name": "smtpHost",
+      "type": "string",
+      "values": [
+        "mailrelay.blackducksoftware.com"
+      ]
+    },
+    {
+      "name": "smtpPort",
+      "type": "integer",
+      "values": [
+        "465"
       ]
     }
   ]
