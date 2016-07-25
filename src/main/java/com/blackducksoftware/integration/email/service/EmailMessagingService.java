@@ -17,7 +17,7 @@ import com.blackducksoftware.integration.email.model.SmtpProperties;
 
 @Service
 public class EmailMessagingService {
-	public static void main(final String[] args) {
+	public static void test(final String[] args) {
 		final Properties props = new Properties();
 		props.put("mail.smtp.host", "mailrelay.blackducksoftware.com");
 		props.put("mail.smtp.port", Integer.toString(25));
