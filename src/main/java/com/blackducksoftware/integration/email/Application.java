@@ -34,7 +34,6 @@ public class Application {
 			}
 
 			final Properties props = propertyBuilder.build();
-			System.out.println("Properties: " + props);
 
 			SpringApplication.run(Application.class, args);
 		} catch (final ParseException | IOException e) {
