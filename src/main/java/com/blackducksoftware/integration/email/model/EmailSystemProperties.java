@@ -10,31 +10,31 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class EmailSystemProperties {
-	@Value("${smtp.host:''}")
+	@Value("${smtp.host:}")
 	private String smtpHost;
 
-	@Value("${smtp.port:''}")
+	@Value("${smtp.port:}")
 	private String smtpPort;
 
-	@Value("${smtp.auth:''}")
+	@Value("${smtp.auth:}")
 	private String smtpAuth;
 
-	@Value("${smtp.username:''}")
+	@Value("${smtp.username:}")
 	private String smtpUsername;
 
-	@Value("${smtp.password:''}")
+	@Value("${smtp.password:}")
 	private String smtpPassword;
 
-	@Value("${email.from.address:''}")
+	@Value("${email.from.address:}")
 	private String emailFromAddress;
 
-	@Value("${email.reply.to.address:''}")
+	@Value("${email.reply.to.address:}")
 	private String emailReplyToAddress;
 
-	@Value("${template.name:''}")
+	@Value("${template.name:}")
 	private String templateName;
 
-	@Value("${property.file:''}")
+	@Value("${property.file:}")
 	private String propertyFilePath;
 
 	public String getSmtpHost() {
