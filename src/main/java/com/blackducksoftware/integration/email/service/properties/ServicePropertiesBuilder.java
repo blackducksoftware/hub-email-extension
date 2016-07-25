@@ -24,8 +24,8 @@ public class ServicePropertiesBuilder {
 	@PostConstruct
 	public Properties build() throws FileNotFoundException, IOException {
 		File file;
-		if (StringUtils.isNotBlank(filePath)) {
-			file = new File(filePath);
+		if (StringUtils.isNotBlank(getFilePath())) {
+			file = new File(getFilePath());
 		} else {
 			file = new File(DEFAULT_PROP_FILE_NAME);
 		}
@@ -39,6 +39,10 @@ public class ServicePropertiesBuilder {
 		} else {
 			return readProperties(file);
 		}
+	}
+
+	public String getFilePath() {
+		return filePath;
 	}
 
 	private Properties generatePropertiesFile(final File file) throws IOException {

@@ -1,7 +1,6 @@
 package com.blackducksoftware.integration.email.service.properties;
 
 public enum ServicePropertyDescriptor {
-
 	HUB_SERVER_URL("hub.server.url", "http://ahub.customer1.com"),
 	HUB_USER("hub.server.user", "user"),
 	HUB_PASSWORD("hub.server.password", "password"),
@@ -27,4 +26,5 @@ public enum ServicePropertyDescriptor {
 	public String getDefaultValue() {
 		return defaultValue;
 	}
+
 }

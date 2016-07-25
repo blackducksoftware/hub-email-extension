@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.blackducksoftware.integration.email.dto.ConfigurationElement;
 import com.blackducksoftware.integration.email.dto.ConfigurationResponse;
@@ -17,9 +18,9 @@ import com.blackducksoftware.integration.email.model.ConfigurationFieldEnum;
 import com.blackducksoftware.integration.email.model.EmailFrequencyEnum;
 import com.blackducksoftware.integration.email.model.EmailSystemConfiguration;
 import com.blackducksoftware.integration.email.model.EmailTriggerEnum;
-import com.blackducksoftware.integration.email.model.SmtpProperties;
 import com.google.gson.Gson;
 
+@Component
 public class ConfigurationResponseParser {
 	private final Logger log = LoggerFactory.getLogger(ConfigurationResponseParser.class);
 
@@ -40,40 +41,14 @@ public class ConfigurationResponseParser {
 			fieldToValues.put(field, element.getValues());
 		}
 
-		final SmtpProperties smtpProperties = new SmtpProperties();
-		populateSmtpProperties(smtpProperties, fieldToValues);
+		// final SmtpProperties smtpProperties = new SmtpProperties();
+		// populateSmtpProperties(smtpProperties, fieldToValues);
 
 		final EmailSystemConfiguration emailSystemConfiguration = new EmailSystemConfiguration();
-		emailSystemConfiguration.setSmtpProperties(smtpProperties);
+		// emailSystemConfiguration.setSmtpProperties(smtpProperties);
 		populateEmailSystemConfiguration(emailSystemConfiguration, fieldToValues);
 
 		return emailSystemConfiguration;
-	}
-
-	private void populateSmtpProperties(final SmtpProperties smtpProperties,
-			final Map<ConfigurationFieldEnum, List<String>> fieldToValues) {
-		if (checkFieldValue(ConfigurationFieldEnum.smtpAuth, fieldToValues)) {
-			smtpProperties.setAuth(getBoolean(ConfigurationFieldEnum.smtpAuth, fieldToValues));
-		}
-		if (checkFieldValue(ConfigurationFieldEnum.smtpEnableTls, fieldToValues)) {
-			smtpProperties.setEnableTls(getBoolean(ConfigurationFieldEnum.smtpEnableTls, fieldToValues));
-		}
-		if (checkFieldValue(ConfigurationFieldEnum.smtpHost, fieldToValues)) {
-			smtpProperties.setHost(getString(ConfigurationFieldEnum.smtpHost, fieldToValues));
-		}
-		if (checkFieldValue(ConfigurationFieldEnum.smtpPassword, fieldToValues)) {
-			smtpProperties.setPassword(getString(ConfigurationFieldEnum.smtpPassword, fieldToValues));
-		}
-		if (checkFieldValue(ConfigurationFieldEnum.smtpPort, fieldToValues)) {
-			smtpProperties.setPort(getInt(ConfigurationFieldEnum.smtpPort, fieldToValues));
-		}
-		if (checkFieldValue(ConfigurationFieldEnum.smtpSocketFactoryClass, fieldToValues)) {
-			smtpProperties
-					.setSocketFactoryClass(getString(ConfigurationFieldEnum.smtpSocketFactoryClass, fieldToValues));
-		}
-		if (checkFieldValue(ConfigurationFieldEnum.smtpUsername, fieldToValues)) {
-			smtpProperties.setUsername(getString(ConfigurationFieldEnum.smtpUsername, fieldToValues));
-		}
 	}
 
 	private void populateEmailSystemConfiguration(final EmailSystemConfiguration emailSystemConfiguration,

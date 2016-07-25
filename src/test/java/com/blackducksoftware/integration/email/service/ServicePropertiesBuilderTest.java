@@ -11,6 +11,7 @@ import java.util.Properties;
 
 import org.junit.After;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.blackducksoftware.integration.email.service.properties.ServicePropertiesBuilder;
 import com.blackducksoftware.integration.email.service.properties.ServicePropertyDescriptor;
@@ -42,7 +43,8 @@ public class ServicePropertiesBuilderTest {
 
 	@Test
 	public void testGeneratePropFileDefault() throws Exception {
-		final ServicePropertiesBuilder propBuilder = new ServicePropertiesBuilder();
+		ServicePropertiesBuilder propBuilder = new ServicePropertiesBuilder();
+		propBuilder = Mockito.spy(propBuilder);
 		final Properties props = propBuilder.build();
 
 		for (final ServicePropertyDescriptor descriptor : ServicePropertyDescriptor.values()) {
@@ -54,8 +56,9 @@ public class ServicePropertiesBuilderTest {
 	@Test
 	public void testGeneratePropFileWithDirectoryPath() throws Exception {
 		final String directory = "build/resources/test";
-		final ServicePropertiesBuilder propBuilder = new ServicePropertiesBuilder();
-		propBuilder.setFilePath(directory);
+		ServicePropertiesBuilder propBuilder = new ServicePropertiesBuilder();
+		propBuilder = Mockito.spy(propBuilder);
+		Mockito.doReturn(directory).when(propBuilder).getFilePath();
 		final Properties props = propBuilder.build();
 		generatedFile = new File(propBuilder.getFilePath(), ServicePropertiesBuilder.DEFAULT_PROP_FILE_NAME);
 
@@ -69,8 +72,9 @@ public class ServicePropertiesBuilderTest {
 	@Test
 	public void testGeneratePropFilePath() throws Exception {
 		final String path = "build/resources/test/email.props";
-		final ServicePropertiesBuilder propBuilder = new ServicePropertiesBuilder();
-		propBuilder.setFilePath(path);
+		ServicePropertiesBuilder propBuilder = new ServicePropertiesBuilder();
+		propBuilder = Mockito.spy(propBuilder);
+		Mockito.doReturn(path).when(propBuilder).getFilePath();
 		final Properties props = propBuilder.build();
 		generatedFile = new File(propBuilder.getFilePath());
 
@@ -84,8 +88,9 @@ public class ServicePropertiesBuilderTest {
 	@Test
 	public void testReadPropertiesFile() throws Exception {
 		final String path = "build/resources/test/readTest.props";
-		final ServicePropertiesBuilder propBuilder = new ServicePropertiesBuilder();
-		propBuilder.setFilePath(path);
+		ServicePropertiesBuilder propBuilder = new ServicePropertiesBuilder();
+		propBuilder = Mockito.spy(propBuilder);
+		Mockito.doReturn(path).when(propBuilder).getFilePath();
 		generatedFile = new File(propBuilder.getFilePath());
 		final Properties existingProps = createTestPropertiesFile(generatedFile);
 
