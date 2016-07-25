@@ -1,4 +1,4 @@
-package com.blackducksoftware.integration.email;
+package com.blackducksoftware.integration.email.service.properties;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,15 +14,6 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 public class ServicePropertiesBuilder {
 
 	public final static String DEFAULT_PROP_FILE_NAME = "service.properties";
-	public final static String KEY_HUB_SERVER_URL = "hub.server.url";
-	public final static String KEY_HUB_USER = "hub.server.user";
-	public final static String KEY_HUB_PASSWORD = "hub.server.password";
-	public final static String KEY_HUB_TIMEOUT = "hub.server.timeout";
-	public final static String KEY_HUB_PROXY_HOST = "hub.proxy.host";
-	public final static String KEY_HUB_PROXY_PORT = "hub.proxy.port";
-	public final static String KEY_HUB_PROXY_USER = "hub.proxy.user";
-	public final static String KEY_HUB_PROXY_PASS = "hub.proxy.password";
-	public final static String KEY_HUB_PROXY_NO_HOST = "hub.proxy.nohost";
 
 	private String filePath;
 
@@ -32,6 +23,12 @@ public class ServicePropertiesBuilder {
 			file = new File(filePath);
 		} else {
 			file = new File(DEFAULT_PROP_FILE_NAME);
+		}
+
+		if (file.isDirectory()) {
+			if (file.isDirectory()) {
+				file = new File(file, DEFAULT_PROP_FILE_NAME);
+			}
 		}
 
 		if (!file.exists()) {
@@ -52,15 +49,9 @@ public class ServicePropertiesBuilder {
 	private Properties generatePropertiesFile(final File file) throws IOException {
 		final Properties props = new Properties();
 		try (FileOutputStream output = new FileOutputStream(file)) {
-			props.put(KEY_HUB_SERVER_URL, "http://some.hub.comany.com");
-			props.put(KEY_HUB_USER, "user");
-			props.put(KEY_HUB_PASSWORD, "password");
-			props.put(KEY_HUB_TIMEOUT, "120");
-			props.put(KEY_HUB_PROXY_HOST, "");
-			props.put(KEY_HUB_PROXY_PORT, "");
-			props.put(KEY_HUB_PROXY_NO_HOST, "");
-			props.put(KEY_HUB_PROXY_USER, "");
-			props.put(KEY_HUB_PROXY_PASS, "");
+			for (final ServicePropertyDescriptor descriptor : ServicePropertyDescriptor.values()) {
+				props.put(descriptor.getKey(), descriptor.getDefaultValue());
+			}
 			props.store(output, createFileComment());
 		}
 		return props;
