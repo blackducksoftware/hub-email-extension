@@ -8,7 +8,7 @@ import com.blackducksoftware.integration.email.messaging.events.MessageEvent;
 import com.blackducksoftware.integration.email.messaging.events.MessageEventDispatcher;
 import com.blackducksoftware.integration.email.messaging.events.MessageEventListener;
 
-public abstract class AbstractPollingConsumer<M> extends TimerTask {
+public abstract class AbstractPollingDispatcher<M> extends TimerTask {
 
 	public static long DEFAULT_POLLING_INTERVAL = 10000;
 
@@ -16,7 +16,7 @@ public abstract class AbstractPollingConsumer<M> extends TimerTask {
 	private final long interval;
 	private final MessageEventDispatcher<M> eventDispatcher = new MessageEventDispatcher<M>();
 
-	public AbstractPollingConsumer() {
+	public AbstractPollingDispatcher() {
 		interval = DEFAULT_POLLING_INTERVAL;
 	}
 

@@ -18,6 +18,7 @@ import com.blackducksoftware.integration.email.model.SmtpConfiguration;
 
 @Service
 public class EmailMessagingService {
+
 	@Autowired
 	private SmtpConfiguration smtpConfiguration;
 
