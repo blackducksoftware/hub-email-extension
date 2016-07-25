@@ -1,17 +1,22 @@
 package com.blackducksoftware.integration.email.notifier;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.blackducksoftware.integration.email.model.EmailSystemConfiguration;
 
+@Component
 public class NotificationEngine {
 
-	private final NotificationConsumer consumer;
-	private final NotificationRouter router;
+	@Autowired
+	private NotificationDispatcher consumer;
+	@Autowired
+	private NotificationRouter router;
 
-	public NotificationEngine() {
-		consumer = new NotificationConsumer();
-		router = new NotificationRouter();
-	}
-
+	@PostConstruct
 	public void configure() {
 		final EmailSystemConfiguration emailSystemConfiguration = new EmailSystemConfiguration();
 		consumer.addListener(router);
@@ -22,6 +27,7 @@ public class NotificationEngine {
 		consumer.start();
 	}
 
+	@PreDestroy
 	public void stop() {
 		consumer.stop();
 	}
