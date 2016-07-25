@@ -16,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.blackducksoftware.integration.email.service.ConfigurationResponseParser;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
+import com.blackducksoftware.integration.email.service.properties.ServicePropertiesBuilder;
 import com.google.gson.Gson;
 
 @SpringBootApplication
@@ -56,24 +57,16 @@ public class Application {
 		return new ConfigurationResponseParser();
 	}
 
-	<<<<<<<HEAD
-
 	@Bean
 	public EmailMessagingService emailMessagingService() {
 		return new EmailMessagingService();
 	}
-
-	private boolean doesPropertiesExist(final String path) {
-		return true;
-	}=======
 
 	private static Options createCommandLineOptions() {
 		final Options options = new Options();
 		final Option option = new Option(ARG_PROP_FILE, true,
 				"The path to the file containing the properties for the service.");
 		option.setArgName("file");
->>>>>>> 96a55f441acb4e829dd29072ecab3c5e200d6f4f
-
 		options.addOption(option);
 		return options;
 	}
