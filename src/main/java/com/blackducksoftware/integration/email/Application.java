@@ -1,10 +1,15 @@
 package com.blackducksoftware.integration.email;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 
+import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.google.gson.Gson;
 
 import freemarker.template.Configuration;
@@ -37,6 +42,18 @@ public class Application {
 		cfg.setLogTemplateExceptions(false);
 
 		return cfg;
+	}
+
+	@Bean
+	public DateFormat notificationDateFormatter() {
+		final DateFormat dateFormatter = new SimpleDateFormat(RestConnection.JSON_DATE_FORMAT);
+		dateFormatter.setTimeZone(java.util.TimeZone.getTimeZone("Zulu"));
+		return dateFormatter;
+	}
+
+	@Bean
+	public Date applicationStartDate() {
+		return new Date();
 	}
 
 }

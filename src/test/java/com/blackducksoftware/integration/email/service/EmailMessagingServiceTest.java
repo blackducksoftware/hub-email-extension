@@ -37,5 +37,4 @@ public class EmailMessagingServiceTest {
 		emailMessagingService.sendEmailMessage(
 				Arrays.asList("ekerwin@blackducksoftware.com", "akamen@blackducksoftware.com"), content);
 	}
-
 }
