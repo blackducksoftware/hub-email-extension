@@ -1,74 +1,101 @@
 package com.blackducksoftware.integration.email.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.Transport;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 
+import org.jsoup.Jsoup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.blackducksoftware.integration.email.model.EmailSystemConfiguration;
+import com.blackducksoftware.integration.email.model.EmailSystemProperties;
 import com.blackducksoftware.integration.email.model.SmtpConfiguration;
 
 @Service
 public class EmailMessagingService {
+	private final Logger log = LoggerFactory.getLogger(EmailMessagingService.class);
+
+	@Autowired
+	private EmailSystemProperties emailSystemProperties;
 
 	@Autowired
 	private SmtpConfiguration smtpConfiguration;
 
-	public static void test(final String[] args) {
-		final Properties props = new Properties();
-		props.put("mail.smtp.host", "mailrelay.blackducksoftware.com");
-		props.put("mail.smtp.port", Integer.toString(25));
-		props.put("mail.smtp.auth", "true");
-
-		final Session session = Session.getInstance(props);
-
-		try {
-			final Message message = new MimeMessage(session);
-			message.setFrom(new InternetAddress("giggles@blackducksoftware.com"));
-			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("eric.kerwin@gmail.com"));
-			message.setSubject("Testing Hub Email Extension");
-			message.setText("We are as Midas.");
-
-			Transport.send(message);
-		} catch (final MessagingException e) {
-			throw new RuntimeException(e);
-		}
+	public void sendEmailMessage(final List<String> emailAddresses, final String html) throws MessagingException {
+		final Session session = createMailSession();
+		final Message message = createMailMessage(session, html, emailAddresses);
+		sendMessage(session, message);
 	}
 
-	public void sendEmailMessage(final EmailSystemConfiguration emailSystemConfiguration) {
+	private Session createMailSession() {
 		final Map<String, String> sessionProps = smtpConfiguration.getPropertiesForSession();
 		final Properties props = System.getProperties();
 		props.putAll(sessionProps);
 
-		final Session session = Session.getInstance(props);
+		return Session.getInstance(props);
+	}
 
-		try {
-			final Message message = new MimeMessage(session);
-			message.setFrom(new InternetAddress("giggles@blackducksoftware.com"));
-			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("ekerwin@blackducksoftware.com"));
-			message.setSubject("Testing Hub Email Extension");
-			message.setText("We are as Midas.");
-
-			if (smtpConfiguration.isAuth()) {
-				sendAuthenticated(message, session, smtpConfiguration);
-			} else {
-				Transport.send(message);
+	private Message createMailMessage(final Session session, final String html,
+			final List<String> recipientEmailAddresses) throws MessagingException {
+		final List<InternetAddress> addresses = new ArrayList<>();
+		for (final String recipient : recipientEmailAddresses) {
+			try {
+				addresses.add(new InternetAddress(recipient));
+			} catch (final AddressException e) {
+				log.warn(String.format("Could not create the address from %s: %s", recipient, e.getMessage()));
 			}
-		} catch (final MessagingException e) {
-			throw new RuntimeException(e);
+		}
+
+		if (addresses.isEmpty()) {
+			throw new RuntimeException("There were no valid email addresses supplied.");
+		}
+
+		final Message message = new MimeMessage(session);
+		final Multipart multiPart = new MimeMultipart("alternative");
+
+		final String text = Jsoup.parse(html).text();
+
+		final MimeBodyPart textPart = new MimeBodyPart();
+		textPart.setText(text, "utf-8");
+
+		final MimeBodyPart htmlPart = new MimeBodyPart();
+		htmlPart.setContent(html, "text/html; charset=utf-8");
+
+		multiPart.addBodyPart(htmlPart);
+		multiPart.addBodyPart(textPart);
+		message.setContent(multiPart);
+
+		message.setFrom(new InternetAddress(emailSystemProperties.getEmailFromAddress()));
+		message.setRecipients(Message.RecipientType.TO, addresses.toArray(new Address[addresses.size()]));
+		message.setSubject("Testing Hub Email Extension");
+
+		return message;
+	}
+
+	private void sendMessage(final Session session, final Message message) throws MessagingException {
+		if (smtpConfiguration.isAuth()) {
+			sendAuthenticated(message, session);
+		} else {
+			Transport.send(message);
 		}
 	}
 
-	private void sendAuthenticated(final Message message, final Session session,
-			final SmtpConfiguration smtpConfiguration) throws MessagingException {
+	private void sendAuthenticated(final Message message, final Session session) throws MessagingException {
 		final String host = smtpConfiguration.getHost();
 		final int port = smtpConfiguration.getPort();
 		final String username = smtpConfiguration.getUsername();
@@ -77,7 +104,6 @@ public class EmailMessagingService {
 		final Transport transport = session.getTransport("smtp");
 		try {
 			transport.connect(host, port, username, password);
-			message.saveChanges();
 			transport.sendMessage(message, message.getAllRecipients());
 		} finally {
 			transport.close();

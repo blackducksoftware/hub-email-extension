@@ -10,6 +10,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class EmailSystemProperties {
+	@Value("${hub.server.url:}")
+	private String hubServerUrl;
+
 	@Value("${smtp.host:}")
 	private String smtpHost;
 
@@ -36,6 +39,14 @@ public class EmailSystemProperties {
 
 	@Value("${property.file:}")
 	private String propertyFilePath;
+
+	public String getHubServerUrl() {
+		return hubServerUrl;
+	}
+
+	public void setHubServerUrl(final String hubServerUrl) {
+		this.hubServerUrl = hubServerUrl;
+	}
 
 	public String getSmtpHost() {
 		return smtpHost;

@@ -1,40 +1,41 @@
 package com.blackducksoftware.integration.email.service;
 
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
+import javax.mail.MessagingException;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.blackducksoftware.integration.email.Application;
-import com.blackducksoftware.integration.email.model.EmailSystemConfiguration;
+
+import freemarker.template.TemplateException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(Application.class)
 public class EmailMessagingServiceTest {
 	@Autowired
-	private ConfigurationResponseParser configurationResponseParser;
-
-	@Autowired
 	private EmailMessagingService emailMessagingService;
 
+	@Autowired
+	private TemplateProcessor templateProcessor;
+
 	@Test
-	public void testSendingEmail() throws IOException {
-		final String resourcePath = "defaultSystemConfig.json";
-		final ClassPathResource configResponseResource = new ClassPathResource(resourcePath);
-		final String json = IOUtils.toString(configResponseResource.getInputStream(), Charset.forName("UTF-8"));
+	public void testSendingEmail() throws IOException, MessagingException, TemplateException {
+		final Map<String, Object> model = new HashMap<>();
+		model.put("title", "A Glorious Day");
+		model.put("message", "this should have html and plain text parts");
+		model.put("items", Arrays.asList("apple", "orange", "pear", "banana"));
 
-		final EmailSystemConfiguration emailSystemConfiguration = configurationResponseParser.fromJson(json);
-		assertTrue(emailSystemConfiguration.isOptIn());
-
-		emailMessagingService.sendEmailMessage(emailSystemConfiguration);
+		final String content = templateProcessor.getResolvedTemplate(model, "htmlTemplate.ftl");
+		emailMessagingService.sendEmailMessage(
+				Arrays.asList("ekerwin@blackducksoftware.com", "akamen@blackducksoftware.com"), content);
 	}
 
 }

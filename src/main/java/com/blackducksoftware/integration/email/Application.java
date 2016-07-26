@@ -5,13 +5,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 
-import com.blackducksoftware.integration.email.service.ConfigurationResponseParser;
-import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.google.gson.Gson;
+
+import freemarker.template.Configuration;
+import freemarker.template.TemplateExceptionHandler;
 
 @SpringBootApplication
 public class Application {
-
 	public static void main(final String[] args) {
 		SpringApplication.run(Application.class, args);
 	}
@@ -27,12 +27,16 @@ public class Application {
 	}
 
 	@Bean
-	public ConfigurationResponseParser configurationResponseParser() {
-		return new ConfigurationResponseParser();
+	public Configuration configuration() {
+		final Configuration cfg = new Configuration(Configuration.VERSION_2_3_25);
+		// cfg.setDirectoryForTemplateLoading(new
+		// File("/where/you/store/templates"));
+		cfg.setClassLoaderForTemplateLoading(SpringApplication.class.getClassLoader(), "/");
+		cfg.setDefaultEncoding("UTF-8");
+		cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
+		cfg.setLogTemplateExceptions(false);
+
+		return cfg;
 	}
 
-	@Bean
-	public EmailMessagingService emailMessagingService() {
-		return new EmailMessagingService();
-	}
 }

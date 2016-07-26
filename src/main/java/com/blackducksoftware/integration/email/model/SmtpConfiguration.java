@@ -3,6 +3,7 @@ package com.blackducksoftware.integration.email.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,8 +16,17 @@ public class SmtpConfiguration {
 		final Map<String, String> propertiesForSession = new HashMap<>();
 
 		propertiesForSession.put("mail.smtp.host", emailSystemProperties.getSmtpHost());
-		// propertiesForSession.put("mail.smtp.port", Integer.toString(port));
-		// propertiesForSession.put("mail.smtp.auth", Boolean.toString(auth));
+		if (StringUtils.isNotBlank(emailSystemProperties.getSmtpPort())
+				&& StringUtils.isNumeric(emailSystemProperties.getSmtpPort())) {
+			final int port = Integer.parseInt(emailSystemProperties.getSmtpPort());
+			if (port > 0) {
+				propertiesForSession.put("mail.smtp.port", Integer.toString(port));
+			}
+		}
+
+		if (Boolean.parseBoolean(emailSystemProperties.getSmtpAuth())) {
+			propertiesForSession.put("mail.smtp.auth", "true");
+		}
 
 		return propertiesForSession;
 	}
