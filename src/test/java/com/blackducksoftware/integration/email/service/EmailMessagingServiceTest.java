@@ -36,5 +36,4 @@ public class EmailMessagingServiceTest {
 
 		emailMessagingService.sendEmailMessage(emailSystemConfiguration);
 	}
-
 }

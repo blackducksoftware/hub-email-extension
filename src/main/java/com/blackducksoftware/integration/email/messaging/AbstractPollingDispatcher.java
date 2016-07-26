@@ -1,5 +1,6 @@
 package com.blackducksoftware.integration.email.messaging;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -15,6 +16,9 @@ public abstract class AbstractPollingDispatcher<M> extends TimerTask {
 	private Timer timer;
 	private final long interval;
 	private final MessageEventDispatcher<M> eventDispatcher = new MessageEventDispatcher<M>();
+
+	private Date lastRun;
+	private Date currentRun;
 
 	public AbstractPollingDispatcher() {
 		interval = DEFAULT_POLLING_INTERVAL;
@@ -46,11 +50,21 @@ public abstract class AbstractPollingDispatcher<M> extends TimerTask {
 
 	@Override
 	public void run() {
+		currentRun = new Date();
 		final List<M> messageList = fetchMessages();
 		if (messageList != null && !messageList.isEmpty()) {
 			// send event
 			final MessageEvent<M> event = new MessageEvent<M>(messageList);
 			eventDispatcher.dispatchEvent(event);
 		}
+		lastRun = currentRun;
+	}
+
+	public Date getCurrentRun() {
+		return currentRun;
+	}
+
+	public Date getLastRun() {
+		return lastRun;
 	}
 }

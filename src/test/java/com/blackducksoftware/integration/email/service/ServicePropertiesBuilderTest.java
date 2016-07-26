@@ -1,9 +1,11 @@
 package com.blackducksoftware.integration.email.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -12,30 +14,17 @@ import java.util.Properties;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.blackducksoftware.integration.email.Application;
-import com.blackducksoftware.integration.email.model.EmailSystemProperties;
 import com.blackducksoftware.integration.email.service.properties.ServicePropertiesBuilder;
 import com.blackducksoftware.integration.email.service.properties.ServicePropertyDescriptor;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(Application.class)
 public class ServicePropertiesBuilderTest {
 	private File generatedFile;
-	@Autowired
 	private ServicePropertiesBuilder propBuilder;
-	@Autowired
-	private EmailSystemProperties systemProperties;
-
-	private String oldPropFilePath;
 
 	@Before
 	public void initTest() {
-		oldPropFilePath = systemProperties.getPropertyFilePath();
+		propBuilder = new ServicePropertiesBuilder();
 	}
 
 	@After
@@ -43,8 +32,6 @@ public class ServicePropertiesBuilderTest {
 		if (generatedFile.exists()) {
 			generatedFile.delete();
 		}
-
-		systemProperties.setPropertyFilePath(oldPropFilePath);
 	}
 
 	private Properties createTestPropertiesFile(final File file) throws FileNotFoundException, IOException {
@@ -61,25 +48,33 @@ public class ServicePropertiesBuilderTest {
 		return props;
 	}
 
+	private Properties readTestProperties(final File file) throws FileNotFoundException, IOException {
+		final Properties props = new Properties();
+		try (FileInputStream input = new FileInputStream(file)) {
+			props.load(input);
+		}
+		return props;
+	}
+
 	@Test
 	public void testGeneratePropFileDefault() throws Exception {
-		systemProperties.setPropertyFilePath(null);
-		final Properties props = propBuilder.build();
-
+		propBuilder.setFilePath(null);
+		final boolean exists = propBuilder.propertyFileExists();
+		assertFalse(exists);
+		generatedFile = new File(propBuilder.getFilePath());
+		final Properties props = readTestProperties(generatedFile);
 		for (final ServicePropertyDescriptor descriptor : ServicePropertyDescriptor.values()) {
 			assertEquals(descriptor.getDefaultValue(), props.getProperty(descriptor.getKey()));
 		}
-		generatedFile = new File(ServicePropertiesBuilder.DEFAULT_PROP_FILE_NAME);
 	}
 
 	@Test
 	public void testGeneratePropFileWithDirectoryPath() throws Exception {
-		final String directory = "build/resources/test";
-		systemProperties.setPropertyFilePath(directory);
-		final Properties props = propBuilder.build();
-		generatedFile = new File(propBuilder.getFilePath(), ServicePropertiesBuilder.DEFAULT_PROP_FILE_NAME);
-
-		assertTrue(generatedFile.exists());
+		propBuilder.setFilePath("build/resources/test");
+		final boolean exists = propBuilder.propertyFileExists();
+		assertFalse(exists);
+		generatedFile = new File(propBuilder.getFilePath());
+		final Properties props = readTestProperties(generatedFile);
 
 		for (final ServicePropertyDescriptor descriptor : ServicePropertyDescriptor.values()) {
 			assertEquals(descriptor.getDefaultValue(), props.getProperty(descriptor.getKey()));
@@ -88,13 +83,11 @@ public class ServicePropertiesBuilderTest {
 
 	@Test
 	public void testGeneratePropFilePath() throws Exception {
-		final String path = "build/resources/test/email.props";
-		systemProperties.setPropertyFilePath(path);
-		final Properties props = propBuilder.build();
+		propBuilder.setFilePath("build/resources/test/email.props");
+		final boolean exists = propBuilder.propertyFileExists();
+		assertFalse(exists);
 		generatedFile = new File(propBuilder.getFilePath());
-
-		assertTrue(generatedFile.exists());
-
+		final Properties props = readTestProperties(generatedFile);
 		for (final ServicePropertyDescriptor descriptor : ServicePropertyDescriptor.values()) {
 			assertEquals(descriptor.getDefaultValue(), props.getProperty(descriptor.getKey()));
 		}
@@ -102,12 +95,12 @@ public class ServicePropertiesBuilderTest {
 
 	@Test
 	public void testReadPropertiesFile() throws Exception {
-		final String path = "build/resources/test/readTest.props";
-		systemProperties.setPropertyFilePath(path);
+		propBuilder.setFilePath("build/resources/test/readTest.props");
 		generatedFile = new File(propBuilder.getFilePath());
 		final Properties existingProps = createTestPropertiesFile(generatedFile);
-
-		final Properties props = propBuilder.build();
+		final boolean exists = propBuilder.propertyFileExists();
+		assertTrue(exists);
+		final Properties props = readTestProperties(generatedFile);
 		for (final ServicePropertyDescriptor descriptor : ServicePropertyDescriptor.values()) {
 			final String existing = existingProps.getProperty(descriptor.getKey());
 			final String readProperty = props.getProperty(descriptor.getKey());
@@ -119,8 +112,9 @@ public class ServicePropertiesBuilderTest {
 	public void testReadDefaultPropertiesFile() throws Exception {
 		generatedFile = new File(ServicePropertiesBuilder.DEFAULT_PROP_FILE_NAME);
 		final Properties existingProps = createTestPropertiesFile(generatedFile);
-		systemProperties.setPropertyFilePath(null);
-		final Properties props = propBuilder.build();
+		final boolean exists = propBuilder.propertyFileExists();
+		assertTrue(exists);
+		final Properties props = readTestProperties(generatedFile);
 		for (final ServicePropertyDescriptor descriptor : ServicePropertyDescriptor.values()) {
 			final String existing = existingProps.getProperty(descriptor.getKey());
 			final String readProperty = props.getProperty(descriptor.getKey());

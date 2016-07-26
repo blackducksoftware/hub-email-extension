@@ -1,29 +1,20 @@
 package com.blackducksoftware.integration.email.service.properties;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import com.blackducksoftware.integration.email.model.EmailSystemProperties;
-
-@Component
 public class ServicePropertiesBuilder {
 
-	public final static String DEFAULT_PROP_FILE_NAME = "service.properties";
-	@Autowired
-	private EmailSystemProperties systemProperties;
+	public final static String DEFAULT_PROP_FILE_NAME = "application.properties";
 
-	@PostConstruct
-	public Properties build() throws FileNotFoundException, IOException {
+	private String filePath;
+
+	public boolean propertyFileExists() throws FileNotFoundException, IOException {
 		File file;
 		if (StringUtils.isNotBlank(getFilePath())) {
 			file = new File(getFilePath());
@@ -36,14 +27,20 @@ public class ServicePropertiesBuilder {
 		}
 
 		if (!file.exists()) {
-			return generatePropertiesFile(file);
+			generatePropertiesFile(file);
+			setFilePath(file.getCanonicalPath());
+			return false;
 		} else {
-			return readProperties(file);
+			return true;
 		}
 	}
 
 	public String getFilePath() {
-		return systemProperties.getPropertyFilePath();
+		return filePath;
+	}
+
+	public void setFilePath(final String filePath) {
+		this.filePath = filePath;
 	}
 
 	private Properties generatePropertiesFile(final File file) throws IOException {
@@ -53,14 +50,6 @@ public class ServicePropertiesBuilder {
 				props.put(descriptor.getKey(), descriptor.getDefaultValue());
 			}
 			props.store(output, "Hub extension service properties file.");
-		}
-		return props;
-	}
-
-	private Properties readProperties(final File file) throws FileNotFoundException, IOException {
-		final Properties props = new Properties();
-		try (FileInputStream input = new FileInputStream(file)) {
-			props.load(input);
 		}
 		return props;
 	}
