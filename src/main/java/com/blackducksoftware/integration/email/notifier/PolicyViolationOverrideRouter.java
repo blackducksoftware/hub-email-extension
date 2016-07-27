@@ -11,9 +11,9 @@ import com.blackducksoftware.integration.email.model.EmailSystemConfiguration;
 import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
 
 @Component
-public class NotificationRouter extends AbstractEmailRouter {
+public class PolicyViolationOverrideRouter extends AbstractEmailRouter {
 
-	private final static Logger logger = LoggerFactory.getLogger(NotificationRouter.class);
+	private final static Logger logger = LoggerFactory.getLogger(PolicyViolationOverrideRouter.class);
 
 	@Override
 	public void configure(final EmailSystemConfiguration data) {
@@ -27,6 +27,8 @@ public class NotificationRouter extends AbstractEmailRouter {
 
 	@Override
 	public void send(final EmailMessage data) {
+		// TODO Auto-generated method stub
 
 	}
+
 }
