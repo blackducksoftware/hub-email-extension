@@ -17,7 +17,7 @@ import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
 
 @Component
 public class NotificationEngine {
-	private static Logger logger = LoggerFactory.getLogger(NotificationEngine.class);
+	private final Logger logger = LoggerFactory.getLogger(NotificationEngine.class);
 
 	@Autowired
 	private RouterConfigDispatcher configDispatcher;
@@ -51,5 +51,4 @@ public class NotificationEngine {
 		notificationDispatcher.stop();
 		configDispatcher.stop();
 	}
-
 }
