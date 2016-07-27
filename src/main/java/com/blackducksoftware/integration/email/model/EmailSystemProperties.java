@@ -61,6 +61,18 @@ public class EmailSystemProperties {
 	@Value("${hub.proxy.nohost:}")
 	private String hubProxyNoHost;
 
+	@Value("email.service.dispatcher.notification.interval:")
+	private String notificationInterval;
+
+	@Value("email.service.dispatcher.notification.delay:")
+	private String notificationStartupDelay;
+
+	@Value("email.service.dispatcher.configuration.interval:")
+	private String configurationInterval;
+
+	@Value("email.service.dispatcher.configuration.delay:")
+	private String configurationStartupDelay;
+
 	@PostConstruct
 	private void checkPropertiesFile() {
 		try {
@@ -84,6 +96,10 @@ public class EmailSystemProperties {
 		map.put("email.from.address", "");
 		map.put("email.reply.to.address", "");
 		map.put("template.name", "");
+		map.put("email.service.dispatcher.notification.interval", "10");
+		map.put("email.service.dispatcher.notification.delay", "5");
+		map.put("email.service.dispatcher.configuration.interval", "30");
+		map.put("email.service.dispatcher.configuration.delay", "2");
 		return map;
 	}
 
@@ -189,6 +205,38 @@ public class EmailSystemProperties {
 
 	public void setHubProxyNoHost(final String hubProxyNoHost) {
 		this.hubProxyNoHost = hubProxyNoHost;
+	}
+
+	public String getNotificationInterval() {
+		return notificationInterval;
+	}
+
+	public void setNotificationInterval(final String notificationInterval) {
+		this.notificationInterval = notificationInterval;
+	}
+
+	public String getNotificationStartupDelay() {
+		return notificationStartupDelay;
+	}
+
+	public void setNotificationStartupDelay(final String notificationStartupDelay) {
+		this.notificationStartupDelay = notificationStartupDelay;
+	}
+
+	public String getConfigurationInterval() {
+		return configurationInterval;
+	}
+
+	public void setConfigurationInterval(final String configurationInterval) {
+		this.configurationInterval = configurationInterval;
+	}
+
+	public String getConfigurationStartupDelay() {
+		return configurationStartupDelay;
+	}
+
+	public void setConfigurationStartupDelay(final String configurationStartupDelay) {
+		this.configurationStartupDelay = configurationStartupDelay;
 	}
 
 }
