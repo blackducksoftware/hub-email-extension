@@ -16,9 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ServicePropertiesBuilder {
+	private final Logger logger = LoggerFactory.getLogger(ServicePropertiesBuilder.class);
 
-	private static Logger logger = LoggerFactory.getLogger(ServicePropertiesBuilder.class);
-	public final static String DEFAULT_PROP_FILE_NAME = "application.properties";
+	public static final String DEFAULT_PROP_FILE_NAME = "application.properties";
 
 	private String filePath;
 	private String serviceName;
@@ -81,7 +81,7 @@ public class ServicePropertiesBuilder {
 
 			@Override
 			public synchronized Enumeration<Object> keys() {
-				return Collections.enumeration(new TreeSet<Object>(super.keySet()));
+				return Collections.enumeration(new TreeSet<>(super.keySet()));
 			}
 		};
 		try (FileOutputStream output = new FileOutputStream(file)) {

@@ -44,7 +44,7 @@ public class EmailMessagingService {
 
 	private Session createMailSession() {
 		final Map<String, String> sessionProps = smtpConfiguration.getPropertiesForSession();
-		final Properties props = System.getProperties();
+		final Properties props = new Properties();
 		props.putAll(sessionProps);
 
 		return Session.getInstance(props);

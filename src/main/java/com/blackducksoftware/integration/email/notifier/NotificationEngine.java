@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.blackducksoftware.integration.email.model.EmailSystemConfiguration;
+import com.blackducksoftware.integration.email.model.EmailSystemProperties;
 
 @Component
 public class NotificationEngine {
@@ -20,9 +20,9 @@ public class NotificationEngine {
 
 	@PostConstruct
 	public void configure() {
-		final EmailSystemConfiguration emailSystemConfiguration = new EmailSystemConfiguration();
+		final EmailSystemProperties emailSystemProperties = new EmailSystemProperties();
 		consumer.addListener(router);
-		router.configure(emailSystemConfiguration);
+		router.configure(emailSystemProperties);
 	}
 
 	@PostConstruct
@@ -36,4 +36,5 @@ public class NotificationEngine {
 		logger.info("Stopping notification engine.");
 		consumer.stop();
 	}
+
 }
