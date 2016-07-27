@@ -1,6 +1,8 @@
 package com.blackducksoftware.integration.email.model;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -79,15 +81,25 @@ public class EmailSystemProperties {
 		try {
 			final ServicePropertiesBuilder propBuilder = new ServicePropertiesBuilder();
 			propBuilder.setFilePath(getPropertyFilePath());
-
-			if (!propBuilder.propertyFileExists()) {
-				logger.error("Properties file for the service does not exist prior to service startup.");
-				logger.error("A properties file for the service has been generated at the following location: "
-						+ propBuilder.getFilePath());
-			}
+			propBuilder.setServiceName("Email Notification Service");
+			propBuilder.setRequiredPropertyMap(createRequiredPropertyMap());
+			propBuilder.generatePropertyFile();
 		} catch (final IOException e) {
 			logger.error("Error occurred checking for the properties file", e);
 		}
+	}
+
+	private Map<String, String> createRequiredPropertyMap() {
+		final Map<String, String> map = new HashMap<>();
+		map.put("smtp.host", "");
+		map.put("smtp.port", "");
+		map.put("smtp.auth", "");
+		map.put("smtp.username", "");
+		map.put("smtp.password", "");
+		map.put("email.from.address", "");
+		map.put("email.reply.to.address", "");
+		map.put("template.name", "");
+		return map;
 	}
 
 	public String getSmtpHost() {

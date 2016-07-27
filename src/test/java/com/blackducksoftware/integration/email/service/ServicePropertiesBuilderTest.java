@@ -9,7 +9,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
@@ -29,8 +32,10 @@ public class ServicePropertiesBuilderTest {
 
 	@After
 	public void deleteGeneratedFile() {
-		if (generatedFile.exists()) {
-			generatedFile.delete();
+		if (generatedFile != null) {
+			if (generatedFile.exists()) {
+				generatedFile.delete();
+			}
 		}
 	}
 
@@ -48,6 +53,13 @@ public class ServicePropertiesBuilderTest {
 		return props;
 	}
 
+	private Map<String, String> createRequiredPropertyMap() {
+		final Map<String, String> map = new HashMap<>();
+		map.put("prop.key.1", "value1");
+		map.put("prop.key.2", "value2");
+		return map;
+	}
+
 	private Properties readTestProperties(final File file) throws FileNotFoundException, IOException {
 		final Properties props = new Properties();
 		try (FileInputStream input = new FileInputStream(file)) {
@@ -59,37 +71,57 @@ public class ServicePropertiesBuilderTest {
 	@Test
 	public void testGeneratePropFileDefault() throws Exception {
 		propBuilder.setFilePath(null);
-		final boolean exists = propBuilder.propertyFileExists();
-		assertFalse(exists);
+		final Map<String, String> map = createRequiredPropertyMap();
+		propBuilder.setRequiredPropertyMap(map);
+		final boolean generated = propBuilder.generatePropertyFile();
+		assertTrue(generated);
 		generatedFile = new File(propBuilder.getFilePath());
 		final Properties props = readTestProperties(generatedFile);
 		for (final ServicePropertyDescriptor descriptor : ServicePropertyDescriptor.values()) {
 			assertEquals(descriptor.getDefaultValue(), props.getProperty(descriptor.getKey()));
+		}
+		final Set<String> keySet = map.keySet();
+		for (final String key : keySet) {
+			assertEquals(map.get(key), props.get(key));
 		}
 	}
 
 	@Test
 	public void testGeneratePropFileWithDirectoryPath() throws Exception {
 		propBuilder.setFilePath("build/resources/test");
-		final boolean exists = propBuilder.propertyFileExists();
-		assertFalse(exists);
+		final Map<String, String> map = createRequiredPropertyMap();
+		propBuilder.setRequiredPropertyMap(map);
+		final boolean generated = propBuilder.generatePropertyFile();
+		assertTrue(generated);
 		generatedFile = new File(propBuilder.getFilePath());
 		final Properties props = readTestProperties(generatedFile);
 
 		for (final ServicePropertyDescriptor descriptor : ServicePropertyDescriptor.values()) {
 			assertEquals(descriptor.getDefaultValue(), props.getProperty(descriptor.getKey()));
 		}
+
+		final Set<String> keySet = map.keySet();
+		for (final String key : keySet) {
+			assertEquals(map.get(key), props.get(key));
+		}
 	}
 
 	@Test
 	public void testGeneratePropFilePath() throws Exception {
 		propBuilder.setFilePath("build/resources/test/email.props");
-		final boolean exists = propBuilder.propertyFileExists();
-		assertFalse(exists);
+		final Map<String, String> map = createRequiredPropertyMap();
+		propBuilder.setRequiredPropertyMap(map);
+		final boolean generated = propBuilder.generatePropertyFile();
+		assertTrue(generated);
 		generatedFile = new File(propBuilder.getFilePath());
 		final Properties props = readTestProperties(generatedFile);
 		for (final ServicePropertyDescriptor descriptor : ServicePropertyDescriptor.values()) {
 			assertEquals(descriptor.getDefaultValue(), props.getProperty(descriptor.getKey()));
+		}
+
+		final Set<String> keySet = map.keySet();
+		for (final String key : keySet) {
+			assertEquals(map.get(key), props.get(key));
 		}
 	}
 
@@ -98,8 +130,8 @@ public class ServicePropertiesBuilderTest {
 		propBuilder.setFilePath("build/resources/test/readTest.props");
 		generatedFile = new File(propBuilder.getFilePath());
 		final Properties existingProps = createTestPropertiesFile(generatedFile);
-		final boolean exists = propBuilder.propertyFileExists();
-		assertTrue(exists);
+		final boolean generated = propBuilder.generatePropertyFile();
+		assertFalse(generated);
 		final Properties props = readTestProperties(generatedFile);
 		for (final ServicePropertyDescriptor descriptor : ServicePropertyDescriptor.values()) {
 			final String existing = existingProps.getProperty(descriptor.getKey());
@@ -112,8 +144,8 @@ public class ServicePropertiesBuilderTest {
 	public void testReadDefaultPropertiesFile() throws Exception {
 		generatedFile = new File(ServicePropertiesBuilder.DEFAULT_PROP_FILE_NAME);
 		final Properties existingProps = createTestPropertiesFile(generatedFile);
-		final boolean exists = propBuilder.propertyFileExists();
-		assertTrue(exists);
+		final boolean generated = propBuilder.generatePropertyFile();
+		assertFalse(generated);
 		final Properties props = readTestProperties(generatedFile);
 		for (final ServicePropertyDescriptor descriptor : ServicePropertyDescriptor.values()) {
 			final String existing = existingProps.getProperty(descriptor.getKey());
