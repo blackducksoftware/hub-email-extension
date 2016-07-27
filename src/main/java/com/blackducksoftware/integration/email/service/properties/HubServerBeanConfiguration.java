@@ -2,6 +2,7 @@ package com.blackducksoftware.integration.email.service.properties;
 
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,14 +37,18 @@ public class HubServerBeanConfiguration {
 		configBuilder.setProxyPassword(emailConfig.getHubProxyPassword());
 
 		// output the configuration details
-		logger.info("Properties file path:    " + emailConfig.getPropertyFilePath());
-		logger.info("Hub Server URL:          " + configBuilder.getHubUrl());
-		logger.info("Hub User:                " + configBuilder.getUsername());
-		logger.info("Hub Timeout:             " + configBuilder.getTimeout());
-		logger.info("Hub Proxy Host:          " + configBuilder.getProxyHost());
-		logger.info("Hub Proxy Port:          " + configBuilder.getProxyPort());
-		logger.info("Hub Ignored Proxy Hosts: " + configBuilder.getIgnoredProxyHosts());
-		logger.info("Hub Proxy User:          " + configBuilder.getProxyUsername());
+		String propPath = "./application.properties";
+		if (StringUtils.isNotBlank(emailConfig.getPropertyFilePath())) {
+			propPath = emailConfig.getPropertyFilePath();
+		}
+		logger.info("Properties file path    = " + propPath);
+		logger.info("Hub Server URL          = " + configBuilder.getHubUrl());
+		logger.info("Hub User                = " + configBuilder.getUsername());
+		logger.info("Hub Timeout             = " + configBuilder.getTimeout());
+		logger.info("Hub Proxy Host          = " + configBuilder.getProxyHost());
+		logger.info("Hub Proxy Port          = " + configBuilder.getProxyPort());
+		logger.info("Hub Ignored Proxy Hosts = " + configBuilder.getIgnoredProxyHosts());
+		logger.info("Hub Proxy User          = " + configBuilder.getProxyUsername());
 
 		final ValidationResults<GlobalFieldKey, HubServerConfig> results = configBuilder.build();
 
@@ -70,7 +75,6 @@ public class HubServerBeanConfiguration {
 			return results.getConstructedObject();
 		}
 
-		// shouldn't get here
 		return null;
 	}
 }

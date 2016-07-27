@@ -44,13 +44,15 @@ public class NotificationDispatcher extends AbstractPollingDispatcher<Notificati
 	public List<NotificationItem> fetchMessages() {
 		List<NotificationItem> messages = new ArrayList<NotificationItem>();
 
-		try {
-			final RestConnection restConnection = initRestConnection();
-			final HubItemsService<NotificationItem> hubItemsService = initHubItemsService(restConnection);
-			final Date startDate = findStartDate();
-			messages = fetchNotifications(hubItemsService, startDate, getCurrentRun());
-		} catch (final Exception e) {
-			e.printStackTrace();
+		if (hubServerConfig != null) {
+			try {
+				final RestConnection restConnection = initRestConnection();
+				final HubItemsService<NotificationItem> hubItemsService = initHubItemsService(restConnection);
+				final Date startDate = findStartDate();
+				messages = fetchNotifications(hubItemsService, startDate, getCurrentRun());
+			} catch (final Exception e) {
+				e.printStackTrace();
+			}
 		}
 		return messages;
 	}
