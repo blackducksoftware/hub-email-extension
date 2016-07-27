@@ -1,5 +1,7 @@
 package com.blackducksoftware.integration.email.notifier;
 
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
@@ -8,32 +10,45 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.blackducksoftware.integration.email.messaging.ItemRouter;
+import com.blackducksoftware.integration.email.model.EmailMessage;
 import com.blackducksoftware.integration.email.model.EmailSystemConfiguration;
+import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
 
 @Component
 public class NotificationEngine {
 	private static Logger logger = LoggerFactory.getLogger(NotificationEngine.class);
+
 	@Autowired
-	private NotificationDispatcher consumer;
+	private RouterConfigDispatcher configDispatcher;
+
 	@Autowired
-	private NotificationRouter router;
+	private NotificationDispatcher notificationDispatcher;
+
+	@Autowired
+	private ItemRouter<EmailSystemConfiguration, List<NotificationItem>, EmailMessage>[] routerArray;
 
 	@PostConstruct
 	public void configure() {
-		final EmailSystemConfiguration emailSystemConfiguration = new EmailSystemConfiguration();
-		consumer.addListener(router);
-		router.configure(emailSystemConfiguration);
+		if (routerArray != null) {
+			for (final ItemRouter<EmailSystemConfiguration, List<NotificationItem>, EmailMessage> router : routerArray) {
+				notificationDispatcher.addListener(router);
+				configDispatcher.addListener(router);
+			}
+		}
 	}
 
 	@PostConstruct
 	public void start() {
 		logger.info("Starting notification engine.");
-		consumer.start();
+		configDispatcher.start();
+		notificationDispatcher.start();
 	}
 
 	@PreDestroy
 	public void stop() {
 		logger.info("Stopping notification engine.");
-		consumer.stop();
+		notificationDispatcher.stop();
+		configDispatcher.stop();
 	}
 }
