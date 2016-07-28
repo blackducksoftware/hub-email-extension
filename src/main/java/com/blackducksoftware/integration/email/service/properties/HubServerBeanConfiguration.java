@@ -18,7 +18,7 @@ import com.blackducksoftware.integration.hub.global.HubServerConfig;
 
 @Configuration
 public class HubServerBeanConfiguration {
-	private static Logger logger = LoggerFactory.getLogger(HubServerBeanConfiguration.class);
+	private final Logger logger = LoggerFactory.getLogger(HubServerBeanConfiguration.class);
 
 	@Autowired
 	private EmailSystemProperties emailConfig;

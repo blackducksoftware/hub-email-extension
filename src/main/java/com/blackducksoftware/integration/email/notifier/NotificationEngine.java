@@ -1,6 +1,7 @@
 package com.blackducksoftware.integration.email.notifier;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -11,13 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.blackducksoftware.integration.email.messaging.ItemRouter;
-import com.blackducksoftware.integration.email.model.EmailMessage;
-import com.blackducksoftware.integration.email.model.EmailSystemConfiguration;
+import com.blackducksoftware.integration.email.model.EmailSystemProperties;
 import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
 
 @Component
 public class NotificationEngine {
-	private static Logger logger = LoggerFactory.getLogger(NotificationEngine.class);
+	private final Logger logger = LoggerFactory.getLogger(NotificationEngine.class);
 
 	@Autowired
 	private RouterConfigDispatcher configDispatcher;
@@ -26,12 +26,12 @@ public class NotificationEngine {
 	private NotificationDispatcher notificationDispatcher;
 
 	@Autowired
-	private ItemRouter<EmailSystemConfiguration, List<? extends NotificationItem>, EmailMessage>[] routerArray;
+	private ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, Map<String, Object>>[] routerArray;
 
 	@PostConstruct
 	public void configure() {
 		if (routerArray != null) {
-			for (final ItemRouter<EmailSystemConfiguration, List<? extends NotificationItem>, EmailMessage> router : routerArray) {
+			for (final ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, Map<String, Object>> router : routerArray) {
 				notificationDispatcher.addListener(router.getReceiveEventTopics(), router);
 				configDispatcher.addListener(router.getConfigureEventTopics(), router);
 			}

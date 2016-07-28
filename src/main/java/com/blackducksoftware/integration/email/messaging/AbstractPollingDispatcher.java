@@ -14,7 +14,7 @@ import com.blackducksoftware.integration.email.messaging.events.AbstractEventDis
 
 public abstract class AbstractPollingDispatcher<L, D> extends TimerTask {
 
-	private static Logger logger = LoggerFactory.getLogger(AbstractPollingDispatcher.class);
+	private final Logger logger = LoggerFactory.getLogger(AbstractPollingDispatcher.class);
 	public static long DEFAULT_POLLING_INTERVAL = 10000;
 	public static long DEFAULT_POLLING_DELAY = 5000;
 
@@ -137,21 +137,18 @@ public abstract class AbstractPollingDispatcher<L, D> extends TimerTask {
 	@Override
 	public void run() {
 		currentRun = new Date();
-		final Date previousRun = lastRun;
-
 		final Map<String, D> data = createEventData();
-
-		if (data != null) {
-			eventDispatcher.dispatchEvent(data);
-		}
-		lastRun = currentRun;
 		if (logger.isDebugEnabled()) {
 			logger.debug("Execution data: " + System.lineSeparator()
 					+ "########## Polling Dispatcher Execution ##########" + System.lineSeparator()
 					+ "Dispatcher Name  = " + name + System.lineSeparator() + "Polling interval = " + interval
-					+ System.lineSeparator() + "Last Run         = " + previousRun + System.lineSeparator()
+					+ System.lineSeparator() + "Last Run         = " + lastRun + System.lineSeparator()
 					+ "Current Run      = " + currentRun + System.lineSeparator() + "Data to dispatch " + data
 					+ System.lineSeparator() + "##################################################");
 		}
+		if (data != null) {
+			eventDispatcher.dispatchEvent(data);
+		}
+		lastRun = currentRun;
 	}
 }

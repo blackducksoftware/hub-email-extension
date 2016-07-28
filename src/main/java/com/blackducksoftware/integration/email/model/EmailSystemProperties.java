@@ -20,22 +20,7 @@ import com.blackducksoftware.integration.email.service.properties.ServicePropert
  */
 @Component
 public class EmailSystemProperties {
-	private static Logger logger = LoggerFactory.getLogger(EmailSystemProperties.class);
-
-	@Value("${smtp.host:}")
-	private String smtpHost;
-
-	@Value("${smtp.port:}")
-	private String smtpPort;
-
-	@Value("${smtp.auth:}")
-	private String smtpAuth;
-
-	@Value("${smtp.username:}")
-	private String smtpUsername;
-
-	@Value("${smtp.password:}")
-	private String smtpPassword;
+	private final Logger logger = LoggerFactory.getLogger(EmailSystemProperties.class);
 
 	@Value("${email.from.address:}")
 	private String emailFromAddress;
@@ -116,46 +101,6 @@ public class EmailSystemProperties {
 		map.put("email.service.dispatcher.configuration.interval", "30");
 		map.put("email.service.dispatcher.configuration.delay", "2");
 		return map;
-	}
-
-	public String getSmtpHost() {
-		return smtpHost;
-	}
-
-	public void setSmtpHost(final String smtpHost) {
-		this.smtpHost = smtpHost;
-	}
-
-	public String getSmtpPort() {
-		return smtpPort;
-	}
-
-	public void setSmtpPort(final String smtpPort) {
-		this.smtpPort = smtpPort;
-	}
-
-	public String getSmtpAuth() {
-		return smtpAuth;
-	}
-
-	public void setSmtpAuth(final String smtpAuth) {
-		this.smtpAuth = smtpAuth;
-	}
-
-	public String getSmtpUsername() {
-		return smtpUsername;
-	}
-
-	public void setSmtpUsername(final String smtpUsername) {
-		this.smtpUsername = smtpUsername;
-	}
-
-	public String getSmtpPassword() {
-		return smtpPassword;
-	}
-
-	public void setSmtpPassword(final String smtpPassword) {
-		this.smtpPassword = smtpPassword;
 	}
 
 	public String getEmailFromAddress() {

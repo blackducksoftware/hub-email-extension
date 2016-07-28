@@ -62,9 +62,9 @@ public class NotificationDispatcher extends
 		// values in config file are assumed to be in seconds.
 		final String intervalSeconds = systemProperties.getNotificationInterval();
 		final String delaySeconds = systemProperties.getNotificationStartupDelay();
-		final Long interval = NumberUtils.toLong(intervalSeconds, DEFAULT_POLLING_INTERVAL_SECONDS);
+		final long interval = NumberUtils.toLong(intervalSeconds, DEFAULT_POLLING_INTERVAL_SECONDS);
 		setInterval(interval * 1000);
-		final Long delay = NumberUtils.toLong(delaySeconds, DEFAULT_POLLING_DELAY_SECONDS);
+		final long delay = NumberUtils.toLong(delaySeconds, DEFAULT_POLLING_DELAY_SECONDS);
 		setStartupDelay(delay * 1000);
 	}
 
@@ -87,7 +87,6 @@ public class NotificationDispatcher extends
 	}
 
 	private RestConnection initRestConnection() throws EncryptionException, URISyntaxException, BDRestException {
-
 		final RestConnection restConnection = new RestConnection(hubServerConfig.getHubUrl().toString());
 
 		restConnection.setCookies(hubServerConfig.getGlobalCredentials().getUsername(),
@@ -120,11 +119,10 @@ public class NotificationDispatcher extends
 
 	private List<NotificationItem> fetchNotifications(final HubItemsService<NotificationItem> hubItemsService,
 			final Date startDate, final Date endDate) throws Exception {
+		// TODO may need chunking and maybe retry logic to
+		final int limit = 1000;
 
-		final int limit = 1000; // TODO may need chunking and maybe retry logic
-								// to
 		// handle large sets
-
 		final String startDateString = notificationDateFormatter.format(startDate);
 		final String endDateString = notificationDateFormatter.format(endDate);
 		final List<String> urlSegments = new ArrayList<>();
@@ -132,9 +130,9 @@ public class NotificationDispatcher extends
 		urlSegments.add("notifications");
 
 		final Set<AbstractMap.SimpleEntry<String, String>> queryParameters = new HashSet<>();
-		queryParameters.add(new AbstractMap.SimpleEntry<String, String>("startDate", startDateString));
-		queryParameters.add(new AbstractMap.SimpleEntry<String, String>("endDate", endDateString));
-		queryParameters.add(new AbstractMap.SimpleEntry<String, String>("limit", String.valueOf(limit)));
+		queryParameters.add(new AbstractMap.SimpleEntry<>("startDate", startDateString));
+		queryParameters.add(new AbstractMap.SimpleEntry<>("endDate", endDateString));
+		queryParameters.add(new AbstractMap.SimpleEntry<>("limit", String.valueOf(limit)));
 		List<NotificationItem> items;
 		try {
 			items = hubItemsService.httpGetItemList(urlSegments, queryParameters);
@@ -143,4 +141,5 @@ public class NotificationDispatcher extends
 		}
 		return items;
 	}
+
 }

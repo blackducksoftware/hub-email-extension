@@ -4,11 +4,13 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 
+import com.blackducksoftware.integration.email.model.EmailSystemProperties;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.google.gson.Gson;
 
@@ -17,6 +19,9 @@ import freemarker.template.TemplateExceptionHandler;
 
 @SpringBootApplication
 public class Application {
+	@Autowired
+	private EmailSystemProperties emailSystemProperties;
+
 	public static void main(final String[] args) {
 		SpringApplication.run(Application.class, args);
 	}
@@ -46,9 +51,9 @@ public class Application {
 
 	@Bean
 	public DateFormat notificationDateFormatter() {
-		final DateFormat dateFormatter = new SimpleDateFormat(RestConnection.JSON_DATE_FORMAT);
-		dateFormatter.setTimeZone(java.util.TimeZone.getTimeZone("Zulu"));
-		return dateFormatter;
+		final DateFormat dateFormat = new SimpleDateFormat(RestConnection.JSON_DATE_FORMAT);
+		dateFormat.setTimeZone(java.util.TimeZone.getTimeZone("Zulu"));
+		return dateFormat;
 	}
 
 	@Bean

@@ -35,6 +35,8 @@ public class EmailMessagingServiceTest {
 
 		final String content = templateProcessor.getResolvedTemplate(model, "htmlTemplate.ftl");
 		emailMessagingService.sendEmailMessage(
-				Arrays.asList("ekerwin@blackducksoftware.com", "akamen@blackducksoftware.com"), content);
+				Arrays.asList("ekerwin@blackducksoftware.com", "eric.kerwin@gmail.com", "akamen@blackducksoftware.com"),
+				content);
 	}
+
 }

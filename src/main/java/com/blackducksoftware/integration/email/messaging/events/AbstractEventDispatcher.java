@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractEventDispatcher<L, E> {
-	private final static Logger logger = LoggerFactory.getLogger(AbstractEventDispatcher.class);
+	private final Logger logger = LoggerFactory.getLogger(AbstractEventDispatcher.class);
 	private final Map<String, List<L>> topicListenerMap = new ConcurrentHashMap<>();
 	private final ExecutorService eventExecutor;
 

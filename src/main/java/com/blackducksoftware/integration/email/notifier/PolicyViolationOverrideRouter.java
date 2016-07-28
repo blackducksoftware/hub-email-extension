@@ -2,23 +2,23 @@ package com.blackducksoftware.integration.email.notifier;
 
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.blackducksoftware.integration.email.model.EmailMessage;
-import com.blackducksoftware.integration.email.model.EmailSystemConfiguration;
+import com.blackducksoftware.integration.email.model.EmailSystemProperties;
 import com.blackducksoftware.integration.hub.notification.api.PolicyOverrideNotificationItem;
 
 @Component
 public class PolicyViolationOverrideRouter extends AbstractEmailRouter<PolicyOverrideNotificationItem> {
 
-	private final static Logger logger = LoggerFactory.getLogger(PolicyViolationOverrideRouter.class);
+	private final Logger logger = LoggerFactory.getLogger(PolicyViolationOverrideRouter.class);
 
 	@Override
-	public void configure(final EmailSystemConfiguration data) {
+	public void configure(final EmailSystemProperties data) {
 		logger.info("Configuration data event received for " + getClass().getName() + ": " + data);
 	}
 
@@ -28,7 +28,7 @@ public class PolicyViolationOverrideRouter extends AbstractEmailRouter<PolicyOve
 	}
 
 	@Override
-	public void send(final EmailMessage data) {
+	public void send(final Map<String, Object> data) {
 		// TODO Auto-generated method stub
 
 	}
