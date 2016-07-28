@@ -1,5 +1,8 @@
 package com.blackducksoftware.integration.email.notifier;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.math.NumberUtils;
@@ -43,8 +46,9 @@ public class RouterConfigDispatcher extends
 	}
 
 	@Override
-	public EmailSystemConfiguration createEventData() {
+	public Map<String, EmailSystemConfiguration> createEventData() {
+		final Map<String, EmailSystemConfiguration> eventDataMap = new HashMap<>();
 		logger.debug("Fetching Email system configuration data");
-		return new EmailSystemConfiguration();
+		return eventDataMap;
 	}
 }

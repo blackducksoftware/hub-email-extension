@@ -32,8 +32,8 @@ public class NotificationEngine {
 	public void configure() {
 		if (routerArray != null) {
 			for (final ItemRouter<EmailSystemConfiguration, List<NotificationItem>, EmailMessage> router : routerArray) {
-				notificationDispatcher.addListener(router);
-				configDispatcher.addListener(router);
+				notificationDispatcher.addListener(router.getReceiveEventTopics(), router);
+				configDispatcher.addListener(router.getConfigureEventTopics(), router);
 			}
 		}
 	}

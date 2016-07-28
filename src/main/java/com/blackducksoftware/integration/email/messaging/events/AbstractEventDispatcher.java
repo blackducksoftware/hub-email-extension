@@ -1,7 +1,10 @@
 package com.blackducksoftware.integration.email.messaging.events;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -11,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractEventDispatcher<L, E> {
 	private final static Logger logger = LoggerFactory.getLogger(AbstractEventDispatcher.class);
-	private final List<L> listenerList = new Vector<L>();
+	private final Map<String, List<L>> topicListenerMap = new ConcurrentHashMap<>();
 	private final ExecutorService eventExecutor;
 
 	public AbstractEventDispatcher() {
@@ -19,25 +22,65 @@ public abstract class AbstractEventDispatcher<L, E> {
 		eventExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), threadFactory);
 	}
 
-	public void addListener(final L listener) {
-		logger.debug("Listener added: " + listener);
-		listenerList.add(listener);
-		logger.debug("Current Listener Count: " + listenerList.size());
+	public void addListener(final Set<String> topics, final L listener) {
+		if (topics != null) {
+			for (final String topic : topics) {
+				List<L> listeners;
+				if (topicListenerMap.containsKey(topic)) {
+					listeners = topicListenerMap.get(topic);
+				} else {
+					listeners = new Vector<L>();
+				}
+				listeners.add(listener);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Listener added: " + listener);
+					logger.debug("Topic: " + topic + " current Listener Count: " + listeners.size());
+				}
+			}
+		}
 	}
 
-	public void removeListener(final L listener) {
-		logger.debug("Listener removed: " + listener);
-		listenerList.remove(listener);
-		logger.debug("Current Listener Count: " + listenerList.size());
+	public void removeListener(final Set<String> topics, final L listener) {
+		if (topics != null) {
+			for (final String topic : topics) {
+				List<L> listeners;
+				if (topicListenerMap.containsKey(topic)) {
+					listeners = topicListenerMap.get(topic);
+				} else {
+					listeners = new Vector<L>();
+				}
+				listeners.remove(listener);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Listener removed: " + listener);
+					logger.debug("Topic: " + topic + " current Listener Count: " + listeners.size());
+				}
+			}
+		}
 	}
 
 	public void shutdown() {
 		logger.info("Shutting down event dispatching thread pool.");
+		// cleanup topics listener map
 		eventExecutor.shutdown();
+		final Set<String> topicSet = topicListenerMap.keySet();
+
+		// for (final String topic : topicSet) {
+		// final List<L> listeners = topicListenerMap.get(topic);
+		// final Iterator<L> iterator = listeners.iterator();
+		// while (iterator.hasNext()) {
+		// final L listener = iterator.next();
+		// listeners.remove(listener);
+		// logger.info("Listener removed: " + listener);
+		// logger.info("Topic: " + topic + " current Listener Count: " +
+		// listeners.size());
+		// }
+		// topicListenerMap.put(topic, null);
+		// }
+		// topicListenerMap.clear(); // remove all topics
 	}
 
-	public List<L> getListenerList() {
-		return listenerList;
+	public Map<String, List<L>> getTopicListenerMap() {
+		return topicListenerMap;
 	}
 
 	// expect this method to be called in the implementation of the
@@ -46,6 +89,24 @@ public abstract class AbstractEventDispatcher<L, E> {
 		eventExecutor.submit(runnable);
 	}
 
-	public abstract void dispatchEvent(final E data);
+	public void dispatchEvent(final Map<String, E> data) {
+		// execute in a thread for each listener.
+		final Set<String> topicSet = data.keySet();
+		for (final String topic : topicSet) {
+			if (getTopicListenerMap().containsKey(topic)) {
+				final List<L> listenerList = getTopicListenerMap().get(topic);
+				for (final L listener : listenerList) {
+					if (logger.isDebugEnabled()) {
+						logger.debug(
+								"Dispatching for topic: " + topic + " to listener: " + listener + " event: " + data);
+					}
+					final E topicEventData = data.get(topic);
+					final Runnable task = createEventTask(listener, topicEventData);
+					submitEvent(task);
+				}
+			}
+		}
+	}
 
+	public abstract Runnable createEventTask(L listener, E topicEventData);
 }

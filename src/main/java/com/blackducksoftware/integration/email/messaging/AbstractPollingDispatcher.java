@@ -1,6 +1,8 @@
 package com.blackducksoftware.integration.email.messaging;
 
 import java.util.Date;
+import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -78,14 +80,14 @@ public abstract class AbstractPollingDispatcher<L, D> extends TimerTask {
 		}
 	}
 
-	public void addListener(final L listener) {
-		logger.debug("Registering listener: " + listener);
-		eventDispatcher.addListener(listener);
+	public void addListener(final Set<String> topics, final L listener) {
+		logger.debug("Registering listener: " + listener + " for topics: " + topics);
+		eventDispatcher.addListener(topics, listener);
 	}
 
-	public void removeListener(final L listener) {
-		logger.debug("Unregistering listener: " + listener);
-		eventDispatcher.removeListener(listener);
+	public void removeListener(final Set<String> topics, final L listener) {
+		logger.debug("Unregistering listener: " + listener + " for topics: " + topics);
+		eventDispatcher.removeListener(topics, listener);
 	}
 
 	public Date getCurrentRun() {
@@ -130,14 +132,14 @@ public abstract class AbstractPollingDispatcher<L, D> extends TimerTask {
 
 	public abstract void initDispatcher();
 
-	public abstract D createEventData();
+	public abstract Map<String, D> createEventData();
 
 	@Override
 	public void run() {
 		currentRun = new Date();
 		final Date previousRun = lastRun;
 
-		final D data = createEventData();
+		final Map<String, D> data = createEventData();
 
 		if (data != null) {
 			eventDispatcher.dispatchEvent(data);

@@ -69,10 +69,12 @@ public class NotificationDispatcher
 	}
 
 	@Override
-	public List<NotificationItem> createEventData() {
-		List<NotificationItem> messages = new ArrayList<NotificationItem>();
+	public Map<String, List<NotificationItem>> createEventData() {
+		final Map<String, List<NotificationItem>> eventDataMap = new HashMap<>();
+
 		if (hubServerConfig != null) {
 			try {
+				List<NotificationItem> messages = new ArrayList<NotificationItem>();
 				final RestConnection restConnection = initRestConnection();
 				final HubItemsService<NotificationItem> hubItemsService = initHubItemsService(restConnection);
 				final Date startDate = findStartDate();
@@ -81,7 +83,7 @@ public class NotificationDispatcher
 				e.printStackTrace();
 			}
 		}
-		return messages;
+		return eventDataMap;
 	}
 
 	private RestConnection initRestConnection() throws EncryptionException, URISyntaxException, BDRestException {

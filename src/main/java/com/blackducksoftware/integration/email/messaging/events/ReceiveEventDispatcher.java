@@ -1,22 +1,10 @@
 package com.blackducksoftware.integration.email.messaging.events;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class ReceiveEventDispatcher<D> extends AbstractEventDispatcher<ReceiveMessageListener<D>, D> {
 
-	private final static Logger logger = LoggerFactory.getLogger(ReceiveEventDispatcher.class);
-
 	@Override
-	public void dispatchEvent(final D data) {
-		// execute in a thread for each listener.
-		for (final ReceiveMessageListener<D> listener : getListenerList()) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Dispatching to listener: " + listener + " data: " + data);
-			}
-			final ReceieveEventTask task = new ReceieveEventTask(listener, data);
-			submitEvent(task);
-		}
+	public Runnable createEventTask(final ReceiveMessageListener<D> listener, final D topicEventData) {
+		return new ReceieveEventTask(listener, topicEventData);
 	}
 
 	private class ReceieveEventTask implements Runnable {
