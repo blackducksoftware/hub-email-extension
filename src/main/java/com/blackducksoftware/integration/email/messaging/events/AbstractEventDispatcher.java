@@ -87,12 +87,6 @@ public abstract class AbstractEventDispatcher<L, E> {
 		return topicListenerMap;
 	}
 
-	// expect this method to be called in the implementation of the
-	// dispatchEvent method.
-	public void submitEvent(final Runnable runnable) {
-		eventExecutor.submit(runnable);
-	}
-
 	public void dispatchEvent(final Map<String, E> data) {
 		// execute in a thread for each listener.
 		final Set<String> topicSet = data.keySet();
@@ -106,7 +100,7 @@ public abstract class AbstractEventDispatcher<L, E> {
 					}
 					final E topicEventData = data.get(topic);
 					final Runnable task = createEventTask(listener, topicEventData);
-					submitEvent(task);
+					eventExecutor.submit(task);
 				}
 			}
 		}
