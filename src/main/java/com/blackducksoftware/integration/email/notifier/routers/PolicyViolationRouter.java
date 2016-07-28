@@ -1,4 +1,4 @@
-package com.blackducksoftware.integration.email.notifier;
+package com.blackducksoftware.integration.email.notifier.routers;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -24,7 +24,7 @@ public class PolicyViolationRouter extends AbstractEmailRouter<RuleViolationNoti
 
 	@Override
 	public void receive(final List<RuleViolationNotificationItem> data) {
-		logger.info("Received notification data event received for " + getClass().getName() + ": " + data);
+		logger.info("RuleViolationNotificationItem received: " + (data == null ? 0 : data.size()));
 	}
 
 	@Override

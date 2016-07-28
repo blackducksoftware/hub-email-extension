@@ -1,4 +1,4 @@
-package com.blackducksoftware.integration.email.notifier;
+package com.blackducksoftware.integration.email.notifier.routers;
 
 import java.util.List;
 import java.util.Map;
