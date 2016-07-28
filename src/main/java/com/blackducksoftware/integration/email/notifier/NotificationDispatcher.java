@@ -35,8 +35,8 @@ import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.google.gson.reflect.TypeToken;
 
 @Component
-public class NotificationDispatcher
-		extends AbstractPollingDispatcher<ReceiveMessageListener<List<NotificationItem>>, List<NotificationItem>> {
+public class NotificationDispatcher extends
+		AbstractPollingDispatcher<ReceiveMessageListener<List<? extends NotificationItem>>, List<? extends NotificationItem>> {
 	public static long DEFAULT_POLLING_INTERVAL_SECONDS = 10;
 	public static long DEFAULT_POLLING_DELAY_SECONDS = 5;
 
@@ -56,7 +56,7 @@ public class NotificationDispatcher
 	@Override
 	public void initDispatcher() {
 		setName("Notification Dispatcher");
-		setEventDispatcher(new ReceiveEventDispatcher<List<NotificationItem>>());
+		setEventDispatcher(new ReceiveEventDispatcher<List<? extends NotificationItem>>());
 
 		// setup the delay and polling interval based on the property values
 		// values in config file are assumed to be in seconds.
@@ -69,8 +69,8 @@ public class NotificationDispatcher
 	}
 
 	@Override
-	public Map<String, List<NotificationItem>> createEventData() {
-		final Map<String, List<NotificationItem>> eventDataMap = new HashMap<>();
+	public Map<String, List<? extends NotificationItem>> createEventData() {
+		final Map<String, List<? extends NotificationItem>> eventDataMap = new HashMap<>();
 
 		if (hubServerConfig != null) {
 			try {

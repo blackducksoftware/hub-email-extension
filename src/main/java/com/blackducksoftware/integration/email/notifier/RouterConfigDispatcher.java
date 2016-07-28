@@ -49,6 +49,7 @@ public class RouterConfigDispatcher extends
 	public Map<String, EmailSystemConfiguration> createEventData() {
 		final Map<String, EmailSystemConfiguration> eventDataMap = new HashMap<>();
 		logger.debug("Fetching Email system configuration data");
+		eventDataMap.put("emailconfigtopic", new EmailSystemConfiguration());
 		return eventDataMap;
 	}
 }

@@ -1,5 +1,6 @@
 package com.blackducksoftware.integration.email.messaging.events;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,6 +31,7 @@ public abstract class AbstractEventDispatcher<L, E> {
 					listeners = topicListenerMap.get(topic);
 				} else {
 					listeners = new Vector<L>();
+					topicListenerMap.put(topic, listeners);
 				}
 				listeners.add(listener);
 				if (logger.isDebugEnabled()) {
@@ -43,16 +45,19 @@ public abstract class AbstractEventDispatcher<L, E> {
 	public void removeListener(final Set<String> topics, final L listener) {
 		if (topics != null) {
 			for (final String topic : topics) {
-				List<L> listeners;
+				int listenerCount = 0;
 				if (topicListenerMap.containsKey(topic)) {
-					listeners = topicListenerMap.get(topic);
-				} else {
-					listeners = new Vector<L>();
+					final List<L> listeners = topicListenerMap.get(topic);
+					listeners.remove(listener);
+					listenerCount = listeners.size();
+					if (listeners.isEmpty()) {
+						topicListenerMap.remove(topic);
+					}
 				}
-				listeners.remove(listener);
+
 				if (logger.isDebugEnabled()) {
 					logger.debug("Listener removed: " + listener);
-					logger.debug("Topic: " + topic + " current Listener Count: " + listeners.size());
+					logger.debug("Topic: " + topic + " current Listener Count: " + listenerCount);
 				}
 			}
 		}
@@ -64,19 +69,18 @@ public abstract class AbstractEventDispatcher<L, E> {
 		eventExecutor.shutdown();
 		final Set<String> topicSet = topicListenerMap.keySet();
 
-		// for (final String topic : topicSet) {
-		// final List<L> listeners = topicListenerMap.get(topic);
-		// final Iterator<L> iterator = listeners.iterator();
-		// while (iterator.hasNext()) {
-		// final L listener = iterator.next();
-		// listeners.remove(listener);
-		// logger.info("Listener removed: " + listener);
-		// logger.info("Topic: " + topic + " current Listener Count: " +
-		// listeners.size());
-		// }
-		// topicListenerMap.put(topic, null);
-		// }
-		// topicListenerMap.clear(); // remove all topics
+		for (final String topic : topicSet) {
+			final List<L> listeners = topicListenerMap.get(topic);
+			final Iterator<L> iterator = listeners.iterator();
+			while (iterator.hasNext()) {
+				final L listener = iterator.next();
+				iterator.remove();
+				logger.info("Listener removed: " + listener);
+				logger.info("Topic: " + topic + " current Listener Count: " + listeners.size());
+			}
+			topicListenerMap.remove(topic);
+		}
+		topicListenerMap.clear(); // remove all topics
 	}
 
 	public Map<String, List<L>> getTopicListenerMap() {

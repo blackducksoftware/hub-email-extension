@@ -26,12 +26,12 @@ public class NotificationEngine {
 	private NotificationDispatcher notificationDispatcher;
 
 	@Autowired
-	private ItemRouter<EmailSystemConfiguration, List<NotificationItem>, EmailMessage>[] routerArray;
+	private ItemRouter<EmailSystemConfiguration, List<? extends NotificationItem>, EmailMessage>[] routerArray;
 
 	@PostConstruct
 	public void configure() {
 		if (routerArray != null) {
-			for (final ItemRouter<EmailSystemConfiguration, List<NotificationItem>, EmailMessage> router : routerArray) {
+			for (final ItemRouter<EmailSystemConfiguration, List<? extends NotificationItem>, EmailMessage> router : routerArray) {
 				notificationDispatcher.addListener(router.getReceiveEventTopics(), router);
 				configDispatcher.addListener(router.getConfigureEventTopics(), router);
 			}

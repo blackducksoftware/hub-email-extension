@@ -10,6 +10,6 @@ import com.blackducksoftware.integration.email.model.EmailSystemConfiguration;
 import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
 
 @Component
-public abstract class AbstractEmailRouter
-		extends ItemRouter<EmailSystemConfiguration, List<NotificationItem>, EmailMessage> {
+public abstract class AbstractEmailRouter<T extends NotificationItem>
+		extends ItemRouter<EmailSystemConfiguration, List<T>, EmailMessage> {
 }

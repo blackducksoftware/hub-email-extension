@@ -10,11 +10,10 @@ import org.springframework.stereotype.Component;
 
 import com.blackducksoftware.integration.email.model.EmailMessage;
 import com.blackducksoftware.integration.email.model.EmailSystemConfiguration;
-import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
 import com.blackducksoftware.integration.hub.notification.api.PolicyOverrideNotificationItem;
 
 @Component
-public class PolicyViolationOverrideCancelRouter extends AbstractEmailRouter {
+public class PolicyViolationOverrideCancelRouter extends AbstractEmailRouter<PolicyOverrideNotificationItem> {
 
 	private final static Logger logger = LoggerFactory.getLogger(PolicyViolationOverrideCancelRouter.class);
 
@@ -24,7 +23,7 @@ public class PolicyViolationOverrideCancelRouter extends AbstractEmailRouter {
 	}
 
 	@Override
-	public void receive(final List<NotificationItem> data) {
+	public void receive(final List<PolicyOverrideNotificationItem> data) {
 		logger.info("Received notification data event received for " + getClass().getName() + ": " + data);
 	}
 
