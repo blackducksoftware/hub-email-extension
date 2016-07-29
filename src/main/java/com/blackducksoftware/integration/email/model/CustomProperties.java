@@ -13,7 +13,9 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.PropertySources;
+import org.springframework.stereotype.Component;
 
+@Component
 public class CustomProperties {
 	public static final String JAVAMAIL_CONFIG_PREFIX = "hub.email.javamail.config.";
 	public static final String TEMPLATE_VARIABLE_PREFIX = "hub.email.template.variable.";
@@ -35,12 +37,14 @@ public class CustomProperties {
 				final EnumerablePropertySource<?> enumerable = (EnumerablePropertySource<?>) propertySource;
 				final String[] propertyNames = enumerable.getPropertyNames();
 				for (final String propertyName : propertyNames) {
-					final String value = enumerable.getProperty(propertyName).toString();
-					if (StringUtils.isNotBlank(value)) {
-						if (propertyName.startsWith(JAVAMAIL_CONFIG_PREFIX)) {
-							javamailConfigKeys.add(propertyName);
-						} else if (propertyName.startsWith(TEMPLATE_VARIABLE_PREFIX)) {
-							templateVariableKeys.add(propertyName);
+					if (propertyName.startsWith("hub.email.")) {
+						final String value = enumerable.getProperty(propertyName).toString();
+						if (StringUtils.isNotBlank(value)) {
+							if (propertyName.startsWith(JAVAMAIL_CONFIG_PREFIX)) {
+								javamailConfigKeys.add(propertyName);
+							} else if (propertyName.startsWith(TEMPLATE_VARIABLE_PREFIX)) {
+								templateVariableKeys.add(propertyName);
+							}
 						}
 					}
 				}
@@ -50,7 +54,7 @@ public class CustomProperties {
 		if (!javamailConfigKeys.isEmpty()) {
 			for (final String javamailConfigKey : javamailConfigKeys) {
 				final String key = javamailConfigKey.replace(JAVAMAIL_CONFIG_PREFIX, "");
-				final String value = configurableEnvironment.getProperty(key);
+				final String value = configurableEnvironment.getProperty(javamailConfigKey);
 				suppliedJavamailConfigProperties.put(key, value);
 			}
 		}
@@ -58,7 +62,7 @@ public class CustomProperties {
 		if (!templateVariableKeys.isEmpty()) {
 			for (final String templateVariableKey : templateVariableKeys) {
 				final String key = templateVariableKey.replace(TEMPLATE_VARIABLE_PREFIX, "");
-				final String value = configurableEnvironment.getProperty(key);
+				final String value = configurableEnvironment.getProperty(templateVariableKey);
 				suppliedTemplateVariableProperties.put(key, value);
 			}
 		}
