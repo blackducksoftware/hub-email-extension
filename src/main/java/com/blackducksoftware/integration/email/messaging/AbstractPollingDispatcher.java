@@ -17,7 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractPollingDispatcher<D, F extends SubscriptionAware> extends TimerTask {
+public abstract class AbstractPollingDispatcher<D, F extends RouterSubscriber> extends TimerTask {
 
 	private final Logger logger = LoggerFactory.getLogger(AbstractPollingDispatcher.class);
 	public static long DEFAULT_POLLING_INTERVAL = 10000;
@@ -26,7 +26,7 @@ public abstract class AbstractPollingDispatcher<D, F extends SubscriptionAware> 
 	private Timer timer;
 	private long interval;
 	private long startupDelay;
-	private final Map<String, List<F>> topicListenerMap = new ConcurrentHashMap<>();
+	private final Map<String, List<F>> topicSubscriberMap = new ConcurrentHashMap<>();
 	private final ExecutorService eventExecutor;
 
 	private Date lastRun;
@@ -77,17 +77,17 @@ public abstract class AbstractPollingDispatcher<D, F extends SubscriptionAware> 
 	public void attachRouters(final List<F> routers) {
 		for (final F router : routers) {
 			for (final String topic : router.getTopics()) {
-				List<F> listeners;
-				if (topicListenerMap.containsKey(topic)) {
-					listeners = topicListenerMap.get(topic);
+				List<F> routerList;
+				if (topicSubscriberMap.containsKey(topic)) {
+					routerList = topicSubscriberMap.get(topic);
 				} else {
-					listeners = new Vector<F>();
-					topicListenerMap.put(topic, listeners);
+					routerList = new Vector<F>();
+					topicSubscriberMap.put(topic, routerList);
 				}
-				listeners.add(router);
+				routerList.add(router);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Router added: " + router);
-					logger.debug("Topic: " + topic + " current Listener Count: " + listeners.size());
+					logger.debug("Topic: " + topic + " current subscriber count: " + routers.size());
 				}
 			}
 		}
@@ -96,19 +96,19 @@ public abstract class AbstractPollingDispatcher<D, F extends SubscriptionAware> 
 	public void unattachRouters(final List<F> routers) {
 		for (final F router : routers) {
 			for (final String topic : router.getTopics()) {
-				int listenerCount = 0;
-				if (topicListenerMap.containsKey(topic)) {
-					final List<F> listeners = topicListenerMap.get(topic);
-					listeners.remove(router);
-					listenerCount = listeners.size();
-					if (listeners.isEmpty()) {
-						topicListenerMap.remove(topic);
+				int routerCount = 0;
+				if (topicSubscriberMap.containsKey(topic)) {
+					final List<F> routerList = topicSubscriberMap.get(topic);
+					routerList.remove(router);
+					routerCount = routerList.size();
+					if (routerList.isEmpty()) {
+						topicSubscriberMap.remove(topic);
 					}
 				}
 
 				if (logger.isDebugEnabled()) {
 					logger.debug("Router removed: " + router);
-					logger.debug("Topic: " + topic + " current Listener Count: " + listenerCount);
+					logger.debug("Topic: " + topic + " current subscriber count: " + routerCount);
 				}
 			}
 		}
@@ -116,39 +116,56 @@ public abstract class AbstractPollingDispatcher<D, F extends SubscriptionAware> 
 
 	private void shutdown() {
 		logger.info("Shutting down event dispatching thread pool.");
-		// cleanup topics listener map
+		// cleanup topics router map
 		eventExecutor.shutdown();
-		final Set<String> topicSet = topicListenerMap.keySet();
+		final Set<String> topicSet = topicSubscriberMap.keySet();
 
 		for (final String topic : topicSet) {
-			final List<F> routers = topicListenerMap.get(topic);
+			final List<F> routers = topicSubscriberMap.get(topic);
 			final Iterator<F> iterator = routers.iterator();
 			while (iterator.hasNext()) {
 				final F router = iterator.next();
 				iterator.remove();
-				logger.info("Listener removed: " + router);
-				logger.info("Topic: " + topic + " current Listener Count: " + routers.size());
+				logger.info("Router removed: " + router);
+				logger.info("Topic: " + topic + " current subscriber count: " + routers.size());
 			}
-			topicListenerMap.remove(topic);
+			topicSubscriberMap.remove(topic);
 		}
-		topicListenerMap.clear(); // remove all topics
+		topicSubscriberMap.clear(); // remove all topics
 	}
 
 	public void dispatchEvent(final Map<String, D> data) {
-		// execute in a thread for each listener.
 		final Set<String> topicSet = data.keySet();
 		for (final String topic : topicSet) {
-			if (topicListenerMap.containsKey(topic)) {
-				final List<F> routerList = topicListenerMap.get(topic);
+			if (topicSubscriberMap.containsKey(topic)) {
+				final List<F> routerList = topicSubscriberMap.get(topic);
 				for (final F router : routerList) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Dispatching for topic: " + topic + " to listener: " + router + " event: " + data);
+						logger.debug("Dispatching to subscriber" + router + " for topic: " + topic + " data: " + data);
 					}
+					// execute the processing of the data in a separate thread
+					// in the threadpool
 					final Runnable task = createEventTask(router, data.get(topic));
 					eventExecutor.submit(task);
 				}
 			}
 		}
+	}
+
+	@Override
+	public void run() {
+		currentRun = new Date();
+		final Map<String, D> data = fetchData();
+		if (logger.isDebugEnabled()) {
+			logger.debug("Execution data: " + System.lineSeparator()
+					+ "########## Polling Dispatcher Execution ##########" + System.lineSeparator()
+					+ "Dispatcher Name  = " + name + System.lineSeparator() + "Polling interval = " + interval
+					+ System.lineSeparator() + "Last Run         = " + lastRun + System.lineSeparator()
+					+ "Current Run      = " + currentRun + System.lineSeparator() + "Data to dispatch " + data
+					+ System.lineSeparator() + "##################################################");
+		}
+		dispatchEvent(data);
+		lastRun = currentRun;
 	}
 
 	public Date getCurrentRun() {
@@ -188,20 +205,4 @@ public abstract class AbstractPollingDispatcher<D, F extends SubscriptionAware> 
 	public abstract Map<String, D> fetchData();
 
 	public abstract Runnable createEventTask(F router, D data);
-
-	@Override
-	public void run() {
-		currentRun = new Date();
-		final Map<String, D> data = fetchData();
-		if (logger.isDebugEnabled()) {
-			logger.debug("Execution data: " + System.lineSeparator()
-					+ "########## Polling Dispatcher Execution ##########" + System.lineSeparator()
-					+ "Dispatcher Name  = " + name + System.lineSeparator() + "Polling interval = " + interval
-					+ System.lineSeparator() + "Last Run         = " + lastRun + System.lineSeparator()
-					+ "Current Run      = " + currentRun + System.lineSeparator() + "Data to dispatch " + data
-					+ System.lineSeparator() + "##################################################");
-		}
-		dispatchEvent(data);
-		lastRun = currentRun;
-	}
 }

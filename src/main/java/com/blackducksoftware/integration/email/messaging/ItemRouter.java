@@ -1,6 +1,6 @@
 package com.blackducksoftware.integration.email.messaging;
 
-public abstract class ItemRouter<C, R, S> implements SubscriptionAware {
+public abstract class ItemRouter<C, R, S> implements RouterSubscriber {
 
 	public abstract void configure(C data);
 
