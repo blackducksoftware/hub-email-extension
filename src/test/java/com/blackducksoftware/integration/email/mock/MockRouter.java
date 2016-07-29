@@ -8,6 +8,7 @@ import com.blackducksoftware.integration.email.messaging.ItemRouter;
 
 public class MockRouter extends ItemRouter<String, String, String> {
 
+	public final static String ROUTER_NAME = "Mock Router";
 	private final Set<String> topicSet;
 	private final String expectedConfig;
 	private final String expectedReceive;
@@ -39,5 +40,10 @@ public class MockRouter extends ItemRouter<String, String, String> {
 	@Override
 	public void send(final String data) {
 		assertEquals(expectedSend, data);
+	}
+
+	@Override
+	public String getName() {
+		return ROUTER_NAME;
 	}
 }

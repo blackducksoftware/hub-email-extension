@@ -49,4 +49,9 @@ public class ItemRouterTest {
 	public void testSend() {
 		router.send(SEND_DATA);
 	}
+
+	@Test
+	public void testGetName() {
+		assertEquals(MockRouter.ROUTER_NAME, router.getName());
+	}
 }
