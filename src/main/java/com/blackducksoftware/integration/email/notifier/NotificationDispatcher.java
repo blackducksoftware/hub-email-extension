@@ -24,8 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.blackducksoftware.integration.email.messaging.AbstractPollingDispatcher;
-import com.blackducksoftware.integration.email.messaging.events.ReceiveEventDispatcher;
-import com.blackducksoftware.integration.email.messaging.events.ReceiveMessageListener;
+import com.blackducksoftware.integration.email.messaging.ItemRouter;
 import com.blackducksoftware.integration.email.model.EmailSystemProperties;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
 import com.blackducksoftware.integration.hub.exception.EncryptionException;
@@ -43,7 +42,7 @@ import com.google.gson.reflect.TypeToken;
 
 @Component
 public class NotificationDispatcher extends
-		AbstractPollingDispatcher<ReceiveMessageListener<List<? extends NotificationItem>>, List<? extends NotificationItem>> {
+		AbstractPollingDispatcher<List<? extends NotificationItem>, ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, Map<String, Object>>> {
 	public static long DEFAULT_POLLING_INTERVAL_SECONDS = 10;
 	public static long DEFAULT_POLLING_DELAY_SECONDS = 5;
 
@@ -65,7 +64,6 @@ public class NotificationDispatcher extends
 	@Override
 	public void initDispatcher() {
 		setName("Notification Dispatcher");
-		setEventDispatcher(new ReceiveEventDispatcher<List<? extends NotificationItem>>());
 
 		// setup the delay and polling interval based on the property values
 		// values in config file are assumed to be in seconds.
@@ -78,7 +76,7 @@ public class NotificationDispatcher extends
 	}
 
 	@Override
-	public Map<String, List<? extends NotificationItem>> createEventData() {
+	public Map<String, List<? extends NotificationItem>> fetchData() {
 		final Map<String, List<? extends NotificationItem>> eventDataMap = new HashMap<>();
 
 		if (hubServerConfig != null) {
@@ -217,5 +215,30 @@ public class NotificationDispatcher extends
 			}
 		}
 		return map;
+	}
+
+	@Override
+	public Runnable createEventTask(
+			final ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, Map<String, Object>> router,
+			final List<? extends NotificationItem> data) {
+		return new ReceiveTask(router, data);
+	}
+
+	private class ReceiveTask implements Runnable {
+
+		private final ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, Map<String, Object>> router;
+		private final List<? extends NotificationItem> data;
+
+		public ReceiveTask(
+				final ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, Map<String, Object>> router,
+				final List<? extends NotificationItem> eventData) {
+			this.router = router;
+			this.data = eventData;
+		}
+
+		@Override
+		public void run() {
+			router.receive(data);
+		}
 	}
 }
