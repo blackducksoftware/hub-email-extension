@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.blackducksoftware.integration.email.messaging.ItemRouter;
-import com.blackducksoftware.integration.email.model.EmailData;
-import com.blackducksoftware.integration.email.model.EmailSystemProperties;
 import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
 
 @Component
@@ -21,20 +19,15 @@ public class NotificationEngine {
 	private final Logger logger = LoggerFactory.getLogger(NotificationEngine.class);
 
 	@Autowired
-	private RouterConfigDispatcher configDispatcher;
-
-	@Autowired
 	private NotificationDispatcher notificationDispatcher;
 
 	@Autowired
-	private ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, EmailData>[] routerArray;
+	private ItemRouter<List<? extends NotificationItem>>[] routerArray;
 
 	public void configure() {
 		if (routerArray != null) {
-			final List<ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, EmailData>> routerList = Arrays
-					.asList(routerArray);
+			final List<ItemRouter<List<? extends NotificationItem>>> routerList = Arrays.asList(routerArray);
 			notificationDispatcher.attachRouters(routerList);
-			configDispatcher.attachRouters(routerList);
 		}
 	}
 
@@ -42,7 +35,6 @@ public class NotificationEngine {
 	public void start() {
 		logger.info("Starting notification engine.");
 		configure();
-		configDispatcher.start();
 		notificationDispatcher.start();
 	}
 
@@ -50,6 +42,5 @@ public class NotificationEngine {
 	public void stop() {
 		logger.info("Stopping notification engine.");
 		notificationDispatcher.stop();
-		configDispatcher.stop();
 	}
 }

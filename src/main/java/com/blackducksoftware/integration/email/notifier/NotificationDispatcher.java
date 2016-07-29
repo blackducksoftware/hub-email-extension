@@ -25,8 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.blackducksoftware.integration.email.messaging.AbstractPollingDispatcher;
-import com.blackducksoftware.integration.email.messaging.ItemRouter;
-import com.blackducksoftware.integration.email.model.EmailData;
+import com.blackducksoftware.integration.email.messaging.RouterTaskData;
 import com.blackducksoftware.integration.email.model.EmailSystemProperties;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
 import com.blackducksoftware.integration.hub.exception.EncryptionException;
@@ -43,8 +42,7 @@ import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.google.gson.reflect.TypeToken;
 
 @Component
-public class NotificationDispatcher extends
-		AbstractPollingDispatcher<List<? extends NotificationItem>, ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, EmailData>> {
+public class NotificationDispatcher extends AbstractPollingDispatcher<List<? extends NotificationItem>> {
 	public static long DEFAULT_POLLING_INTERVAL_SECONDS = 10;
 	public static long DEFAULT_POLLING_DELAY_SECONDS = 5;
 
@@ -81,37 +79,23 @@ public class NotificationDispatcher extends
 	}
 
 	@Override
-	public Map<String, List<? extends NotificationItem>> fetchData() {
-		final Map<String, List<? extends NotificationItem>> eventDataMap = new HashMap<>();
-
+	public RouterTaskData<List<? extends NotificationItem>> fetchRouterConfig() {
+		List<NotificationItem> notificationList = new Vector<>();
 		if (hubServerConfig != null) {
 			try {
-				List<NotificationItem> messages = new ArrayList<NotificationItem>();
 				final RestConnection restConnection = initRestConnection();
 				final HubItemsService<NotificationItem> hubItemsService = initHubItemsService(restConnection);
 				final Date startDate = findStartDate();
-				messages = fetchNotifications(hubItemsService, startDate, getCurrentRun());
-				final Map<String, List<NotificationItem>> tempMap = new HashMap<>();
-				for (final NotificationItem item : messages) {
-					final String topic = item.getClass().getName();
-					List<NotificationItem> list;
-					if (eventDataMap.containsKey(topic)) {
-						list = tempMap.get(topic);
-					} else {
-						list = new Vector<>();
-						tempMap.put(topic, list);
-					}
-					list.add(item);
-				}
-				eventDataMap.putAll(tempMap);
+				notificationList = fetchNotifications(hubItemsService, startDate, getCurrentRun());
+
 			} catch (final Exception e) {
 				e.printStackTrace();
 			}
+		} else {
+			notificationList = createNotificationData();
 		}
-		// TODO remove eventually when ready.
-		eventDataMap.putAll(createNotificationData());
 
-		return eventDataMap;
+		return new RouterTaskData<List<? extends NotificationItem>>(notificationList);
 	}
 
 	private RestConnection initRestConnection() throws EncryptionException, URISyntaxException, BDRestException {
@@ -170,11 +154,10 @@ public class NotificationDispatcher extends
 		return items;
 	}
 
-	private Map<String, List<NotificationItem>> createNotificationData() {
+	private List<NotificationItem> createNotificationData() {
 
-		final Map<String, List<NotificationItem>> map = new HashMap<>();
+		final List<NotificationItem> list = new Vector<>();
 		for (int selectedClass = 0; selectedClass < 3; selectedClass++) {
-			final List<NotificationItem> itemList = new Vector<>();
 			final Class<? extends NotificationItem> clazz;
 			final List<String> allow = new ArrayList<>();
 			final List<MetaLink> links = new ArrayList<>();
@@ -209,40 +192,15 @@ public class NotificationDispatcher extends
 					try {
 						final Constructor<?> constructor = clazz.getDeclaredConstructor(MetaInformation.class);
 						if (constructor != null) {
-							itemList.add((NotificationItem) constructor.newInstance(meta));
+							list.add((NotificationItem) constructor.newInstance(meta));
 						}
 					} catch (final InstantiationException | IllegalAccessException | NoSuchMethodException
 							| SecurityException | IllegalArgumentException | InvocationTargetException e) {
 						logger.error("GENERATING TEST DATA: Error", e);
 					}
 				}
-				map.put(clazz.getName(), itemList);
 			}
 		}
-		return map;
-	}
-
-	@Override
-	public Runnable createEventTask(
-			final ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, EmailData> router,
-			final List<? extends NotificationItem> data) {
-		return new ReceiveTask(router, data);
-	}
-
-	private class ReceiveTask implements Runnable {
-
-		private final ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, EmailData> router;
-		private final List<? extends NotificationItem> data;
-
-		public ReceiveTask(final ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, EmailData> router,
-				final List<? extends NotificationItem> eventData) {
-			this.router = router;
-			this.data = eventData;
-		}
-
-		@Override
-		public void run() {
-			router.receive(data);
-		}
+		return list;
 	}
 }
