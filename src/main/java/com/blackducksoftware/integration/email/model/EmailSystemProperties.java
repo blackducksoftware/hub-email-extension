@@ -1,17 +1,7 @@
 package com.blackducksoftware.integration.email.model;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import com.blackducksoftware.integration.email.service.properties.ServicePropertiesBuilder;
 
 /**
  * Encapsulates the current properties from the file system, json, the hub, etc.
@@ -20,19 +10,11 @@ import com.blackducksoftware.integration.email.service.properties.ServicePropert
  */
 @Component
 public class EmailSystemProperties {
-	private final Logger logger = LoggerFactory.getLogger(EmailSystemProperties.class);
-
 	@Value("${email.from.address:}")
 	private String emailFromAddress;
 
 	@Value("${email.reply.to.address:}")
 	private String emailReplyToAddress;
-
-	@Value("${template.name:}")
-	private String templateName;
-
-	@Value("${property.file:}")
-	private String propertyFilePath;
 
 	@Value("${hub.server.url:}")
 	private String hubServerUrl;
@@ -73,36 +55,6 @@ public class EmailSystemProperties {
 	@Value("email.service.dispatcher.configuration.delay:")
 	private String configurationStartupDelay;
 
-	@PostConstruct
-	private void checkPropertiesFile() {
-		try {
-			final ServicePropertiesBuilder propBuilder = new ServicePropertiesBuilder();
-			propBuilder.setFilePath(getPropertyFilePath());
-			propBuilder.setServiceName("Email Notification Service");
-			propBuilder.setRequiredPropertyMap(createRequiredPropertyMap());
-			propBuilder.generatePropertyFile();
-		} catch (final IOException e) {
-			logger.error("Error occurred checking for the properties file", e);
-		}
-	}
-
-	private Map<String, String> createRequiredPropertyMap() {
-		final Map<String, String> map = new HashMap<>();
-		map.put("smtp.host", "");
-		map.put("smtp.port", "");
-		map.put("smtp.auth", "");
-		map.put("smtp.username", "");
-		map.put("smtp.password", "");
-		map.put("email.from.address", "");
-		map.put("email.reply.to.address", "");
-		map.put("template.name", "");
-		map.put("email.service.dispatcher.notification.interval", "10");
-		map.put("email.service.dispatcher.notification.delay", "5");
-		map.put("email.service.dispatcher.configuration.interval", "30");
-		map.put("email.service.dispatcher.configuration.delay", "2");
-		return map;
-	}
-
 	public String getEmailFromAddress() {
 		return emailFromAddress;
 	}
@@ -117,22 +69,6 @@ public class EmailSystemProperties {
 
 	public void setEmailReplyToAddress(final String emailReplyToAddress) {
 		this.emailReplyToAddress = emailReplyToAddress;
-	}
-
-	public String getTemplateName() {
-		return templateName;
-	}
-
-	public void setTemplateName(final String templateName) {
-		this.templateName = templateName;
-	}
-
-	public String getPropertyFilePath() {
-		return propertyFilePath;
-	}
-
-	public void setPropertyFilePath(final String propertyFilePath) {
-		this.propertyFilePath = propertyFilePath;
 	}
 
 	public String getHubServerUrl() {

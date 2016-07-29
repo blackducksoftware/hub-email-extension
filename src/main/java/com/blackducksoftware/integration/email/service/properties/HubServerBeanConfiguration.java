@@ -2,7 +2,6 @@ package com.blackducksoftware.integration.email.service.properties;
 
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,11 +36,6 @@ public class HubServerBeanConfiguration {
 		configBuilder.setProxyPassword(emailConfig.getHubProxyPassword());
 
 		// output the configuration details
-		String propPath = "./application.properties";
-		if (StringUtils.isNotBlank(emailConfig.getPropertyFilePath())) {
-			propPath = emailConfig.getPropertyFilePath();
-		}
-		logger.info("Properties file path    = " + propPath);
 		logger.info("Hub Server URL          = " + configBuilder.getHubUrl());
 		logger.info("Hub User                = " + configBuilder.getUsername());
 		logger.info("Hub Timeout             = " + configBuilder.getTimeout());
@@ -77,4 +71,5 @@ public class HubServerBeanConfiguration {
 
 		return null;
 	}
+
 }

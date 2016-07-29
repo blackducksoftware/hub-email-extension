@@ -38,3 +38,25 @@ dependencies {
 
 	testCompile 'org.springframework.boot:spring-boot-starter-test'
 }
+
+jar {
+	sourceSets {
+		main {
+			resources {
+				exclude 'application.properties'
+				exclude '**/images/*'
+				exclude 'images'
+				exclude '**/templates/*'
+				exclude 'templates'
+			}
+		}
+	}
+}
+
+task buildDistribution(type: Zip, dependsOn: build) {
+	from ('src/main/resources/images/') {into 'hub-email-extension/images/'}
+	from('src/main/resources/templates/') {into 'hub-email-extension/templates/'}
+	from('src/main/resources/application.properties') {into 'hub-email-extension'}
+
+	from(jar) {into 'hub-email-extension'}
+}
