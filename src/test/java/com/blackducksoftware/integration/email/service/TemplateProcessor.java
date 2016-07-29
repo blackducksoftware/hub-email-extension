@@ -23,7 +23,7 @@ public class TemplateProcessor {
 			throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException,
 			TemplateException {
 		final StringWriter stringWriter = new StringWriter();
-		final Template template = configuration.getTemplate("htmlTemplate.ftl");
+		final Template template = configuration.getTemplate(templateName);
 		template.process(model, stringWriter);
 		return stringWriter.toString();
 	}
