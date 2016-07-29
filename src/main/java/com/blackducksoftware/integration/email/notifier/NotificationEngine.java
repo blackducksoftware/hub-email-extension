@@ -1,5 +1,6 @@
 package com.blackducksoftware.integration.email.notifier;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -28,19 +29,19 @@ public class NotificationEngine {
 	@Autowired
 	private ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, Map<String, Object>>[] routerArray;
 
-	@PostConstruct
 	public void configure() {
 		if (routerArray != null) {
-			for (final ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, Map<String, Object>> router : routerArray) {
-				notificationDispatcher.addListener(router.getReceiveEventTopics(), router);
-				configDispatcher.addListener(router.getConfigureEventTopics(), router);
-			}
+			final List<ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, Map<String, Object>>> routerList = Arrays
+					.asList(routerArray);
+			notificationDispatcher.attachRouters(routerList);
+			configDispatcher.attachRouters(routerList);
 		}
 	}
 
 	@PostConstruct
 	public void start() {
 		logger.info("Starting notification engine.");
+		configure();
 		configDispatcher.start();
 		notificationDispatcher.start();
 	}

@@ -1,6 +1,7 @@
 package com.blackducksoftware.integration.email.notifier;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -12,13 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.blackducksoftware.integration.email.messaging.AbstractPollingDispatcher;
-import com.blackducksoftware.integration.email.messaging.events.ConfigureEventDispatcher;
-import com.blackducksoftware.integration.email.messaging.events.ConfigureMessageListener;
+import com.blackducksoftware.integration.email.messaging.ItemRouter;
 import com.blackducksoftware.integration.email.model.EmailSystemProperties;
+import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
 
 @Component
-public class RouterConfigDispatcher
-		extends AbstractPollingDispatcher<ConfigureMessageListener<EmailSystemProperties>, EmailSystemProperties> {
+public class RouterConfigDispatcher extends
+		AbstractPollingDispatcher<EmailSystemProperties, ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, Map<String, Object>>> {
 
 	private final Logger logger = LoggerFactory.getLogger(RouterConfigDispatcher.class);
 
@@ -32,8 +33,6 @@ public class RouterConfigDispatcher
 	@Override
 	public void initDispatcher() {
 		setName("Router Configuration Dispatcher");
-		setEventDispatcher(new ConfigureEventDispatcher<EmailSystemProperties>());
-
 		// setup the delay and polling interval based on the property values
 		// values in config file are assumed to be in seconds.
 		final String intervalSeconds = systemProperties.getConfigurationInterval();
@@ -45,11 +44,35 @@ public class RouterConfigDispatcher
 	}
 
 	@Override
-	public Map<String, EmailSystemProperties> createEventData() {
+	public Map<String, EmailSystemProperties> fetchData() {
 		final Map<String, EmailSystemProperties> eventDataMap = new HashMap<>();
 		logger.debug("Fetching Email system configuration data");
 		eventDataMap.put("emailconfigtopic", new EmailSystemProperties());
 		return eventDataMap;
 	}
 
+	@Override
+	public Runnable createEventTask(
+			final ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, Map<String, Object>> router,
+			final EmailSystemProperties data) {
+		return new ConfigureTask(router, data);
+	}
+
+	private class ConfigureTask implements Runnable {
+
+		private final ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, Map<String, Object>> router;
+		private final EmailSystemProperties data;
+
+		public ConfigureTask(
+				final ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, Map<String, Object>> router,
+				final EmailSystemProperties data) {
+			this.router = router;
+			this.data = data;
+		}
+
+		@Override
+		public void run() {
+			router.configure(data);
+		}
+	}
 }

@@ -34,17 +34,9 @@ public class PolicyViolationOverrideRouter extends AbstractEmailRouter<PolicyOve
 	}
 
 	@Override
-	public Set<String> getConfigureEventTopics() {
-		final Set<String> topics = new LinkedHashSet<>();
-		topics.add("emailconfigtopic");
-		return topics;
-	}
-
-	@Override
-	public Set<String> getReceiveEventTopics() {
+	public Set<String> getTopics() {
 		final Set<String> topics = new LinkedHashSet<>();
 		topics.add(PolicyOverrideNotificationItem.class.getName());
 		return topics;
 	}
-
 }

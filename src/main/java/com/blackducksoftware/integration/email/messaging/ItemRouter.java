@@ -1,8 +1,10 @@
 package com.blackducksoftware.integration.email.messaging;
 
-import com.blackducksoftware.integration.email.messaging.events.ConfigureMessageListener;
-import com.blackducksoftware.integration.email.messaging.events.ReceiveMessageListener;
+public abstract class ItemRouter<C, R, S> implements RouterSubscriber {
 
-public abstract class ItemRouter<C, R, S> implements ConfigureMessageListener<C>, ReceiveMessageListener<R> {
+	public abstract void configure(C data);
+
+	public abstract void receive(R data);
+
 	public abstract void send(final S data);
 }
