@@ -15,12 +15,13 @@ import org.springframework.stereotype.Component;
 
 import com.blackducksoftware.integration.email.messaging.AbstractPollingDispatcher;
 import com.blackducksoftware.integration.email.messaging.ItemRouter;
+import com.blackducksoftware.integration.email.model.EmailData;
 import com.blackducksoftware.integration.email.model.EmailSystemProperties;
 import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
 
 @Component
 public class RouterConfigDispatcher extends
-		AbstractPollingDispatcher<EmailSystemProperties, ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, Map<String, Object>>> {
+		AbstractPollingDispatcher<EmailSystemProperties, ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, EmailData>> {
 
 	private final Logger logger = LoggerFactory.getLogger(RouterConfigDispatcher.class);
 
@@ -58,18 +59,18 @@ public class RouterConfigDispatcher extends
 
 	@Override
 	public Runnable createEventTask(
-			final ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, Map<String, Object>> router,
+			final ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, EmailData> router,
 			final EmailSystemProperties data) {
 		return new ConfigureTask(router, data);
 	}
 
 	private class ConfigureTask implements Runnable {
 
-		private final ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, Map<String, Object>> router;
+		private final ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, EmailData> router;
 		private final EmailSystemProperties data;
 
 		public ConfigureTask(
-				final ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, Map<String, Object>> router,
+				final ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, EmailData> router,
 				final EmailSystemProperties data) {
 			this.router = router;
 			this.data = data;

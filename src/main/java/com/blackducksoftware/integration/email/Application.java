@@ -7,13 +7,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 
-import com.blackducksoftware.integration.email.model.EmailSystemProperties;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.google.gson.Gson;
 
@@ -22,8 +20,6 @@ import freemarker.template.TemplateExceptionHandler;
 
 @SpringBootApplication
 public class Application {
-	@Autowired
-	private EmailSystemProperties emailSystemProperties;
 
 	public static void main(final String[] args) {
 		SpringApplication.run(Application.class, args);

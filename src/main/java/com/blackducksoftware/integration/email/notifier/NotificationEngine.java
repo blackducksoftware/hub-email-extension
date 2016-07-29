@@ -2,7 +2,6 @@ package com.blackducksoftware.integration.email.notifier;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -13,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.blackducksoftware.integration.email.messaging.ItemRouter;
+import com.blackducksoftware.integration.email.model.EmailData;
 import com.blackducksoftware.integration.email.model.EmailSystemProperties;
 import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
 
@@ -27,11 +27,11 @@ public class NotificationEngine {
 	private NotificationDispatcher notificationDispatcher;
 
 	@Autowired
-	private ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, Map<String, Object>>[] routerArray;
+	private ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, EmailData>[] routerArray;
 
 	public void configure() {
 		if (routerArray != null) {
-			final List<ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, Map<String, Object>>> routerList = Arrays
+			final List<ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, EmailData>> routerList = Arrays
 					.asList(routerArray);
 			notificationDispatcher.attachRouters(routerList);
 			configDispatcher.attachRouters(routerList);

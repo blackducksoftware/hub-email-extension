@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 
 import com.blackducksoftware.integration.email.messaging.AbstractPollingDispatcher;
 import com.blackducksoftware.integration.email.messaging.ItemRouter;
+import com.blackducksoftware.integration.email.model.EmailData;
 import com.blackducksoftware.integration.email.model.EmailSystemProperties;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
 import com.blackducksoftware.integration.hub.exception.EncryptionException;
@@ -43,7 +44,7 @@ import com.google.gson.reflect.TypeToken;
 
 @Component
 public class NotificationDispatcher extends
-		AbstractPollingDispatcher<List<? extends NotificationItem>, ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, Map<String, Object>>> {
+		AbstractPollingDispatcher<List<? extends NotificationItem>, ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, EmailData>> {
 	public static long DEFAULT_POLLING_INTERVAL_SECONDS = 10;
 	public static long DEFAULT_POLLING_DELAY_SECONDS = 5;
 
@@ -223,18 +224,17 @@ public class NotificationDispatcher extends
 
 	@Override
 	public Runnable createEventTask(
-			final ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, Map<String, Object>> router,
+			final ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, EmailData> router,
 			final List<? extends NotificationItem> data) {
 		return new ReceiveTask(router, data);
 	}
 
 	private class ReceiveTask implements Runnable {
 
-		private final ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, Map<String, Object>> router;
+		private final ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, EmailData> router;
 		private final List<? extends NotificationItem> data;
 
-		public ReceiveTask(
-				final ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, Map<String, Object>> router,
+		public ReceiveTask(final ItemRouter<EmailSystemProperties, List<? extends NotificationItem>, EmailData> router,
 				final List<? extends NotificationItem> eventData) {
 			this.router = router;
 			this.data = eventData;
