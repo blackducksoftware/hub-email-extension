@@ -10,8 +10,6 @@ import java.util.TimerTask;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -27,7 +25,7 @@ public abstract class AbstractPollingDispatcher<D, F extends RouterSubscriber> e
 	private long interval;
 	private long startupDelay;
 	private final Map<String, List<F>> topicSubscriberMap = new ConcurrentHashMap<>();
-	private final ExecutorService eventExecutor;
+	private ExecutorService executorService;
 
 	private Date lastRun;
 	private Date currentRun;
@@ -36,9 +34,6 @@ public abstract class AbstractPollingDispatcher<D, F extends RouterSubscriber> e
 	public AbstractPollingDispatcher() {
 		interval = DEFAULT_POLLING_INTERVAL;
 		startupDelay = DEFAULT_POLLING_DELAY;
-		final ThreadFactory threadFactory = Executors.defaultThreadFactory();
-		eventExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), threadFactory);
-
 	}
 
 	public void start() {
@@ -74,6 +69,12 @@ public abstract class AbstractPollingDispatcher<D, F extends RouterSubscriber> e
 		}
 	}
 
+	public void attachRouter(final F router) {
+		final List<F> routerList = new Vector<>();
+		routerList.add(router);
+		attachRouters(routerList);
+	}
+
 	public void attachRouters(final List<F> routers) {
 		for (final F router : routers) {
 			for (final String topic : router.getTopics()) {
@@ -91,6 +92,12 @@ public abstract class AbstractPollingDispatcher<D, F extends RouterSubscriber> e
 				}
 			}
 		}
+	}
+
+	public void unattachRouter(final F router) {
+		final List<F> routerList = new Vector<>();
+		routerList.add(router);
+		unattachRouters(routerList);
 	}
 
 	public void unattachRouters(final List<F> routers) {
@@ -117,7 +124,9 @@ public abstract class AbstractPollingDispatcher<D, F extends RouterSubscriber> e
 	private void shutdown() {
 		logger.info("Shutting down event dispatching thread pool.");
 		// cleanup topics router map
-		eventExecutor.shutdown();
+		if (executorService != null) {
+			executorService.shutdown();
+		}
 		final Set<String> topicSet = topicSubscriberMap.keySet();
 
 		for (final String topic : topicSet) {
@@ -134,19 +143,19 @@ public abstract class AbstractPollingDispatcher<D, F extends RouterSubscriber> e
 		topicSubscriberMap.clear(); // remove all topics
 	}
 
-	public void dispatchEvent(final Map<String, D> data) {
+	private void dispatchEvent(final Map<String, D> data) {
 		final Set<String> topicSet = data.keySet();
 		for (final String topic : topicSet) {
 			if (topicSubscriberMap.containsKey(topic)) {
 				final List<F> routerList = topicSubscriberMap.get(topic);
 				for (final F router : routerList) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Dispatching to subscriber" + router + " for topic: " + topic + " data: " + data);
+						logger.debug("Dispatching to subscriber" + router + " for topic: " + topic);
 					}
 					// execute the processing of the data in a separate thread
 					// in the threadpool
 					final Runnable task = createEventTask(router, data.get(topic));
-					eventExecutor.submit(task);
+					executorService.submit(task);
 				}
 			}
 		}
@@ -157,12 +166,12 @@ public abstract class AbstractPollingDispatcher<D, F extends RouterSubscriber> e
 		currentRun = new Date();
 		final Map<String, D> data = fetchData();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Execution data: " + System.lineSeparator()
-					+ "########## Polling Dispatcher Execution ##########" + System.lineSeparator()
-					+ "Dispatcher Name  = " + name + System.lineSeparator() + "Polling interval = " + interval
-					+ System.lineSeparator() + "Last Run         = " + lastRun + System.lineSeparator()
-					+ "Current Run      = " + currentRun + System.lineSeparator() + "Data to dispatch " + data
-					+ System.lineSeparator() + "##################################################");
+			logger.debug(
+					"Execution data: " + System.lineSeparator() + "########## Polling Dispatcher Execution ##########"
+							+ System.lineSeparator() + "Dispatcher Name  = " + name + System.lineSeparator()
+							+ "Polling interval = " + interval + System.lineSeparator() + "Last Run         = "
+							+ lastRun + System.lineSeparator() + "Current Run      = " + currentRun
+							+ System.lineSeparator() + "##################################################");
 		}
 		dispatchEvent(data);
 		lastRun = currentRun;
@@ -200,7 +209,15 @@ public abstract class AbstractPollingDispatcher<D, F extends RouterSubscriber> e
 		this.startupDelay = startupDelay;
 	}
 
-	public abstract void initDispatcher();
+	public ExecutorService getExecutorService() {
+		return executorService;
+	}
+
+	public void setExecutorService(final ExecutorService executorService) {
+		this.executorService = executorService;
+	}
+
+	public abstract void init();
 
 	public abstract Map<String, D> fetchData();
 

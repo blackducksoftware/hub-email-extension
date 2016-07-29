@@ -3,6 +3,7 @@ package com.blackducksoftware.integration.email.notifier;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import javax.annotation.PostConstruct;
 
@@ -29,10 +30,14 @@ public class RouterConfigDispatcher extends
 	@Autowired
 	private EmailSystemProperties systemProperties;
 
+	@Autowired
+	private ExecutorService executorService;
+
 	@PostConstruct
 	@Override
-	public void initDispatcher() {
+	public void init() {
 		setName("Router Configuration Dispatcher");
+		setExecutorService(executorService);
 		// setup the delay and polling interval based on the property values
 		// values in config file are assumed to be in seconds.
 		final String intervalSeconds = systemProperties.getConfigurationInterval();

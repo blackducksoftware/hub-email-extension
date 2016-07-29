@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
 
 import javax.annotation.PostConstruct;
 
@@ -60,11 +61,14 @@ public class NotificationDispatcher extends
 	@Autowired
 	private EmailSystemProperties systemProperties;
 
+	@Autowired
+	private ExecutorService executorService;
+
 	@PostConstruct
 	@Override
-	public void initDispatcher() {
+	public void init() {
 		setName("Notification Dispatcher");
-
+		setExecutorService(executorService);
 		// setup the delay and polling interval based on the property values
 		// values in config file are assumed to be in seconds.
 		final String intervalSeconds = systemProperties.getNotificationInterval();

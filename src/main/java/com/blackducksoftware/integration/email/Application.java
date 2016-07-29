@@ -3,6 +3,9 @@ package com.blackducksoftware.integration.email;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -61,4 +64,9 @@ public class Application {
 		return new Date();
 	}
 
+	@Bean
+	public ExecutorService executorService() {
+		final ThreadFactory threadFactory = Executors.defaultThreadFactory();
+		return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), threadFactory);
+	}
 }
