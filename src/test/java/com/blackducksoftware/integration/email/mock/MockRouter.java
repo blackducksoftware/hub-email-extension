@@ -10,7 +10,8 @@ public class MockRouter extends ItemRouter<String> {
 	public final static String ROUTER_NAME = "Mock Router";
 	private final String expectedData;
 
-	public MockRouter(final String expectedData) {
+	public MockRouter(final RouterTaskData<String> data, final String expectedData) {
+		super(data);
 		this.expectedData = expectedData;
 	}
 

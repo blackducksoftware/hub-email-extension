@@ -20,7 +20,7 @@ public abstract class AbstractPollingDispatcher<D> extends TimerTask {
 	private Timer timer;
 	private long interval;
 	private long startupDelay;
-	private final List<ItemRouter<D>> topicSubscriberMap = new Vector<>();
+	private final List<ItemRouterFactory<D>> topicSubscriberMap = new Vector<>();
 	private ExecutorService executorService;
 
 	private Date lastRun;
@@ -65,13 +65,13 @@ public abstract class AbstractPollingDispatcher<D> extends TimerTask {
 		}
 	}
 
-	public void attachRouter(final ItemRouter<D> router) {
-		final List<ItemRouter<D>> routerList = new Vector<>();
+	public void attachRouter(final ItemRouterFactory<D> router) {
+		final List<ItemRouterFactory<D>> routerList = new Vector<>();
 		routerList.add(router);
 		attachRouters(routerList);
 	}
 
-	public void attachRouters(final List<ItemRouter<D>> routers) {
+	public void attachRouters(final List<ItemRouterFactory<D>> routers) {
 		topicSubscriberMap.addAll(routers);
 	}
 
@@ -111,11 +111,12 @@ public abstract class AbstractPollingDispatcher<D> extends TimerTask {
 							+ System.lineSeparator() + "##################################################");
 		}
 
-		for (final ItemRouter<D> router : topicSubscriberMap) {
+		for (final ItemRouterFactory<D> routerFactory : topicSubscriberMap) {
+			final ItemRouter<D> router = routerFactory.createInstance(data);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Dispatching to router " + router.getName());
 			}
-			router.setTaskData(data);
+
 			executorService.submit(router);
 		}
 		lastRun = currentRun;
