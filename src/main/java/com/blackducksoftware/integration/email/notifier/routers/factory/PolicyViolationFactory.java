@@ -1,6 +1,8 @@
 package com.blackducksoftware.integration.email.notifier.routers.factory;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
@@ -15,7 +17,15 @@ public class PolicyViolationFactory extends AbstractEmailFactory<RuleViolationNo
 	@Override
 	public ItemRouter<List<RuleViolationNotificationItem>> createInstance(
 			final RouterTaskData<List<RuleViolationNotificationItem>> data) {
-		return new PolicyViolationRouter(data);
+		final PolicyViolationRouter router = new PolicyViolationRouter();
+		router.setTaskData(data);
+		return router;
 	}
 
+	@Override
+	public Set<String> getSubscriberTopics() {
+		final Set<String> topicSet = new HashSet<>();
+		topicSet.add(RuleViolationNotificationItem.class.getName());
+		return topicSet;
+	}
 }

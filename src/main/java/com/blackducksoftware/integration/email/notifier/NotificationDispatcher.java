@@ -27,6 +27,8 @@ import org.springframework.stereotype.Component;
 import com.blackducksoftware.integration.email.messaging.AbstractPollingDispatcher;
 import com.blackducksoftware.integration.email.messaging.RouterTaskData;
 import com.blackducksoftware.integration.email.model.EmailSystemProperties;
+import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
+import com.blackducksoftware.integration.email.notifier.routers.factory.AbstractEmailFactory;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
 import com.blackducksoftware.integration.hub.exception.EncryptionException;
 import com.blackducksoftware.integration.hub.exception.ResourceDoesNotExistException;
@@ -79,23 +81,23 @@ public class NotificationDispatcher extends AbstractPollingDispatcher<List<? ext
 	}
 
 	@Override
-	public RouterTaskData<List<? extends NotificationItem>> fetchRouterConfig() {
-		List<NotificationItem> notificationList = new Vector<>();
+	public Map<String, RouterTaskData<List<? extends NotificationItem>>> fetchRouterConfig() {
+		Map<String, RouterTaskData<List<? extends NotificationItem>>> dataMap = new HashMap<>();
 		if (hubServerConfig != null) {
 			try {
 				final RestConnection restConnection = initRestConnection();
 				final HubItemsService<NotificationItem> hubItemsService = initHubItemsService(restConnection);
 				final Date startDate = findStartDate();
-				notificationList = fetchNotifications(hubItemsService, startDate, getCurrentRun());
+				dataMap = fetchNotifications(hubItemsService, startDate, getCurrentRun());
 
 			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 		} else {
-			notificationList = createNotificationData();
+			dataMap = createNotificationTestData();
 		}
 
-		return new RouterTaskData<List<? extends NotificationItem>>(notificationList);
+		return dataMap;
 	}
 
 	private RestConnection initRestConnection() throws EncryptionException, URISyntaxException, BDRestException {
@@ -129,8 +131,9 @@ public class NotificationDispatcher extends AbstractPollingDispatcher<List<? ext
 		return hubItemsService;
 	}
 
-	private List<NotificationItem> fetchNotifications(final HubItemsService<NotificationItem> hubItemsService,
-			final Date startDate, final Date endDate) throws Exception {
+	private Map<String, RouterTaskData<List<? extends NotificationItem>>> fetchNotifications(
+			final HubItemsService<NotificationItem> hubItemsService, final Date startDate, final Date endDate)
+			throws Exception {
 		// TODO may need chunking and maybe retry logic to
 		final int limit = 1000;
 
@@ -145,17 +148,42 @@ public class NotificationDispatcher extends AbstractPollingDispatcher<List<? ext
 		queryParameters.add(new AbstractMap.SimpleEntry<>("startDate", startDateString));
 		queryParameters.add(new AbstractMap.SimpleEntry<>("endDate", endDateString));
 		queryParameters.add(new AbstractMap.SimpleEntry<>("limit", String.valueOf(limit)));
-		List<NotificationItem> items;
+		final Map<String, RouterTaskData<List<? extends NotificationItem>>> items = new HashMap<>();
 		try {
-			items = hubItemsService.httpGetItemList(urlSegments, queryParameters);
+			final List<NotificationItem> notificationItems = hubItemsService.httpGetItemList(urlSegments,
+					queryParameters);
+			final Map<String, List<NotificationItem>> partitionMap = createPartionMap(notificationItems);
+			items.put(AbstractEmailFactory.TOPIC_ALL, new EmailTaskData(notificationItems));
+			final Set<String> topicSet = partitionMap.keySet();
+			for (final String topic : topicSet) {
+				items.put(topic, new EmailTaskData(partitionMap.get(topic)));
+			}
+
 		} catch (IOException | URISyntaxException | ResourceDoesNotExistException | BDRestException e) {
 			throw new RuntimeException("Error parsing NotificationItemList: " + e.getMessage(), e);
 		}
 		return items;
 	}
 
-	private List<NotificationItem> createNotificationData() {
+	private Map<String, List<NotificationItem>> createPartionMap(final List<NotificationItem> notificationItems) {
+		final Map<String, List<NotificationItem>> partitionMap = new HashMap<>();
+		for (final NotificationItem notification : notificationItems) {
+			final String topic = notification.getClass().getName();
+			List<NotificationItem> partitionList;
+			if (partitionMap.containsKey(topic)) {
+				partitionList = partitionMap.get(topic);
+			} else {
+				partitionList = new Vector<NotificationItem>();
+				partitionMap.put(topic, partitionList);
+			}
+			partitionList.add(notification);
+		}
 
+		return partitionMap;
+	}
+
+	private Map<String, RouterTaskData<List<? extends NotificationItem>>> createNotificationTestData() {
+		final Map<String, RouterTaskData<List<? extends NotificationItem>>> dataMap = new HashMap<>();
 		final List<NotificationItem> list = new Vector<>();
 		for (int selectedClass = 0; selectedClass < 3; selectedClass++) {
 			final Class<? extends NotificationItem> clazz;
@@ -201,6 +229,6 @@ public class NotificationDispatcher extends AbstractPollingDispatcher<List<? ext
 				}
 			}
 		}
-		return list;
+		return dataMap;
 	}
 }

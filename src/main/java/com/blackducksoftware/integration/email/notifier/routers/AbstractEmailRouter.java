@@ -30,10 +30,6 @@ public abstract class AbstractEmailRouter<T extends NotificationItem> extends It
 	@Autowired
 	private TemplateProcessor templateProcessor;
 
-	public AbstractEmailRouter(final RouterTaskData<List<T>> data) {
-		super(data);
-	}
-
 	@Override
 	public String getName() {
 		return getClass().getName();

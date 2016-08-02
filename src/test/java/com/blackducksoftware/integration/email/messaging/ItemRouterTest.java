@@ -15,7 +15,7 @@ public class ItemRouterTest {
 	@Before
 	public void initTest() {
 
-		router = new MockRouter(new RouterTaskData<String>(RECEIVE_DATA), RECEIVE_DATA);
+		router = new MockRouter(RECEIVE_DATA);
 	}
 
 	@Test

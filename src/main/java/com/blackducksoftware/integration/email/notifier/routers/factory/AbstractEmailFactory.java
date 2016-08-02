@@ -7,4 +7,5 @@ import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
 
 public abstract class AbstractEmailFactory<T extends NotificationItem> extends ItemRouterFactory<List<T>> {
 
+	public final static String TOPIC_ALL = "all";
 }

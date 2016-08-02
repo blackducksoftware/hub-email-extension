@@ -1,6 +1,8 @@
 package com.blackducksoftware.integration.email.notifier.routers.factory;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
@@ -15,6 +17,15 @@ public class PolicyViolationOverrideCancelFactory extends AbstractEmailFactory<P
 	@Override
 	public ItemRouter<List<PolicyOverrideNotificationItem>> createInstance(
 			final RouterTaskData<List<PolicyOverrideNotificationItem>> data) {
-		return new PolicyViolationOverrideCancelRouter(data);
+		final PolicyViolationOverrideCancelRouter router = new PolicyViolationOverrideCancelRouter();
+		router.setTaskData(data);
+		return router;
+	}
+
+	@Override
+	public Set<String> getSubscriberTopics() {
+		final Set<String> topicSet = new HashSet<>();
+		topicSet.add(PolicyOverrideNotificationItem.class.getName());
+		return topicSet;
 	}
 }
