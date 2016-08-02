@@ -1,21 +1,17 @@
 package com.blackducksoftware.integration.email.messaging;
 
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractPollingDispatcher<D, F extends RouterSubscriber> extends TimerTask {
+public abstract class AbstractPollingDispatcher<D> extends TimerTask {
 
 	private final Logger logger = LoggerFactory.getLogger(AbstractPollingDispatcher.class);
 	public static long DEFAULT_POLLING_INTERVAL = 10000;
@@ -24,7 +20,7 @@ public abstract class AbstractPollingDispatcher<D, F extends RouterSubscriber> e
 	private Timer timer;
 	private long interval;
 	private long startupDelay;
-	private final Map<String, List<F>> topicSubscriberMap = new ConcurrentHashMap<>();
+	private final List<ItemRouter<D>> topicSubscriberMap = new Vector<>();
 	private ExecutorService executorService;
 
 	private Date lastRun;
@@ -69,54 +65,26 @@ public abstract class AbstractPollingDispatcher<D, F extends RouterSubscriber> e
 		}
 	}
 
-	public void attachRouter(final F router) {
-		final List<F> routerList = new Vector<>();
+	public void attachRouter(final ItemRouter<D> router) {
+		final List<ItemRouter<D>> routerList = new Vector<>();
 		routerList.add(router);
 		attachRouters(routerList);
 	}
 
-	public void attachRouters(final List<F> routers) {
-		for (final F router : routers) {
-			for (final String topic : router.getTopics()) {
-				List<F> routerList;
-				if (topicSubscriberMap.containsKey(topic)) {
-					routerList = topicSubscriberMap.get(topic);
-				} else {
-					routerList = new Vector<F>();
-					topicSubscriberMap.put(topic, routerList);
-				}
-				routerList.add(router);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Router added: " + router);
-					logger.debug("Topic: " + topic + " current subscriber count: " + routers.size());
-				}
-			}
-		}
+	public void attachRouters(final List<ItemRouter<D>> routers) {
+		topicSubscriberMap.addAll(routers);
 	}
 
-	public void unattachRouter(final F router) {
-		final List<F> routerList = new Vector<>();
-		routerList.add(router);
-		unattachRouters(routerList);
+	public void unattachRouter(final ItemRouter<D> router) {
+		topicSubscriberMap.remove(router);
 	}
 
-	public void unattachRouters(final List<F> routers) {
-		for (final F router : routers) {
-			for (final String topic : router.getTopics()) {
-				int routerCount = 0;
-				if (topicSubscriberMap.containsKey(topic)) {
-					final List<F> routerList = topicSubscriberMap.get(topic);
-					routerList.remove(router);
-					routerCount = routerList.size();
-					if (routerList.isEmpty()) {
-						topicSubscriberMap.remove(topic);
-					}
-				}
-
-				if (logger.isDebugEnabled()) {
-					logger.debug("Router removed: " + router);
-					logger.debug("Topic: " + topic + " current subscriber count: " + routerCount);
-				}
+	public void unattachRouters(final List<ItemRouter<D>> routers) {
+		for (final ItemRouter<D> router : routers) {
+			topicSubscriberMap.remove(router);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Router removed: " + router);
+				logger.debug("Current router count: " + topicSubscriberMap.size());
 			}
 		}
 	}
@@ -127,44 +95,13 @@ public abstract class AbstractPollingDispatcher<D, F extends RouterSubscriber> e
 		if (executorService != null) {
 			executorService.shutdown();
 		}
-		final Set<String> topicSet = topicSubscriberMap.keySet();
-
-		for (final String topic : topicSet) {
-			final List<F> routers = topicSubscriberMap.get(topic);
-			final Iterator<F> iterator = routers.iterator();
-			while (iterator.hasNext()) {
-				final F router = iterator.next();
-				iterator.remove();
-				logger.info("Router removed: " + router);
-				logger.info("Topic: " + topic + " current subscriber count: " + routers.size());
-			}
-			topicSubscriberMap.remove(topic);
-		}
 		topicSubscriberMap.clear(); // remove all topics
-	}
-
-	private void dispatchEvent(final Map<String, D> data) {
-		final Set<String> topicSet = data.keySet();
-		for (final String topic : topicSet) {
-			if (topicSubscriberMap.containsKey(topic)) {
-				final List<F> routerList = topicSubscriberMap.get(topic);
-				for (final F router : routerList) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Dispatching to subscriber" + router + " for topic: " + topic);
-					}
-					// execute the processing of the data in a separate thread
-					// in the threadpool
-					final Runnable task = createEventTask(router, data.get(topic));
-					executorService.submit(task);
-				}
-			}
-		}
 	}
 
 	@Override
 	public void run() {
 		currentRun = new Date();
-		final Map<String, D> data = fetchData();
+		final RouterTaskData<D> data = fetchRouterConfig();
 		if (logger.isDebugEnabled()) {
 			logger.debug(
 					"Execution data: " + System.lineSeparator() + "########## Polling Dispatcher Execution ##########"
@@ -173,7 +110,14 @@ public abstract class AbstractPollingDispatcher<D, F extends RouterSubscriber> e
 							+ lastRun + System.lineSeparator() + "Current Run      = " + currentRun
 							+ System.lineSeparator() + "##################################################");
 		}
-		dispatchEvent(data);
+
+		for (final ItemRouter<D> router : topicSubscriberMap) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Dispatching to router " + router.getName());
+			}
+			router.setTaskData(data);
+			executorService.submit(router);
+		}
 		lastRun = currentRun;
 	}
 
@@ -219,7 +163,5 @@ public abstract class AbstractPollingDispatcher<D, F extends RouterSubscriber> e
 
 	public abstract void init();
 
-	public abstract Map<String, D> fetchData();
-
-	public abstract Runnable createEventTask(F router, D data);
+	public abstract RouterTaskData<D> fetchRouterConfig();
 }

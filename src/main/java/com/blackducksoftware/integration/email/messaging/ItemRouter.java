@@ -1,12 +1,23 @@
 package com.blackducksoftware.integration.email.messaging;
 
-public abstract class ItemRouter<C, R, S> implements RouterSubscriber {
+public abstract class ItemRouter<D> implements Runnable {
+
+	private RouterTaskData<D> taskData;
+
+	public RouterTaskData<D> getTaskData() {
+		return taskData;
+	}
+
+	public void setTaskData(final RouterTaskData<D> taskData) {
+		this.taskData = taskData;
+	}
 
 	public abstract String getName();
 
-	public abstract void configure(C data);
+	public abstract void execute(RouterTaskData<D> data);
 
-	public abstract void receive(R data);
-
-	public abstract void send(final S data);
+	@Override
+	public void run() {
+		execute(getTaskData());
+	}
 }

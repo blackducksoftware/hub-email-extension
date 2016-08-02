@@ -11,16 +11,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.blackducksoftware.integration.email.messaging.ItemRouter;
+import com.blackducksoftware.integration.email.messaging.RouterTaskData;
 import com.blackducksoftware.integration.email.model.EmailData;
-import com.blackducksoftware.integration.email.model.EmailSystemProperties;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
 
 import freemarker.template.TemplateException;
 
 @Component
-public abstract class AbstractEmailRouter<T extends NotificationItem>
-		extends ItemRouter<EmailSystemProperties, List<T>, EmailData> {
+public abstract class AbstractEmailRouter<T extends NotificationItem> extends ItemRouter<List<T>> {
 	private final Logger logger = LoggerFactory.getLogger(AbstractEmailRouter.class);
 
 	@Autowired
@@ -32,13 +31,13 @@ public abstract class AbstractEmailRouter<T extends NotificationItem>
 	}
 
 	@Override
-	public void receive(final List<T> data) {
+	public void execute(final RouterTaskData<List<T>> taskData) {
+		final List<T> data = taskData.getData();
 		logger.info(
 				"Router " + getName() + ": Received notification(s). Total count: " + (data == null ? 0 : data.size()));
 		send(transform(data));
 	}
 
-	@Override
 	public void send(final EmailData data) {
 		try {
 			if (data != null && !data.getAddresses().isEmpty() && !data.getModel().isEmpty()) {

@@ -2,44 +2,21 @@ package com.blackducksoftware.integration.email.mock;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Set;
-
 import com.blackducksoftware.integration.email.messaging.ItemRouter;
+import com.blackducksoftware.integration.email.messaging.RouterTaskData;
 
-public class MockRouter extends ItemRouter<String, String, String> {
+public class MockRouter extends ItemRouter<String> {
 
 	public final static String ROUTER_NAME = "Mock Router";
-	private final Set<String> topicSet;
-	private final String expectedConfig;
-	private final String expectedReceive;
-	private final String expectedSend;
+	private final String expectedData;
 
-	public MockRouter(final Set<String> topicSet, final String expectedConfig, final String expectedRecieve,
-			final String expectedSend) {
-		this.topicSet = topicSet;
-		this.expectedConfig = expectedConfig;
-		this.expectedReceive = expectedRecieve;
-		this.expectedSend = expectedSend;
+	public MockRouter(final String expectedData) {
+		this.expectedData = expectedData;
 	}
 
 	@Override
-	public Set<String> getTopics() {
-		return topicSet;
-	}
-
-	@Override
-	public void configure(final String data) {
-		assertEquals(expectedConfig, data);
-	}
-
-	@Override
-	public void receive(final String data) {
-		assertEquals(expectedReceive, data);
-	}
-
-	@Override
-	public void send(final String data) {
-		assertEquals(expectedSend, data);
+	public void execute(final RouterTaskData<String> taskData) {
+		assertEquals(expectedData, taskData.getData());
 	}
 
 	@Override
