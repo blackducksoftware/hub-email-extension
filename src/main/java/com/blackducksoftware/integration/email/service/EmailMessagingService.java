@@ -8,9 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.activation.FileDataSource;
 import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -18,7 +15,6 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
@@ -30,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.EmailSystemProperties;
+import com.blackducksoftware.integration.email.model.MimeMultipartBuilder;
 
 import freemarker.core.ParseException;
 import freemarker.template.Configuration;
@@ -55,7 +52,13 @@ public class EmailMessagingService {
 		final Map<String, String> contentIdsToFilePaths = new HashMap<>();
 		populateModelWithAdditionalProperties(customerProperties, model, templateName, contentIdsToFilePaths);
 		final String html = getResolvedTemplate(model, templateName);
-		final MimeMultipart mimeMultipart = createMimeMultipart(session, html, contentIdsToFilePaths);
+
+		final MimeMultipartBuilder mimeMultipartBuilder = new MimeMultipartBuilder();
+		mimeMultipartBuilder.addHtmlContent(html);
+		mimeMultipartBuilder.addTextContent(Jsoup.parse(html).text());
+		mimeMultipartBuilder.addEmbeddedImages(contentIdsToFilePaths);
+		final MimeMultipart mimeMultipart = mimeMultipartBuilder.build();
+
 		final Message message = createMessage(emailAddresses, session, mimeMultipart);
 		sendMessage(customerProperties, session, message);
 	}
@@ -94,38 +97,6 @@ public class EmailMessagingService {
 		props.putAll(sessionProps);
 
 		return Session.getInstance(props);
-	}
-
-	private MimeMultipart createMimeMultipart(final Session session, final String html,
-			final Map<String, String> contentIdsToFilePaths) throws MessagingException, IOException {
-		final MimeMultipart mimeMultipart = new MimeMultipart("alternative");
-
-		final String text = Jsoup.parse(html).text();
-
-		final MimeBodyPart textPart = new MimeBodyPart();
-		textPart.setText(text, "utf-8");
-
-		final MimeBodyPart htmlPart = new MimeBodyPart();
-		htmlPart.setContent(html, "text/html; charset=utf-8");
-
-		mimeMultipart.addBodyPart(htmlPart);
-		addImageAttachments(mimeMultipart, contentIdsToFilePaths);
-		mimeMultipart.addBodyPart(textPart);
-
-		return mimeMultipart;
-	}
-
-	private void addImageAttachments(final MimeMultipart mimeMultipart, final Map<String, String> contentIdsToFilePaths)
-			throws IOException, MessagingException {
-		for (final Map.Entry<String, String> entry : contentIdsToFilePaths.entrySet()) {
-			final String cid = entry.getKey();
-			final String filePath = entry.getValue();
-			final DataSource fds = new FileDataSource(filePath);
-			final MimeBodyPart imagePart = new MimeBodyPart();
-			imagePart.setDataHandler(new DataHandler(fds));
-			imagePart.setHeader("Content-ID", cid);
-			mimeMultipart.addBodyPart(imagePart);
-		}
 	}
 
 	private Message createMessage(final List<String> recipientEmailAddresses, final Session session,
