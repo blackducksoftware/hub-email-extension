@@ -4,9 +4,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import com.blackducksoftware.integration.email.model.EmailSystemProperties;
 import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
@@ -15,12 +13,14 @@ import com.blackducksoftware.integration.hub.builder.ValidationResults;
 import com.blackducksoftware.integration.hub.global.GlobalFieldKey;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 
-@Configuration
 public class HubServerBeanConfiguration {
 	private final Logger logger = LoggerFactory.getLogger(HubServerBeanConfiguration.class);
 
-	@Autowired
-	private EmailSystemProperties emailConfig;
+	private final EmailSystemProperties emailConfig;
+
+	public HubServerBeanConfiguration(final EmailSystemProperties emailConfig) {
+		this.emailConfig = emailConfig;
+	}
 
 	@Bean
 	public HubServerConfig hubServerConfig() {

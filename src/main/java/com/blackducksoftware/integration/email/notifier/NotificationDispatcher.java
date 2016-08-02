@@ -21,8 +21,6 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.blackducksoftware.integration.email.messaging.AbstractPollingDispatcher;
 import com.blackducksoftware.integration.email.messaging.RouterTaskData;
@@ -43,27 +41,26 @@ import com.blackducksoftware.integration.hub.notification.api.VulnerabilityNotif
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.google.gson.reflect.TypeToken;
 
-@Component
 public class NotificationDispatcher extends AbstractPollingDispatcher<List<? extends NotificationItem>> {
 	public static long DEFAULT_POLLING_INTERVAL_SECONDS = 10;
 	public static long DEFAULT_POLLING_DELAY_SECONDS = 5;
 
 	private final Logger logger = LoggerFactory.getLogger(NotificationDispatcher.class);
 
-	@Autowired
-	private HubServerConfig hubServerConfig;
-
-	@Autowired
-	private DateFormat notificationDateFormatter;
-
-	@Autowired
-	private Date applicationStartDate;
-
-	@Autowired
-	private EmailSystemProperties systemProperties;
-
-	@Autowired
+	private final HubServerConfig hubServerConfig;
+	private final DateFormat notificationDateFormatter;
+	private final Date applicationStartDate;
+	private final EmailSystemProperties systemProperties;
 	private ExecutorService executorService;
+
+	public NotificationDispatcher(final HubServerConfig hubConfig, final DateFormat notificationDateFormatter,
+			final Date applicationStartDate, final EmailSystemProperties systemProperties,
+			final ExecutorService executorService) {
+		this.hubServerConfig = hubConfig;
+		this.notificationDateFormatter = notificationDateFormatter;
+		this.applicationStartDate = applicationStartDate;
+		this.systemProperties = systemProperties;
+	}
 
 	@PostConstruct
 	@Override

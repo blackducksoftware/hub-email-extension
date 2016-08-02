@@ -9,15 +9,21 @@ import org.springframework.stereotype.Component;
 import com.blackducksoftware.integration.email.messaging.ItemRouter;
 import com.blackducksoftware.integration.email.messaging.RouterTaskData;
 import com.blackducksoftware.integration.email.notifier.routers.PolicyViolationOverrideCancelRouter;
+import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.notification.api.PolicyOverrideNotificationItem;
 
 @Component
 public class PolicyViolationOverrideCancelFactory extends AbstractEmailFactory<PolicyOverrideNotificationItem> {
 
+	public PolicyViolationOverrideCancelFactory(final EmailMessagingService emailMessagingService) {
+		super(emailMessagingService);
+	}
+
 	@Override
 	public ItemRouter<List<PolicyOverrideNotificationItem>> createInstance(
 			final RouterTaskData<List<PolicyOverrideNotificationItem>> data) {
-		final PolicyViolationOverrideCancelRouter router = new PolicyViolationOverrideCancelRouter();
+		final PolicyViolationOverrideCancelRouter router = new PolicyViolationOverrideCancelRouter(
+				getEmailMessagingService());
 		router.setTaskData(data);
 		return router;
 	}

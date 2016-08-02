@@ -25,8 +25,6 @@ import javax.mail.internet.MimeMultipart;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.EmailSystemProperties;
@@ -38,15 +36,17 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateNotFoundException;
 
-@Service
 public class EmailMessagingService {
 	private final Logger log = LoggerFactory.getLogger(EmailMessagingService.class);
 
-	@Autowired
-	private EmailSystemProperties emailSystemProperties;
+	private final EmailSystemProperties emailSystemProperties;
 
-	@Autowired
-	private Configuration configuration;
+	private final Configuration configuration;
+
+	public EmailMessagingService(final EmailSystemProperties emailSystemProperties, final Configuration configuration) {
+		this.emailSystemProperties = emailSystemProperties;
+		this.configuration = configuration;
+	}
 
 	public void sendEmailMessage(final CustomerProperties customerProperties, final List<String> emailAddresses,
 			final Map<String, Object> model, final String templateName) throws MessagingException,

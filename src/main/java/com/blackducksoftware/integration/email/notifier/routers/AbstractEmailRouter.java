@@ -7,8 +7,6 @@ import javax.mail.MessagingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.blackducksoftware.integration.email.messaging.ItemRouter;
 import com.blackducksoftware.integration.email.messaging.RouterTaskData;
@@ -18,7 +16,6 @@ import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
 
 import freemarker.template.TemplateException;
 
-@Component
 public abstract class AbstractEmailRouter<T extends NotificationItem> extends ItemRouter<List<T>> {
 	private final Logger logger = LoggerFactory.getLogger(AbstractEmailRouter.class);
 
@@ -27,8 +24,11 @@ public abstract class AbstractEmailRouter<T extends NotificationItem> extends It
 	public final String KEY_COMPONENT_NAME = "hub-component-name";
 	public final String KEY_COMPONENT_VERSION = "hub-component-version";
 
-	@Autowired
-	private EmailMessagingService emailMessagingService;
+	private final EmailMessagingService emailMessagingService;
+
+	public AbstractEmailRouter(final EmailMessagingService emailMessagingService) {
+		this.emailMessagingService = emailMessagingService;
+	}
 
 	@Override
 	public String getName() {

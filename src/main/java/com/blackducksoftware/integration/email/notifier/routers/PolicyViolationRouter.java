@@ -6,9 +6,14 @@ import java.util.List;
 import java.util.Map;
 
 import com.blackducksoftware.integration.email.model.EmailData;
+import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.notification.api.RuleViolationNotificationItem;
 
 public class PolicyViolationRouter extends AbstractEmailRouter<RuleViolationNotificationItem> {
+
+	public PolicyViolationRouter(final EmailMessagingService emailMessagingService) {
+		super(emailMessagingService);
+	}
 
 	@Override
 	public EmailData transform(final List<RuleViolationNotificationItem> data) {
