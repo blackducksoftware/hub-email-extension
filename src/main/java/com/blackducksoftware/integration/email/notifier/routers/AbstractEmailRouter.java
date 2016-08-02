@@ -14,21 +14,16 @@ import com.blackducksoftware.integration.email.messaging.ItemRouter;
 import com.blackducksoftware.integration.email.messaging.RouterTaskData;
 import com.blackducksoftware.integration.email.model.EmailData;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.email.service.TemplateProcessor;
 import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
 
 import freemarker.template.TemplateException;
 
 @Component
 public abstract class AbstractEmailRouter<T extends NotificationItem> extends ItemRouter<List<T>> {
-
 	private final Logger logger = LoggerFactory.getLogger(AbstractEmailRouter.class);
 
 	@Autowired
 	private EmailMessagingService emailMessagingService;
-
-	@Autowired
-	private TemplateProcessor templateProcessor;
 
 	@Override
 	public String getName() {
@@ -46,8 +41,7 @@ public abstract class AbstractEmailRouter<T extends NotificationItem> extends It
 	public void send(final EmailData data) {
 		try {
 			if (data != null && !data.getAddresses().isEmpty() && !data.getModel().isEmpty()) {
-				final String content = templateProcessor.getResolvedTemplate(data.getModel(), "htmlTemplate.ftl");
-				emailMessagingService.sendEmailMessage(data.getAddresses(), content);
+				emailMessagingService.sendEmailMessage(null, data.getAddresses(), data.getModel(), "htmlTemplate.ftl");
 			} else {
 				logger.info(
 						"Router " + getName() + ": Address list empty or missing content.  No emails drafted to send.");
