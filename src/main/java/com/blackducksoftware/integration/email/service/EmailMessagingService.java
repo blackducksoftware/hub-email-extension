@@ -1,14 +1,19 @@
 package com.blackducksoftware.integration.email.service;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
 import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.AddressException;
@@ -23,8 +28,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.EmailSystemProperties;
-import com.blackducksoftware.integration.email.model.SmtpConfiguration;
+
+import freemarker.core.ParseException;
+import freemarker.template.Configuration;
+import freemarker.template.MalformedTemplateNameException;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateNotFoundException;
 
 @Service
 public class EmailMessagingService {
@@ -34,24 +46,90 @@ public class EmailMessagingService {
 	private EmailSystemProperties emailSystemProperties;
 
 	@Autowired
-	private SmtpConfiguration smtpConfiguration;
+	private Configuration configuration;
 
-	public void sendEmailMessage(final List<String> emailAddresses, final String html) throws MessagingException {
-		final Session session = createMailSession();
-		final Message message = createMailMessage(session, html, emailAddresses);
-		sendMessage(session, message);
+	public void sendEmailMessage(final CustomerProperties customerProperties, final List<String> emailAddresses,
+			final Map<String, Object> model, final String templateName) throws MessagingException,
+			TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException, TemplateException {
+		final Session session = createMailSession(customerProperties);
+		final Map<String, String> contentIdsToFilePaths = new HashMap<>();
+		populateModelWithAdditionalProperties(customerProperties, model, templateName, contentIdsToFilePaths);
+		final String html = getResolvedTemplate(model, templateName);
+		final MimeMultipart mimeMultipart = createMimeMultipart(session, html, contentIdsToFilePaths);
+		final Message message = createMessage(emailAddresses, session, mimeMultipart);
+		sendMessage(customerProperties, session, message);
 	}
 
-	private Session createMailSession() {
-		final Map<String, String> sessionProps = smtpConfiguration.getPropertiesForSession();
+	private String getResolvedTemplate(final Map<String, Object> model, final String templateName)
+			throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException,
+			TemplateException {
+		final StringWriter stringWriter = new StringWriter();
+		final Template template = configuration.getTemplate(templateName);
+		template.process(model, stringWriter);
+		return stringWriter.toString();
+	}
+
+	private void populateModelWithAdditionalProperties(final CustomerProperties customerProperties,
+			final Map<String, Object> model, final String templateName,
+			final Map<String, String> contentIdsToFilePaths) {
+		for (final Map.Entry<String, String> entry : customerProperties.getSuppliedTemplateVariableProperties()
+				.entrySet()) {
+			final String key = entry.getKey();
+			final String value = entry.getValue();
+			if (key.contains("all.templates") || key.contains(templateName)) {
+				if (key.endsWith(".image")) {
+					final String cid = generateContentId(key);
+					model.put(cleanForFreemarker(key), cid);
+					contentIdsToFilePaths.put("<" + cid + ">", value);
+				} else {
+					model.put(cleanForFreemarker(key), value);
+				}
+			}
+		}
+	}
+
+	private Session createMailSession(final CustomerProperties customerProperties) {
+		final Map<String, String> sessionProps = customerProperties.getPropertiesForSession();
 		final Properties props = new Properties();
 		props.putAll(sessionProps);
 
 		return Session.getInstance(props);
 	}
 
-	private Message createMailMessage(final Session session, final String html,
-			final List<String> recipientEmailAddresses) throws MessagingException {
+	private MimeMultipart createMimeMultipart(final Session session, final String html,
+			final Map<String, String> contentIdsToFilePaths) throws MessagingException, IOException {
+		final MimeMultipart mimeMultipart = new MimeMultipart("alternative");
+
+		final String text = Jsoup.parse(html).text();
+
+		final MimeBodyPart textPart = new MimeBodyPart();
+		textPart.setText(text, "utf-8");
+
+		final MimeBodyPart htmlPart = new MimeBodyPart();
+		htmlPart.setContent(html, "text/html; charset=utf-8");
+
+		mimeMultipart.addBodyPart(htmlPart);
+		addImageAttachments(mimeMultipart, contentIdsToFilePaths);
+		mimeMultipart.addBodyPart(textPart);
+
+		return mimeMultipart;
+	}
+
+	private void addImageAttachments(final MimeMultipart mimeMultipart, final Map<String, String> contentIdsToFilePaths)
+			throws IOException, MessagingException {
+		for (final Map.Entry<String, String> entry : contentIdsToFilePaths.entrySet()) {
+			final String cid = entry.getKey();
+			final String filePath = entry.getValue();
+			final DataSource fds = new FileDataSource(filePath);
+			final MimeBodyPart imagePart = new MimeBodyPart();
+			imagePart.setDataHandler(new DataHandler(fds));
+			imagePart.setHeader("Content-ID", cid);
+			mimeMultipart.addBodyPart(imagePart);
+		}
+	}
+
+	private Message createMessage(final List<String> recipientEmailAddresses, final Session session,
+			final MimeMultipart mimeMultipart) throws MessagingException {
 		final List<InternetAddress> addresses = new ArrayList<>();
 		for (final String recipient : recipientEmailAddresses) {
 			try {
@@ -66,19 +144,7 @@ public class EmailMessagingService {
 		}
 
 		final Message message = new MimeMessage(session);
-		final Multipart multiPart = new MimeMultipart("alternative");
-
-		final String text = Jsoup.parse(html).text();
-
-		final MimeBodyPart textPart = new MimeBodyPart();
-		textPart.setText(text, "utf-8");
-
-		final MimeBodyPart htmlPart = new MimeBodyPart();
-		htmlPart.setContent(html, "text/html; charset=utf-8");
-
-		multiPart.addBodyPart(htmlPart);
-		multiPart.addBodyPart(textPart);
-		message.setContent(multiPart);
+		message.setContent(mimeMultipart);
 
 		message.setFrom(new InternetAddress(emailSystemProperties.getEmailFromAddress()));
 		message.setRecipients(Message.RecipientType.TO, addresses.toArray(new Address[addresses.size()]));
@@ -87,19 +153,21 @@ public class EmailMessagingService {
 		return message;
 	}
 
-	private void sendMessage(final Session session, final Message message) throws MessagingException {
-		if (smtpConfiguration.isAuth()) {
-			sendAuthenticated(message, session);
+	private void sendMessage(final CustomerProperties customerProperties, final Session session, final Message message)
+			throws MessagingException {
+		if (customerProperties.isAuth()) {
+			sendAuthenticated(customerProperties, message, session);
 		} else {
 			Transport.send(message);
 		}
 	}
 
-	private void sendAuthenticated(final Message message, final Session session) throws MessagingException {
-		final String host = smtpConfiguration.getHost();
-		final int port = smtpConfiguration.getPort();
-		final String username = smtpConfiguration.getUsername();
-		final String password = smtpConfiguration.getPassword();
+	private void sendAuthenticated(final CustomerProperties customerProperties, final Message message,
+			final Session session) throws MessagingException {
+		final String host = customerProperties.getHost();
+		final int port = customerProperties.getPort();
+		final String username = customerProperties.getUsername();
+		final String password = customerProperties.getPassword();
 
 		final Transport transport = session.getTransport("smtp");
 		try {
@@ -108,6 +176,15 @@ public class EmailMessagingService {
 		} finally {
 			transport.close();
 		}
+	}
+
+	private String generateContentId(final String value) {
+		final String cid = value.replaceAll("[^A-Za-z0-9]", "bd").trim() + "@blackducksoftware.com";
+		return cid;
+	}
+
+	private String cleanForFreemarker(final String s) {
+		return s.replace(".", "_");
 	}
 
 }

@@ -17,7 +17,6 @@ import com.blackducksoftware.integration.hub.notification.api.RuleViolationNotif
 
 @Component
 public class PolicyViolationRouter extends AbstractEmailRouter<RuleViolationNotificationItem> {
-
 	private final Logger logger = LoggerFactory.getLogger(PolicyViolationRouter.class);
 
 	@Override
@@ -38,4 +37,5 @@ public class PolicyViolationRouter extends AbstractEmailRouter<RuleViolationNoti
 		final Map<String, Object> emailDataMap = new HashMap<>();
 		return new EmailData(addresses, emailDataMap);
 	}
+
 }

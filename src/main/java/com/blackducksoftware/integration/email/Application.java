@@ -1,5 +1,7 @@
 package com.blackducksoftware.integration.email;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -20,7 +22,6 @@ import freemarker.template.TemplateExceptionHandler;
 
 @SpringBootApplication
 public class Application {
-
 	public static void main(final String[] args) {
 		SpringApplication.run(Application.class, args);
 	}
@@ -36,11 +37,10 @@ public class Application {
 	}
 
 	@Bean
-	public Configuration configuration() {
+	public Configuration configuration() throws IOException {
 		final Configuration cfg = new Configuration(Configuration.VERSION_2_3_25);
-		// cfg.setDirectoryForTemplateLoading(new
-		// File("/where/you/store/templates"));
-		cfg.setClassLoaderForTemplateLoading(SpringApplication.class.getClassLoader(), "/");
+		cfg.setDirectoryForTemplateLoading(
+				new File("/Users/ekerwin/Documents/bitbucket/hub-email-extension/src/main/resources/templates/"));
 		cfg.setDefaultEncoding("UTF-8");
 		cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
 		cfg.setLogTemplateExceptions(false);
