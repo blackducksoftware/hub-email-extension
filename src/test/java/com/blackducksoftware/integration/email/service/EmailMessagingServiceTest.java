@@ -28,7 +28,7 @@ public class EmailMessagingServiceTest {
 	@Test
 	public void testSendingEmail() throws IOException, MessagingException, TemplateException {
 		System.setProperty("customer.properties",
-				"/Users/ekerwin/Documents/bitbucket/hub-email-extension/src/main/resources/application-default.properties");
+				"/Users/psantos/git/hub-extensions/email-notifications/hub-email-extension/src/main/resources/application-default.properties");
 		final CustomerProperties customerProperties = new CustomerProperties();
 		final List<String> recipients = Arrays.asList("ekerwin@blackducksoftware.com", "eric.kerwin@gmail.com",
 				"akamen@blackducksoftware.com");
@@ -37,7 +37,8 @@ public class EmailMessagingServiceTest {
 		model.put("message", "this should have html and plain text parts");
 		model.put("items", Arrays.asList("apple", "orange", "pear", "banana"));
 
-		emailMessagingService.sendEmailMessage(customerProperties, recipients, model, "htmlTemplate.ftl");
+		// emailMessagingService.sendEmailMessage(customerProperties,
+		// recipients, model, "htmlTemplate.ftl");
 	}
 
 }

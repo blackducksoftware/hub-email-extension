@@ -12,12 +12,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.blackducksoftware.integration.email.mock.MockDispatcher;
-import com.blackducksoftware.integration.email.mock.MockRouter;
+import com.blackducksoftware.integration.email.mock.MockRouterFactory;
 
 public class PollingDispatcherTest {
 
 	private final static String RECEIVE_DATA = "receive data string";
-	private MockRouter router;
+	private MockRouterFactory router;
 	private MockDispatcher dispatcher;
 	private ExecutorService executorService;
 
@@ -40,7 +40,7 @@ public class PollingDispatcherTest {
 
 	@Test
 	public void testRouterExecution() throws Exception {
-		router = new MockRouter(RECEIVE_DATA);
+		router = new MockRouterFactory(RECEIVE_DATA);
 		dispatcher = new MockDispatcher();
 		dispatcher.init();
 		dispatcher.setExecutorService(executorService);

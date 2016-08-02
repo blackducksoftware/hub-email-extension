@@ -1,5 +1,8 @@
 package com.blackducksoftware.integration.email.mock;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.blackducksoftware.integration.email.messaging.AbstractPollingDispatcher;
 import com.blackducksoftware.integration.email.messaging.RouterTaskData;
 
@@ -18,7 +21,9 @@ public class MockDispatcher extends AbstractPollingDispatcher<String> {
 	}
 
 	@Override
-	public RouterTaskData<String> fetchRouterConfig() {
-		return new RouterTaskData<String>(TEST_DATA);
+	public Map<String, RouterTaskData<String>> fetchRouterConfig() {
+		final Map<String, RouterTaskData<String>> map = new HashMap<>();
+		map.put(MockRouterFactory.TOPIC_KEY, new RouterTaskData<String>(TEST_DATA));
+		return map;
 	}
 }

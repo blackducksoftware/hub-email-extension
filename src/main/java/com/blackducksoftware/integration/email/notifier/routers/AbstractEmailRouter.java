@@ -22,6 +22,11 @@ import freemarker.template.TemplateException;
 public abstract class AbstractEmailRouter<T extends NotificationItem> extends ItemRouter<List<T>> {
 	private final Logger logger = LoggerFactory.getLogger(AbstractEmailRouter.class);
 
+	public final String KEY_PROJECT_NAME = "hub-project-name";
+	public final String KEY_PROJECT_VERSION = "hub-project-version";
+	public final String KEY_COMPONENT_NAME = "hub-component-name";
+	public final String KEY_COMPONENT_VERSION = "hub-component-version";
+
 	@Autowired
 	private EmailMessagingService emailMessagingService;
 
@@ -52,5 +57,4 @@ public abstract class AbstractEmailRouter<T extends NotificationItem> extends It
 	}
 
 	public abstract EmailData transform(List<T> data);
-
 }
