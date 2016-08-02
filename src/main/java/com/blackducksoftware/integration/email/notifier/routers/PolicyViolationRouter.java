@@ -16,5 +16,4 @@ public class PolicyViolationRouter extends AbstractEmailRouter<RuleViolationNoti
 		final Map<String, Object> emailDataMap = new HashMap<>();
 		return new EmailData(addresses, emailDataMap);
 	}
-
 }

@@ -152,7 +152,7 @@ public class NotificationDispatcher extends AbstractPollingDispatcher<List<? ext
 		try {
 			final List<NotificationItem> notificationItems = hubItemsService.httpGetItemList(urlSegments,
 					queryParameters);
-			final Map<String, List<NotificationItem>> partitionMap = createPartionMap(notificationItems);
+			final Map<String, List<NotificationItem>> partitionMap = createPartitionMap(notificationItems);
 			items.put(AbstractEmailFactory.TOPIC_ALL, new EmailTaskData(notificationItems));
 			final Set<String> topicSet = partitionMap.keySet();
 			for (final String topic : topicSet) {
@@ -165,16 +165,16 @@ public class NotificationDispatcher extends AbstractPollingDispatcher<List<? ext
 		return items;
 	}
 
-	private Map<String, List<NotificationItem>> createPartionMap(final List<NotificationItem> notificationItems) {
+	private Map<String, List<NotificationItem>> createPartitionMap(final List<NotificationItem> notificationItems) {
 		final Map<String, List<NotificationItem>> partitionMap = new HashMap<>();
 		for (final NotificationItem notification : notificationItems) {
-			final String topic = notification.getClass().getName();
+			final String classname = notification.getClass().getName();
 			List<NotificationItem> partitionList;
-			if (partitionMap.containsKey(topic)) {
-				partitionList = partitionMap.get(topic);
+			if (partitionMap.containsKey(classname)) {
+				partitionList = partitionMap.get(classname);
 			} else {
 				partitionList = new Vector<NotificationItem>();
-				partitionMap.put(topic, partitionList);
+				partitionMap.put(classname, partitionList);
 			}
 			partitionList.add(notification);
 		}
