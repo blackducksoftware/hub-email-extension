@@ -79,14 +79,28 @@ public class EmailMessagingService {
 				.entrySet()) {
 			final String key = entry.getKey();
 			final String value = entry.getValue();
-			if (key.contains("all.templates") || key.contains(templateName)) {
-				if (key.endsWith(".image")) {
-					final String cid = generateContentId(key);
-					model.put(cleanForFreemarker(key), cid);
-					contentIdsToFilePaths.put("<" + cid + ">", value);
-				} else {
-					model.put(cleanForFreemarker(key), value);
-				}
+			manageKey(model, templateName, contentIdsToFilePaths, key, value);
+		}
+	}
+
+	private void manageKey(final Map<String, Object> model, final String templateName,
+			final Map<String, String> contentIdsToFilePaths, String key, final String value) {
+		boolean shouldAddToModel = false;
+		if (key.contains("all.templates")) {
+			shouldAddToModel = true;
+			key = key.replace("all.templates.", "");
+		} else if (key.contains(templateName)) {
+			shouldAddToModel = true;
+			key = key.replace(templateName + ".", "");
+		}
+
+		if (shouldAddToModel) {
+			if (key.endsWith(".image")) {
+				final String cid = generateContentId(key);
+				model.put(cleanForFreemarker(key), cid);
+				contentIdsToFilePaths.put("<" + cid + ">", value);
+			} else {
+				model.put(cleanForFreemarker(key), value);
 			}
 		}
 	}
