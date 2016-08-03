@@ -5,4 +5,4 @@
 <#list items as item>
     ${item_index + 1}: ${item} <br/>
 </#list>
-<img src="cid:${all_templates_logo_image}" />
+<img src="cid:${logo_image}" />
