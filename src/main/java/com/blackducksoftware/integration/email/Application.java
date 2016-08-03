@@ -33,8 +33,7 @@ import freemarker.template.Configuration;
 import freemarker.template.TemplateExceptionHandler;
 
 public class Application {
-
-	private final RestTemplate restTemplate;
+	public RestTemplate restTemplate;
 	private final Gson gson;
 	private final Configuration configuration;
 	private final DateFormat notificationDateFormat;
@@ -119,7 +118,6 @@ public class Application {
 	}
 
 	private CustomerProperties createCustomerProperties() {
-
 		return new CustomerProperties(appProperties);
 	}
 
@@ -147,4 +145,5 @@ public class Application {
 		return new NotificationDispatcher(hubServerConfig, notificationDateFormat, applicationStartDate,
 				emailSystemProperties, executorService);
 	}
+
 }
