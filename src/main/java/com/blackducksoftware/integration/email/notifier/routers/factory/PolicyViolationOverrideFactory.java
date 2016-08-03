@@ -3,25 +3,24 @@ package com.blackducksoftware.integration.email.notifier.routers.factory;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.springframework.stereotype.Component;
-
+import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.notifier.routers.AbstractEmailRouter;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 import com.blackducksoftware.integration.email.notifier.routers.PolicyViolationOverrideRouter;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.notification.api.PolicyOverrideNotificationItem;
 
-@Component
 public class PolicyViolationOverrideFactory extends AbstractEmailFactory {
 
-	public PolicyViolationOverrideFactory(final EmailMessagingService emailMessagingService) {
-		super(emailMessagingService);
+	public PolicyViolationOverrideFactory(final EmailMessagingService emailMessagingService,
+			final CustomerProperties customerProperties) {
+		super(emailMessagingService, customerProperties);
 	}
 
 	@Override
 	public AbstractEmailRouter<?> createInstance(final EmailTaskData data) {
 		final PolicyViolationOverrideRouter router = new PolicyViolationOverrideRouter(getEmailMessagingService(),
-				data);
+				getCustomerProperties(), data);
 		return router;
 	}
 

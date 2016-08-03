@@ -8,6 +8,7 @@ import javax.mail.MessagingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.EmailData;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 
@@ -23,10 +24,13 @@ public abstract class AbstractEmailRouter<T> implements Runnable {
 
 	private final EmailMessagingService emailMessagingService;
 	private final EmailTaskData taskData;
+	private final CustomerProperties customerProperties;
 
-	public AbstractEmailRouter(final EmailMessagingService emailMessagingService, final EmailTaskData taskData) {
+	public AbstractEmailRouter(final EmailMessagingService emailMessagingService,
+			final CustomerProperties customerProperties, final EmailTaskData taskData) {
 		this.emailMessagingService = emailMessagingService;
 		this.taskData = taskData;
+		this.customerProperties = customerProperties;
 	}
 
 	public String getName() {
@@ -44,7 +48,8 @@ public abstract class AbstractEmailRouter<T> implements Runnable {
 	public void send(final EmailData data) {
 		try {
 			if (data != null && !data.getAddresses().isEmpty() && !data.getModel().isEmpty()) {
-				emailMessagingService.sendEmailMessage(null, data.getAddresses(), data.getModel(), "htmlTemplate.ftl");
+				emailMessagingService.sendEmailMessage(customerProperties, data.getAddresses(), data.getModel(),
+						"htmlTemplate.ftl");
 			} else {
 				logger.info(
 						"Router " + getName() + ": Address list empty or missing content.  No emails drafted to send.");

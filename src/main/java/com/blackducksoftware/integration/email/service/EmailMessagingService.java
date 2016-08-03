@@ -37,12 +37,12 @@ public class EmailMessagingService {
 	private final Logger log = LoggerFactory.getLogger(EmailMessagingService.class);
 
 	private final EmailSystemProperties emailSystemProperties;
-
 	private final Configuration configuration;
 
 	public EmailMessagingService(final EmailSystemProperties emailSystemProperties, final Configuration configuration) {
 		this.emailSystemProperties = emailSystemProperties;
 		this.configuration = configuration;
+
 	}
 
 	public void sendEmailMessage(final CustomerProperties customerProperties, final List<String> emailAddresses,

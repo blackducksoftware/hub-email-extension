@@ -1,8 +1,5 @@
 package com.blackducksoftware.integration.email.model;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,16 +33,8 @@ public class CustomerProperties {
 	private final List<String> templateVariableKeys = new ArrayList<>();
 	private final Map<String, String> suppliedTemplateVariableProperties = new HashMap<>();
 
-	public CustomerProperties() {
-		final String customerPropertiesPath = System.getProperty("customer.properties");
-		final File customerPropertiesFile = new File(customerPropertiesPath);
-		try (FileInputStream fileInputStream = new FileInputStream(customerPropertiesFile)) {
-			final Properties customerProperties = new Properties();
-			customerProperties.load(fileInputStream);
-			extractProperties(customerProperties);
-		} catch (final IOException e) {
-			log.error("Couldn't load the customer properties so the application won't function: " + e.getMessage());
-		}
+	public CustomerProperties(final Properties appProperties) {
+		extractProperties(appProperties);
 	}
 
 	public void extractProperties(final Properties properties) {
@@ -99,5 +88,4 @@ public class CustomerProperties {
 	public String getPassword() {
 		return getSuppliedJavamailConfigProperties().get(JAVAMAIL_PASSWORD_KEY);
 	}
-
 }

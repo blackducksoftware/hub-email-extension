@@ -5,31 +5,25 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.mail.MessagingException;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.blackducksoftware.integration.email.Application;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 
 import freemarker.template.TemplateException;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(Application.class)
 public class EmailMessagingServiceTest {
-	@Autowired
+
 	private EmailMessagingService emailMessagingService;
 
 	@Test
 	public void testSendingEmail() throws IOException, MessagingException, TemplateException {
 		System.setProperty("customer.properties",
 				"/Users/psantos/git/hub-extensions/email-notifications/hub-email-extension/src/main/resources/application-default.properties");
-		final CustomerProperties customerProperties = new CustomerProperties();
+		final CustomerProperties customerProperties = new CustomerProperties(new Properties());
 		final List<String> recipients = Arrays.asList("ekerwin@blackducksoftware.com", "eric.kerwin@gmail.com",
 				"akamen@blackducksoftware.com");
 		final Map<String, Object> model = new HashMap<>();

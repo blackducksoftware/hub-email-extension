@@ -4,7 +4,6 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
 
 import com.blackducksoftware.integration.email.model.EmailSystemProperties;
 import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
@@ -22,7 +21,6 @@ public class HubServerBeanConfiguration {
 		this.emailConfig = emailConfig;
 	}
 
-	@Bean
 	public HubServerConfig build() {
 		final HubServerConfigBuilder configBuilder = new HubServerConfigBuilder();
 		configBuilder.setHubUrl(emailConfig.getHubServerUrl());

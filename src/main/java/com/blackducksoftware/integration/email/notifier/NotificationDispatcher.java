@@ -16,8 +16,6 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +58,6 @@ public class NotificationDispatcher extends AbstractPollingDispatcher {
 		this.systemProperties = systemProperties;
 	}
 
-	@PostConstruct
 	@Override
 	public void init() {
 		setName("Notification Dispatcher");

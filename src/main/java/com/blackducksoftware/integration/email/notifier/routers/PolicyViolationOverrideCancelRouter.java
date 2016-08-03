@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.EmailData;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.notification.api.PolicyOverrideNotificationItem;
@@ -12,8 +13,8 @@ import com.blackducksoftware.integration.hub.notification.api.PolicyOverrideNoti
 public class PolicyViolationOverrideCancelRouter extends AbstractEmailRouter<PolicyOverrideNotificationItem> {
 
 	public PolicyViolationOverrideCancelRouter(final EmailMessagingService emailMessagingService,
-			final EmailTaskData taskData) {
-		super(emailMessagingService, taskData);
+			final CustomerProperties customerProperties, final EmailTaskData taskData) {
+		super(emailMessagingService, customerProperties, taskData);
 	}
 
 	@Override

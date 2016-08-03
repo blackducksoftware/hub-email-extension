@@ -1,6 +1,7 @@
 package com.blackducksoftware.integration.email;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -12,10 +13,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.client.RestTemplate;
 
+import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.EmailSystemProperties;
 import com.blackducksoftware.integration.email.notifier.NotificationDispatcher;
 import com.blackducksoftware.integration.email.notifier.routers.factory.AbstractEmailFactory;
@@ -32,7 +32,6 @@ import com.google.gson.Gson;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateExceptionHandler;
 
-@SpringBootApplication
 public class Application {
 
 	private final RestTemplate restTemplate;
@@ -47,32 +46,52 @@ public class Application {
 	private final EmailMessagingService emailMessagingService;
 	private final NotificationDispatcher notificationDispatcher;
 	private final HubServerConfig hubServerConfig;
+	private final Properties appProperties;
+	private final CustomerProperties customerProperties;
 
 	public static void main(final String[] args) {
-		SpringApplication.run(Application.class, args);
+		try {
+			new Application();
+		} catch (final Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public Application() throws IOException {
 		restTemplate = new RestTemplate();
 		gson = new Gson();
+		appProperties = createAppProperties();
+		emailSystemProperties = createEmailSystemProperties();
+		customerProperties = createCustomerProperties();
 		configuration = createFreemarkerConfig();
+		hubServerConfig = createHubConfig();
+
 		notificationDateFormat = createNotificationDateFormat();
 		applicationStartDate = createApplicationStartDate();
 		executorService = createExecutorService();
 		emailMessagingService = createEmailMessagingService();
 		routerFactoryList = createRouterFactoryList();
-		emailSystemProperties = createEmailSystemProperties();
 		notificationDispatcher = createDispatcher();
-		hubServerConfig = createHubConfig();
 
+		notificationDispatcher.init();
 		notificationDispatcher.attachRouters(routerFactoryList);
 		notificationDispatcher.start();
 	}
 
+	private Properties createAppProperties() throws IOException {
+		final Properties appProperties = new Properties();
+		final String customerPropertiesPath = System.getProperty("customer.properties");
+		final File customerPropertiesFile = new File(customerPropertiesPath);
+		try (FileInputStream fileInputStream = new FileInputStream(customerPropertiesFile)) {
+			appProperties.load(fileInputStream);
+		}
+
+		return appProperties;
+	}
+
 	private Configuration createFreemarkerConfig() throws IOException {
 		final Configuration cfg = new Configuration(Configuration.VERSION_2_3_25);
-		cfg.setDirectoryForTemplateLoading(
-				new File("/Users/ekerwin/Documents/bitbucket/hub-email-extension/src/main/resources/templates/"));
+		cfg.setDirectoryForTemplateLoading(new File("../../../src/main/resources/templates/"));
 		cfg.setDefaultEncoding("UTF-8");
 		cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
 		cfg.setLogTemplateExceptions(false);
@@ -95,12 +114,13 @@ public class Application {
 		return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), threadFactory);
 	}
 
-	private Properties createPropertiesFile() {
-		return new Properties();
+	private EmailSystemProperties createEmailSystemProperties() {
+		return new EmailSystemProperties(appProperties);
 	}
 
-	private EmailSystemProperties createEmailSystemProperties() {
-		return new EmailSystemProperties(createPropertiesFile());
+	private CustomerProperties createCustomerProperties() {
+
+		return new CustomerProperties(appProperties);
 	}
 
 	private EmailMessagingService createEmailMessagingService() {
@@ -109,10 +129,10 @@ public class Application {
 
 	private List<AbstractEmailFactory> createRouterFactoryList() {
 		final List<AbstractEmailFactory> factoryList = new Vector<>();
-		factoryList.add(new PolicyViolationFactory(emailMessagingService));
-		factoryList.add(new PolicyViolationOverrideCancelFactory(emailMessagingService));
-		factoryList.add(new PolicyViolationOverrideFactory(emailMessagingService));
-		factoryList.add(new VulnerabilityFactory(emailMessagingService));
+		factoryList.add(new PolicyViolationFactory(emailMessagingService, customerProperties));
+		factoryList.add(new PolicyViolationOverrideCancelFactory(emailMessagingService, customerProperties));
+		factoryList.add(new PolicyViolationOverrideFactory(emailMessagingService, customerProperties));
+		factoryList.add(new VulnerabilityFactory(emailMessagingService, customerProperties));
 
 		return factoryList;
 	}

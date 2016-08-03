@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
 
+import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.EmailData;
 import com.blackducksoftware.integration.email.notifier.routers.AbstractEmailRouter;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
@@ -15,9 +16,9 @@ public class MockRouter extends AbstractEmailRouter<String> {
 	public final static String ROUTER_NAME = "Mock Router";
 	private final String expectedData;
 
-	public MockRouter(final EmailMessagingService emailMessagingService, final EmailTaskData taskData,
-			final String expectedData) {
-		super(emailMessagingService, taskData);
+	public MockRouter(final EmailMessagingService emailMessagingService, final CustomerProperties customerProperties,
+			final EmailTaskData taskData, final String expectedData) {
+		super(emailMessagingService, customerProperties, taskData);
 		this.expectedData = expectedData;
 	}
 
