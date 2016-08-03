@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.model.CustomerProperties;
-import com.blackducksoftware.integration.email.model.EmailSystemProperties;
 import com.blackducksoftware.integration.email.model.MimeMultipartBuilder;
 
 import freemarker.core.ParseException;
@@ -36,11 +35,11 @@ import freemarker.template.TemplateNotFoundException;
 public class EmailMessagingService {
 	private final Logger log = LoggerFactory.getLogger(EmailMessagingService.class);
 
-	private final EmailSystemProperties emailSystemProperties;
+	private final CustomerProperties customerProperties;
 	private final Configuration configuration;
 
-	public EmailMessagingService(final EmailSystemProperties emailSystemProperties, final Configuration configuration) {
-		this.emailSystemProperties = emailSystemProperties;
+	public EmailMessagingService(final CustomerProperties customerProperties, final Configuration configuration) {
+		this.customerProperties = customerProperties;
 		this.configuration = configuration;
 
 	}
@@ -131,7 +130,7 @@ public class EmailMessagingService {
 		final Message message = new MimeMessage(session);
 		message.setContent(mimeMultipart);
 
-		message.setFrom(new InternetAddress(emailSystemProperties.getEmailFromAddress()));
+		message.setFrom(new InternetAddress(customerProperties.getEmailFromAddress()));
 		message.setRecipients(Message.RecipientType.TO, addresses.toArray(new Address[addresses.size()]));
 		message.setSubject("Testing Hub Email Extension");
 

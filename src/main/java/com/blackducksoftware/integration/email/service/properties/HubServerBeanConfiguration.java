@@ -5,7 +5,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.email.model.EmailSystemProperties;
+import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
 import com.blackducksoftware.integration.hub.builder.ValidationResultEnum;
 import com.blackducksoftware.integration.hub.builder.ValidationResults;
@@ -15,9 +15,9 @@ import com.blackducksoftware.integration.hub.global.HubServerConfig;
 public class HubServerBeanConfiguration {
 	private final Logger logger = LoggerFactory.getLogger(HubServerBeanConfiguration.class);
 
-	private final EmailSystemProperties emailConfig;
+	private final CustomerProperties emailConfig;
 
-	public HubServerBeanConfiguration(final EmailSystemProperties emailConfig) {
+	public HubServerBeanConfiguration(final CustomerProperties emailConfig) {
 		this.emailConfig = emailConfig;
 	}
 

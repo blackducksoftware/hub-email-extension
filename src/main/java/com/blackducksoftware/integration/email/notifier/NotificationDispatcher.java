@@ -20,7 +20,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.email.model.EmailSystemProperties;
+import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 import com.blackducksoftware.integration.email.notifier.routers.factory.AbstractEmailFactory;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
@@ -46,11 +46,11 @@ public class NotificationDispatcher extends AbstractPollingDispatcher {
 	private final HubServerConfig hubServerConfig;
 	private final DateFormat notificationDateFormatter;
 	private final Date applicationStartDate;
-	private final EmailSystemProperties systemProperties;
+	private final CustomerProperties systemProperties;
 	private ExecutorService executorService;
 
 	public NotificationDispatcher(final HubServerConfig hubConfig, final DateFormat notificationDateFormatter,
-			final Date applicationStartDate, final EmailSystemProperties systemProperties,
+			final Date applicationStartDate, final CustomerProperties systemProperties,
 			final ExecutorService executorService) {
 		this.hubServerConfig = hubConfig;
 		this.notificationDateFormatter = notificationDateFormatter;

@@ -16,7 +16,6 @@ import java.util.concurrent.ThreadFactory;
 import org.springframework.web.client.RestTemplate;
 
 import com.blackducksoftware.integration.email.model.CustomerProperties;
-import com.blackducksoftware.integration.email.model.EmailSystemProperties;
 import com.blackducksoftware.integration.email.notifier.NotificationDispatcher;
 import com.blackducksoftware.integration.email.notifier.routers.factory.AbstractEmailFactory;
 import com.blackducksoftware.integration.email.notifier.routers.factory.PolicyViolationFactory;
@@ -34,20 +33,19 @@ import freemarker.template.TemplateExceptionHandler;
 
 public class Application {
 
-	private final RestTemplate restTemplate;
-	private final Gson gson;
-	private final Configuration configuration;
-	private final DateFormat notificationDateFormat;
-	private final Date applicationStartDate;
-	private final ExecutorService executorService;
+	public final RestTemplate restTemplate;
+	public final Gson gson;
+	public final Configuration configuration;
+	public final DateFormat notificationDateFormat;
+	public final Date applicationStartDate;
+	public final ExecutorService executorService;
 
-	private final List<AbstractEmailFactory> routerFactoryList;
-	private final EmailSystemProperties emailSystemProperties;
-	private final EmailMessagingService emailMessagingService;
-	private final NotificationDispatcher notificationDispatcher;
-	private final HubServerConfig hubServerConfig;
-	private final Properties appProperties;
-	private final CustomerProperties customerProperties;
+	public final List<AbstractEmailFactory> routerFactoryList;
+	public final EmailMessagingService emailMessagingService;
+	public final NotificationDispatcher notificationDispatcher;
+	public final HubServerConfig hubServerConfig;
+	public final Properties appProperties;
+	public final CustomerProperties customerProperties;
 
 	public static void main(final String[] args) {
 		try {
@@ -61,7 +59,6 @@ public class Application {
 		restTemplate = new RestTemplate();
 		gson = new Gson();
 		appProperties = createAppProperties();
-		emailSystemProperties = createEmailSystemProperties();
 		customerProperties = createCustomerProperties();
 		configuration = createFreemarkerConfig();
 		hubServerConfig = createHubConfig();
@@ -91,7 +88,7 @@ public class Application {
 
 	private Configuration createFreemarkerConfig() throws IOException {
 		final Configuration cfg = new Configuration(Configuration.VERSION_2_3_25);
-		cfg.setDirectoryForTemplateLoading(new File("../../../src/main/resources/templates/"));
+		cfg.setDirectoryForTemplateLoading(new File(customerProperties.getEmailTemplateDirectory()));
 		cfg.setDefaultEncoding("UTF-8");
 		cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
 		cfg.setLogTemplateExceptions(false);
@@ -114,17 +111,13 @@ public class Application {
 		return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), threadFactory);
 	}
 
-	private EmailSystemProperties createEmailSystemProperties() {
-		return new EmailSystemProperties(appProperties);
-	}
-
 	private CustomerProperties createCustomerProperties() {
 
 		return new CustomerProperties(appProperties);
 	}
 
 	private EmailMessagingService createEmailMessagingService() {
-		return new EmailMessagingService(emailSystemProperties, configuration);
+		return new EmailMessagingService(customerProperties, configuration);
 	}
 
 	private List<AbstractEmailFactory> createRouterFactoryList() {
@@ -138,13 +131,13 @@ public class Application {
 	}
 
 	private HubServerConfig createHubConfig() {
-		final HubServerBeanConfiguration serverBeanConfig = new HubServerBeanConfiguration(emailSystemProperties);
+		final HubServerBeanConfiguration serverBeanConfig = new HubServerBeanConfiguration(customerProperties);
 
 		return serverBeanConfig.build();
 	}
 
 	private NotificationDispatcher createDispatcher() {
 		return new NotificationDispatcher(hubServerConfig, notificationDateFormat, applicationStartDate,
-				emailSystemProperties, executorService);
+				customerProperties, executorService);
 	}
 }
