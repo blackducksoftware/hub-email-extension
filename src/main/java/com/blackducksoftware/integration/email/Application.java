@@ -112,7 +112,6 @@ public class Application {
 	}
 
 	private CustomerProperties createCustomerProperties() {
-
 		return new CustomerProperties(appProperties);
 	}
 
@@ -140,4 +139,5 @@ public class Application {
 		return new NotificationDispatcher(hubServerConfig, notificationDateFormat, applicationStartDate,
 				customerProperties, executorService);
 	}
+
 }
