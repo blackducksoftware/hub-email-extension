@@ -1,26 +1,37 @@
 package com.blackducksoftware.integration.email.mock;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
-import com.blackducksoftware.integration.email.messaging.ItemRouter;
-import com.blackducksoftware.integration.email.messaging.RouterTaskData;
+import java.util.List;
 
-public class MockRouter extends ItemRouter<String> {
+import com.blackducksoftware.integration.email.model.EmailData;
+import com.blackducksoftware.integration.email.notifier.routers.AbstractEmailRouter;
+import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
+import com.blackducksoftware.integration.email.service.EmailMessagingService;
+
+public class MockRouter extends AbstractEmailRouter<String> {
 
 	public final static String ROUTER_NAME = "Mock Router";
 	private final String expectedData;
 
-	public MockRouter(final String expectedData) {
+	public MockRouter(final EmailMessagingService emailMessagingService, final EmailTaskData taskData,
+			final String expectedData) {
+		super(emailMessagingService, taskData);
 		this.expectedData = expectedData;
-	}
-
-	@Override
-	public void execute(final RouterTaskData<String> taskData) {
-		assertEquals(expectedData, taskData.getData());
 	}
 
 	@Override
 	public String getName() {
 		return ROUTER_NAME;
+	}
+
+	@Override
+	public EmailData transform(final List<String> data) {
+		assertNotNull(data);
+		assertEquals(1, data.size());
+		final String item = data.get(0);
+		assertEquals(expectedData, item);
+		return null;
 	}
 }

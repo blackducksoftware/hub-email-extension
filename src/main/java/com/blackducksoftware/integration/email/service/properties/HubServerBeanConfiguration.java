@@ -23,7 +23,7 @@ public class HubServerBeanConfiguration {
 	}
 
 	@Bean
-	public HubServerConfig hubServerConfig() {
+	public HubServerConfig build() {
 		final HubServerConfigBuilder configBuilder = new HubServerConfigBuilder();
 		configBuilder.setHubUrl(emailConfig.getHubServerUrl());
 		configBuilder.setUsername(emailConfig.getHubServerUser());

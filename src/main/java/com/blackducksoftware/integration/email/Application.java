@@ -26,7 +26,6 @@ import com.blackducksoftware.integration.email.notifier.routers.factory.Vulnerab
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.service.properties.HubServerBeanConfiguration;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
-import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.google.gson.Gson;
 
@@ -43,7 +42,7 @@ public class Application {
 	private final Date applicationStartDate;
 	private final ExecutorService executorService;
 
-	private final List<AbstractEmailFactory<? extends NotificationItem>> routerFactoryList;
+	private final List<AbstractEmailFactory> routerFactoryList;
 	private final EmailSystemProperties emailSystemProperties;
 	private final EmailMessagingService emailMessagingService;
 	private final NotificationDispatcher notificationDispatcher;
@@ -65,6 +64,9 @@ public class Application {
 		emailSystemProperties = createEmailSystemProperties();
 		notificationDispatcher = createDispatcher();
 		hubServerConfig = createHubConfig();
+
+		notificationDispatcher.attachRouters(routerFactoryList);
+		notificationDispatcher.start();
 	}
 
 	private Configuration createFreemarkerConfig() throws IOException {
@@ -105,9 +107,8 @@ public class Application {
 		return new EmailMessagingService(emailSystemProperties, configuration);
 	}
 
-	private List<AbstractEmailFactory<? extends NotificationItem>> createRouterFactoryList() {
-		final List<AbstractEmailFactory<? extends NotificationItem>> factoryList = new Vector<>();
-
+	private List<AbstractEmailFactory> createRouterFactoryList() {
+		final List<AbstractEmailFactory> factoryList = new Vector<>();
 		factoryList.add(new PolicyViolationFactory(emailMessagingService));
 		factoryList.add(new PolicyViolationOverrideCancelFactory(emailMessagingService));
 		factoryList.add(new PolicyViolationOverrideFactory(emailMessagingService));
@@ -119,7 +120,7 @@ public class Application {
 	private HubServerConfig createHubConfig() {
 		final HubServerBeanConfiguration serverBeanConfig = new HubServerBeanConfiguration(emailSystemProperties);
 
-		return serverBeanConfig.hubServerConfig();
+		return serverBeanConfig.build();
 	}
 
 	private NotificationDispatcher createDispatcher() {

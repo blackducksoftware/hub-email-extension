@@ -11,8 +11,8 @@ import com.blackducksoftware.integration.hub.notification.api.RuleViolationNotif
 
 public class PolicyViolationRouter extends AbstractEmailRouter<RuleViolationNotificationItem> {
 
-	public PolicyViolationRouter(final EmailMessagingService emailMessagingService) {
-		super(emailMessagingService);
+	public PolicyViolationRouter(final EmailMessagingService emailMessagingService, final EmailTaskData taskData) {
+		super(emailMessagingService, taskData);
 	}
 
 	@Override

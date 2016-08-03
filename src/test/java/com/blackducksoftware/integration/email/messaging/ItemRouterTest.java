@@ -2,10 +2,14 @@ package com.blackducksoftware.integration.email.messaging;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import com.blackducksoftware.integration.email.mock.MockRouter;
+import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 
 public class ItemRouterTest {
 
@@ -14,13 +18,14 @@ public class ItemRouterTest {
 
 	@Before
 	public void initTest() {
-
-		router = new MockRouter(RECEIVE_DATA);
+		router = new MockRouter(null, null, RECEIVE_DATA);
 	}
 
 	@Test
 	public void testReceive() {
-		router.execute(new RouterTaskData<String>(RECEIVE_DATA));
+		final List<Object> dataList = new ArrayList<>();
+		dataList.add(RECEIVE_DATA);
+		router.execute(new EmailTaskData(dataList));
 	}
 
 	@Test

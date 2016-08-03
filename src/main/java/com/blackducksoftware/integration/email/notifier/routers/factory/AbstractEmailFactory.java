@@ -1,12 +1,12 @@
 package com.blackducksoftware.integration.email.notifier.routers.factory;
 
-import java.util.List;
+import java.util.Set;
 
-import com.blackducksoftware.integration.email.messaging.ItemRouterFactory;
+import com.blackducksoftware.integration.email.notifier.routers.AbstractEmailRouter;
+import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
 
-public abstract class AbstractEmailFactory<T extends NotificationItem> extends ItemRouterFactory<List<T>> {
+public abstract class AbstractEmailFactory {
 
 	public final static String TOPIC_ALL = "all";
 
@@ -19,4 +19,8 @@ public abstract class AbstractEmailFactory<T extends NotificationItem> extends I
 	public EmailMessagingService getEmailMessagingService() {
 		return emailMessagingService;
 	}
+
+	public abstract Set<String> getSubscriberTopics();
+
+	public abstract AbstractEmailRouter<?> createInstance(EmailTaskData data);
 }

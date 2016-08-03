@@ -1,12 +1,14 @@
 package com.blackducksoftware.integration.email.mock;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import com.blackducksoftware.integration.email.messaging.AbstractPollingDispatcher;
-import com.blackducksoftware.integration.email.messaging.RouterTaskData;
+import com.blackducksoftware.integration.email.notifier.AbstractPollingDispatcher;
+import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 
-public class MockDispatcher extends AbstractPollingDispatcher<String> {
+public class MockDispatcher extends AbstractPollingDispatcher {
 
 	public final static String NAME = "Mock Dispatcher";
 	public final static int INTERVAL = 500;
@@ -21,9 +23,11 @@ public class MockDispatcher extends AbstractPollingDispatcher<String> {
 	}
 
 	@Override
-	public Map<String, RouterTaskData<String>> fetchRouterConfig() {
-		final Map<String, RouterTaskData<String>> map = new HashMap<>();
-		map.put(MockRouterFactory.TOPIC_KEY, new RouterTaskData<String>(TEST_DATA));
+	public Map<String, EmailTaskData> fetchRouterConfig() {
+		final Map<String, EmailTaskData> map = new HashMap<>();
+		final List<Object> data = new ArrayList<>();
+		data.add(TEST_DATA);
+		map.put(MockRouterFactory.TOPIC_KEY, new EmailTaskData(data));
 		return map;
 	}
 }

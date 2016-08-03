@@ -8,15 +8,12 @@ import javax.mail.MessagingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.email.messaging.ItemRouter;
-import com.blackducksoftware.integration.email.messaging.RouterTaskData;
 import com.blackducksoftware.integration.email.model.EmailData;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
 
 import freemarker.template.TemplateException;
 
-public abstract class AbstractEmailRouter<T extends NotificationItem> extends ItemRouter<List<T>> {
+public abstract class AbstractEmailRouter<T> implements Runnable {
 	private final Logger logger = LoggerFactory.getLogger(AbstractEmailRouter.class);
 
 	public final String KEY_PROJECT_NAME = "hub-project-name";
@@ -25,19 +22,20 @@ public abstract class AbstractEmailRouter<T extends NotificationItem> extends It
 	public final String KEY_COMPONENT_VERSION = "hub-component-version";
 
 	private final EmailMessagingService emailMessagingService;
+	private final EmailTaskData taskData;
 
-	public AbstractEmailRouter(final EmailMessagingService emailMessagingService) {
+	public AbstractEmailRouter(final EmailMessagingService emailMessagingService, final EmailTaskData taskData) {
 		this.emailMessagingService = emailMessagingService;
+		this.taskData = taskData;
 	}
 
-	@Override
 	public String getName() {
 		return getClass().getName();
 	}
 
-	@Override
-	public void execute(final RouterTaskData<List<T>> taskData) {
-		final List<T> data = taskData.getData();
+	@SuppressWarnings("unchecked")
+	public void execute(final EmailTaskData taskData) {
+		final List<T> data = (List<T>) taskData.getData();
 		logger.info(
 				"Router " + getName() + ": Received notification(s). Total count: " + (data == null ? 0 : data.size()));
 		send(transform(data));
@@ -57,4 +55,9 @@ public abstract class AbstractEmailRouter<T extends NotificationItem> extends It
 	}
 
 	public abstract EmailData transform(List<T> data);
+
+	@Override
+	public void run() {
+		execute(taskData);
+	}
 }

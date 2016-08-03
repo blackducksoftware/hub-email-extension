@@ -22,8 +22,6 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.email.messaging.AbstractPollingDispatcher;
-import com.blackducksoftware.integration.email.messaging.RouterTaskData;
 import com.blackducksoftware.integration.email.model.EmailSystemProperties;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 import com.blackducksoftware.integration.email.notifier.routers.factory.AbstractEmailFactory;
@@ -41,7 +39,7 @@ import com.blackducksoftware.integration.hub.notification.api.VulnerabilityNotif
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.google.gson.reflect.TypeToken;
 
-public class NotificationDispatcher extends AbstractPollingDispatcher<List<? extends NotificationItem>> {
+public class NotificationDispatcher extends AbstractPollingDispatcher {
 	public static long DEFAULT_POLLING_INTERVAL_SECONDS = 10;
 	public static long DEFAULT_POLLING_DELAY_SECONDS = 5;
 
@@ -78,8 +76,8 @@ public class NotificationDispatcher extends AbstractPollingDispatcher<List<? ext
 	}
 
 	@Override
-	public Map<String, RouterTaskData<List<? extends NotificationItem>>> fetchRouterConfig() {
-		Map<String, RouterTaskData<List<? extends NotificationItem>>> dataMap = new HashMap<>();
+	public Map<String, EmailTaskData> fetchRouterConfig() {
+		Map<String, EmailTaskData> dataMap = new HashMap<>();
 		if (hubServerConfig != null) {
 			try {
 				final RestConnection restConnection = initRestConnection();
@@ -128,9 +126,8 @@ public class NotificationDispatcher extends AbstractPollingDispatcher<List<? ext
 		return hubItemsService;
 	}
 
-	private Map<String, RouterTaskData<List<? extends NotificationItem>>> fetchNotifications(
-			final HubItemsService<NotificationItem> hubItemsService, final Date startDate, final Date endDate)
-			throws Exception {
+	private Map<String, EmailTaskData> fetchNotifications(final HubItemsService<NotificationItem> hubItemsService,
+			final Date startDate, final Date endDate) throws Exception {
 		// TODO may need chunking and maybe retry logic to
 		final int limit = 1000;
 
@@ -145,12 +142,11 @@ public class NotificationDispatcher extends AbstractPollingDispatcher<List<? ext
 		queryParameters.add(new AbstractMap.SimpleEntry<>("startDate", startDateString));
 		queryParameters.add(new AbstractMap.SimpleEntry<>("endDate", endDateString));
 		queryParameters.add(new AbstractMap.SimpleEntry<>("limit", String.valueOf(limit)));
-		final Map<String, RouterTaskData<List<? extends NotificationItem>>> items = new HashMap<>();
+		final Map<String, EmailTaskData> items = new HashMap<>();
 		try {
 			final List<NotificationItem> notificationItems = hubItemsService.httpGetItemList(urlSegments,
 					queryParameters);
-			final Map<String, List<NotificationItem>> partitionMap = createPartitionMap(notificationItems);
-			items.put(AbstractEmailFactory.TOPIC_ALL, new EmailTaskData(notificationItems));
+			final Map<String, List<Object>> partitionMap = createPartitionMap(notificationItems);
 			final Set<String> topicSet = partitionMap.keySet();
 			for (final String topic : topicSet) {
 				items.put(topic, new EmailTaskData(partitionMap.get(topic)));
@@ -162,15 +158,17 @@ public class NotificationDispatcher extends AbstractPollingDispatcher<List<? ext
 		return items;
 	}
 
-	private Map<String, List<NotificationItem>> createPartitionMap(final List<NotificationItem> notificationItems) {
-		final Map<String, List<NotificationItem>> partitionMap = new HashMap<>();
+	private Map<String, List<Object>> createPartitionMap(final List<NotificationItem> notificationItems) {
+		final Map<String, List<Object>> partitionMap = new HashMap<>();
+		partitionMap.put(AbstractEmailFactory.TOPIC_ALL, new Vector<Object>());
 		for (final NotificationItem notification : notificationItems) {
+			partitionMap.get(AbstractEmailFactory.TOPIC_ALL).add(notification);
 			final String classname = notification.getClass().getName();
-			List<NotificationItem> partitionList;
+			List<Object> partitionList;
 			if (partitionMap.containsKey(classname)) {
 				partitionList = partitionMap.get(classname);
 			} else {
-				partitionList = new Vector<NotificationItem>();
+				partitionList = new Vector<Object>();
 				partitionMap.put(classname, partitionList);
 			}
 			partitionList.add(notification);
@@ -179,9 +177,9 @@ public class NotificationDispatcher extends AbstractPollingDispatcher<List<? ext
 		return partitionMap;
 	}
 
-	private Map<String, RouterTaskData<List<? extends NotificationItem>>> createNotificationTestData() {
-		final Map<String, RouterTaskData<List<? extends NotificationItem>>> dataMap = new HashMap<>();
-		final List<NotificationItem> list = new Vector<>();
+	private Map<String, EmailTaskData> createNotificationTestData() {
+		final Map<String, EmailTaskData> dataMap = new HashMap<>();
+		final List<Object> list = new Vector<>();
 		for (int selectedClass = 0; selectedClass < 3; selectedClass++) {
 			final Class<? extends NotificationItem> clazz;
 			final List<String> allow = new ArrayList<>();
@@ -217,13 +215,14 @@ public class NotificationDispatcher extends AbstractPollingDispatcher<List<? ext
 					try {
 						final Constructor<?> constructor = clazz.getDeclaredConstructor(MetaInformation.class);
 						if (constructor != null) {
-							list.add((NotificationItem) constructor.newInstance(meta));
+							list.add(constructor.newInstance(meta));
 						}
 					} catch (final InstantiationException | IllegalAccessException | NoSuchMethodException
 							| SecurityException | IllegalArgumentException | InvocationTargetException e) {
 						logger.error("GENERATING TEST DATA: Error", e);
 					}
 				}
+				dataMap.put(clazz.getName(), new EmailTaskData(list));
 			}
 		}
 		return dataMap;

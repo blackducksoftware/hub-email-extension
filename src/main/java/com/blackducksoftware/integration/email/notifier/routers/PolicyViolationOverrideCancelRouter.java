@@ -11,8 +11,9 @@ import com.blackducksoftware.integration.hub.notification.api.PolicyOverrideNoti
 
 public class PolicyViolationOverrideCancelRouter extends AbstractEmailRouter<PolicyOverrideNotificationItem> {
 
-	public PolicyViolationOverrideCancelRouter(final EmailMessagingService emailMessagingService) {
-		super(emailMessagingService);
+	public PolicyViolationOverrideCancelRouter(final EmailMessagingService emailMessagingService,
+			final EmailTaskData taskData) {
+		super(emailMessagingService, taskData);
 	}
 
 	@Override

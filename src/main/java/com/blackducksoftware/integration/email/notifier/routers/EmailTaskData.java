@@ -2,12 +2,15 @@ package com.blackducksoftware.integration.email.notifier.routers;
 
 import java.util.List;
 
-import com.blackducksoftware.integration.email.messaging.RouterTaskData;
-import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
+public class EmailTaskData {
 
-public class EmailTaskData extends RouterTaskData<List<? extends NotificationItem>> {
+	private final List<Object> data;
 
-	public EmailTaskData(final List<? extends NotificationItem> data) {
-		super(data);
+	public EmailTaskData(final List<Object> data) {
+		this.data = data;
+	}
+
+	public List<Object> getData() {
+		return data;
 	}
 }

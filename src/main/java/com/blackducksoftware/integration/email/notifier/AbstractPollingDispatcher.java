@@ -1,4 +1,4 @@
-package com.blackducksoftware.integration.email.messaging;
+package com.blackducksoftware.integration.email.notifier;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,7 +16,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractPollingDispatcher<D> extends TimerTask {
+import com.blackducksoftware.integration.email.notifier.routers.AbstractEmailRouter;
+import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
+import com.blackducksoftware.integration.email.notifier.routers.factory.AbstractEmailFactory;
+
+public abstract class AbstractPollingDispatcher extends TimerTask {
 
 	private final Logger logger = LoggerFactory.getLogger(AbstractPollingDispatcher.class);
 	public static long DEFAULT_POLLING_INTERVAL = 10000;
@@ -25,7 +29,7 @@ public abstract class AbstractPollingDispatcher<D> extends TimerTask {
 	private Timer timer;
 	private long interval;
 	private long startupDelay;
-	private final Map<String, List<ItemRouterFactory<D>>> topicSubscriberMap = new ConcurrentHashMap<>();
+	private final Map<String, List<AbstractEmailFactory>> topicSubscriberMap = new ConcurrentHashMap<>();
 	private ExecutorService executorService;
 
 	private Date lastRun;
@@ -70,17 +74,17 @@ public abstract class AbstractPollingDispatcher<D> extends TimerTask {
 		}
 	}
 
-	public void attachRouter(final ItemRouterFactory<D> router) {
-		final List<ItemRouterFactory<D>> routerList = new Vector<>();
+	public void attachRouter(final AbstractEmailFactory router) {
+		final List<AbstractEmailFactory> routerList = new Vector<>();
 		routerList.add(router);
 		attachRouters(routerList);
 	}
 
-	public void attachRouters(final List<ItemRouterFactory<D>> routers) {
-		for (final ItemRouterFactory<D> factory : routers) {
+	public void attachRouters(final List<AbstractEmailFactory> routers) {
+		for (final AbstractEmailFactory factory : routers) {
 			final Set<String> topics = factory.getSubscriberTopics();
 			for (final String topic : topics) {
-				List<ItemRouterFactory<D>> factoryList;
+				List<AbstractEmailFactory> factoryList;
 				if (topicSubscriberMap.containsKey(topic)) {
 					factoryList = topicSubscriberMap.get(topic);
 				} else {
@@ -91,18 +95,18 @@ public abstract class AbstractPollingDispatcher<D> extends TimerTask {
 		}
 	}
 
-	public void unattachRouter(final ItemRouterFactory<D> router) {
-		final List<ItemRouterFactory<D>> factoryList = new ArrayList<>();
+	public void unattachRouter(final AbstractEmailFactory router) {
+		final List<AbstractEmailFactory> factoryList = new ArrayList<>();
 		factoryList.add(router);
 		unattachRouters(factoryList);
 	}
 
-	public void unattachRouters(final List<ItemRouterFactory<D>> routerFactories) {
-		for (final ItemRouterFactory<D> factory : routerFactories) {
+	public void unattachRouters(final List<AbstractEmailFactory> routerFactories) {
+		for (final AbstractEmailFactory factory : routerFactories) {
 			final Set<String> topics = factory.getSubscriberTopics();
 			for (final String topic : topics) {
 				if (topicSubscriberMap.containsKey(topic)) {
-					final List<ItemRouterFactory<D>> factoryList = topicSubscriberMap.get(topic);
+					final List<AbstractEmailFactory> factoryList = topicSubscriberMap.get(topic);
 					factoryList.remove(factory);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Router removed: " + factory);
@@ -124,8 +128,8 @@ public abstract class AbstractPollingDispatcher<D> extends TimerTask {
 		}
 		final Set<String> factoryTopics = topicSubscriberMap.keySet();
 		for (final String topic : factoryTopics) {
-			final List<ItemRouterFactory<D>> factoryList = topicSubscriberMap.get(topic);
-			final Iterator<ItemRouterFactory<D>> iterator = factoryList.iterator();
+			final List<AbstractEmailFactory> factoryList = topicSubscriberMap.get(topic);
+			final Iterator<AbstractEmailFactory> iterator = factoryList.iterator();
 			while (iterator.hasNext()) {
 				iterator.remove();
 			}
@@ -136,7 +140,7 @@ public abstract class AbstractPollingDispatcher<D> extends TimerTask {
 	@Override
 	public void run() {
 		currentRun = new Date();
-		final Map<String, RouterTaskData<D>> dataMap = fetchRouterConfig();
+		final Map<String, EmailTaskData> dataMap = fetchRouterConfig();
 		if (logger.isDebugEnabled()) {
 			logger.debug(
 					"Execution data: " + System.lineSeparator() + "########## Polling Dispatcher Execution ##########"
@@ -148,12 +152,9 @@ public abstract class AbstractPollingDispatcher<D> extends TimerTask {
 		final Set<String> factoryTopics = dataMap.keySet();
 		for (final String topic : factoryTopics) {
 			if (topicSubscriberMap.containsKey(topic)) {
-				final List<ItemRouterFactory<D>> factoryList = topicSubscriberMap.get(topic);
-				for (final ItemRouterFactory<D> routerFactory : factoryList) {
-					final ItemRouter<D> router = routerFactory.createInstance(dataMap.get(topic));
-					if (logger.isDebugEnabled()) {
-						logger.debug("Dispatching to router " + router.getName());
-					}
+				final List<AbstractEmailFactory> factoryList = topicSubscriberMap.get(topic);
+				for (final AbstractEmailFactory routerFactory : factoryList) {
+					final AbstractEmailRouter<?> router = routerFactory.createInstance(dataMap.get(topic));
 					executorService.submit(router);
 				}
 			}
@@ -203,5 +204,5 @@ public abstract class AbstractPollingDispatcher<D> extends TimerTask {
 
 	public abstract void init();
 
-	public abstract Map<String, RouterTaskData<D>> fetchRouterConfig();
+	public abstract Map<String, EmailTaskData> fetchRouterConfig();
 }
