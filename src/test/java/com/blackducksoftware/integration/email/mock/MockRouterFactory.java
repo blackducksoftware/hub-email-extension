@@ -8,6 +8,7 @@ import com.blackducksoftware.integration.email.notifier.routers.AbstractEmailRou
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 import com.blackducksoftware.integration.email.notifier.routers.factory.AbstractEmailFactory;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
+import com.blackducksoftware.integration.hub.notification.NotificationService;
 
 public class MockRouterFactory extends AbstractEmailFactory {
 
@@ -15,8 +16,9 @@ public class MockRouterFactory extends AbstractEmailFactory {
 	private final String expectedData;
 
 	public MockRouterFactory(final EmailMessagingService emailMessagingService,
-			final CustomerProperties customerProperties, final String expectedData) {
-		super(emailMessagingService, customerProperties);
+			final CustomerProperties customerProperties, final NotificationService notificationService,
+			final String expectedData) {
+		super(emailMessagingService, customerProperties, notificationService);
 		this.expectedData = expectedData;
 	}
 
@@ -29,6 +31,7 @@ public class MockRouterFactory extends AbstractEmailFactory {
 
 	@Override
 	public AbstractEmailRouter<?> createInstance(final EmailTaskData data) {
-		return new MockRouter(getEmailMessagingService(), getCustomerProperties(), data, expectedData);
+		return new MockRouter(getEmailMessagingService(), getCustomerProperties(), getNotificationService(), data,
+				expectedData);
 	}
 }

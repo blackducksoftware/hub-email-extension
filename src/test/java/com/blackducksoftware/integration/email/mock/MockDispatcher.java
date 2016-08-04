@@ -23,7 +23,7 @@ public class MockDispatcher extends AbstractPollingDispatcher {
 	}
 
 	@Override
-	public Map<String, EmailTaskData> fetchRouterConfig() {
+	public Map<String, EmailTaskData> fetchData() {
 		final Map<String, EmailTaskData> map = new HashMap<>();
 		final List<Object> data = new ArrayList<>();
 		data.add(TEST_DATA);

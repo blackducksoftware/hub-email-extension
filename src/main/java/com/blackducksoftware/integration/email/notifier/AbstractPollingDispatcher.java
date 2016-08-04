@@ -140,7 +140,7 @@ public abstract class AbstractPollingDispatcher extends TimerTask {
 	@Override
 	public void run() {
 		currentRun = new Date();
-		final Map<String, EmailTaskData> dataMap = fetchRouterConfig();
+		final Map<String, EmailTaskData> dataMap = fetchData();
 		if (logger.isDebugEnabled()) {
 			logger.debug(
 					"Execution data: " + System.lineSeparator() + "########## Polling Dispatcher Execution ##########"
@@ -204,5 +204,5 @@ public abstract class AbstractPollingDispatcher extends TimerTask {
 
 	public abstract void init();
 
-	public abstract Map<String, EmailTaskData> fetchRouterConfig();
+	public abstract Map<String, EmailTaskData> fetchData();
 }

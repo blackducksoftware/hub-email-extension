@@ -8,19 +8,20 @@ import com.blackducksoftware.integration.email.notifier.routers.AbstractEmailRou
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 import com.blackducksoftware.integration.email.notifier.routers.PolicyViolationOverrideRouter;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
+import com.blackducksoftware.integration.hub.notification.NotificationService;
 import com.blackducksoftware.integration.hub.notification.api.PolicyOverrideNotificationItem;
 
 public class PolicyViolationOverrideFactory extends AbstractEmailFactory {
 
 	public PolicyViolationOverrideFactory(final EmailMessagingService emailMessagingService,
-			final CustomerProperties customerProperties) {
-		super(emailMessagingService, customerProperties);
+			final CustomerProperties customerProperties, final NotificationService notificationService) {
+		super(emailMessagingService, customerProperties, notificationService);
 	}
 
 	@Override
 	public AbstractEmailRouter<?> createInstance(final EmailTaskData data) {
 		final PolicyViolationOverrideRouter router = new PolicyViolationOverrideRouter(getEmailMessagingService(),
-				getCustomerProperties(), data);
+				getCustomerProperties(), getNotificationService(), data);
 		return router;
 	}
 

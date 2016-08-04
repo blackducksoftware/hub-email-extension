@@ -1,7 +1,5 @@
 package com.blackducksoftware.integration.email;
 
-import java.io.IOException;
-
 import com.blackducksoftware.integration.email.notifier.EmailEngine;
 
 public class Application {
@@ -16,7 +14,7 @@ public class Application {
 		}
 	}
 
-	public Application() throws IOException {
+	public Application() throws Exception {
 		emailEngine = new EmailEngine();
 	}
 }
