@@ -1,7 +1,6 @@
-BDS Hub: Daily Digest
-
 Dear ${hubUserName},
-
+<br />
+<br />
 <#if policyViolations?? && policyViolations?size gt 0>
   The Black Duck Hub's monitoring system captured one or more policy violations -
   <br />
@@ -10,6 +9,7 @@ Dear ${hubUserName},
     <#list policyViolations as policyViolation>
       <li>
         ${policyViolation.projectName} / ${policyViolation.projectVersionName} / ${policyViolation.componentName} / ${policyViolation.componentVersionName}
+        <!--
         <br />
         ---don't know how to get these values---
         <br />
@@ -20,6 +20,7 @@ Dear ${hubUserName},
         Actual Policy Logic text display
         <br />
         ---end unknown values---
+        -->
       </li>
     </#list>
   </ul>
@@ -33,6 +34,7 @@ Dear ${hubUserName},
     <#list policyViolationOverrides as policyViolationOverride>
       <li>
         ${policyViolationOverride.projectName} / ${policyViolationOverride.projectVersionName} / ${policyViolationOverride.componentName} / ${policyViolationOverride.componentVersionName} was overriden
+        <!--
         <br />
         ---don't know how to get these values---
         <br />
@@ -43,6 +45,7 @@ Dear ${hubUserName},
         Actual Policy Logic text display
         <br />
         ---end unknown values---
+        -->
         <br />
         Override by ${policyViolationOverride.firstName} ${policyViolationOverride.lastName}
       </li>
@@ -70,7 +73,8 @@ Dear ${hubUserName},
   <ul style="list-style-type: none;">
     <#list securityVulnerabilities as securityVulnerability>
       <li>
-        ${securityVulnerability.projectName} / ${securityVulnerability.projectVersionName} / ${securityVulnerability.componentName} / ${securityVulnerability.versionName}
+        ${securityVulnerability.projectName} / ${securityVulnerability.projectVersionName} / ${securityVulnerability.componentName} / ${securityVulnerability.componentVersionName}
+        <!--
         <br />
         ---don't know how to get these values---
         <br />
@@ -87,11 +91,13 @@ Dear ${hubUserName},
         Logged Date
         <br />
         ---end unknown values---
+        -->
       </li>
     </#list>
   </ul>
 </#if>
 
-To manage these items and/or see more details, please log in to your <a href="${hubServerUrl}">Black Duck Hub</a>
+To manage these items and/or see more details, please log in to your <a href="${hub_server_url}">Black Duck Hub</a>
+<br />
 <br />
 <img src="cid:${logo_image}" />

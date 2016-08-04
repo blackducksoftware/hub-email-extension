@@ -18,6 +18,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,12 +42,15 @@ public class EmailMessagingService {
 	public EmailMessagingService(final CustomerProperties customerProperties, final Configuration configuration) {
 		this.customerProperties = customerProperties;
 		this.configuration = configuration;
-
 	}
 
 	public void sendEmailMessage(final CustomerProperties customerProperties, final List<String> emailAddresses,
 			final Map<String, Object> model, final String templateName) throws MessagingException,
 			TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException, TemplateException {
+		if (null == emailAddresses || emailAddresses.isEmpty()) {
+			// we've got nothing to do...might as well get out of here...
+			return;
+		}
 		final Session session = createMailSession(customerProperties);
 		final Map<String, String> contentIdsToFilePaths = new HashMap<>();
 		populateModelWithAdditionalProperties(customerProperties, model, templateName, contentIdsToFilePaths);
@@ -58,7 +62,8 @@ public class EmailMessagingService {
 		mimeMultipartBuilder.addEmbeddedImages(contentIdsToFilePaths);
 		final MimeMultipart mimeMultipart = mimeMultipartBuilder.build();
 
-		final Message message = createMessage(emailAddresses, session, mimeMultipart);
+		final String resolvedSubjectLine = getResolvedSubjectLine(model);
+		final Message message = createMessage(emailAddresses, resolvedSubjectLine, session, mimeMultipart);
 		sendMessage(customerProperties, session, message);
 	}
 
@@ -68,6 +73,17 @@ public class EmailMessagingService {
 		final StringWriter stringWriter = new StringWriter();
 		final Template template = configuration.getTemplate(templateName);
 		template.process(model, stringWriter);
+		return stringWriter.toString();
+	}
+
+	private String getResolvedSubjectLine(final Map<String, Object> model) throws IOException, TemplateException {
+		String subjectLine = (String) model.get("subject_line");
+		if (StringUtils.isBlank(subjectLine)) {
+			subjectLine = "Default Subject Line - please define one in customer.properties";
+		}
+		final Template subjectLineTemplate = new Template("subjectLineTemplate", subjectLine, configuration);
+		final StringWriter stringWriter = new StringWriter();
+		subjectLineTemplate.process(model, stringWriter);
 		return stringWriter.toString();
 	}
 
@@ -85,10 +101,16 @@ public class EmailMessagingService {
 	private void manageKey(final Map<String, Object> model, final String templateName,
 			final Map<String, String> contentIdsToFilePaths, String key, final String value) {
 		boolean shouldAddToModel = false;
-		if (key.contains("all.templates")) {
+		if (key.contains("all.templates.")) {
 			shouldAddToModel = true;
 			key = key.replace("all.templates.", "");
-		} else if (key.contains(templateName)) {
+
+			// if we've already added a value for this key using the template
+			// name, assume it overrides the 'all.templates' value
+			if (model.containsKey(cleanForFreemarker(key))) {
+				shouldAddToModel = false;
+			}
+		} else if (key.contains(templateName + ".")) {
 			shouldAddToModel = true;
 			key = key.replace(templateName + ".", "");
 		}
@@ -112,8 +134,8 @@ public class EmailMessagingService {
 		return Session.getInstance(props);
 	}
 
-	private Message createMessage(final List<String> recipientEmailAddresses, final Session session,
-			final MimeMultipart mimeMultipart) throws MessagingException {
+	private Message createMessage(final List<String> recipientEmailAddresses, final String subjectLine,
+			final Session session, final MimeMultipart mimeMultipart) throws MessagingException {
 		final List<InternetAddress> addresses = new ArrayList<>();
 		for (final String recipient : recipientEmailAddresses) {
 			try {
@@ -132,7 +154,7 @@ public class EmailMessagingService {
 
 		message.setFrom(new InternetAddress(customerProperties.getEmailFromAddress()));
 		message.setRecipients(Message.RecipientType.TO, addresses.toArray(new Address[addresses.size()]));
-		message.setSubject("Testing Hub Email Extension");
+		message.setSubject(subjectLine);
 
 		return message;
 	}
