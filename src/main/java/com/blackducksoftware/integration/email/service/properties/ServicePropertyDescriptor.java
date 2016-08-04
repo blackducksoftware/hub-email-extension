@@ -26,4 +26,5 @@ public enum ServicePropertyDescriptor {
 	public String getDefaultValue() {
 		return defaultValue;
 	}
+
 }

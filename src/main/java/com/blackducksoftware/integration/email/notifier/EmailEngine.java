@@ -18,7 +18,6 @@ import java.util.concurrent.ThreadFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.client.RestTemplate;
 
 import com.blackducksoftware.integration.email.ExtensionLogger;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
@@ -47,10 +46,8 @@ import freemarker.template.Configuration;
 import freemarker.template.TemplateExceptionHandler;
 
 public class EmailEngine {
-
 	private final Logger logger = LoggerFactory.getLogger(EmailEngine.class);
 
-	public final RestTemplate restTemplate;
 	public final Gson gson;
 	public final Configuration configuration;
 	public final DateFormat notificationDateFormat;
@@ -66,7 +63,6 @@ public class EmailEngine {
 	public final NotificationService notificationService;
 
 	public EmailEngine() throws IOException, EncryptionException, URISyntaxException, BDRestException {
-		restTemplate = new RestTemplate();
 		gson = new Gson();
 		appProperties = createAppProperties();
 		customerProperties = createCustomerProperties();
@@ -187,4 +183,5 @@ public class EmailEngine {
 				NotificationItem.class, typeToken, typeToSubclassMap);
 		return hubItemsService;
 	}
+
 }

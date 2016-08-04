@@ -21,8 +21,8 @@ import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 import com.blackducksoftware.integration.email.notifier.routers.factory.AbstractEmailFactory;
 
 public abstract class AbstractPollingDispatcher extends TimerTask {
-
 	private final Logger logger = LoggerFactory.getLogger(AbstractPollingDispatcher.class);
+
 	public static long DEFAULT_POLLING_INTERVAL = 10000;
 	public static long DEFAULT_POLLING_DELAY = 5000;
 
@@ -205,4 +205,5 @@ public abstract class AbstractPollingDispatcher extends TimerTask {
 	public abstract void init();
 
 	public abstract Map<String, EmailTaskData> fetchData();
+
 }

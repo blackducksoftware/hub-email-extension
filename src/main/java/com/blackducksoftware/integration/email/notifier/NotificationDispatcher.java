@@ -105,7 +105,7 @@ public class NotificationDispatcher extends AbstractPollingDispatcher {
 
 	private Map<String, List<Object>> createPartitionMap(final List<NotificationItem> notificationItems) {
 		final Map<String, List<Object>> partitionMap = new HashMap<>();
-		partitionMap.put(AbstractEmailFactory.TOPIC_ALL, new Vector<Object>());
+		partitionMap.put(AbstractEmailFactory.TOPIC_ALL, new Vector<>());
 		for (final NotificationItem notification : notificationItems) {
 			partitionMap.get(AbstractEmailFactory.TOPIC_ALL).add(notification);
 			final String classname = notification.getClass().getName();
@@ -113,7 +113,7 @@ public class NotificationDispatcher extends AbstractPollingDispatcher {
 			if (partitionMap.containsKey(classname)) {
 				partitionList = partitionMap.get(classname);
 			} else {
-				partitionList = new Vector<Object>();
+				partitionList = new Vector<>();
 				partitionMap.put(classname, partitionList);
 			}
 			partitionList.add(notification);
@@ -172,4 +172,5 @@ public class NotificationDispatcher extends AbstractPollingDispatcher {
 		}
 		return dataMap;
 	}
+
 }

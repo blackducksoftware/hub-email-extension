@@ -15,7 +15,6 @@ import com.blackducksoftware.integration.email.notifier.EmailEngine;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 
 public class ItemRouterTest {
-
 	private final static String RECEIVE_DATA = "receive data string";
 	private MockRouter router;
 	private EmailEngine engine;
@@ -45,4 +44,5 @@ public class ItemRouterTest {
 	public void testGetName() {
 		assertEquals(MockRouter.ROUTER_NAME, router.getName());
 	}
+
 }

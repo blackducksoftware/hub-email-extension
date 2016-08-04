@@ -12,7 +12,6 @@ import com.blackducksoftware.integration.hub.notification.NotificationService;
 import com.blackducksoftware.integration.hub.notification.api.RuleViolationNotificationItem;
 
 public class PolicyViolationRouter extends AbstractEmailRouter<RuleViolationNotificationItem> {
-
 	public PolicyViolationRouter(final EmailMessagingService emailMessagingService,
 			final CustomerProperties customerProperties, final NotificationService notificationService,
 			final EmailTaskData taskData) {
@@ -25,4 +24,5 @@ public class PolicyViolationRouter extends AbstractEmailRouter<RuleViolationNoti
 		final Map<String, Object> emailDataMap = new HashMap<>();
 		return new EmailData(addresses, emailDataMap);
 	}
+
 }

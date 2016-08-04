@@ -1,36 +1,50 @@
-Subject - BDS Hub: Security Vulnerability Notification for Component Name in Project Name
-Subject - BDS Hub: Policy Violation Notification for Component Name in Project Name
-Subject - BDS Hub: Policy Violation Override Notification for Component Name in Project Name
-Subject - BDS Hub: Policy Violation Override Cancellation Notification for Component Name in Project Name
+BDS Hub: Daily Digest
 
 Dear ${hubUserName},
 
 <#if policyViolations?? && policyViolations?size gt 0>
-  The Black Duck Hub's monitoring system captured the following policy violation -
+  The Black Duck Hub's monitoring system captured one or more policy violations -
+  <br />
 
   <ul style="list-style-type: none;">
     <#list policyViolations as policyViolation>
       <li>
-      Project Name/Version/Component Name/Component Version
-Policy Name in Violation
-Policy Conditions
-<Actual Policy Logic> text display
+        ${policyViolation.projectName} / ${policyViolation.projectVersionName} / ${policyViolation.componentName} / ${policyViolation.componentVersionName}
+        <br />
+        ---don't know how to get these values---
+        <br />
+        Policy Name in Violation
+        <br />
+        Policy Conditions
+        <br />
+        Actual Policy Logic text display
+        <br />
+        ---end unknown values---
       </li>
     </#list>
   </ul>
 </#if>
 
 <#if policyViolationOverrides?? && policyViolationOverrides?size gt 0>
-  The Black Duck Hub's monitoring system captured the following override of a policy violation -
+  The Black Duck Hub's monitoring system captured the one or more policy violation overrides -
+  <br />
 
   <ul style="list-style-type: none;">
     <#list policyViolationOverrides as policyViolationOverride>
       <li>
-      Project Name/Version/Component Name/Component Version was overridden
-      Policy Name in Violation
-      Policy Conditions
-      <Actual Policy Logic> text display
-      Override by <User Name>
+        ${policyViolationOverride.projectName} / ${policyViolationOverride.projectVersionName} / ${policyViolationOverride.componentName} / ${policyViolationOverride.componentVersionName} was overriden
+        <br />
+        ---don't know how to get these values---
+        <br />
+        Policy Name in Violation
+        <br />
+        Policy Conditions
+        <br />
+        Actual Policy Logic text display
+        <br />
+        ---end unknown values---
+        <br />
+        Override by ${policyViolationOverride.firstName} ${policyViolationOverride.lastName}
       </li>
     </#list>
   </ul>
@@ -38,10 +52,12 @@ Policy Conditions
 
 <#if policyViolationOverrideCancellations?? && policyViolationOverrideCancellations?size gt 0>
   The Black Duck Hub's monitoring system captured the following cancellation of an override of a policy violation -
+  <br />
 
   <ul style="list-style-type: none;">
     <#list policyViolationOverrideCancellations as policyViolationOverrideCancellation>
       <li>
+        ---don't know how to get ANY values---
       </li>
     </#list>
   </ul>
@@ -49,20 +65,33 @@ Policy Conditions
 
 <#if securityVulnerabilities?? && securityVulnerabilities?size gt 0>
   The Black Duck Hub's monitoring system captured the following security vulnerability -
+  <br />
 
   <ul style="list-style-type: none;">
     <#list securityVulnerabilities as securityVulnerability>
       <li>
-      Project Name/Version/Component Name/Version
-CVE Identifier
-Published Date
-Base Score
-Exploitability
-Impact Score
-Logged Date
+        ${securityVulnerability.projectName} / ${securityVulnerability.projectVersionName} / ${securityVulnerability.componentName} / ${securityVulnerability.versionName}
+        <br />
+        ---don't know how to get these values---
+        <br />
+        CVE Identifier
+        <br />
+        Published Date
+        <br />
+        Base Score
+        <br />
+        Exploitability
+        <br />
+        Impact Score
+        <br />
+        Logged Date
+        <br />
+        ---end unknown values---
       </li>
     </#list>
   </ul>
 </#if>
 
 To manage these items and/or see more details, please log in to your <a href="${hubServerUrl}">Black Duck Hub</a>
+<br />
+<img src="cid:${logo_image}" />

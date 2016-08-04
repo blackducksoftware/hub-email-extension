@@ -3,7 +3,6 @@ package com.blackducksoftware.integration.email.notifier.routers;
 import java.util.List;
 
 public class EmailTaskData {
-
 	private final List<Object> data;
 
 	public EmailTaskData(final List<Object> data) {
@@ -13,4 +12,5 @@ public class EmailTaskData {
 	public List<Object> getData() {
 		return data;
 	}
+
 }
