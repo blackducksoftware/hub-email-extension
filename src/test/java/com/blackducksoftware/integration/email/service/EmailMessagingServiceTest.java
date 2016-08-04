@@ -13,12 +13,12 @@ import javax.mail.MessagingException;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.blackducksoftware.integration.email.Application;
+import com.blackducksoftware.integration.email.notifier.EmailEngine;
 
 import freemarker.template.TemplateException;
 
 public class EmailMessagingServiceTest {
-	private Application app;
+	private EmailEngine engine;
 
 	@Before
 	public void init() throws Exception {
@@ -26,7 +26,7 @@ public class EmailMessagingServiceTest {
 		final URL propFileUrl = classLoader.getResource("test.properties");
 		final File file = new File(propFileUrl.toURI());
 		System.setProperty("customer.properties", file.getCanonicalPath());
-		app = new Application();
+		engine = new EmailEngine();
 	}
 
 	@Test
@@ -37,6 +37,6 @@ public class EmailMessagingServiceTest {
 		model.put("message", "this should have html and plain text parts");
 		model.put("items", Arrays.asList("apple", "orange", "pear", "banana"));
 
-		app.emailMessagingService.sendEmailMessage(app.customerProperties, recipients, model, "htmlTemplate.ftl");
+		engine.emailMessagingService.sendEmailMessage(engine.customerProperties, recipients, model, "htmlTemplate.ftl");
 	}
 }

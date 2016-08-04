@@ -10,15 +10,15 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.blackducksoftware.integration.email.Application;
 import com.blackducksoftware.integration.email.mock.MockRouter;
+import com.blackducksoftware.integration.email.notifier.EmailEngine;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 
 public class ItemRouterTest {
 
 	private final static String RECEIVE_DATA = "receive data string";
 	private MockRouter router;
-	private Application app;
+	private EmailEngine engine;
 
 	@Before
 	public void initTest() throws Exception {
@@ -26,11 +26,11 @@ public class ItemRouterTest {
 		final URL propFileUrl = classLoader.getResource("test.properties");
 		final File file = new File(propFileUrl.toURI());
 		System.setProperty("customer.properties", file.getCanonicalPath());
-		app = new Application();
+		engine = new EmailEngine();
 		final List<Object> data = new ArrayList<>();
 		data.add(RECEIVE_DATA);
 		final EmailTaskData taskData = new EmailTaskData(data);
-		router = new MockRouter(app.emailMessagingService, app.customerProperties, taskData, RECEIVE_DATA);
+		router = new MockRouter(engine.emailMessagingService, engine.customerProperties, taskData, RECEIVE_DATA);
 	}
 
 	@Test
