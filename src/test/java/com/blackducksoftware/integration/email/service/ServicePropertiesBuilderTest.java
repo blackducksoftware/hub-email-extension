@@ -153,4 +153,5 @@ public class ServicePropertiesBuilderTest {
 			assertEquals(existing, readProperty);
 		}
 	}
+
 }

@@ -39,4 +39,5 @@ public class EmailMessagingServiceTest {
 
 		engine.emailMessagingService.sendEmailMessage(engine.customerProperties, recipients, model, "htmlTemplate.ftl");
 	}
+
 }

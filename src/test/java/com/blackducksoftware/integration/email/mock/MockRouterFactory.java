@@ -11,7 +11,6 @@ import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
 
 public class MockRouterFactory extends AbstractEmailFactory {
-
 	public final static String TOPIC_KEY = "MockTopic";
 	private final String expectedData;
 
@@ -34,4 +33,5 @@ public class MockRouterFactory extends AbstractEmailFactory {
 		return new MockRouter(getEmailMessagingService(), getCustomerProperties(), getNotificationService(), data,
 				expectedData);
 	}
+
 }

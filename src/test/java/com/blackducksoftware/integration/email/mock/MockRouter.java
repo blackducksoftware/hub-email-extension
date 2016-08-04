@@ -13,7 +13,6 @@ import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
 
 public class MockRouter extends AbstractEmailRouter<String> {
-
 	public final static String ROUTER_NAME = "Mock Router";
 	private final String expectedData;
 
@@ -36,4 +35,5 @@ public class MockRouter extends AbstractEmailRouter<String> {
 		assertEquals(expectedData, item);
 		return null;
 	}
+
 }

@@ -15,7 +15,6 @@ import com.blackducksoftware.integration.email.mock.MockDispatcher;
 import com.blackducksoftware.integration.email.mock.MockRouterFactory;
 
 public class PollingDispatcherTest {
-
 	private final static String RECEIVE_DATA = "receive data string";
 	private MockRouterFactory router;
 	private MockDispatcher dispatcher;
@@ -56,4 +55,5 @@ public class PollingDispatcherTest {
 
 		dispatcher.stop();
 	}
+
 }

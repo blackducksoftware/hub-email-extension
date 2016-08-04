@@ -12,7 +12,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 public class EmailDataTest {
-
 	@Rule
 	public ExpectedException exception = ExpectedException.none();
 
@@ -43,4 +42,5 @@ public class EmailDataTest {
 		final Map<String, Object> model = null;
 		new EmailData(addresses, model);
 	}
+
 }
