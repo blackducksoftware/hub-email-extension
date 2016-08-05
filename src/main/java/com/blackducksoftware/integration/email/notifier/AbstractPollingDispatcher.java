@@ -89,8 +89,9 @@ public abstract class AbstractPollingDispatcher extends TimerTask {
 					factoryList = topicSubscriberMap.get(topic);
 				} else {
 					factoryList = new Vector<>();
+					topicSubscriberMap.put(topic, factoryList);
 				}
-				topicSubscriberMap.put(topic, factoryList);
+				factoryList.add(factory);
 			}
 		}
 	}
@@ -131,6 +132,7 @@ public abstract class AbstractPollingDispatcher extends TimerTask {
 			final List<AbstractEmailFactory> factoryList = topicSubscriberMap.get(topic);
 			final Iterator<AbstractEmailFactory> iterator = factoryList.iterator();
 			while (iterator.hasNext()) {
+				iterator.next();
 				iterator.remove();
 			}
 		}

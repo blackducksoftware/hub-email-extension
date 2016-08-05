@@ -39,7 +39,7 @@ public class PollingDispatcherTest {
 
 	@Test
 	public void testRouterExecution() throws Exception {
-		router = new MockRouterFactory(null, null, null, RECEIVE_DATA);
+		router = new MockRouterFactory(null, null, null, null, RECEIVE_DATA);
 		dispatcher = new MockDispatcher();
 		dispatcher.init();
 		dispatcher.setExecutorService(executorService);

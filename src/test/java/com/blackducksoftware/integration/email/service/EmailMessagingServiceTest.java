@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,9 +20,11 @@ import com.blackducksoftware.integration.email.notifier.EmailEngine;
 import freemarker.template.TemplateException;
 
 public class EmailMessagingServiceTest {
-	// private static final List<String> recipients = Collections.emptyList();
-	private static final List<String> recipients = Arrays.asList("ekerwin@blackducksoftware.com",
-			"akamen@blackducksoftware.com", "psantos@blackducksoftware.com", "eric.kerwin@gmail.com");
+	private static final List<String> recipients = Collections.emptyList();
+	// private static final List<String> recipients =
+	// Arrays.asList("ekerwin@blackducksoftware.com",
+	// "akamen@blackducksoftware.com", "psantos@blackducksoftware.com",
+	// "eric.kerwin@gmail.com");
 	// private static final List<String> recipients =
 	// Arrays.asList("ekerwin@blackducksoftware.com");
 	// private static final List<String> recipients =

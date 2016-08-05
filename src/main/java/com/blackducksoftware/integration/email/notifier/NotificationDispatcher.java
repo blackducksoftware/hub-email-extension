@@ -68,15 +68,14 @@ public class NotificationDispatcher extends AbstractPollingDispatcher {
 
 	@Override
 	public Map<String, EmailTaskData> fetchData() {
-		Map<String, EmailTaskData> dataMap = new HashMap<>();
+		final List<NotificationItem> itemList;
 		if (hubServerConfig != null) {
 			final Date startDate = findStartDate();
-			dataMap = fetchNotifications(startDate, getCurrentRun());
+			itemList = fetchNotifications(startDate, getCurrentRun());
 		} else {
-			dataMap = createNotificationTestData();
+			itemList = createNotificationTestData();
 		}
-
-		return dataMap;
+		return partitionData(itemList);
 	}
 
 	private Date findStartDate() {
@@ -87,20 +86,26 @@ public class NotificationDispatcher extends AbstractPollingDispatcher {
 		}
 	}
 
-	private Map<String, EmailTaskData> fetchNotifications(final Date startDate, final Date endDate) {
-		final Map<String, EmailTaskData> items = new HashMap<>();
+	private List<NotificationItem> fetchNotifications(final Date startDate, final Date endDate) {
+		List<NotificationItem> items = new Vector<>();
 		try {
 			final NotificationDateRange dateRange = new NotificationDateRange(startDate, endDate);
-			final List<NotificationItem> notificationItems = notificationService.fetchNotifications(dateRange);
-			final Map<String, List<Object>> partitionMap = createPartitionMap(notificationItems);
-			final Set<String> topicSet = partitionMap.keySet();
-			for (final String topic : topicSet) {
-				items.put(topic, new EmailTaskData(partitionMap.get(topic)));
-			}
+			items = notificationService.fetchNotifications(dateRange);
 		} catch (ParseException | NotificationServiceException e) {
 			logger.error("Error occurred fetching notifications.", e);
 		}
 		return items;
+	}
+
+	private Map<String, EmailTaskData> partitionData(final List<NotificationItem> itemList) {
+		final Map<String, EmailTaskData> dataMap = new HashMap<>();
+		final Map<String, List<Object>> partitionMap = createPartitionMap(itemList);
+		final Set<String> topicSet = partitionMap.keySet();
+		for (final String topic : topicSet) {
+			dataMap.put(topic, new EmailTaskData(partitionMap.get(topic)));
+		}
+
+		return dataMap;
 	}
 
 	private Map<String, List<Object>> createPartitionMap(final List<NotificationItem> notificationItems) {
@@ -122,9 +127,8 @@ public class NotificationDispatcher extends AbstractPollingDispatcher {
 		return partitionMap;
 	}
 
-	private Map<String, EmailTaskData> createNotificationTestData() {
-		final Map<String, EmailTaskData> dataMap = new HashMap<>();
-		final List<Object> list = new Vector<>();
+	private List<NotificationItem> createNotificationTestData() {
+		final List<NotificationItem> list = new Vector<>();
 		for (int selectedClass = 0; selectedClass < 3; selectedClass++) {
 			final Class<? extends NotificationItem> clazz;
 			final List<String> allow = new ArrayList<>();
@@ -160,17 +164,16 @@ public class NotificationDispatcher extends AbstractPollingDispatcher {
 					try {
 						final Constructor<?> constructor = clazz.getDeclaredConstructor(MetaInformation.class);
 						if (constructor != null) {
-							list.add(constructor.newInstance(meta));
+							list.add((NotificationItem) constructor.newInstance(meta));
 						}
 					} catch (final InstantiationException | IllegalAccessException | NoSuchMethodException
 							| SecurityException | IllegalArgumentException | InvocationTargetException e) {
 						logger.error("GENERATING TEST DATA: Error", e);
 					}
 				}
-				dataMap.put(clazz.getName(), new EmailTaskData(list));
 			}
 		}
-		return dataMap;
+		return list;
 	}
 
 }

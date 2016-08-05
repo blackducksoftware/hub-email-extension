@@ -1,0 +1,26 @@
+package com.blackducksoftware.integration.email.transforms;
+
+import java.util.List;
+import java.util.Map;
+
+import com.blackducksoftware.integration.hub.notification.NotificationService;
+import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
+
+public abstract class AbstractTransform {
+	public final String KEY_PROJECT_NAME = "projectName";
+	public final String KEY_PROJECT_VERSION = "projectVersion";
+	public final String KEY_COMPONENT_NAME = "componentName";
+	public final String KEY_COMPONENT_VERSION = "componentVersion";
+
+	private final NotificationService notificationService;
+
+	public AbstractTransform(final NotificationService notificationService) {
+		this.notificationService = notificationService;
+	}
+
+	public NotificationService getNotificationService() {
+		return notificationService;
+	}
+
+	public abstract List<Map<String, Object>> transform(NotificationItem item);
+}
