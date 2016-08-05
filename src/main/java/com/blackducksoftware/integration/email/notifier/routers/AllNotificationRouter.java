@@ -31,9 +31,6 @@ public class AllNotificationRouter extends AbstractEmailRouter<NotificationItem>
 	@Override
 	public EmailData transform(final List<NotificationItem> data) {
 		final List<String> addresses = new ArrayList<>();
-		addresses.add("psantos@blackducksoftware.com");
-		// addresses.add("akamen@blackducksoftware.com");
-		// addresses.add("ekerwin@blackducksoftware.com");
 		final Map<String, Object> templateMap = initTempateMap();
 		final Map<String, AbstractTransform> transformMap = getTransformMap();
 		for (final NotificationItem notification : data) {

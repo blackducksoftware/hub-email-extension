@@ -35,6 +35,14 @@ dependencies {
 }
 
 jar {
+    manifest { 
+        attributes "Main-Class": "com.blackducksoftware.integration.email.Application"
+    }  
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    
 	sourceSets {
 		main {
 			resources {
