@@ -26,13 +26,12 @@ public class PolicyViolationTransform extends AbstractPolicyTransform {
 	@Override
 	public List<Map<String, Object>> transform(final NotificationItem item) {
 		List<Map<String, Object>> templateData = new ArrayList<>();
-
-		final RuleViolationNotificationItem policyViolation = (RuleViolationNotificationItem) item;
-		final String projectName = policyViolation.getContent().getProjectName();
-		final List<ComponentVersionStatus> componentVersionList = policyViolation.getContent()
-				.getComponentVersionStatuses();
-		ReleaseItem releaseItem;
 		try {
+			final RuleViolationNotificationItem policyViolation = (RuleViolationNotificationItem) item;
+			final String projectName = policyViolation.getContent().getProjectName();
+			final List<ComponentVersionStatus> componentVersionList = policyViolation.getContent()
+					.getComponentVersionStatuses();
+			ReleaseItem releaseItem;
 			releaseItem = getNotificationService()
 					.getProjectReleaseItemFromProjectReleaseUrl(policyViolation.getContent().getProjectVersionLink());
 			templateData = handleNotification(projectName, componentVersionList, releaseItem);

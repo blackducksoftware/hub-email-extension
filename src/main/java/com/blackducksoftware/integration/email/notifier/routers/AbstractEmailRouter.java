@@ -23,6 +23,8 @@ public abstract class AbstractEmailRouter<T> implements Runnable {
 	public final String KEY_USER = "hubUserName";
 	public final String KEY_HUB_URL = "hubServerUrl";
 
+	public final static String TEMPLATE_DEFAULT = "htmlTemplate.ftl";
+
 	private final EmailMessagingService emailMessagingService;
 	private final EmailTaskData taskData;
 	private final CustomerProperties customerProperties;
@@ -56,14 +58,17 @@ public abstract class AbstractEmailRouter<T> implements Runnable {
 		final List<T> data = (List<T>) taskData.getData();
 		logger.info(
 				"Router " + getName() + ": Received notification(s). Total count: " + (data == null ? 0 : data.size()));
-		send(transform(data));
+
+		if (!data.isEmpty()) {
+			send(transform(data));
+		}
 	}
 
 	public void send(final EmailData data) {
 		try {
 			if (data != null && !data.getAddresses().isEmpty() && !data.getModel().isEmpty()) {
 				emailMessagingService.sendEmailMessage(customerProperties, data.getAddresses(), data.getModel(),
-						"htmlTemplate.ftl");
+						getTemplateName());
 			} else {
 				logger.info(
 						"Router " + getName() + ": Address list empty or missing content.  No emails drafted to send.");
@@ -72,6 +77,8 @@ public abstract class AbstractEmailRouter<T> implements Runnable {
 			logger.error("Error sending email..", e);
 		}
 	}
+
+	public abstract String getTemplateName();
 
 	public abstract EmailData transform(List<T> data);
 

@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import com.blackducksoftware.integration.email.mock.MockRouter;
 import com.blackducksoftware.integration.email.notifier.EmailEngine;
+import com.blackducksoftware.integration.email.notifier.routers.AbstractEmailRouter;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 
 public class ItemRouterTest {
@@ -45,4 +46,8 @@ public class ItemRouterTest {
 		assertEquals(MockRouter.ROUTER_NAME, router.getName());
 	}
 
+	@Test
+	public void testGetTemplateName() {
+		assertEquals(AbstractEmailRouter.TEMPLATE_DEFAULT, router.getTemplateName());
+	}
 }

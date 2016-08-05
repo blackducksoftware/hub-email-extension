@@ -39,4 +39,9 @@ public class MockRouter extends AbstractEmailRouter<String> {
 		return null;
 	}
 
+	@Override
+	public String getTemplateName() {
+		return TEMPLATE_DEFAULT;
+	}
+
 }

@@ -8,13 +8,11 @@ Dear ${hubUserName},
   <ul style="list-style-type: none;">
     <#list policyViolations as policyViolation>
       <li>
-        ${policyViolation.projectName} / ${policyViolation.projectVersionName} / ${policyViolation.componentName} / ${policyViolation.componentVersionName}
+        ${policyViolation.projectName} / ${policyViolation.projectVersionName} / ${policyViolation.componentName} / ${policyViolation.componentVersionName}     
+        <br />
+        Policy Name in Violation: ${policyViolation.policyName}
+        <br />
         <!--
-        <br />
-        ---don't know how to get these values---
-        <br />
-        Policy Name in Violation
-        <br />
         Policy Conditions
         <br />
         Actual Policy Logic text display
@@ -34,12 +32,11 @@ Dear ${hubUserName},
     <#list policyViolationOverrides as policyViolationOverride>
       <li>
         ${policyViolationOverride.projectName} / ${policyViolationOverride.projectVersionName} / ${policyViolationOverride.componentName} / ${policyViolationOverride.componentVersionName} was overriden
+        <br />
+        <br />
+        Policy Name in Violation: ${policyViolationOverride.policyName}
+        <br />
         <!--
-        <br />
-        ---don't know how to get these values---
-        <br />
-        Policy Name in Violation
-        <br />
         Policy Conditions
         <br />
         Actual Policy Logic text display

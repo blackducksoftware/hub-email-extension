@@ -31,6 +31,9 @@ public class AllNotificationRouter extends AbstractEmailRouter<NotificationItem>
 	@Override
 	public EmailData transform(final List<NotificationItem> data) {
 		final List<String> addresses = new ArrayList<>();
+		addresses.add("psantos@blackducksoftware.com");
+		// addresses.add("akamen@blackducksoftware.com");
+		// addresses.add("ekerwin@blackducksoftware.com");
 		final Map<String, Object> templateMap = initTempateMap();
 		final Map<String, AbstractTransform> transformMap = getTransformMap();
 		for (final NotificationItem notification : data) {
@@ -80,8 +83,10 @@ public class AllNotificationRouter extends AbstractEmailRouter<NotificationItem>
 		final List<Map<String, Object>> policyOverrides = (List<Map<String, Object>>) templateMap
 				.get(LIST_POLICY_OVERRIDES);
 
-		final List<Map<String, Object>> policyOverrideCancels = (List<Map<String, Object>>) templateMap
-				.get(LIST_POLICY_OVERRIDE_CANCEL);
+		policyOverrides.addAll(converter.transform(item));
+		// final List<Map<String, Object>> policyOverrideCancels =
+		// (List<Map<String, Object>>) templateMap
+		// .get(LIST_POLICY_OVERRIDE_CANCEL);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -90,5 +95,10 @@ public class AllNotificationRouter extends AbstractEmailRouter<NotificationItem>
 		final List<Map<String, Object>> vulnerabilityList = (List<Map<String, Object>>) templateMap
 				.get(LIST_VULNERABILITIES);
 		vulnerabilityList.addAll(converter.transform(item));
+	}
+
+	@Override
+	public String getTemplateName() {
+		return "dailyDigest.ftl";
 	}
 }

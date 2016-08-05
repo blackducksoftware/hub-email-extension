@@ -13,10 +13,13 @@ import com.blackducksoftware.integration.hub.component.api.BomComponentVersionPo
 import com.blackducksoftware.integration.hub.component.api.ComponentVersionStatus;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
 import com.blackducksoftware.integration.hub.notification.NotificationServiceException;
+import com.blackducksoftware.integration.hub.policy.api.PolicyRule;
 import com.blackducksoftware.integration.hub.version.api.ReleaseItem;
 
 public abstract class AbstractPolicyTransform extends AbstractTransform {
 	public final static String KEY_POLICY_NAME = "policyName";
+	public final static String KEY_FIRST_NAME = "firstName";
+	public final static String KEY_LAST_NAME = "lastName";
 	private final Logger logger = LoggerFactory.getLogger(AbstractPolicyTransform.class);
 
 	public AbstractPolicyTransform(final NotificationService notificationService) {
@@ -33,18 +36,24 @@ public abstract class AbstractPolicyTransform extends AbstractTransform {
 				final String policyStatusUrl = componentVersion.getBomComponentVersionPolicyStatusLink();
 				final BomComponentVersionPolicyStatus bomComponentVersionPolicyStatus = getNotificationService()
 						.getPolicyStatus(policyStatusUrl);
-				final List<String> monitoredUrls = getRules(
+				final List<String> ruleList = getRules(
 						bomComponentVersionPolicyStatus.getLinks(BomComponentVersionPolicyStatus.POLICY_RULE_URL));
-				if (monitoredUrls == null || monitoredUrls.isEmpty()) {
+				if (ruleList == null || ruleList.isEmpty()) {
 					logger.warn(
 							"No configured policy violations matching this notification found; skipping this notification");
 				} else {
+					final List<String> ruleNameList = new ArrayList<>();
+					for (final String ruleUrl : ruleList) {
+						final PolicyRule rule = getNotificationService().getPolicyRule(ruleUrl);
+						logger.debug("Policy Rule : " + rule);
+						ruleNameList.add(rule.getName());
+					}
 					final Map<String, Object> itemMap = new HashMap<>();
 					itemMap.put(KEY_PROJECT_NAME, projectName);
 					itemMap.put(KEY_PROJECT_VERSION, releaseItem.getVersionName());
 					itemMap.put(KEY_COMPONENT_NAME, componentVersion.getComponentName());
 					itemMap.put(KEY_COMPONENT_VERSION, componentVersionName);
-					itemMap.put(KEY_POLICY_NAME, StringUtils.join(monitoredUrls, ","));
+					itemMap.put(KEY_POLICY_NAME, StringUtils.join(ruleNameList, ", "));
 					templateData.add(itemMap);
 				}
 

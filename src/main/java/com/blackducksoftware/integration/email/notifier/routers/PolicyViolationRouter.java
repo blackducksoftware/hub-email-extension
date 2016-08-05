@@ -26,4 +26,9 @@ public class PolicyViolationRouter extends AbstractEmailRouter<RuleViolationNoti
 		return new EmailData(addresses, emailDataMap);
 	}
 
+	@Override
+	public String getTemplateName() {
+		return TEMPLATE_DEFAULT;
+	}
+
 }

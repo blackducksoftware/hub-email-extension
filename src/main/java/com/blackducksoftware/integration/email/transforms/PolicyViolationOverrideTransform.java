@@ -12,7 +12,7 @@ import com.blackducksoftware.integration.hub.exception.UnexpectedHubResponseExce
 import com.blackducksoftware.integration.hub.notification.NotificationService;
 import com.blackducksoftware.integration.hub.notification.NotificationServiceException;
 import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
-import com.blackducksoftware.integration.hub.notification.api.RuleViolationNotificationItem;
+import com.blackducksoftware.integration.hub.notification.api.PolicyOverrideNotificationItem;
 import com.blackducksoftware.integration.hub.version.api.ReleaseItem;
 
 public class PolicyViolationOverrideTransform extends AbstractPolicyTransform {
@@ -27,15 +27,27 @@ public class PolicyViolationOverrideTransform extends AbstractPolicyTransform {
 	public List<Map<String, Object>> transform(final NotificationItem item) {
 		List<Map<String, Object>> templateData = new ArrayList<>();
 
-		final RuleViolationNotificationItem policyViolation = (RuleViolationNotificationItem) item;
-		final String projectName = policyViolation.getContent().getProjectName();
-		final List<ComponentVersionStatus> componentVersionList = policyViolation.getContent()
-				.getComponentVersionStatuses();
 		ReleaseItem releaseItem;
 		try {
+			final PolicyOverrideNotificationItem policyViolation = (PolicyOverrideNotificationItem) item;
+
+			final String projectName = policyViolation.getContent().getProjectName();
+			final List<ComponentVersionStatus> componentVersionList = new ArrayList<>();
+			final ComponentVersionStatus componentStatus = new ComponentVersionStatus();
+			componentStatus.setBomComponentVersionPolicyStatusLink(
+					policyViolation.getContent().getBomComponentVersionPolicyStatusLink());
+			componentStatus.setComponentName(policyViolation.getContent().getComponentName());
+			componentStatus.setComponentVersionLink(policyViolation.getContent().getComponentVersionLink());
+
+			componentVersionList.add(componentStatus);
+
 			releaseItem = getNotificationService()
 					.getProjectReleaseItemFromProjectReleaseUrl(policyViolation.getContent().getProjectVersionLink());
 			templateData = handleNotification(projectName, componentVersionList, releaseItem);
+			final Map<String, Object> templateMap = templateData.get(0);
+			templateMap.put(KEY_FIRST_NAME, policyViolation.getContent().getFirstName());
+			templateMap.put(KEY_LAST_NAME, policyViolation.getContent().getLastName());
+
 		} catch (NotificationServiceException | UnexpectedHubResponseException e) {
 			logger.error("Error Transforming: " + item, e);
 		}
