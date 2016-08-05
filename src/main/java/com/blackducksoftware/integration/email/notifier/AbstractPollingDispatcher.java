@@ -132,6 +132,7 @@ public abstract class AbstractPollingDispatcher extends TimerTask {
 			final List<AbstractEmailFactory> factoryList = topicSubscriberMap.get(topic);
 			final Iterator<AbstractEmailFactory> iterator = factoryList.iterator();
 			while (iterator.hasNext()) {
+				iterator.next();
 				iterator.remove();
 			}
 		}
