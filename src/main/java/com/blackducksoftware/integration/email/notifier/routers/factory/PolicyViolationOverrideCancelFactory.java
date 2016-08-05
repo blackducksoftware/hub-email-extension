@@ -14,7 +14,6 @@ import com.blackducksoftware.integration.hub.notification.NotificationService;
 import com.blackducksoftware.integration.hub.notification.api.PolicyOverrideNotificationItem;
 
 public class PolicyViolationOverrideCancelFactory extends AbstractEmailFactory {
-
 	public PolicyViolationOverrideCancelFactory(final EmailMessagingService emailMessagingService,
 			final CustomerProperties customerProperties, final NotificationService notificationService,
 			final Map<String, AbstractTransform> transformMap) {
@@ -34,4 +33,5 @@ public class PolicyViolationOverrideCancelFactory extends AbstractEmailFactory {
 		topicSet.add(PolicyOverrideNotificationItem.class.getName());
 		return topicSet;
 	}
+
 }

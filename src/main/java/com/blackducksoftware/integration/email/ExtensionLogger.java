@@ -6,7 +6,6 @@ import com.blackducksoftware.integration.hub.logging.IntLogger;
 import com.blackducksoftware.integration.hub.logging.LogLevel;
 
 public class ExtensionLogger extends IntLogger {
-
 	private final Logger logger;
 
 	public ExtensionLogger(final Logger logger) {
@@ -65,7 +64,6 @@ public class ExtensionLogger extends IntLogger {
 
 	@Override
 	public LogLevel getLogLevel() {
-
 		if (logger.isDebugEnabled()) {
 			return LogLevel.DEBUG;
 		} else if (logger.isTraceEnabled()) {
@@ -80,4 +78,5 @@ public class ExtensionLogger extends IntLogger {
 			return LogLevel.OFF;
 		}
 	}
+
 }

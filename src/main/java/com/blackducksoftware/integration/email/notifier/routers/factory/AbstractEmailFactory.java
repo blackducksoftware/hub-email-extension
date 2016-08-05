@@ -11,7 +11,6 @@ import com.blackducksoftware.integration.email.transforms.AbstractTransform;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
 
 public abstract class AbstractEmailFactory {
-
 	public final static String TOPIC_ALL = "all";
 
 	private final EmailMessagingService emailMessagingService;
@@ -47,4 +46,5 @@ public abstract class AbstractEmailFactory {
 	public abstract Set<String> getSubscriberTopics();
 
 	public abstract AbstractEmailRouter<?> createInstance(EmailTaskData data);
+
 }

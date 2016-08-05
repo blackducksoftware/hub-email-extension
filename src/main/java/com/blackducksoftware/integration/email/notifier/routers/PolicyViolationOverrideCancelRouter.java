@@ -13,7 +13,6 @@ import com.blackducksoftware.integration.hub.notification.NotificationService;
 import com.blackducksoftware.integration.hub.notification.api.PolicyOverrideNotificationItem;
 
 public class PolicyViolationOverrideCancelRouter extends AbstractEmailRouter<PolicyOverrideNotificationItem> {
-
 	public PolicyViolationOverrideCancelRouter(final EmailMessagingService emailMessagingService,
 			final CustomerProperties customerProperties, final NotificationService notificationService,
 			final Map<String, AbstractTransform> transformMap, final EmailTaskData taskData) {
@@ -26,4 +25,5 @@ public class PolicyViolationOverrideCancelRouter extends AbstractEmailRouter<Pol
 		final Map<String, Object> emailDataMap = new HashMap<>();
 		return new EmailData(addresses, emailDataMap);
 	}
+
 }

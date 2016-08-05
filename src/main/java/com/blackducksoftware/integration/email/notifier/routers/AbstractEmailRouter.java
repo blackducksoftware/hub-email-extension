@@ -79,4 +79,5 @@ public abstract class AbstractEmailRouter<T> implements Runnable {
 	public void run() {
 		execute(taskData);
 	}
+
 }

@@ -14,7 +14,6 @@ import com.blackducksoftware.integration.hub.notification.NotificationService;
 import com.blackducksoftware.integration.hub.notification.api.RuleViolationNotificationItem;
 
 public class PolicyViolationFactory extends AbstractEmailFactory {
-
 	public PolicyViolationFactory(final EmailMessagingService emailMessagingService,
 			final CustomerProperties customerProperties, final NotificationService notificationService,
 			final Map<String, AbstractTransform> transformMap) {
@@ -34,4 +33,5 @@ public class PolicyViolationFactory extends AbstractEmailFactory {
 		topicSet.add(RuleViolationNotificationItem.class.getName());
 		return topicSet;
 	}
+
 }

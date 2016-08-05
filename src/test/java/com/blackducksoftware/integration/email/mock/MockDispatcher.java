@@ -9,7 +9,6 @@ import com.blackducksoftware.integration.email.notifier.AbstractPollingDispatche
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 
 public class MockDispatcher extends AbstractPollingDispatcher {
-
 	public final static String NAME = "Mock Dispatcher";
 	public final static int INTERVAL = 500;
 	public final static int DELAY = 0;
@@ -30,4 +29,5 @@ public class MockDispatcher extends AbstractPollingDispatcher {
 		map.put(MockRouterFactory.TOPIC_KEY, new EmailTaskData(data));
 		return map;
 	}
+
 }

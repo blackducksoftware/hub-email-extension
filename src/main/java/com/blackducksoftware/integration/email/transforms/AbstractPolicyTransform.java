@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import com.blackducksoftware.integration.hub.component.api.BomComponentVersionPolicyStatus;
 import com.blackducksoftware.integration.hub.component.api.ComponentVersionStatus;
@@ -44,7 +44,7 @@ public abstract class AbstractPolicyTransform extends AbstractTransform {
 					itemMap.put(KEY_PROJECT_VERSION, releaseItem.getVersionName());
 					itemMap.put(KEY_COMPONENT_NAME, componentVersion.getComponentName());
 					itemMap.put(KEY_COMPONENT_VERSION, componentVersionName);
-					itemMap.put(KEY_POLICY_NAME, StringUtils.collectionToCommaDelimitedString(monitoredUrls));
+					itemMap.put(KEY_POLICY_NAME, StringUtils.join(monitoredUrls, ","));
 					templateData.add(itemMap);
 				}
 

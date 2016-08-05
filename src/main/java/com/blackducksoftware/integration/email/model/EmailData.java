@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 public class EmailData {
-
 	private final List<String> addresses;
 	private final Map<String, Object> model;
 
@@ -71,4 +70,5 @@ public class EmailData {
 	public String toString() {
 		return "EmailData [addresses=" + addresses + ", model=" + model + "]";
 	}
+
 }
