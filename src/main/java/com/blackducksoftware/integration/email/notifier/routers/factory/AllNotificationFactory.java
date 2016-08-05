@@ -6,32 +6,30 @@ import java.util.Set;
 
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.notifier.routers.AbstractEmailRouter;
+import com.blackducksoftware.integration.email.notifier.routers.AllNotificationRouter;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
-import com.blackducksoftware.integration.email.notifier.routers.PolicyViolationRouter;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.transforms.AbstractTransform;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
-import com.blackducksoftware.integration.hub.notification.api.RuleViolationNotificationItem;
 
-public class PolicyViolationFactory extends AbstractEmailFactory {
+public class AllNotificationFactory extends AbstractEmailFactory {
 
-	public PolicyViolationFactory(final EmailMessagingService emailMessagingService,
+	public AllNotificationFactory(final EmailMessagingService emailMessagingService,
 			final CustomerProperties customerProperties, final NotificationService notificationService,
 			final Map<String, AbstractTransform> transformMap) {
 		super(emailMessagingService, customerProperties, notificationService, transformMap);
 	}
 
 	@Override
-	public AbstractEmailRouter<?> createInstance(final EmailTaskData data) {
-		final PolicyViolationRouter router = new PolicyViolationRouter(getEmailMessagingService(),
-				getCustomerProperties(), getNotificationService(), getTransformMap(), data);
-		return router;
+	public Set<String> getSubscriberTopics() {
+		final Set<String> topicSet = new HashSet<>();
+		topicSet.add(TOPIC_ALL);
+		return topicSet;
 	}
 
 	@Override
-	public Set<String> getSubscriberTopics() {
-		final Set<String> topicSet = new HashSet<>();
-		topicSet.add(RuleViolationNotificationItem.class.getName());
-		return topicSet;
+	public AbstractEmailRouter<?> createInstance(final EmailTaskData data) {
+		return new AllNotificationRouter(getEmailMessagingService(), getCustomerProperties(), getNotificationService(),
+				getTransformMap(), data);
 	}
 }

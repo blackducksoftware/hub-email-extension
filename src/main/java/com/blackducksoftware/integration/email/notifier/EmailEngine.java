@@ -23,12 +23,13 @@ import org.springframework.web.client.RestTemplate;
 import com.blackducksoftware.integration.email.ExtensionLogger;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.notifier.routers.factory.AbstractEmailFactory;
-import com.blackducksoftware.integration.email.notifier.routers.factory.PolicyViolationFactory;
-import com.blackducksoftware.integration.email.notifier.routers.factory.PolicyViolationOverrideCancelFactory;
-import com.blackducksoftware.integration.email.notifier.routers.factory.PolicyViolationOverrideFactory;
-import com.blackducksoftware.integration.email.notifier.routers.factory.VulnerabilityFactory;
+import com.blackducksoftware.integration.email.notifier.routers.factory.AllNotificationFactory;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.service.properties.HubServerBeanConfiguration;
+import com.blackducksoftware.integration.email.transforms.AbstractTransform;
+import com.blackducksoftware.integration.email.transforms.PolicyViolationOverrideTransform;
+import com.blackducksoftware.integration.email.transforms.PolicyViolationTransform;
+import com.blackducksoftware.integration.email.transforms.VulnerabilityTransform;
 import com.blackducksoftware.integration.hub.HubIntRestService;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
 import com.blackducksoftware.integration.hub.exception.EncryptionException;
@@ -64,6 +65,7 @@ public class EmailEngine {
 	public final Properties appProperties;
 	public final CustomerProperties customerProperties;
 	public final NotificationService notificationService;
+	public final Map<String, AbstractTransform> transformMap;
 
 	public EmailEngine() throws IOException, EncryptionException, URISyntaxException, BDRestException {
 		restTemplate = new RestTemplate();
@@ -78,6 +80,7 @@ public class EmailEngine {
 		executorService = createExecutorService();
 		emailMessagingService = createEmailMessagingService();
 		notificationService = createNotificationService();
+		transformMap = createTransformMap();
 		routerFactoryList = createRouterFactoryList();
 		notificationDispatcher = createDispatcher();
 
@@ -132,12 +135,19 @@ public class EmailEngine {
 
 	private List<AbstractEmailFactory> createRouterFactoryList() {
 		final List<AbstractEmailFactory> factoryList = new Vector<>();
-		factoryList.add(new PolicyViolationFactory(emailMessagingService, customerProperties, notificationService));
-		factoryList.add(new PolicyViolationOverrideCancelFactory(emailMessagingService, customerProperties,
-				notificationService));
-		factoryList.add(
-				new PolicyViolationOverrideFactory(emailMessagingService, customerProperties, notificationService));
-		factoryList.add(new VulnerabilityFactory(emailMessagingService, customerProperties, notificationService));
+		factoryList.add(new AllNotificationFactory(emailMessagingService, customerProperties, notificationService,
+				transformMap));
+		// factoryList.add(new PolicyViolationFactory(emailMessagingService,
+		// customerProperties, notificationService));
+		// factoryList.add(new
+		// PolicyViolationOverrideCancelFactory(emailMessagingService,
+		// customerProperties,
+		// notificationService));
+		// factoryList.add(
+		// new PolicyViolationOverrideFactory(emailMessagingService,
+		// customerProperties, notificationService));
+		// factoryList.add(new VulnerabilityFactory(emailMessagingService,
+		// customerProperties, notificationService));
 
 		return factoryList;
 	}
@@ -186,5 +196,16 @@ public class EmailEngine {
 		final HubItemsService<NotificationItem> hubItemsService = new HubItemsService<>(restConnection,
 				NotificationItem.class, typeToken, typeToSubclassMap);
 		return hubItemsService;
+	}
+
+	private Map<String, AbstractTransform> createTransformMap() {
+		final Map<String, AbstractTransform> transformMap = new HashMap<>();
+		transformMap.put(RuleViolationNotificationItem.class.getName(),
+				new PolicyViolationTransform(notificationService));
+		transformMap.put(PolicyOverrideNotificationItem.class.getName(),
+				new PolicyViolationOverrideTransform(notificationService));
+		transformMap.put(VulnerabilityNotificationItem.class.getName(),
+				new VulnerabilityTransform(notificationService));
+		return transformMap;
 	}
 }

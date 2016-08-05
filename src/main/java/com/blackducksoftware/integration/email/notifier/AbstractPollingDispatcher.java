@@ -89,8 +89,9 @@ public abstract class AbstractPollingDispatcher extends TimerTask {
 					factoryList = topicSubscriberMap.get(topic);
 				} else {
 					factoryList = new Vector<>();
+					topicSubscriberMap.put(topic, factoryList);
 				}
-				topicSubscriberMap.put(topic, factoryList);
+				factoryList.add(factory);
 			}
 		}
 	}
