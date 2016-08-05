@@ -8,17 +8,7 @@ Dear ${hubUserName},
   <ul style="list-style-type: none;">
     <#list policyViolations as policyViolation>
       <li>
-        ${policyViolation.projectName} / ${policyViolation.projectVersionName} / ${policyViolation.componentName} / ${policyViolation.componentVersionName}     
-        <br />
-        Policy Name in Violation: ${policyViolation.policyName}
-        <br />
-        <!--
-        Policy Conditions
-        <br />
-        Actual Policy Logic text display
-        <br />
-        ---end unknown values---
-        -->
+        ${policyViolation.projectName} / ${policyViolation.projectVersionName} / ${policyViolation.componentName} / ${policyViolation.componentVersionName} - ${policyViolation.policyName}
       </li>
     </#list>
   </ul>
@@ -31,20 +21,9 @@ Dear ${hubUserName},
   <ul style="list-style-type: none;">
     <#list policyViolationOverrides as policyViolationOverride>
       <li>
-        ${policyViolationOverride.projectName} / ${policyViolationOverride.projectVersionName} / ${policyViolationOverride.componentName} / ${policyViolationOverride.componentVersionName} was overriden
+        ${policyViolationOverride.projectName} / ${policyViolationOverride.projectVersionName} / ${policyViolationOverride.componentName} / ${policyViolationOverride.componentVersionName} - ${policyViolationOverride.policyName} was overridden
         <br />
-        <br />
-        Policy Name in Violation: ${policyViolationOverride.policyName}
-        <br />
-        <!--
-        Policy Conditions
-        <br />
-        Actual Policy Logic text display
-        <br />
-        ---end unknown values---
-        -->
-        <br />
-        Override by ${policyViolationOverride.firstName} ${policyViolationOverride.lastName}
+        Overridden by ${policyViolationOverride.firstName} ${policyViolationOverride.lastName}
       </li>
     </#list>
   </ul>
