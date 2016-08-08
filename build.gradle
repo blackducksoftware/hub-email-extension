@@ -1,6 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'maven'
+apply plugin: 'application'
 
 tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
 tasks.withType(GroovyCompile) { options.encoding = 'UTF-8' }
@@ -8,6 +9,8 @@ tasks.withType(GroovyCompile) { options.encoding = 'UTF-8' }
 group = 'com.blackducksoftware.integration'
 version = '1.0.0-SNAPSHOT'
 description = ''
+mainClassName = 'com.blackducksoftware.integration.email.Application'
+applicationDefaultJvmArgs = ['-Dlog4j.configurationFile=APP_HOME_VAR_TOKEN/lib/log4j.xml', '-Dcustomer.properties=APP_HOME_VAR_TOKEN/customer.properties']
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
@@ -34,15 +37,7 @@ dependencies {
 	testCompile 'junit:junit:4.12'
 }
 
-jar {
-    manifest { 
-        attributes "Main-Class": "com.blackducksoftware.integration.email.Application"
-    }  
-
-    from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-    
+jar { 
 	sourceSets {
 		main {
 			resources {
@@ -51,15 +46,29 @@ jar {
 				exclude 'images'
 				exclude '**/templates/*'
 				exclude 'templates'
+				exclude '**/lib/log4j.xml'
 			}
 		}
 	}
 }
 
-task buildDistribution(type: Zip, dependsOn: build) {
-	from ('src/main/resources/images/') {into 'hub-email-extension/images/'}
-	from('src/main/resources/templates/') {into 'hub-email-extension/templates/'}
-	from('src/main/resources/customer.properties') {into 'hub-email-extension'}
-
-	from(jar) {into 'hub-email-extension'}
+startScripts {
+  doLast {
+    unixScript.text = unixScript.text.replace("APP_HOME_VAR_TOKEN", "\$APP_HOME")
+    windowsScript.text = windowsScript.text.replace("APP_HOME_VAR_TOKEN", "%APP_HOME%")
+  }
 }
+
+distributions {
+    main {
+        contents {
+            from ('src/main/resources/images/') {into 'images/'}
+            from('src/main/resources/templates/') {into 'templates/'}
+            from('src/main/resources/customer.properties') {into ''}
+            from('src/main/resources/lib/log4j.xml') {into 'lib/'}  
+        }
+    }
+}
+
+
+

@@ -3,6 +3,8 @@ package com.blackducksoftware.integration.email.notifier;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -22,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import com.blackducksoftware.integration.email.ExtensionLogger;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.notifier.routers.factory.AbstractEmailFactory;
-import com.blackducksoftware.integration.email.notifier.routers.factory.DailyDigestFactory;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.service.properties.HubServerBeanConfiguration;
 import com.blackducksoftware.integration.email.transforms.AbstractTransform;
@@ -85,6 +86,10 @@ public class EmailEngine {
 		notificationDispatcher.start();
 	}
 
+	public void shutDown() {
+		notificationDispatcher.stop();
+	}
+
 	private Properties createAppProperties() throws IOException {
 		final Properties appProperties = new Properties();
 		final String customerPropertiesPath = System.getProperty("customer.properties");
@@ -129,22 +134,25 @@ public class EmailEngine {
 		return new EmailMessagingService(customerProperties, configuration);
 	}
 
+	@SuppressWarnings("unchecked")
 	private List<AbstractEmailFactory> createRouterFactoryList() {
 		final List<AbstractEmailFactory> factoryList = new Vector<>();
-		factoryList.add(new DailyDigestFactory(emailMessagingService, customerProperties, notificationService,
-				transformMap));
-		// factoryList.add(new PolicyViolationFactory(emailMessagingService,
-		// customerProperties, notificationService));
-		// factoryList.add(new
-		// PolicyViolationOverrideCancelFactory(emailMessagingService,
-		// customerProperties,
-		// notificationService));
-		// factoryList.add(
-		// new PolicyViolationOverrideFactory(emailMessagingService,
-		// customerProperties, notificationService));
-		// factoryList.add(new VulnerabilityFactory(emailMessagingService,
-		// customerProperties, notificationService));
 
+		final List<String> factoryClassNames = customerProperties.getFactoryClassNames();
+
+		for (final String className : factoryClassNames) {
+			Class<? extends AbstractEmailFactory> clazz;
+			try {
+				clazz = (Class<? extends AbstractEmailFactory>) Class.forName(className);
+				final Constructor<? extends AbstractEmailFactory> constructor = clazz.getConstructor(
+						EmailMessagingService.class, CustomerProperties.class, NotificationService.class, Map.class);
+				factoryList.add(constructor.newInstance(emailMessagingService, customerProperties, notificationService,
+						transformMap));
+			} catch (final ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException
+					| IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				logger.error("Error initializing router factory.", e);
+			}
+		}
 		return factoryList;
 	}
 
