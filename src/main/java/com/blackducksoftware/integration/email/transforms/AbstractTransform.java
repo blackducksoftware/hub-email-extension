@@ -8,9 +8,9 @@ import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
 
 public abstract class AbstractTransform {
 	public final String KEY_PROJECT_NAME = "projectName";
-	public final String KEY_PROJECT_VERSION = "projectVersion";
+	public final String KEY_PROJECT_VERSION = "projectVersionName";
 	public final String KEY_COMPONENT_NAME = "componentName";
-	public final String KEY_COMPONENT_VERSION = "componentVersion";
+	public final String KEY_COMPONENT_VERSION = "componentVersionName";
 
 	private final NotificationService notificationService;
 

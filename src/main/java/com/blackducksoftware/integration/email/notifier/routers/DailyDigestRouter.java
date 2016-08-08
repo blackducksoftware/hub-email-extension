@@ -15,14 +15,14 @@ import com.blackducksoftware.integration.hub.notification.api.PolicyOverrideNoti
 import com.blackducksoftware.integration.hub.notification.api.RuleViolationNotificationItem;
 import com.blackducksoftware.integration.hub.notification.api.VulnerabilityNotificationItem;
 
-public class AllNotificationRouter extends AbstractEmailRouter<NotificationItem> {
+public class DailyDigestRouter extends AbstractEmailRouter<NotificationItem> {
 
 	private final static String LIST_POLICY_VIOLATIONS = "policyViolations";
 	private final static String LIST_POLICY_OVERRIDES = "policyViolationOverrides";
 	private final static String LIST_POLICY_OVERRIDE_CANCEL = "policyViolationOverrides";
 	private final static String LIST_VULNERABILITIES = "securityVulnerabilities";
 
-	public AllNotificationRouter(final EmailMessagingService emailMessagingService,
+	public DailyDigestRouter(final EmailMessagingService emailMessagingService,
 			final CustomerProperties customerProperties, final NotificationService notificationService,
 			final Map<String, AbstractTransform> transformMap, final EmailTaskData taskData) {
 		super(emailMessagingService, customerProperties, notificationService, transformMap, taskData);
@@ -80,8 +80,10 @@ public class AllNotificationRouter extends AbstractEmailRouter<NotificationItem>
 		final List<Map<String, Object>> policyOverrides = (List<Map<String, Object>>) templateMap
 				.get(LIST_POLICY_OVERRIDES);
 
-		final List<Map<String, Object>> policyOverrideCancels = (List<Map<String, Object>>) templateMap
-				.get(LIST_POLICY_OVERRIDE_CANCEL);
+		policyOverrides.addAll(converter.transform(item));
+		// final List<Map<String, Object>> policyOverrideCancels =
+		// (List<Map<String, Object>>) templateMap
+		// .get(LIST_POLICY_OVERRIDE_CANCEL);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -90,5 +92,10 @@ public class AllNotificationRouter extends AbstractEmailRouter<NotificationItem>
 		final List<Map<String, Object>> vulnerabilityList = (List<Map<String, Object>>) templateMap
 				.get(LIST_VULNERABILITIES);
 		vulnerabilityList.addAll(converter.transform(item));
+	}
+
+	@Override
+	public String getTemplateName() {
+		return "dailyDigest.ftl";
 	}
 }

@@ -26,4 +26,9 @@ public class PolicyViolationOverrideCancelRouter extends AbstractEmailRouter<Pol
 		return new EmailData(addresses, emailDataMap);
 	}
 
+	@Override
+	public String getTemplateName() {
+		return TEMPLATE_DEFAULT;
+	}
+
 }

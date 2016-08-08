@@ -38,6 +38,7 @@ public class CustomerProperties {
 
 	public static final String JAVAMAIL_CONFIG_PREFIX = "hub.email.javamail.config.";
 	public static final String TEMPLATE_VARIABLE_PREFIX = "hub.email.template.variable.";
+	public static final String ROUTER_FACTORY_PREFIX = "email.service.router.factory.";
 
 	private final List<String> javamailConfigKeys = new ArrayList<>();
 	private final Map<String, String> suppliedJavamailConfigProperties = new HashMap<>();
@@ -45,6 +46,7 @@ public class CustomerProperties {
 	private final List<String> templateVariableKeys = new ArrayList<>();
 	private final Map<String, String> suppliedTemplateVariableProperties = new HashMap<>();
 	private final Properties appProperties;
+	private final List<String> factoryClassNames = new ArrayList<>();
 
 	public CustomerProperties(final Properties appProperties) {
 		if (appProperties == null) {
@@ -68,6 +70,8 @@ public class CustomerProperties {
 						templateVariableKeys.add(key);
 						final String cleanedKey = key.replace(TEMPLATE_VARIABLE_PREFIX, "");
 						suppliedTemplateVariableProperties.put(cleanedKey, value);
+					} else if (key.startsWith(ROUTER_FACTORY_PREFIX)) {
+						factoryClassNames.add(value);
 					}
 				}
 			}
@@ -160,5 +164,9 @@ public class CustomerProperties {
 
 	public String getEmailTemplateDirectory() {
 		return appProperties.getProperty(EMAIL_TEMPLATE_DIRECTORY);
+	}
+
+	public List<String> getFactoryClassNames() {
+		return factoryClassNames;
 	}
 }
