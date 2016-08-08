@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import com.blackducksoftware.integration.email.ExtensionLogger;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.notifier.routers.factory.AbstractEmailFactory;
-import com.blackducksoftware.integration.email.notifier.routers.factory.AllNotificationFactory;
+import com.blackducksoftware.integration.email.notifier.routers.factory.DailyDigestFactory;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.service.properties.HubServerBeanConfiguration;
 import com.blackducksoftware.integration.email.transforms.AbstractTransform;
@@ -131,7 +131,7 @@ public class EmailEngine {
 
 	private List<AbstractEmailFactory> createRouterFactoryList() {
 		final List<AbstractEmailFactory> factoryList = new Vector<>();
-		factoryList.add(new AllNotificationFactory(emailMessagingService, customerProperties, notificationService,
+		factoryList.add(new DailyDigestFactory(emailMessagingService, customerProperties, notificationService,
 				transformMap));
 		// factoryList.add(new PolicyViolationFactory(emailMessagingService,
 		// customerProperties, notificationService));

@@ -15,14 +15,14 @@ import com.blackducksoftware.integration.hub.notification.api.PolicyOverrideNoti
 import com.blackducksoftware.integration.hub.notification.api.RuleViolationNotificationItem;
 import com.blackducksoftware.integration.hub.notification.api.VulnerabilityNotificationItem;
 
-public class AllNotificationRouter extends AbstractEmailRouter<NotificationItem> {
+public class DailyDigestRouter extends AbstractEmailRouter<NotificationItem> {
 
 	private final static String LIST_POLICY_VIOLATIONS = "policyViolations";
 	private final static String LIST_POLICY_OVERRIDES = "policyViolationOverrides";
 	private final static String LIST_POLICY_OVERRIDE_CANCEL = "policyViolationOverrides";
 	private final static String LIST_VULNERABILITIES = "securityVulnerabilities";
 
-	public AllNotificationRouter(final EmailMessagingService emailMessagingService,
+	public DailyDigestRouter(final EmailMessagingService emailMessagingService,
 			final CustomerProperties customerProperties, final NotificationService notificationService,
 			final Map<String, AbstractTransform> transformMap, final EmailTaskData taskData) {
 		super(emailMessagingService, customerProperties, notificationService, transformMap, taskData);
