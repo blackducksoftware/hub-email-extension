@@ -1,9 +1,6 @@
 package com.blackducksoftware.integration.email.notifier;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -20,13 +17,8 @@ import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 import com.blackducksoftware.integration.email.notifier.routers.factory.AbstractEmailFactory;
 import com.blackducksoftware.integration.hub.api.notification.NotificationItem;
-import com.blackducksoftware.integration.hub.api.notification.PolicyOverrideNotificationItem;
-import com.blackducksoftware.integration.hub.api.notification.RuleViolationNotificationItem;
-import com.blackducksoftware.integration.hub.api.notification.VulnerabilityNotificationItem;
 import com.blackducksoftware.integration.hub.exception.NotificationServiceException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
-import com.blackducksoftware.integration.hub.meta.MetaInformation;
-import com.blackducksoftware.integration.hub.meta.MetaLink;
 import com.blackducksoftware.integration.hub.notification.NotificationDateRange;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
 
@@ -73,7 +65,7 @@ public class NotificationDispatcher extends AbstractPollingDispatcher {
 			final Date startDate = findStartDate();
 			itemList = fetchNotifications(startDate, getCurrentRun());
 		} else {
-			itemList = createNotificationTestData();
+			itemList = new Vector<>();
 		}
 		return partitionData(itemList);
 	}
@@ -126,54 +118,4 @@ public class NotificationDispatcher extends AbstractPollingDispatcher {
 
 		return partitionMap;
 	}
-
-	private List<NotificationItem> createNotificationTestData() {
-		final List<NotificationItem> list = new Vector<>();
-		for (int selectedClass = 0; selectedClass < 3; selectedClass++) {
-			final Class<? extends NotificationItem> clazz;
-			final List<String> allow = new ArrayList<>();
-			final List<MetaLink> links = new ArrayList<>();
-			final MetaInformation meta = new MetaInformation(allow, "", links);
-			final int amount = new Double(Math.random() * 100).intValue() * 1000;
-
-			final boolean generateEvents = new Double(Math.random() * 100).intValue() % 2 == 1;
-			if (generateEvents) {
-				switch (selectedClass) {
-				case 0: {
-					logger.info("GENERATING TEST DATA: Creating VulnerabilityNotificationItem: " + amount);
-					clazz = VulnerabilityNotificationItem.class;
-					break;
-				}
-				case 1: {
-					logger.info("GENERATING TEST DATA: Creating RuleViolationNotificationItem: " + amount);
-					clazz = RuleViolationNotificationItem.class;
-					break;
-				}
-				case 2: {
-					logger.info("GENERATING TEST DATA: Creating PolicyOverrideNotificationItem: " + amount);
-					clazz = PolicyOverrideNotificationItem.class;
-					break;
-				}
-				default: {
-					logger.info("GENERATING TEST DATA: Default Creating RuleViolationNotificationItem: " + amount);
-					clazz = RuleViolationNotificationItem.class;
-					break;
-				}
-				}
-				for (int index = 0; index < amount; index++) {
-					try {
-						final Constructor<?> constructor = clazz.getDeclaredConstructor(MetaInformation.class);
-						if (constructor != null) {
-							list.add((NotificationItem) constructor.newInstance(meta));
-						}
-					} catch (final InstantiationException | IllegalAccessException | NoSuchMethodException
-							| SecurityException | IllegalArgumentException | InvocationTargetException e) {
-						logger.error("GENERATING TEST DATA: Error", e);
-					}
-				}
-			}
-		}
-		return list;
-	}
-
 }
