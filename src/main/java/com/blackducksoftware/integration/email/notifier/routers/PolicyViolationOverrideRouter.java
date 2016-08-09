@@ -9,8 +9,8 @@ import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.EmailData;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.transforms.AbstractTransform;
+import com.blackducksoftware.integration.hub.api.notification.PolicyOverrideNotificationItem;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
-import com.blackducksoftware.integration.hub.notification.api.PolicyOverrideNotificationItem;
 
 public class PolicyViolationOverrideRouter extends AbstractEmailRouter<PolicyOverrideNotificationItem> {
 	public PolicyViolationOverrideRouter(final EmailMessagingService emailMessagingService,

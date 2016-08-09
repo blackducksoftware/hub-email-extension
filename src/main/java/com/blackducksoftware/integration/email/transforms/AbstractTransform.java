@@ -3,8 +3,8 @@ package com.blackducksoftware.integration.email.transforms;
 import java.util.List;
 import java.util.Map;
 
+import com.blackducksoftware.integration.hub.api.notification.NotificationItem;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
-import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
 
 public abstract class AbstractTransform {
 	public final String KEY_PROJECT_NAME = "projectName";

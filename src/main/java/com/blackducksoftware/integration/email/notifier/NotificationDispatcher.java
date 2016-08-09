@@ -19,16 +19,16 @@ import org.slf4j.LoggerFactory;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 import com.blackducksoftware.integration.email.notifier.routers.factory.AbstractEmailFactory;
+import com.blackducksoftware.integration.hub.api.notification.NotificationItem;
+import com.blackducksoftware.integration.hub.api.notification.PolicyOverrideNotificationItem;
+import com.blackducksoftware.integration.hub.api.notification.RuleViolationNotificationItem;
+import com.blackducksoftware.integration.hub.api.notification.VulnerabilityNotificationItem;
+import com.blackducksoftware.integration.hub.exception.NotificationServiceException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.meta.MetaInformation;
 import com.blackducksoftware.integration.hub.meta.MetaLink;
 import com.blackducksoftware.integration.hub.notification.NotificationDateRange;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
-import com.blackducksoftware.integration.hub.notification.NotificationServiceException;
-import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
-import com.blackducksoftware.integration.hub.notification.api.PolicyOverrideNotificationItem;
-import com.blackducksoftware.integration.hub.notification.api.RuleViolationNotificationItem;
-import com.blackducksoftware.integration.hub.notification.api.VulnerabilityNotificationItem;
 
 public class NotificationDispatcher extends AbstractPollingDispatcher {
 	public static long DEFAULT_POLLING_INTERVAL_SECONDS = 10;

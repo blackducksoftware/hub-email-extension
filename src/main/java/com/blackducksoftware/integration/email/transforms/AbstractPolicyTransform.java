@@ -9,12 +9,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.hub.component.api.BomComponentVersionPolicyStatus;
-import com.blackducksoftware.integration.hub.component.api.ComponentVersionStatus;
+import com.blackducksoftware.integration.hub.api.component.BomComponentVersionPolicyStatus;
+import com.blackducksoftware.integration.hub.api.component.ComponentVersionStatus;
+import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
+import com.blackducksoftware.integration.hub.api.version.ReleaseItem;
+import com.blackducksoftware.integration.hub.exception.NotificationServiceException;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
-import com.blackducksoftware.integration.hub.notification.NotificationServiceException;
-import com.blackducksoftware.integration.hub.policy.api.PolicyRule;
-import com.blackducksoftware.integration.hub.version.api.ReleaseItem;
 
 public abstract class AbstractPolicyTransform extends AbstractTransform {
 	public final static String KEY_POLICY_NAME = "policyName";

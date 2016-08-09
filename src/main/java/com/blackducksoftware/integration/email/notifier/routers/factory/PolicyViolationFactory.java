@@ -10,8 +10,8 @@ import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 import com.blackducksoftware.integration.email.notifier.routers.PolicyViolationRouter;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.transforms.AbstractTransform;
+import com.blackducksoftware.integration.hub.api.notification.RuleViolationNotificationItem;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
-import com.blackducksoftware.integration.hub.notification.api.RuleViolationNotificationItem;
 
 public class PolicyViolationFactory extends AbstractEmailFactory {
 	public PolicyViolationFactory(final EmailMessagingService emailMessagingService,
@@ -33,5 +33,4 @@ public class PolicyViolationFactory extends AbstractEmailFactory {
 		topicSet.add(RuleViolationNotificationItem.class.getName());
 		return topicSet;
 	}
-
 }

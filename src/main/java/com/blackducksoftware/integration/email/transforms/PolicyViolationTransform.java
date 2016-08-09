@@ -7,13 +7,13 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.hub.component.api.ComponentVersionStatus;
+import com.blackducksoftware.integration.hub.api.component.ComponentVersionStatus;
+import com.blackducksoftware.integration.hub.api.notification.NotificationItem;
+import com.blackducksoftware.integration.hub.api.notification.RuleViolationNotificationItem;
+import com.blackducksoftware.integration.hub.api.version.ReleaseItem;
+import com.blackducksoftware.integration.hub.exception.NotificationServiceException;
 import com.blackducksoftware.integration.hub.exception.UnexpectedHubResponseException;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
-import com.blackducksoftware.integration.hub.notification.NotificationServiceException;
-import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
-import com.blackducksoftware.integration.hub.notification.api.RuleViolationNotificationItem;
-import com.blackducksoftware.integration.hub.version.api.ReleaseItem;
 
 public class PolicyViolationTransform extends AbstractPolicyTransform {
 

@@ -9,11 +9,11 @@ import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.EmailData;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.transforms.AbstractTransform;
+import com.blackducksoftware.integration.hub.api.notification.NotificationItem;
+import com.blackducksoftware.integration.hub.api.notification.PolicyOverrideNotificationItem;
+import com.blackducksoftware.integration.hub.api.notification.RuleViolationNotificationItem;
+import com.blackducksoftware.integration.hub.api.notification.VulnerabilityNotificationItem;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
-import com.blackducksoftware.integration.hub.notification.api.NotificationItem;
-import com.blackducksoftware.integration.hub.notification.api.PolicyOverrideNotificationItem;
-import com.blackducksoftware.integration.hub.notification.api.RuleViolationNotificationItem;
-import com.blackducksoftware.integration.hub.notification.api.VulnerabilityNotificationItem;
 
 public class DailyDigestRouter extends AbstractEmailRouter<NotificationItem> {
 
