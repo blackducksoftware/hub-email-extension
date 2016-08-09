@@ -10,7 +10,7 @@ group = 'com.blackducksoftware.integration'
 version = '1.0.0-SNAPSHOT'
 description = ''
 mainClassName = 'com.blackducksoftware.integration.email.Application'
-applicationDefaultJvmArgs = ['-Dlog4j.configurationFile=APP_HOME_VAR_TOKEN/lib/log4j.xml', '-Dcustomer.properties=APP_HOME_VAR_TOKEN/customer.properties']
+applicationDefaultJvmArgs = ['-DAPP_HOME=APP_HOME_VAR_TOKEN', '-Dlog4j.configurationFile=APP_HOME_VAR_TOKEN/log4j.xml', '-Dcustomer.properties=APP_HOME_VAR_TOKEN/customer.properties']
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
@@ -46,7 +46,7 @@ jar {
 				exclude 'images'
 				exclude '**/templates/*'
 				exclude 'templates'
-				exclude '**/lib/log4j.xml'
+				exclude 'log4j.xml'
 			}
 		}
 	}
@@ -65,7 +65,7 @@ distributions {
             from ('src/main/resources/images/') {into 'images/'}
             from('src/main/resources/templates/') {into 'templates/'}
             from('src/main/resources/customer.properties') {into ''}
-            from('src/main/resources/lib/log4j.xml') {into 'lib/'}  
+            from('src/main/resources/log4j.xml') {into ''}
         }
     }
 }
