@@ -49,7 +49,7 @@ public class PolicyViolationOverrideTransform extends AbstractPolicyTransform {
 			templateMap.put(KEY_LAST_NAME, policyViolation.getContent().getLastName());
 
 		} catch (NotificationServiceException | UnexpectedHubResponseException e) {
-			logger.error("Error Transforming: " + item, e);
+			logger.error("Error Transforming", e);
 		}
 		return templateData;
 	}

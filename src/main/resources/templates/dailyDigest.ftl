@@ -50,6 +50,26 @@ Dear ${hubUserName},
     <#list securityVulnerabilities as securityVulnerability>
       <li>
         ${securityVulnerability.projectName} / ${securityVulnerability.projectVersionName} / ${securityVulnerability.componentName} / ${securityVulnerability.componentVersionName}
+        <dl>
+        <#if securityVulnerability.vulnAddedList?? && securityVulnerability.vulnAddedList?size gt 0>
+            <dt>Added:</dt>
+                <#list securityVulnerability.vulnAddedList as vulnAdded>
+                    <dd>${vulnAdded}</dd>
+                </#list>
+        </#if>
+        <#if securityVulnerability.vulnUpdatedList?? && securityVulnerability.vulnUpdatedList?size gt 0>
+            <dt>Updated:</dt>
+                <#list securityVulnerability.vulnUpdatedList as vulnUpdated>
+                    <dd>${vulnUpdated}</dd>
+                </#list>
+        </#if>
+        <#if securityVulnerability.vulnDeletedList?? && securityVulnerability.vulnDeletedList?size gt 0>
+            <dt>Deleted:</dt>
+                <#list securityVulnerability.vulnDeletedList as vulnDeleted>
+                    <dd>${vulnDeleted}</dd>
+                </#list>
+        </#if>
+        </dl>
         <!--
         <br />
         ---don't know how to get these values---
