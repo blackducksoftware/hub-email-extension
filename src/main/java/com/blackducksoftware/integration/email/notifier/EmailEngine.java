@@ -23,6 +23,9 @@ import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.ExtensionLogger;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
+import com.blackducksoftware.integration.email.notifier.routers.PolicyOverrideContentItem;
+import com.blackducksoftware.integration.email.notifier.routers.PolicyViolationContentItem;
+import com.blackducksoftware.integration.email.notifier.routers.VulnerabilityContentItem;
 import com.blackducksoftware.integration.email.notifier.routers.factory.AbstractEmailFactory;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.service.properties.HubServerBeanConfiguration;
@@ -30,6 +33,10 @@ import com.blackducksoftware.integration.email.transforms.AbstractTransform;
 import com.blackducksoftware.integration.email.transforms.PolicyViolationOverrideTransform;
 import com.blackducksoftware.integration.email.transforms.PolicyViolationTransform;
 import com.blackducksoftware.integration.email.transforms.VulnerabilityTransform;
+import com.blackducksoftware.integration.email.transforms.templates.AbstractContentTransform;
+import com.blackducksoftware.integration.email.transforms.templates.PolicyOverrideContentTransform;
+import com.blackducksoftware.integration.email.transforms.templates.PolicyViolationContentTransform;
+import com.blackducksoftware.integration.email.transforms.templates.VulnerabilityContentTransform;
 import com.blackducksoftware.integration.hub.HubIntRestService;
 import com.blackducksoftware.integration.hub.api.item.HubItemsService;
 import com.blackducksoftware.integration.hub.api.notification.NotificationItem;
@@ -64,6 +71,7 @@ public class EmailEngine {
 	public final CustomerProperties customerProperties;
 	public final NotificationService notificationService;
 	public final Map<String, AbstractTransform> transformMap;
+	public final Map<String, AbstractContentTransform> contentTransformMap;
 
 	public EmailEngine() throws IOException, EncryptionException, URISyntaxException, BDRestException {
 		gson = new Gson();
@@ -78,6 +86,7 @@ public class EmailEngine {
 		emailMessagingService = createEmailMessagingService();
 		notificationService = createNotificationService();
 		transformMap = createTransformMap();
+		contentTransformMap = createContentTransformMap();
 		routerFactoryList = createRouterFactoryList();
 		notificationDispatcher = createDispatcher();
 
@@ -147,7 +156,7 @@ public class EmailEngine {
 				final Constructor<? extends AbstractEmailFactory> constructor = clazz.getConstructor(
 						EmailMessagingService.class, CustomerProperties.class, NotificationService.class, Map.class);
 				factoryList.add(constructor.newInstance(emailMessagingService, customerProperties, notificationService,
-						transformMap));
+						contentTransformMap));
 			} catch (final ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException
 					| IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 				logger.error("Error initializing router factory.", e);
@@ -164,7 +173,7 @@ public class EmailEngine {
 
 	private NotificationDispatcher createDispatcher() {
 		return new NotificationDispatcher(hubServerConfig, applicationStartDate, customerProperties, executorService,
-				notificationService);
+				notificationService, transformMap);
 	}
 
 	private NotificationService createNotificationService()
@@ -210,6 +219,14 @@ public class EmailEngine {
 				new PolicyViolationOverrideTransform(notificationService));
 		transformMap.put(VulnerabilityNotificationItem.class.getName(),
 				new VulnerabilityTransform(notificationService));
+		return transformMap;
+	}
+
+	private Map<String, AbstractContentTransform> createContentTransformMap() {
+		final Map<String, AbstractContentTransform> transformMap = new HashMap<>();
+		transformMap.put(PolicyViolationContentItem.class.getName(), new PolicyViolationContentTransform());
+		transformMap.put(PolicyOverrideContentItem.class.getName(), new PolicyOverrideContentTransform());
+		transformMap.put(VulnerabilityContentItem.class.getName(), new VulnerabilityContentTransform());
 		return transformMap;
 	}
 }

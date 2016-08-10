@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.blackducksoftware.integration.email.notifier.AbstractPollingDispatcher;
+import com.blackducksoftware.integration.email.notifier.routers.EmailContentItem;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 
 public class MockDispatcher extends AbstractPollingDispatcher {
@@ -22,12 +24,30 @@ public class MockDispatcher extends AbstractPollingDispatcher {
 	}
 
 	@Override
-	public Map<String, EmailTaskData> fetchData() {
-		final Map<String, EmailTaskData> map = new HashMap<>();
+	public List<EmailContentItem> fetchData() {
+		final List<EmailContentItem> data = new ArrayList<>();
+		data.add(new EmailContentItem(TEST_DATA, TEST_DATA, TEST_DATA, TEST_DATA));
+
+		return data;
+	}
+
+	@Override
+	public Map<String, List<Object>> partitionData(final List<EmailContentItem> dataList) {
+		final HashMap<String, List<Object>> map = new HashMap<>();
 		final List<Object> data = new ArrayList<>();
-		data.add(TEST_DATA);
-		map.put(MockRouterFactory.TOPIC_KEY, new EmailTaskData(data));
+		data.addAll(dataList);
+		map.put(MockRouterFactory.TOPIC_KEY, data);
 		return map;
+	}
+
+	@Override
+	public Map<String, EmailTaskData> filterData(final Map<String, List<Object>> partitionedData) {
+		final Map<String, EmailTaskData> templateDataMap = new HashMap<>();
+		final Set<String> topicSet = partitionedData.keySet();
+		for (final String topic : topicSet) {
+			templateDataMap.put(topic, new EmailTaskData(partitionedData.get(topic)));
+		}
+		return templateDataMap;
 	}
 
 }

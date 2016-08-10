@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.notifier.routers.AbstractEmailRouter;
+import com.blackducksoftware.integration.email.notifier.routers.EmailContentItem;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 import com.blackducksoftware.integration.email.notifier.routers.factory.AbstractEmailFactory;
 
@@ -142,7 +143,9 @@ public abstract class AbstractPollingDispatcher extends TimerTask {
 	@Override
 	public void run() {
 		currentRun = new Date();
-		final Map<String, EmailTaskData> dataMap = fetchData();
+		final List<EmailContentItem> itemList = fetchData();
+		final Map<String, List<Object>> partitionedData = partitionData(itemList);
+		final Map<String, EmailTaskData> dataMap = filterData(partitionedData);
 		if (logger.isDebugEnabled()) {
 			logger.debug(
 					"Execution data: " + System.lineSeparator() + "########## Polling Dispatcher Execution ##########"
@@ -206,6 +209,9 @@ public abstract class AbstractPollingDispatcher extends TimerTask {
 
 	public abstract void init();
 
-	public abstract Map<String, EmailTaskData> fetchData();
+	public abstract List<EmailContentItem> fetchData();
 
+	public abstract Map<String, List<Object>> partitionData(List<EmailContentItem> dataList);
+
+	public abstract Map<String, EmailTaskData> filterData(Map<String, List<Object>> partitionedData);
 }

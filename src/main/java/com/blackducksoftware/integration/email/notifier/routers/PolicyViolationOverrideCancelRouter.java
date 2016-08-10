@@ -8,14 +8,14 @@ import java.util.Map;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.EmailData;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.email.transforms.AbstractTransform;
+import com.blackducksoftware.integration.email.transforms.templates.AbstractContentTransform;
 import com.blackducksoftware.integration.hub.api.notification.PolicyOverrideNotificationItem;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
 
 public class PolicyViolationOverrideCancelRouter extends AbstractEmailRouter<PolicyOverrideNotificationItem> {
 	public PolicyViolationOverrideCancelRouter(final EmailMessagingService emailMessagingService,
 			final CustomerProperties customerProperties, final NotificationService notificationService,
-			final Map<String, AbstractTransform> transformMap, final EmailTaskData taskData) {
+			final Map<String, AbstractContentTransform> transformMap, final EmailTaskData taskData) {
 		super(emailMessagingService, customerProperties, notificationService, transformMap, taskData);
 	}
 

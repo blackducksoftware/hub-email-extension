@@ -2,11 +2,12 @@ package com.blackducksoftware.integration.email.transforms;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.email.notifier.routers.EmailContentItem;
+import com.blackducksoftware.integration.email.notifier.routers.PolicyViolationContentItem;
 import com.blackducksoftware.integration.hub.api.component.ComponentVersionStatus;
 import com.blackducksoftware.integration.hub.api.notification.NotificationItem;
 import com.blackducksoftware.integration.hub.api.notification.RuleViolationNotificationItem;
@@ -24,8 +25,8 @@ public class PolicyViolationTransform extends AbstractPolicyTransform {
 	}
 
 	@Override
-	public List<Map<String, Object>> transform(final NotificationItem item) {
-		List<Map<String, Object>> templateData = new ArrayList<>();
+	public List<EmailContentItem> transform(final NotificationItem item) {
+		final List<EmailContentItem> templateData = new ArrayList<>();
 		try {
 			final RuleViolationNotificationItem policyViolation = (RuleViolationNotificationItem) item;
 			final String projectName = policyViolation.getContent().getProjectName();
@@ -34,10 +35,19 @@ public class PolicyViolationTransform extends AbstractPolicyTransform {
 			ReleaseItem releaseItem;
 			releaseItem = getNotificationService()
 					.getProjectReleaseItemFromProjectReleaseUrl(policyViolation.getContent().getProjectVersionLink());
-			templateData = handleNotification(projectName, componentVersionList, releaseItem);
+			handleNotification(projectName, componentVersionList, releaseItem, item, templateData);
+
 		} catch (NotificationServiceException | UnexpectedHubResponseException e) {
 			logger.error("Error Transforming: " + item, e);
 		}
 		return templateData;
+	}
+
+	@Override
+	public void createContents(final String projectName, final String projectVersion, final String componentName,
+			final String componentVersion, final String policyName, final NotificationItem item,
+			final List<EmailContentItem> templateData) {
+		templateData.add(new PolicyViolationContentItem(projectName, projectVersion, componentName, componentVersion,
+				policyName));
 	}
 }

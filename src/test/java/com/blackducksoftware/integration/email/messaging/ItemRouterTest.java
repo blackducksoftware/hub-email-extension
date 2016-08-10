@@ -31,7 +31,7 @@ public class ItemRouterTest {
 		data.add(RECEIVE_DATA);
 		final EmailTaskData taskData = new EmailTaskData(data);
 		router = new MockRouter(engine.emailMessagingService, engine.customerProperties, engine.notificationService,
-				engine.transformMap, taskData, RECEIVE_DATA);
+				engine.contentTransformMap, taskData, RECEIVE_DATA);
 	}
 
 	@Test

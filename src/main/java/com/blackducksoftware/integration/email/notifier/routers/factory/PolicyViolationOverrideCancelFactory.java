@@ -9,14 +9,14 @@ import com.blackducksoftware.integration.email.notifier.routers.AbstractEmailRou
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 import com.blackducksoftware.integration.email.notifier.routers.PolicyViolationOverrideCancelRouter;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.email.transforms.AbstractTransform;
+import com.blackducksoftware.integration.email.transforms.templates.AbstractContentTransform;
 import com.blackducksoftware.integration.hub.api.notification.PolicyOverrideNotificationItem;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
 
 public class PolicyViolationOverrideCancelFactory extends AbstractEmailFactory {
 	public PolicyViolationOverrideCancelFactory(final EmailMessagingService emailMessagingService,
 			final CustomerProperties customerProperties, final NotificationService notificationService,
-			final Map<String, AbstractTransform> transformMap) {
+			final Map<String, AbstractContentTransform> transformMap) {
 		super(emailMessagingService, customerProperties, notificationService, transformMap);
 	}
 

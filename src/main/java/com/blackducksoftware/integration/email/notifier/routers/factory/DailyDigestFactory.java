@@ -9,14 +9,14 @@ import com.blackducksoftware.integration.email.notifier.routers.AbstractEmailRou
 import com.blackducksoftware.integration.email.notifier.routers.DailyDigestRouter;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.email.transforms.AbstractTransform;
+import com.blackducksoftware.integration.email.transforms.templates.AbstractContentTransform;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
 
 public class DailyDigestFactory extends AbstractEmailFactory {
 
 	public DailyDigestFactory(final EmailMessagingService emailMessagingService,
 			final CustomerProperties customerProperties, final NotificationService notificationService,
-			final Map<String, AbstractTransform> transformMap) {
+			final Map<String, AbstractContentTransform> transformMap) {
 		super(emailMessagingService, customerProperties, notificationService, transformMap);
 	}
 

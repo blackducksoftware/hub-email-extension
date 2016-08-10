@@ -11,7 +11,7 @@ import com.blackducksoftware.integration.email.model.EmailData;
 import com.blackducksoftware.integration.email.notifier.routers.AbstractEmailRouter;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.email.transforms.AbstractTransform;
+import com.blackducksoftware.integration.email.transforms.templates.AbstractContentTransform;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
 
 public class MockRouter extends AbstractEmailRouter<String> {
@@ -19,7 +19,7 @@ public class MockRouter extends AbstractEmailRouter<String> {
 	private final String expectedData;
 
 	public MockRouter(final EmailMessagingService emailMessagingService, final CustomerProperties customerProperties,
-			final NotificationService notificationService, final Map<String, AbstractTransform> transformMap,
+			final NotificationService notificationService, final Map<String, AbstractContentTransform> transformMap,
 			final EmailTaskData taskData, final String expectedData) {
 		super(emailMessagingService, customerProperties, notificationService, transformMap, taskData);
 		this.expectedData = expectedData;

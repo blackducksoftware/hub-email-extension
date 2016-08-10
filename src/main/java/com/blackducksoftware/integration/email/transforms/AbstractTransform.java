@@ -1,8 +1,8 @@
 package com.blackducksoftware.integration.email.transforms;
 
 import java.util.List;
-import java.util.Map;
 
+import com.blackducksoftware.integration.email.notifier.routers.EmailContentItem;
 import com.blackducksoftware.integration.hub.api.notification.NotificationItem;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
 
@@ -22,5 +22,5 @@ public abstract class AbstractTransform {
 		return notificationService;
 	}
 
-	public abstract List<Map<String, Object>> transform(NotificationItem item);
+	public abstract List<EmailContentItem> transform(NotificationItem item);
 }
