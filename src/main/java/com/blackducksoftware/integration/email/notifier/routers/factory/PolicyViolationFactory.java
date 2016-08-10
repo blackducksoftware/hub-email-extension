@@ -7,10 +7,10 @@ import java.util.Set;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.notifier.routers.AbstractEmailRouter;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
+import com.blackducksoftware.integration.email.notifier.routers.PolicyViolationContentItem;
 import com.blackducksoftware.integration.email.notifier.routers.PolicyViolationRouter;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.transforms.templates.AbstractContentTransform;
-import com.blackducksoftware.integration.hub.api.notification.RuleViolationNotificationItem;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
 
 public class PolicyViolationFactory extends AbstractEmailFactory {
@@ -30,7 +30,7 @@ public class PolicyViolationFactory extends AbstractEmailFactory {
 	@Override
 	public Set<String> getSubscriberTopics() {
 		final Set<String> topicSet = new HashSet<>();
-		topicSet.add(RuleViolationNotificationItem.class.getName());
+		topicSet.add(PolicyViolationContentItem.class.getName());
 		return topicSet;
 	}
 }
