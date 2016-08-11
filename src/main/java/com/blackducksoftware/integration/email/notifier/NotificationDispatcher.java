@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.EmailContentItem;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
-import com.blackducksoftware.integration.email.transforms.AbstractTransform;
+import com.blackducksoftware.integration.email.transforms.AbstractNotificationTransform;
 import com.blackducksoftware.integration.hub.api.notification.NotificationItem;
 import com.blackducksoftware.integration.hub.exception.NotificationServiceException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
@@ -34,11 +34,11 @@ public class NotificationDispatcher extends AbstractPollingDispatcher {
 	private final CustomerProperties systemProperties;
 	private final ExecutorService executorService;
 	private final NotificationService notificationService;
-	private final Map<String, AbstractTransform> notificationTransformMap;
+	private final Map<String, AbstractNotificationTransform> notificationTransformMap;
 
 	public NotificationDispatcher(final HubServerConfig hubConfig, final Date applicationStartDate,
 			final CustomerProperties systemProperties, final ExecutorService executorService,
-			final NotificationService notificationService, final Map<String, AbstractTransform> transformMap) {
+			final NotificationService notificationService, final Map<String, AbstractNotificationTransform> transformMap) {
 		this.hubServerConfig = hubConfig;
 		this.applicationStartDate = applicationStartDate;
 		this.systemProperties = systemProperties;

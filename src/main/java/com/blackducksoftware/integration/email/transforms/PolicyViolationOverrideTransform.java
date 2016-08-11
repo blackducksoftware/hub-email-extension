@@ -59,4 +59,9 @@ public class PolicyViolationOverrideTransform extends AbstractPolicyTransform {
 		templateData.add(new PolicyOverrideContentItem(projectName, projectVersion, componentName, componentVersion,
 				policyName, policyOverride.getContent().getFirstName(), policyOverride.getContent().getLastName()));
 	}
+
+	@Override
+	public String getNotificationType() {
+		return PolicyOverrideNotificationItem.class.getName();
+	}
 }

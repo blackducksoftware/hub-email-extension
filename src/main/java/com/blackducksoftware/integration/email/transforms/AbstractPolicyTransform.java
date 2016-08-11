@@ -16,7 +16,7 @@ import com.blackducksoftware.integration.hub.api.version.ReleaseItem;
 import com.blackducksoftware.integration.hub.exception.NotificationServiceException;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
 
-public abstract class AbstractPolicyTransform extends AbstractTransform {
+public abstract class AbstractPolicyTransform extends AbstractNotificationTransform {
 	private final Logger logger = LoggerFactory.getLogger(AbstractPolicyTransform.class);
 
 	public AbstractPolicyTransform(final NotificationService notificationService) {

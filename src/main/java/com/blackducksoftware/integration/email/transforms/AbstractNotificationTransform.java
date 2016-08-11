@@ -6,7 +6,7 @@ import com.blackducksoftware.integration.email.model.EmailContentItem;
 import com.blackducksoftware.integration.hub.api.notification.NotificationItem;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
 
-public abstract class AbstractTransform {
+public abstract class AbstractNotificationTransform {
 	public final String KEY_PROJECT_NAME = "projectName";
 	public final String KEY_PROJECT_VERSION = "projectVersionName";
 	public final String KEY_COMPONENT_NAME = "componentName";
@@ -14,7 +14,7 @@ public abstract class AbstractTransform {
 
 	private final NotificationService notificationService;
 
-	public AbstractTransform(final NotificationService notificationService) {
+	public AbstractNotificationTransform(final NotificationService notificationService) {
 		this.notificationService = notificationService;
 	}
 
@@ -23,4 +23,6 @@ public abstract class AbstractTransform {
 	}
 
 	public abstract List<EmailContentItem> transform(NotificationItem item);
+
+	public abstract String getNotificationType();
 }

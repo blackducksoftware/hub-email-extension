@@ -26,6 +26,7 @@ public class PolicyViolationOverrideRouter extends AbstractEmailRouter<PolicyOve
 	@Override
 	public EmailData transform(final List<PolicyOverrideContentItem> data) {
 		final List<String> addresses = new ArrayList<>();
+		addresses.add("psantos@blackducksoftware.com");
 		final Map<String, Object> templateMap = initTempateMap();
 		final Map<String, AbstractContentTransform> transformMap = getTransformMap();
 		for (final PolicyOverrideContentItem item : data) {

@@ -26,4 +26,9 @@ public class PolicyViolationContentTransform extends AbstractPolicyContentTransf
 		}
 		return templateData;
 	}
+
+	@Override
+	public String getContentItemType() {
+		return PolicyViolationContentItem.class.getName();
+	}
 }

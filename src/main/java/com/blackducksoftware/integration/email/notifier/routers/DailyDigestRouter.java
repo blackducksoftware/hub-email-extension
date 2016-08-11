@@ -32,6 +32,7 @@ public class DailyDigestRouter extends AbstractEmailRouter<EmailContentItem> {
 	@Override
 	public EmailData transform(final List<EmailContentItem> data) {
 		final List<String> addresses = new ArrayList<>();
+		addresses.add("psantos@blackducksoftware.com");
 		final Map<String, Object> templateMap = initTempateMap();
 		final Map<String, AbstractContentTransform> transformMap = getTransformMap();
 		for (final EmailContentItem item : data) {

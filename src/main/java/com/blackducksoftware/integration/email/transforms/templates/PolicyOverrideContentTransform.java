@@ -31,4 +31,9 @@ public class PolicyOverrideContentTransform extends AbstractPolicyContentTransfo
 		}
 		return templateData;
 	}
+
+	@Override
+	public String getContentItemType() {
+		return PolicyOverrideContentItem.class.getName();
+	}
 }

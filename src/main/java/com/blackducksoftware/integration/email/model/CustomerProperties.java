@@ -39,6 +39,8 @@ public class CustomerProperties {
 	public static final String JAVAMAIL_CONFIG_PREFIX = "hub.email.javamail.config.";
 	public static final String TEMPLATE_VARIABLE_PREFIX = "hub.email.template.variable.";
 	public static final String ROUTER_FACTORY_PREFIX = "email.service.router.factory.";
+	public static final String TRANSFORMER_NOTIFICATION_PREFIX = "email.service.transformer.notification.";
+	public static final String TRANSFORMER_CONTENT_ITEM_PREFIX = "email.service.transformer.content.";
 
 	private final List<String> javamailConfigKeys = new ArrayList<>();
 	private final Map<String, String> suppliedJavamailConfigProperties = new HashMap<>();
@@ -47,6 +49,8 @@ public class CustomerProperties {
 	private final Map<String, String> suppliedTemplateVariableProperties = new HashMap<>();
 	private final Properties appProperties;
 	private final List<String> factoryClassNames = new ArrayList<>();
+	private final List<String> notificationTransformerList = new ArrayList<>();
+	private final List<String> contentTransformerList = new ArrayList<>();
 
 	public CustomerProperties(final Properties appProperties) {
 		if (appProperties == null) {
@@ -72,6 +76,10 @@ public class CustomerProperties {
 						suppliedTemplateVariableProperties.put(cleanedKey, value);
 					} else if (key.startsWith(ROUTER_FACTORY_PREFIX)) {
 						factoryClassNames.add(value);
+					} else if (key.startsWith(TRANSFORMER_NOTIFICATION_PREFIX)) {
+						notificationTransformerList.add(value);
+					} else if (key.startsWith(TRANSFORMER_CONTENT_ITEM_PREFIX)) {
+						contentTransformerList.add(value);
 					}
 				}
 			}
@@ -168,5 +176,13 @@ public class CustomerProperties {
 
 	public List<String> getFactoryClassNames() {
 		return factoryClassNames;
+	}
+
+	public List<String> getNotificationTransformerList() {
+		return notificationTransformerList;
+	}
+
+	public List<String> getContentTransformerList() {
+		return contentTransformerList;
 	}
 }

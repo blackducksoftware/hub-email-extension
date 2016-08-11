@@ -12,4 +12,6 @@ public abstract class AbstractContentTransform {
 	public final String KEY_COMPONENT_VERSION = "componentVersionName";
 
 	public abstract List<Map<String, Object>> transform(EmailContentItem item);
+
+	public abstract String getContentItemType();
 }
