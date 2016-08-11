@@ -31,6 +31,7 @@ import com.blackducksoftware.integration.email.transforms.PolicyViolationOverrid
 import com.blackducksoftware.integration.email.transforms.PolicyViolationTransform;
 import com.blackducksoftware.integration.email.transforms.VulnerabilityTransform;
 import com.blackducksoftware.integration.hub.HubIntRestService;
+import com.blackducksoftware.integration.hub.api.UserRestService;
 import com.blackducksoftware.integration.hub.api.item.HubItemsService;
 import com.blackducksoftware.integration.hub.api.notification.NotificationItem;
 import com.blackducksoftware.integration.hub.api.notification.PolicyOverrideNotificationItem;
@@ -42,6 +43,7 @@ import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.google.gson.Gson;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 import freemarker.template.Configuration;
@@ -51,6 +53,7 @@ public class EmailEngine {
 	private final Logger logger = LoggerFactory.getLogger(EmailEngine.class);
 
 	public final Gson gson;
+	public final JsonParser jsonParser;
 	public final Configuration configuration;
 	public final DateFormat notificationDateFormat;
 	public final Date applicationStartDate;
@@ -60,23 +63,28 @@ public class EmailEngine {
 	public final EmailMessagingService emailMessagingService;
 	public final NotificationDispatcher notificationDispatcher;
 	public final HubServerConfig hubServerConfig;
+	public final RestConnection restConnection;
 	public final Properties appProperties;
 	public final CustomerProperties customerProperties;
 	public final NotificationService notificationService;
+	public final UserRestService userRestService;
 	public final Map<String, AbstractTransform> transformMap;
 
 	public EmailEngine() throws IOException, EncryptionException, URISyntaxException, BDRestException {
 		gson = new Gson();
+		jsonParser = new JsonParser();
 		appProperties = createAppProperties();
 		customerProperties = createCustomerProperties();
 		configuration = createFreemarkerConfig();
 		hubServerConfig = createHubConfig();
+		restConnection = createRestConnection();
 
 		notificationDateFormat = createNotificationDateFormat();
 		applicationStartDate = createApplicationStartDate();
 		executorService = createExecutorService();
 		emailMessagingService = createEmailMessagingService();
 		notificationService = createNotificationService();
+		userRestService = createUserRestService();
 		transformMap = createTransformMap();
 		routerFactoryList = createRouterFactoryList();
 		notificationDispatcher = createDispatcher();
@@ -164,7 +172,17 @@ public class EmailEngine {
 
 	private NotificationDispatcher createDispatcher() {
 		return new NotificationDispatcher(hubServerConfig, applicationStartDate, customerProperties, executorService,
-				notificationService);
+				notificationService, userRestService);
+	}
+
+	private RestConnection createRestConnection() throws EncryptionException, URISyntaxException, BDRestException {
+		final RestConnection restConnection = initRestConnection();
+		return restConnection;
+	}
+
+	private UserRestService createUserRestService() {
+		final UserRestService userRestService = new UserRestService(restConnection, gson, jsonParser);
+		return userRestService;
 	}
 
 	private NotificationService createNotificationService()
@@ -172,7 +190,6 @@ public class EmailEngine {
 		if (hubServerConfig == null) {
 			return new NotificationService(null, null, null, new ExtensionLogger(logger));
 		} else {
-			final RestConnection restConnection = initRestConnection();
 			final HubItemsService<NotificationItem> hubItemsService = initHubItemsService(restConnection);
 			final HubIntRestService hub = new HubIntRestService(restConnection);
 			return new NotificationService(restConnection, hub, hubItemsService, new ExtensionLogger(logger));

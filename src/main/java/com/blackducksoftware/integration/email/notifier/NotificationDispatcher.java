@@ -1,6 +1,9 @@
 package com.blackducksoftware.integration.email.notifier;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +19,10 @@ import org.slf4j.LoggerFactory;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 import com.blackducksoftware.integration.email.notifier.routers.factory.AbstractEmailFactory;
+import com.blackducksoftware.integration.hub.api.UserRestService;
 import com.blackducksoftware.integration.hub.api.notification.NotificationItem;
+import com.blackducksoftware.integration.hub.api.user.UserItem;
+import com.blackducksoftware.integration.hub.exception.BDRestException;
 import com.blackducksoftware.integration.hub.exception.NotificationServiceException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.notification.NotificationDateRange;
@@ -33,15 +39,17 @@ public class NotificationDispatcher extends AbstractPollingDispatcher {
 	private final CustomerProperties systemProperties;
 	private final ExecutorService executorService;
 	private final NotificationService notificationService;
+	private final UserRestService userRestService;
 
 	public NotificationDispatcher(final HubServerConfig hubConfig, final Date applicationStartDate,
 			final CustomerProperties systemProperties, final ExecutorService executorService,
-			final NotificationService notificationService) {
+			final NotificationService notificationService, final UserRestService userRestService) {
 		this.hubServerConfig = hubConfig;
 		this.applicationStartDate = applicationStartDate;
 		this.systemProperties = systemProperties;
 		this.executorService = executorService;
 		this.notificationService = notificationService;
+		this.userRestService = userRestService;
 	}
 
 	@Override
@@ -87,6 +95,16 @@ public class NotificationDispatcher extends AbstractPollingDispatcher {
 			logger.error("Error occurred fetching notifications.", e);
 		}
 		return items;
+	}
+
+	private List<UserItem> fetchUsers() {
+		List<UserItem> userItems = new ArrayList<>();
+		try {
+			userItems = userRestService.getAllUsers();
+		} catch (IOException | URISyntaxException | BDRestException e) {
+			logger.error("Error occurred fetching users.", e);
+		}
+		return userItems;
 	}
 
 	private Map<String, EmailTaskData> partitionData(final List<NotificationItem> itemList) {

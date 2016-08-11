@@ -39,14 +39,17 @@ public class CustomerProperties {
 	public static final String JAVAMAIL_CONFIG_PREFIX = "hub.email.javamail.config.";
 	public static final String TEMPLATE_VARIABLE_PREFIX = "hub.email.template.variable.";
 	public static final String ROUTER_FACTORY_PREFIX = "email.service.router.factory.";
+	public static final String OPT_OUT_PREFIX = "hub.email.user.preference.opt.out.";
 
 	private final List<String> javamailConfigKeys = new ArrayList<>();
 	private final Map<String, String> suppliedJavamailConfigProperties = new HashMap<>();
 
 	private final List<String> templateVariableKeys = new ArrayList<>();
 	private final Map<String, String> suppliedTemplateVariableProperties = new HashMap<>();
-	private final Properties appProperties;
+
 	private final List<String> factoryClassNames = new ArrayList<>();
+	private final Map<String, String> optOutProperties = new HashMap<>();
+	private final Properties appProperties;
 
 	public CustomerProperties(final Properties appProperties) {
 		if (appProperties == null) {
@@ -72,6 +75,9 @@ public class CustomerProperties {
 						suppliedTemplateVariableProperties.put(cleanedKey, value);
 					} else if (key.startsWith(ROUTER_FACTORY_PREFIX)) {
 						factoryClassNames.add(value);
+					} else if (key.startsWith(OPT_OUT_PREFIX)) {
+						final String cleanedKey = key.replace(OPT_OUT_PREFIX, "");
+						optOutProperties.put(cleanedKey, value);
 					}
 				}
 			}
@@ -169,4 +175,9 @@ public class CustomerProperties {
 	public List<String> getFactoryClassNames() {
 		return factoryClassNames;
 	}
+
+	public Map<String, String> getOptOutProperties() {
+		return optOutProperties;
+	}
+
 }
