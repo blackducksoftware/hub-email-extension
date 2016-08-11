@@ -2,7 +2,7 @@ package com.blackducksoftware.integration.email.transforms;
 
 import java.util.List;
 
-import com.blackducksoftware.integration.email.notifier.routers.EmailContentItem;
+import com.blackducksoftware.integration.email.model.EmailContentItem;
 import com.blackducksoftware.integration.hub.api.notification.NotificationItem;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
 

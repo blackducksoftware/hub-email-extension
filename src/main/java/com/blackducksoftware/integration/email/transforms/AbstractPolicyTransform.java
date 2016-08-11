@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.email.notifier.routers.EmailContentItem;
+import com.blackducksoftware.integration.email.model.EmailContentItem;
 import com.blackducksoftware.integration.hub.api.component.BomComponentVersionPolicyStatus;
 import com.blackducksoftware.integration.hub.api.component.ComponentVersionStatus;
 import com.blackducksoftware.integration.hub.api.notification.NotificationItem;

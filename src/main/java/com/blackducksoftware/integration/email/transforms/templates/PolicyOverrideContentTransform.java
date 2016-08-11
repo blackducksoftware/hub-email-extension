@@ -7,8 +7,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.email.notifier.routers.EmailContentItem;
-import com.blackducksoftware.integration.email.notifier.routers.PolicyOverrideContentItem;
+import com.blackducksoftware.integration.email.model.EmailContentItem;
+import com.blackducksoftware.integration.email.model.PolicyOverrideContentItem;
 
 public class PolicyOverrideContentTransform extends AbstractPolicyContentTransform {
 

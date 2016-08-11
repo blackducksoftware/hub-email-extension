@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.Set;
 
 import com.blackducksoftware.integration.email.model.CustomerProperties;
+import com.blackducksoftware.integration.email.model.PolicyOverrideContentItem;
 import com.blackducksoftware.integration.email.notifier.routers.AbstractEmailRouter;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
-import com.blackducksoftware.integration.email.notifier.routers.PolicyOverrideContentItem;
 import com.blackducksoftware.integration.email.notifier.routers.PolicyViolationOverrideRouter;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.transforms.templates.AbstractContentTransform;

@@ -6,8 +6,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.email.notifier.routers.EmailContentItem;
-import com.blackducksoftware.integration.email.notifier.routers.PolicyOverrideContentItem;
+import com.blackducksoftware.integration.email.model.EmailContentItem;
+import com.blackducksoftware.integration.email.model.PolicyOverrideContentItem;
 import com.blackducksoftware.integration.hub.api.component.ComponentVersionStatus;
 import com.blackducksoftware.integration.hub.api.notification.NotificationItem;
 import com.blackducksoftware.integration.hub.api.notification.PolicyOverrideNotificationItem;

@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.blackducksoftware.integration.email.model.EmailContentItem;
 import com.blackducksoftware.integration.email.notifier.AbstractPollingDispatcher;
-import com.blackducksoftware.integration.email.notifier.routers.EmailContentItem;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 
 public class MockDispatcher extends AbstractPollingDispatcher {

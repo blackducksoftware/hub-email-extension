@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.model.CustomerProperties;
-import com.blackducksoftware.integration.email.notifier.routers.EmailContentItem;
+import com.blackducksoftware.integration.email.model.EmailContentItem;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 import com.blackducksoftware.integration.email.transforms.AbstractTransform;
 import com.blackducksoftware.integration.hub.api.notification.NotificationItem;

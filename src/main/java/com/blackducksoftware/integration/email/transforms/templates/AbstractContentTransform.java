@@ -3,7 +3,7 @@ package com.blackducksoftware.integration.email.transforms.templates;
 import java.util.List;
 import java.util.Map;
 
-import com.blackducksoftware.integration.email.notifier.routers.EmailContentItem;
+import com.blackducksoftware.integration.email.model.EmailContentItem;
 
 public abstract class AbstractContentTransform {
 	public final String KEY_PROJECT_NAME = "projectName";

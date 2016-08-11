@@ -1,4 +1,4 @@
-package com.blackducksoftware.integration.email.notifier.routers;
+package com.blackducksoftware.integration.email.model;
 
 public class EmailContentItem {
 	private final String projectName;

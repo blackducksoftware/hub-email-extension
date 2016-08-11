@@ -23,9 +23,9 @@ import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.ExtensionLogger;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
-import com.blackducksoftware.integration.email.notifier.routers.PolicyOverrideContentItem;
-import com.blackducksoftware.integration.email.notifier.routers.PolicyViolationContentItem;
-import com.blackducksoftware.integration.email.notifier.routers.VulnerabilityContentItem;
+import com.blackducksoftware.integration.email.model.PolicyOverrideContentItem;
+import com.blackducksoftware.integration.email.model.PolicyViolationContentItem;
+import com.blackducksoftware.integration.email.model.VulnerabilityContentItem;
 import com.blackducksoftware.integration.email.notifier.routers.factory.AbstractEmailFactory;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.service.properties.HubServerBeanConfiguration;
