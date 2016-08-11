@@ -36,6 +36,6 @@ public class PolicyViolationOverrideFactory extends AbstractEmailFactory {
 
 	@Override
 	public String getTemplateName() {
-		return "dailyDigest.ftl";
+		return "hubPolicyViolationOverride.ftl";
 	}
 }

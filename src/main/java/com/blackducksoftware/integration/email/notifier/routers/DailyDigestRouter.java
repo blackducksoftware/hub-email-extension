@@ -28,7 +28,6 @@ public class DailyDigestRouter extends AbstractEmailRouter<EmailContentItem> {
 	@Override
 	public EmailData transform(final List<EmailContentItem> data) {
 		final List<String> addresses = new ArrayList<>();
-		addresses.add("psantos@blackducksoftware.com");
 		final Map<String, Object> templateMap = initTempateMap();
 		final Map<String, AbstractContentTransform> transformMap = getTransformMap();
 		for (final EmailContentItem item : data) {
@@ -78,9 +77,6 @@ public class DailyDigestRouter extends AbstractEmailRouter<EmailContentItem> {
 				.get(LIST_POLICY_OVERRIDES);
 
 		policyOverrides.addAll(converter.transform(item));
-		// final List<Map<String, Object>> policyOverrideCancels =
-		// (List<Map<String, Object>>) templateMap
-		// .get(LIST_POLICY_OVERRIDE_CANCEL);
 	}
 
 	@SuppressWarnings("unchecked")
