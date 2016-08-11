@@ -98,4 +98,5 @@ public class DailyDigestRouter extends AbstractEmailRouter<NotificationItem> {
 	public String getTemplateName() {
 		return "dailyDigest.ftl";
 	}
+
 }
