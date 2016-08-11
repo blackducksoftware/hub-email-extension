@@ -16,7 +16,6 @@ import com.blackducksoftware.integration.hub.api.notification.VulnerabilityNotif
 import com.blackducksoftware.integration.hub.notification.NotificationService;
 
 public class DailyDigestRouter extends AbstractEmailRouter<NotificationItem> {
-
 	private final static String LIST_POLICY_VIOLATIONS = "policyViolations";
 	private final static String LIST_POLICY_OVERRIDES = "policyViolationOverrides";
 	private final static String LIST_POLICY_OVERRIDE_CANCEL = "policyViolationOverrides";
