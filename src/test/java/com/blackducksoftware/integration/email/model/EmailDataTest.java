@@ -42,5 +42,4 @@ public class EmailDataTest {
 		final Map<String, Object> model = null;
 		new EmailData(addresses, model);
 	}
-
 }

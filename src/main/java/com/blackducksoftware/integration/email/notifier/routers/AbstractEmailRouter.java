@@ -23,22 +23,23 @@ public abstract class AbstractEmailRouter<T> implements Runnable {
 	public final String KEY_USER = "hubUserName";
 	public final String KEY_HUB_URL = "hubServerUrl";
 
-	public final static String TEMPLATE_DEFAULT = "htmlTemplate.ftl";
-
 	private final EmailMessagingService emailMessagingService;
 	private final EmailTaskData taskData;
 	private final CustomerProperties customerProperties;
 	private final NotificationService notificationService;
 	private final Map<String, AbstractContentTransform> transformMap;
+	private final String templateName;
 
 	public AbstractEmailRouter(final EmailMessagingService emailMessagingService,
 			final CustomerProperties customerProperties, final NotificationService notificationService,
-			final Map<String, AbstractContentTransform> transformMap, final EmailTaskData taskData) {
+			final Map<String, AbstractContentTransform> transformMap, final String templateName,
+			final EmailTaskData taskData) {
 		this.emailMessagingService = emailMessagingService;
 		this.taskData = taskData;
 		this.customerProperties = customerProperties;
 		this.notificationService = notificationService;
 		this.transformMap = transformMap;
+		this.templateName = templateName;
 	}
 
 	public String getName() {
@@ -78,7 +79,9 @@ public abstract class AbstractEmailRouter<T> implements Runnable {
 		}
 	}
 
-	public abstract String getTemplateName();
+	public String getTemplateName() {
+		return templateName;
+	}
 
 	public abstract EmailData transform(List<T> data);
 

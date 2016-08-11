@@ -24,7 +24,7 @@ public class MockRouterFactory extends AbstractEmailFactory {
 	}
 
 	@Override
-	public Set<String> getSubscriberTopics() {
+	public Set<String> getTemplateContentTypes() {
 		final Set<String> subscriberSet = new HashSet<>();
 		subscriberSet.add(TOPIC_KEY);
 		return subscriberSet;
@@ -33,7 +33,12 @@ public class MockRouterFactory extends AbstractEmailFactory {
 	@Override
 	public AbstractEmailRouter<?> createInstance(final EmailTaskData data) {
 		return new MockRouter(getEmailMessagingService(), getCustomerProperties(), getNotificationService(),
-				getTransformMap(), data, expectedData);
+				getTransformMap(), getTemplateName(), data, expectedData);
+	}
+
+	@Override
+	public String getTemplateName() {
+		return TEMPLATE_DEFAULT;
 	}
 
 }

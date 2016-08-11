@@ -20,8 +20,9 @@ public class DailyDigestRouter extends AbstractEmailRouter<EmailContentItem> {
 
 	public DailyDigestRouter(final EmailMessagingService emailMessagingService,
 			final CustomerProperties customerProperties, final NotificationService notificationService,
-			final Map<String, AbstractContentTransform> transformMap, final EmailTaskData taskData) {
-		super(emailMessagingService, customerProperties, notificationService, transformMap, taskData);
+			final Map<String, AbstractContentTransform> transformMap, final String templateName,
+			final EmailTaskData taskData) {
+		super(emailMessagingService, customerProperties, notificationService, transformMap, templateName, taskData);
 	}
 
 	@Override
@@ -88,10 +89,5 @@ public class DailyDigestRouter extends AbstractEmailRouter<EmailContentItem> {
 		final List<Map<String, Object>> vulnerabilityList = (List<Map<String, Object>>) templateMap
 				.get(LIST_VULNERABILITIES);
 		vulnerabilityList.addAll(converter.transform(item));
-	}
-
-	@Override
-	public String getTemplateName() {
-		return "dailyDigest.ftl";
 	}
 }

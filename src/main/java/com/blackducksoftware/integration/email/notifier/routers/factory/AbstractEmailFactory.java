@@ -11,8 +11,7 @@ import com.blackducksoftware.integration.email.transforms.templates.AbstractCont
 import com.blackducksoftware.integration.hub.notification.NotificationService;
 
 public abstract class AbstractEmailFactory {
-	public final static String TOPIC_ALL = "all";
-
+	public final static String TEMPLATE_DEFAULT = "htmlTemplate.ftl";
 	private final EmailMessagingService emailMessagingService;
 	private final CustomerProperties customerProperties;
 	private final NotificationService notificationService;
@@ -43,7 +42,9 @@ public abstract class AbstractEmailFactory {
 		return transformMap;
 	}
 
-	public abstract Set<String> getSubscriberTopics();
+	public abstract String getTemplateName();
+
+	public abstract Set<String> getTemplateContentTypes();
 
 	public abstract AbstractEmailRouter<?> createInstance(EmailTaskData data);
 

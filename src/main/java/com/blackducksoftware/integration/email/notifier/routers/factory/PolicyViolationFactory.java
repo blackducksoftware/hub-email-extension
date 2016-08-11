@@ -23,14 +23,19 @@ public class PolicyViolationFactory extends AbstractEmailFactory {
 	@Override
 	public AbstractEmailRouter<?> createInstance(final EmailTaskData data) {
 		final PolicyViolationRouter router = new PolicyViolationRouter(getEmailMessagingService(),
-				getCustomerProperties(), getNotificationService(), getTransformMap(), data);
+				getCustomerProperties(), getNotificationService(), getTransformMap(), getTemplateName(), data);
 		return router;
 	}
 
 	@Override
-	public Set<String> getSubscriberTopics() {
+	public Set<String> getTemplateContentTypes() {
 		final Set<String> topicSet = new HashSet<>();
 		topicSet.add(PolicyViolationContentItem.class.getName());
 		return topicSet;
+	}
+
+	@Override
+	public String getTemplateName() {
+		return "dailyDigest.ftl";
 	}
 }

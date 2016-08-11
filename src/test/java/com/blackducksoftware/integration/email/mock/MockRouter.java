@@ -20,8 +20,8 @@ public class MockRouter extends AbstractEmailRouter<String> {
 
 	public MockRouter(final EmailMessagingService emailMessagingService, final CustomerProperties customerProperties,
 			final NotificationService notificationService, final Map<String, AbstractContentTransform> transformMap,
-			final EmailTaskData taskData, final String expectedData) {
-		super(emailMessagingService, customerProperties, notificationService, transformMap, taskData);
+			final String templateName, final EmailTaskData taskData, final String expectedData) {
+		super(emailMessagingService, customerProperties, notificationService, transformMap, templateName, taskData);
 		this.expectedData = expectedData;
 	}
 
@@ -38,10 +38,4 @@ public class MockRouter extends AbstractEmailRouter<String> {
 		assertEquals(expectedData, item);
 		return null;
 	}
-
-	@Override
-	public String getTemplateName() {
-		return TEMPLATE_DEFAULT;
-	}
-
 }

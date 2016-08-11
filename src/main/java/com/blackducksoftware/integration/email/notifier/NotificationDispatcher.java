@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.notifier.routers.EmailContentItem;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
-import com.blackducksoftware.integration.email.notifier.routers.factory.AbstractEmailFactory;
 import com.blackducksoftware.integration.email.transforms.AbstractTransform;
 import com.blackducksoftware.integration.hub.api.notification.NotificationItem;
 import com.blackducksoftware.integration.hub.exception.NotificationServiceException;
@@ -35,7 +34,7 @@ public class NotificationDispatcher extends AbstractPollingDispatcher {
 	private final CustomerProperties systemProperties;
 	private final ExecutorService executorService;
 	private final NotificationService notificationService;
-	private final Map<String, AbstractTransform> transformMap;
+	private final Map<String, AbstractTransform> notificationTransformMap;
 
 	public NotificationDispatcher(final HubServerConfig hubConfig, final Date applicationStartDate,
 			final CustomerProperties systemProperties, final ExecutorService executorService,
@@ -45,7 +44,7 @@ public class NotificationDispatcher extends AbstractPollingDispatcher {
 		this.systemProperties = systemProperties;
 		this.executorService = executorService;
 		this.notificationService = notificationService;
-		this.transformMap = transformMap;
+		this.notificationTransformMap = transformMap;
 	}
 
 	@Override
@@ -71,12 +70,11 @@ public class NotificationDispatcher extends AbstractPollingDispatcher {
 
 			for (final NotificationItem item : itemList) {
 				final Class<?> key = item.getClass();
-				if (transformMap.containsKey(key.getName())) {
-					contentList.addAll(transformMap.get(key.getName()).transform(item));
+				if (notificationTransformMap.containsKey(key.getName())) {
+					contentList.addAll(notificationTransformMap.get(key.getName()).transform(item));
 				}
 			}
 		}
-
 		return contentList;
 	}
 
@@ -97,45 +95,6 @@ public class NotificationDispatcher extends AbstractPollingDispatcher {
 			logger.error("Error occurred fetching notifications.", e);
 		}
 		return items;
-	}
-
-	private Map<String, List<Object>> createPartitionMap(final List<NotificationItem> notificationItems) {
-		final Map<String, List<Object>> partitionMap = new HashMap<>();
-		partitionMap.put(AbstractEmailFactory.TOPIC_ALL, new Vector<>());
-		for (final NotificationItem notification : notificationItems) {
-			partitionMap.get(AbstractEmailFactory.TOPIC_ALL).add(notification);
-			final String classname = notification.getClass().getName();
-			List<Object> partitionList;
-			if (partitionMap.containsKey(classname)) {
-				partitionList = partitionMap.get(classname);
-			} else {
-				partitionList = new Vector<>();
-				partitionMap.put(classname, partitionList);
-			}
-			partitionList.add(notification);
-		}
-
-		return partitionMap;
-	}
-
-	@Override
-	public Map<String, List<Object>> partitionData(final List<EmailContentItem> dataList) {
-		final Map<String, List<Object>> partitionMap = new HashMap<>();
-		partitionMap.put(AbstractEmailFactory.TOPIC_ALL, new Vector<>());
-		for (final Object item : dataList) {
-			partitionMap.get(AbstractEmailFactory.TOPIC_ALL).add(item);
-			final String classname = item.getClass().getName();
-			List<Object> partitionList;
-			if (partitionMap.containsKey(classname)) {
-				partitionList = partitionMap.get(classname);
-			} else {
-				partitionList = new Vector<>();
-				partitionMap.put(classname, partitionList);
-			}
-			partitionList.add(item);
-		}
-
-		return partitionMap;
 	}
 
 	@Override

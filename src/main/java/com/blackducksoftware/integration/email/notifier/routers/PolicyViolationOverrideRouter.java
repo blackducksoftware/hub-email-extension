@@ -15,8 +15,9 @@ import com.blackducksoftware.integration.hub.notification.NotificationService;
 public class PolicyViolationOverrideRouter extends AbstractEmailRouter<PolicyOverrideNotificationItem> {
 	public PolicyViolationOverrideRouter(final EmailMessagingService emailMessagingService,
 			final CustomerProperties customerProperties, final NotificationService notificationService,
-			final Map<String, AbstractContentTransform> transformMap, final EmailTaskData taskData) {
-		super(emailMessagingService, customerProperties, notificationService, transformMap, taskData);
+			final Map<String, AbstractContentTransform> transformMap, final String templateName,
+			final EmailTaskData taskData) {
+		super(emailMessagingService, customerProperties, notificationService, transformMap, templateName, taskData);
 	}
 
 	@Override
@@ -25,10 +26,4 @@ public class PolicyViolationOverrideRouter extends AbstractEmailRouter<PolicyOve
 		final Map<String, Object> emailDataMap = new HashMap<>();
 		return new EmailData(addresses, emailDataMap);
 	}
-
-	@Override
-	public String getTemplateName() {
-		return TEMPLATE_DEFAULT;
-	}
-
 }
