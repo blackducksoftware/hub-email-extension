@@ -7,28 +7,49 @@ import java.util.Map;
 
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.EmailData;
+import com.blackducksoftware.integration.email.model.PolicyViolationContentItem;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.email.transforms.AbstractTransform;
-import com.blackducksoftware.integration.hub.api.notification.RuleViolationNotificationItem;
+import com.blackducksoftware.integration.email.transforms.templates.AbstractContentTransform;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
 
-public class PolicyViolationRouter extends AbstractEmailRouter<RuleViolationNotificationItem> {
+public class PolicyViolationRouter extends AbstractEmailRouter<PolicyViolationContentItem> {
+	private final static String LIST_POLICY_VIOLATIONS = "policyViolations";
+
 	public PolicyViolationRouter(final EmailMessagingService emailMessagingService,
 			final CustomerProperties customerProperties, final NotificationService notificationService,
-			final Map<String, AbstractTransform> transformMap, final EmailTaskData taskData) {
-		super(emailMessagingService, customerProperties, notificationService, transformMap, taskData);
+			final Map<String, AbstractContentTransform> transformMap, final String templateName,
+			final EmailTaskData taskData) {
+		super(emailMessagingService, customerProperties, notificationService, transformMap, templateName, taskData);
 	}
 
 	@Override
-	public EmailData transform(final List<RuleViolationNotificationItem> data) {
+	public EmailData transform(final List<PolicyViolationContentItem> data) {
 		final List<String> addresses = new ArrayList<>();
-		final Map<String, Object> emailDataMap = new HashMap<>();
-		return new EmailData(addresses, emailDataMap);
+		addresses.add("psantos@blackducksoftware.com");
+		final Map<String, Object> templateMap = initTempateMap();
+		final Map<String, AbstractContentTransform> transformMap = getTransformMap();
+		for (final PolicyViolationContentItem item : data) {
+			final Class<?> key = item.getClass();
+			if (transformMap.containsKey(key.getName())) {
+				final AbstractContentTransform converter = transformMap.get(key.getName());
+				processRuleViolation(converter, templateMap, item);
+			}
+		}
+		return new EmailData(addresses, templateMap);
 	}
 
-	@Override
-	public String getTemplateName() {
-		return TEMPLATE_DEFAULT;
+	public Map<String, Object> initTempateMap() {
+		final Map<String, Object> templateMap = new HashMap<>();
+		templateMap.put(KEY_USER, "Hub user");
+		templateMap.put(LIST_POLICY_VIOLATIONS, new ArrayList<Map<String, Object>>());
+		return templateMap;
 	}
 
+	@SuppressWarnings("unchecked")
+	private void processRuleViolation(final AbstractContentTransform converter, final Map<String, Object> templateMap,
+			final PolicyViolationContentItem item) {
+		final List<Map<String, Object>> violationList = (List<Map<String, Object>>) templateMap
+				.get(LIST_POLICY_VIOLATIONS);
+		violationList.addAll(converter.transform(item));
+	}
 }

@@ -7,13 +7,14 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.blackducksoftware.integration.email.mock.MockRouter;
 import com.blackducksoftware.integration.email.notifier.EmailEngine;
-import com.blackducksoftware.integration.email.notifier.routers.AbstractEmailRouter;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
+import com.blackducksoftware.integration.email.notifier.routers.factory.AbstractEmailFactory;
 
 public class ItemRouterTest {
 	private final static String RECEIVE_DATA = "receive data string";
@@ -31,7 +32,12 @@ public class ItemRouterTest {
 		data.add(RECEIVE_DATA);
 		final EmailTaskData taskData = new EmailTaskData(data);
 		router = new MockRouter(engine.emailMessagingService, engine.customerProperties, engine.notificationService,
-				engine.transformMap, taskData, RECEIVE_DATA);
+				engine.contentTransformMap, AbstractEmailFactory.TEMPLATE_DEFAULT, taskData, RECEIVE_DATA);
+	}
+
+	@After
+	public void endTest() throws Exception {
+		engine.shutDown();
 	}
 
 	@Test
@@ -48,6 +54,6 @@ public class ItemRouterTest {
 
 	@Test
 	public void testGetTemplateName() {
-		assertEquals(AbstractEmailRouter.TEMPLATE_DEFAULT, router.getTemplateName());
+		assertEquals(AbstractEmailFactory.TEMPLATE_DEFAULT, router.getTemplateName());
 	}
 }

@@ -1,12 +1,20 @@
-Dear User,
+Dear ${hubUserName},
 <br />
-The Black Duck Hub's monitoring system captured the following policy violation -
-Project Name/Version/Component Name/Component Version
-
-${policyNameInViolation}
-Policy Conditions
-<Actual Policy Logic> text display
-
-You can login here: <a href="${hub.server.url}">https://www.customer-hub-url.com> to understand remediation steps.
 <br />
-<img src="cid:${logoContentId}" />
+<#if policyViolations?? && policyViolations?size gt 0>
+  The Black Duck Hub's monitoring system captured one or more policy violations -
+  <br />
+
+  <ul style="list-style-type: none;">
+    <#list policyViolations as policyViolation>
+      <li>
+        ${policyViolation.projectName} / ${policyViolation.projectVersionName} / ${policyViolation.componentName} / ${policyViolation.componentVersionName} - ${policyViolation.policyName}
+      </li>
+    </#list>
+  </ul>
+</#if>
+
+To manage these items and/or see more details, please log in to your <a href="${hub_server_url}">Black Duck Hub</a>
+<br />
+<br />
+<img src="cid:${logo_image}" />

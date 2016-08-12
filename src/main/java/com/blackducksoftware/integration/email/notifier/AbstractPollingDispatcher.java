@@ -2,7 +2,8 @@ package com.blackducksoftware.integration.email.notifier;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.email.model.EmailContentItem;
 import com.blackducksoftware.integration.email.notifier.routers.AbstractEmailRouter;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 import com.blackducksoftware.integration.email.notifier.routers.factory.AbstractEmailFactory;
@@ -29,7 +31,8 @@ public abstract class AbstractPollingDispatcher extends TimerTask {
 	private Timer timer;
 	private long interval;
 	private long startupDelay;
-	private final Map<String, List<AbstractEmailFactory>> topicSubscriberMap = new ConcurrentHashMap<>();
+	private final Map<String, AbstractEmailFactory> templateFactoryMap = new ConcurrentHashMap<>();
+	private final Map<String, Set<String>> typeToTemplateMap = new ConcurrentHashMap<>();
 	private ExecutorService executorService;
 
 	private Date lastRun;
@@ -82,16 +85,18 @@ public abstract class AbstractPollingDispatcher extends TimerTask {
 
 	public void attachRouters(final List<AbstractEmailFactory> routers) {
 		for (final AbstractEmailFactory factory : routers) {
-			final Set<String> topics = factory.getSubscriberTopics();
-			for (final String topic : topics) {
-				List<AbstractEmailFactory> factoryList;
-				if (topicSubscriberMap.containsKey(topic)) {
-					factoryList = topicSubscriberMap.get(topic);
+			final String templateName = factory.getTemplateName();
+			templateFactoryMap.put(templateName, factory);
+			final Set<String> typeNameSet = factory.getTemplateContentTypes();
+			for (final String typeName : typeNameSet) {
+				Set<String> templateNameSet;
+				if (typeToTemplateMap.containsKey(typeName)) {
+					templateNameSet = typeToTemplateMap.get(typeName);
 				} else {
-					factoryList = new Vector<>();
-					topicSubscriberMap.put(topic, factoryList);
+					templateNameSet = new HashSet<>();
+					typeToTemplateMap.put(typeName, templateNameSet);
 				}
-				factoryList.add(factory);
+				templateNameSet.add(factory.getTemplateName());
 			}
 		}
 	}
@@ -104,18 +109,20 @@ public abstract class AbstractPollingDispatcher extends TimerTask {
 
 	public void unattachRouters(final List<AbstractEmailFactory> routerFactories) {
 		for (final AbstractEmailFactory factory : routerFactories) {
-			final Set<String> topics = factory.getSubscriberTopics();
-			for (final String topic : topics) {
-				if (topicSubscriberMap.containsKey(topic)) {
-					final List<AbstractEmailFactory> factoryList = topicSubscriberMap.get(topic);
-					factoryList.remove(factory);
-					if (logger.isDebugEnabled()) {
-						logger.debug("Router removed: " + factory);
-						logger.debug("Current router count: " + topicSubscriberMap.size());
+			final String templateName = factory.getTemplateName();
+			if (templateFactoryMap.containsKey(templateName)) {
+				final Set<String> typeNameSet = factory.getTemplateContentTypes();
+				// remove the template type mappings
+				for (final String typeName : typeNameSet) {
+					if (typeToTemplateMap.containsKey(typeName)) {
+						final Set<String> templateSet = typeToTemplateMap.get(typeName);
+						templateSet.remove(factory.getTemplateName());
 					}
-					if (factoryList.isEmpty()) {
-						topicSubscriberMap.remove(topic);
-					}
+				}
+				templateFactoryMap.remove(templateName);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Router removed: " + factory);
+					logger.debug("Current router count: " + templateFactoryMap.size());
 				}
 			}
 		}
@@ -127,22 +134,16 @@ public abstract class AbstractPollingDispatcher extends TimerTask {
 		if (executorService != null) {
 			executorService.shutdown();
 		}
-		final Set<String> factoryTopics = topicSubscriberMap.keySet();
-		for (final String topic : factoryTopics) {
-			final List<AbstractEmailFactory> factoryList = topicSubscriberMap.get(topic);
-			final Iterator<AbstractEmailFactory> iterator = factoryList.iterator();
-			while (iterator.hasNext()) {
-				iterator.next();
-				iterator.remove();
-			}
-		}
-		topicSubscriberMap.clear(); // remove all topics
+		templateFactoryMap.clear(); // remove all topics
+		typeToTemplateMap.clear();
 	}
 
 	@Override
 	public void run() {
 		currentRun = new Date();
-		final Map<String, EmailTaskData> dataMap = fetchData();
+		final List<EmailContentItem> itemList = fetchData();
+		final Map<String, List<Object>> partitionedData = partitionData(itemList);
+		final Map<String, EmailTaskData> dataMap = filterData(partitionedData);
 		if (logger.isDebugEnabled()) {
 			logger.debug(
 					"Execution data: " + System.lineSeparator() + "########## Polling Dispatcher Execution ##########"
@@ -153,12 +154,10 @@ public abstract class AbstractPollingDispatcher extends TimerTask {
 		}
 		final Set<String> factoryTopics = dataMap.keySet();
 		for (final String topic : factoryTopics) {
-			if (topicSubscriberMap.containsKey(topic)) {
-				final List<AbstractEmailFactory> factoryList = topicSubscriberMap.get(topic);
-				for (final AbstractEmailFactory routerFactory : factoryList) {
-					final AbstractEmailRouter<?> router = routerFactory.createInstance(dataMap.get(topic));
-					executorService.submit(router);
-				}
+			if (templateFactoryMap.containsKey(topic)) {
+				final AbstractEmailFactory factory = templateFactoryMap.get(topic);
+				final AbstractEmailRouter<?> router = factory.createInstance(dataMap.get(topic));
+				executorService.submit(router);
 			}
 		}
 		lastRun = currentRun;
@@ -206,6 +205,28 @@ public abstract class AbstractPollingDispatcher extends TimerTask {
 
 	public abstract void init();
 
-	public abstract Map<String, EmailTaskData> fetchData();
+	public abstract List<EmailContentItem> fetchData();
 
+	public Map<String, List<Object>> partitionData(final List<EmailContentItem> dataList) {
+		final Map<String, List<Object>> partitionMap = new HashMap<>();
+		for (final Object item : dataList) {
+			final String classname = item.getClass().getName();
+			if (typeToTemplateMap.containsKey(classname)) {
+				final Set<String> templateSet = typeToTemplateMap.get(classname);
+				for (final String templateName : templateSet) {
+					List<Object> partitionList;
+					if (partitionMap.containsKey(templateName)) {
+						partitionList = partitionMap.get(templateName);
+					} else {
+						partitionList = new Vector<>();
+						partitionMap.put(templateName, partitionList);
+					}
+					partitionList.add(item);
+				}
+			}
+		}
+		return partitionMap;
+	}
+
+	public abstract Map<String, EmailTaskData> filterData(Map<String, List<Object>> partitionedData);
 }

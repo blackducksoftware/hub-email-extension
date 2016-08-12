@@ -2,11 +2,12 @@ package com.blackducksoftware.integration.email.transforms;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.email.model.EmailContentItem;
+import com.blackducksoftware.integration.email.model.PolicyOverrideContentItem;
 import com.blackducksoftware.integration.hub.api.component.ComponentVersionStatus;
 import com.blackducksoftware.integration.hub.api.notification.NotificationItem;
 import com.blackducksoftware.integration.hub.api.notification.PolicyOverrideNotificationItem;
@@ -24,8 +25,8 @@ public class PolicyViolationOverrideTransform extends AbstractPolicyTransform {
 	}
 
 	@Override
-	public List<Map<String, Object>> transform(final NotificationItem item) {
-		List<Map<String, Object>> templateData = new ArrayList<>();
+	public List<EmailContentItem> transform(final NotificationItem item) {
+		final List<EmailContentItem> templateData = new ArrayList<>();
 
 		ReleaseItem releaseItem;
 		try {
@@ -43,14 +44,24 @@ public class PolicyViolationOverrideTransform extends AbstractPolicyTransform {
 
 			releaseItem = getNotificationService()
 					.getProjectReleaseItemFromProjectReleaseUrl(policyViolation.getContent().getProjectVersionLink());
-			templateData = handleNotification(projectName, componentVersionList, releaseItem);
-			final Map<String, Object> templateMap = templateData.get(0);
-			templateMap.put(KEY_FIRST_NAME, policyViolation.getContent().getFirstName());
-			templateMap.put(KEY_LAST_NAME, policyViolation.getContent().getLastName());
-
+			handleNotification(projectName, componentVersionList, releaseItem, item, templateData);
 		} catch (NotificationServiceException | UnexpectedHubResponseException e) {
 			logger.error("Error Transforming", e);
 		}
 		return templateData;
+	}
+
+	@Override
+	public void createContents(final String projectName, final String projectVersion, final String componentName,
+			final String componentVersion, final String policyName, final NotificationItem item,
+			final List<EmailContentItem> templateData) {
+		final PolicyOverrideNotificationItem policyOverride = (PolicyOverrideNotificationItem) item;
+		templateData.add(new PolicyOverrideContentItem(projectName, projectVersion, componentName, componentVersion,
+				policyName, policyOverride.getContent().getFirstName(), policyOverride.getContent().getLastName()));
+	}
+
+	@Override
+	public String getNotificationType() {
+		return PolicyOverrideNotificationItem.class.getName();
 	}
 }

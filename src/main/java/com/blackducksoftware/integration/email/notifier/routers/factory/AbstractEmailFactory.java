@@ -7,20 +7,19 @@ import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.notifier.routers.AbstractEmailRouter;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.email.transforms.AbstractTransform;
+import com.blackducksoftware.integration.email.transforms.templates.AbstractContentTransform;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
 
 public abstract class AbstractEmailFactory {
-	public final static String TOPIC_ALL = "all";
-
+	public final static String TEMPLATE_DEFAULT = "htmlTemplate.ftl";
 	private final EmailMessagingService emailMessagingService;
 	private final CustomerProperties customerProperties;
 	private final NotificationService notificationService;
-	private final Map<String, AbstractTransform> transformMap;
+	private final Map<String, AbstractContentTransform> transformMap;
 
 	public AbstractEmailFactory(final EmailMessagingService emailMessagingService,
 			final CustomerProperties customerProperties, final NotificationService notificationService,
-			final Map<String, AbstractTransform> transformMap) {
+			final Map<String, AbstractContentTransform> transformMap) {
 		this.emailMessagingService = emailMessagingService;
 		this.customerProperties = customerProperties;
 		this.notificationService = notificationService;
@@ -39,11 +38,13 @@ public abstract class AbstractEmailFactory {
 		return notificationService;
 	}
 
-	public Map<String, AbstractTransform> getTransformMap() {
+	public Map<String, AbstractContentTransform> getTransformMap() {
 		return transformMap;
 	}
 
-	public abstract Set<String> getSubscriberTopics();
+	public abstract String getTemplateName();
+
+	public abstract Set<String> getTemplateContentTypes();
 
 	public abstract AbstractEmailRouter<?> createInstance(EmailTaskData data);
 

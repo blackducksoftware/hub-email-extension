@@ -26,10 +26,8 @@ import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.notifier.routers.factory.AbstractEmailFactory;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.service.properties.HubServerBeanConfiguration;
-import com.blackducksoftware.integration.email.transforms.AbstractTransform;
-import com.blackducksoftware.integration.email.transforms.PolicyViolationOverrideTransform;
-import com.blackducksoftware.integration.email.transforms.PolicyViolationTransform;
-import com.blackducksoftware.integration.email.transforms.VulnerabilityTransform;
+import com.blackducksoftware.integration.email.transforms.AbstractNotificationTransform;
+import com.blackducksoftware.integration.email.transforms.templates.AbstractContentTransform;
 import com.blackducksoftware.integration.hub.HubIntRestService;
 import com.blackducksoftware.integration.hub.api.UserRestService;
 import com.blackducksoftware.integration.hub.api.item.HubItemsService;
@@ -67,8 +65,9 @@ public class EmailEngine {
 	public final Properties appProperties;
 	public final CustomerProperties customerProperties;
 	public final NotificationService notificationService;
+	public final Map<String, AbstractNotificationTransform> transformMap;
+	public final Map<String, AbstractContentTransform> contentTransformMap;
 	public final UserRestService userRestService;
-	public final Map<String, AbstractTransform> transformMap;
 
 	public EmailEngine() throws IOException, EncryptionException, URISyntaxException, BDRestException {
 		gson = new Gson();
@@ -86,6 +85,7 @@ public class EmailEngine {
 		notificationService = createNotificationService();
 		userRestService = createUserRestService();
 		transformMap = createTransformMap();
+		contentTransformMap = createContentTransformMap();
 		routerFactoryList = createRouterFactoryList();
 		notificationDispatcher = createDispatcher();
 
@@ -155,7 +155,7 @@ public class EmailEngine {
 				final Constructor<? extends AbstractEmailFactory> constructor = clazz.getConstructor(
 						EmailMessagingService.class, CustomerProperties.class, NotificationService.class, Map.class);
 				factoryList.add(constructor.newInstance(emailMessagingService, customerProperties, notificationService,
-						transformMap));
+						contentTransformMap));
 			} catch (final ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException
 					| IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 				logger.error("Error initializing router factory.", e);
@@ -172,7 +172,7 @@ public class EmailEngine {
 
 	private NotificationDispatcher createDispatcher() {
 		return new NotificationDispatcher(hubServerConfig, applicationStartDate, customerProperties, executorService,
-				notificationService, userRestService);
+				notificationService, transformMap, userRestService);
 	}
 
 	private RestConnection createRestConnection() throws EncryptionException, URISyntaxException, BDRestException {
@@ -219,14 +219,43 @@ public class EmailEngine {
 		return hubItemsService;
 	}
 
-	private Map<String, AbstractTransform> createTransformMap() {
-		final Map<String, AbstractTransform> transformMap = new HashMap<>();
-		transformMap.put(RuleViolationNotificationItem.class.getName(),
-				new PolicyViolationTransform(notificationService));
-		transformMap.put(PolicyOverrideNotificationItem.class.getName(),
-				new PolicyViolationOverrideTransform(notificationService));
-		transformMap.put(VulnerabilityNotificationItem.class.getName(),
-				new VulnerabilityTransform(notificationService));
+	@SuppressWarnings("unchecked")
+	private Map<String, AbstractNotificationTransform> createTransformMap() {
+		final Map<String, AbstractNotificationTransform> transformMap = new HashMap<>();
+		final List<String> notificationTransformList = customerProperties.getNotificationTransformerList();
+		for (final String className : notificationTransformList) {
+			Class<? extends AbstractNotificationTransform> clazz;
+			try {
+				clazz = (Class<? extends AbstractNotificationTransform>) Class.forName(className);
+				final Constructor<? extends AbstractNotificationTransform> constructor = clazz
+						.getConstructor(NotificationService.class);
+				final AbstractNotificationTransform transformer = constructor.newInstance(notificationService);
+				transformMap.put(transformer.getNotificationType(), transformer);
+			} catch (final ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException
+					| IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				logger.error("Error initializing router factory.", e);
+			}
+		}
+
+		return transformMap;
+	}
+
+	@SuppressWarnings("unchecked")
+	private Map<String, AbstractContentTransform> createContentTransformMap() {
+		final Map<String, AbstractContentTransform> transformMap = new HashMap<>();
+		final List<String> notificationTransformList = customerProperties.getContentTransformerList();
+		for (final String className : notificationTransformList) {
+			Class<? extends AbstractContentTransform> clazz;
+			try {
+				clazz = (Class<? extends AbstractContentTransform>) Class.forName(className);
+				final Constructor<? extends AbstractContentTransform> constructor = clazz.getConstructor();
+				final AbstractContentTransform transformer = constructor.newInstance();
+				transformMap.put(transformer.getContentItemType(), transformer);
+			} catch (final ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException
+					| IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				logger.error("Error initializing router factory.", e);
+			}
+		}
 		return transformMap;
 	}
 }

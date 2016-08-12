@@ -1,34 +1,30 @@
 package com.blackducksoftware.integration.email.transforms;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.email.model.EmailContentItem;
 import com.blackducksoftware.integration.hub.api.component.BomComponentVersionPolicyStatus;
 import com.blackducksoftware.integration.hub.api.component.ComponentVersionStatus;
+import com.blackducksoftware.integration.hub.api.notification.NotificationItem;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
 import com.blackducksoftware.integration.hub.api.version.ReleaseItem;
 import com.blackducksoftware.integration.hub.exception.NotificationServiceException;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
 
-public abstract class AbstractPolicyTransform extends AbstractTransform {
-	public final static String KEY_POLICY_NAME = "policyName";
-	public final static String KEY_FIRST_NAME = "firstName";
-	public final static String KEY_LAST_NAME = "lastName";
+public abstract class AbstractPolicyTransform extends AbstractNotificationTransform {
 	private final Logger logger = LoggerFactory.getLogger(AbstractPolicyTransform.class);
 
 	public AbstractPolicyTransform(final NotificationService notificationService) {
 		super(notificationService);
 	}
 
-	public List<Map<String, Object>> handleNotification(final String projectName,
-			final List<ComponentVersionStatus> componentVersionList, final ReleaseItem releaseItem) {
-		final List<Map<String, Object>> templateData = new ArrayList<>();
+	public void handleNotification(final String projectName, final List<ComponentVersionStatus> componentVersionList,
+			final ReleaseItem releaseItem, final NotificationItem item, final List<EmailContentItem> templateData) {
 		for (final ComponentVersionStatus componentVersion : componentVersionList) {
 			try {
 				final String componentVersionName = getNotificationService()
@@ -48,20 +44,14 @@ public abstract class AbstractPolicyTransform extends AbstractTransform {
 						logger.debug("Policy Rule : " + rule);
 						ruleNameList.add(rule.getName());
 					}
-					final Map<String, Object> itemMap = new HashMap<>();
-					itemMap.put(KEY_PROJECT_NAME, projectName);
-					itemMap.put(KEY_PROJECT_VERSION, releaseItem.getVersionName());
-					itemMap.put(KEY_COMPONENT_NAME, componentVersion.getComponentName());
-					itemMap.put(KEY_COMPONENT_VERSION, componentVersionName);
-					itemMap.put(KEY_POLICY_NAME, StringUtils.join(ruleNameList, ", "));
-					templateData.add(itemMap);
+					createContents(projectName, releaseItem.getVersionName(), componentVersion.getComponentName(),
+							componentVersionName, StringUtils.join(ruleNameList, ", "), item, templateData);
 				}
 
 			} catch (final NotificationServiceException e) {
 				logger.error("Error processing ComponentVersion: " + componentVersion, e);
 			}
 		}
-		return templateData;
 	}
 
 	private List<String> getRules(final List<String> rulesViolated) throws NotificationServiceException {
@@ -97,4 +87,7 @@ public abstract class AbstractPolicyTransform extends AbstractTransform {
 		}
 		return fixedRuleUrl;
 	}
+
+	public abstract void createContents(String projectName, String projectVersion, String componentName,
+			String componentVersion, String policyName, NotificationItem item, List<EmailContentItem> templateData);
 }
