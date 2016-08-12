@@ -1,6 +1,9 @@
 package com.blackducksoftware.integration.email.notifier;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +20,10 @@ import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.EmailContentItem;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 import com.blackducksoftware.integration.email.transforms.AbstractNotificationTransform;
+import com.blackducksoftware.integration.hub.api.UserRestService;
 import com.blackducksoftware.integration.hub.api.notification.NotificationItem;
+import com.blackducksoftware.integration.hub.api.user.UserItem;
+import com.blackducksoftware.integration.hub.exception.BDRestException;
 import com.blackducksoftware.integration.hub.exception.NotificationServiceException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.notification.NotificationDateRange;
@@ -35,16 +41,19 @@ public class NotificationDispatcher extends AbstractPollingDispatcher {
 	private final ExecutorService executorService;
 	private final NotificationService notificationService;
 	private final Map<String, AbstractNotificationTransform> notificationTransformMap;
+	private final UserRestService userRestService;
 
 	public NotificationDispatcher(final HubServerConfig hubConfig, final Date applicationStartDate,
 			final CustomerProperties systemProperties, final ExecutorService executorService,
-			final NotificationService notificationService, final Map<String, AbstractNotificationTransform> transformMap) {
+			final NotificationService notificationService,
+			final Map<String, AbstractNotificationTransform> transformMap, final UserRestService userRestService) {
 		this.hubServerConfig = hubConfig;
 		this.applicationStartDate = applicationStartDate;
 		this.systemProperties = systemProperties;
 		this.executorService = executorService;
 		this.notificationService = notificationService;
 		this.notificationTransformMap = transformMap;
+		this.userRestService = userRestService;
 	}
 
 	@Override
@@ -105,5 +114,15 @@ public class NotificationDispatcher extends AbstractPollingDispatcher {
 			templateDataMap.put(topic, new EmailTaskData(partitionedData.get(topic)));
 		}
 		return templateDataMap;
+	}
+
+	private List<UserItem> fetchUsers() {
+		List<UserItem> userItems = new ArrayList<>();
+		try {
+			userItems = userRestService.getAllUsers();
+		} catch (IOException | URISyntaxException | BDRestException e) {
+			logger.error("Error occurred fetching users.", e);
+		}
+		return userItems;
 	}
 }

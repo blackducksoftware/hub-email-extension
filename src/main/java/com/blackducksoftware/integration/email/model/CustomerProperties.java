@@ -41,16 +41,19 @@ public class CustomerProperties {
 	public static final String ROUTER_FACTORY_PREFIX = "email.service.router.factory.";
 	public static final String TRANSFORMER_NOTIFICATION_PREFIX = "email.service.transformer.notification.";
 	public static final String TRANSFORMER_CONTENT_ITEM_PREFIX = "email.service.transformer.content.";
+	public static final String OPT_OUT_PREFIX = "hub.email.user.preference.opt.out.";
 
 	private final List<String> javamailConfigKeys = new ArrayList<>();
 	private final Map<String, String> suppliedJavamailConfigProperties = new HashMap<>();
 
 	private final List<String> templateVariableKeys = new ArrayList<>();
 	private final Map<String, String> suppliedTemplateVariableProperties = new HashMap<>();
-	private final Properties appProperties;
+
 	private final List<String> factoryClassNames = new ArrayList<>();
 	private final List<String> notificationTransformerList = new ArrayList<>();
 	private final List<String> contentTransformerList = new ArrayList<>();
+	private final Map<String, String> optOutProperties = new HashMap<>();
+	private final Properties appProperties;
 
 	public CustomerProperties(final Properties appProperties) {
 		if (appProperties == null) {
@@ -80,6 +83,9 @@ public class CustomerProperties {
 						notificationTransformerList.add(value);
 					} else if (key.startsWith(TRANSFORMER_CONTENT_ITEM_PREFIX)) {
 						contentTransformerList.add(value);
+					} else if (key.startsWith(OPT_OUT_PREFIX)) {
+						final String cleanedKey = key.replace(OPT_OUT_PREFIX, "");
+						optOutProperties.put(cleanedKey, value);
 					}
 				}
 			}
@@ -184,5 +190,9 @@ public class CustomerProperties {
 
 	public List<String> getContentTransformerList() {
 		return contentTransformerList;
+	}
+
+	public Map<String, String> getOptOutProperties() {
+		return optOutProperties;
 	}
 }

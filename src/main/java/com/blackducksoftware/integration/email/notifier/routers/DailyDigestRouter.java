@@ -16,7 +16,6 @@ import com.blackducksoftware.integration.email.transforms.templates.AbstractCont
 import com.blackducksoftware.integration.hub.notification.NotificationService;
 
 public class DailyDigestRouter extends AbstractEmailRouter<EmailContentItem> {
-
 	private final static String LIST_POLICY_VIOLATIONS = "policyViolations";
 	private final static String LIST_POLICY_OVERRIDES = "policyViolationOverrides";
 	private final static String LIST_POLICY_OVERRIDE_CANCEL = "policyViolationOverrides";
@@ -91,4 +90,5 @@ public class DailyDigestRouter extends AbstractEmailRouter<EmailContentItem> {
 				.get(LIST_VULNERABILITIES);
 		vulnerabilityList.addAll(converter.transform(item));
 	}
+
 }
