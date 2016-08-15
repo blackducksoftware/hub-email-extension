@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.model.CustomerProperties;
+import com.blackducksoftware.integration.email.model.EmailTarget;
 import com.blackducksoftware.integration.email.model.MimeMultipartBuilder;
 
 import freemarker.core.ParseException;
@@ -44,13 +45,16 @@ public class EmailMessagingService {
 		this.configuration = configuration;
 	}
 
-	public void sendEmailMessage(final CustomerProperties customerProperties, final List<String> emailAddresses,
-			final Map<String, Object> model, final String templateName) throws MessagingException,
-			TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException, TemplateException {
-		if (null == emailAddresses || emailAddresses.isEmpty()) {
+	public void sendEmailMessage(final EmailTarget emailTarget) throws MessagingException, TemplateNotFoundException,
+			MalformedTemplateNameException, ParseException, IOException, TemplateException {
+		final String emailAddress = StringUtils.trimToEmpty(emailTarget.getEmailAddress());
+		final String templateName = StringUtils.trimToEmpty(emailTarget.getTemplateName());
+		final Map<String, Object> model = emailTarget.getModel();
+		if (StringUtils.isBlank(emailAddress) || StringUtils.isBlank(templateName)) {
 			// we've got nothing to do...might as well get out of here...
 			return;
 		}
+
 		final Session session = createMailSession(customerProperties);
 		final Map<String, String> contentIdsToFilePaths = new HashMap<>();
 		populateModelWithAdditionalProperties(customerProperties, model, templateName, contentIdsToFilePaths);
@@ -63,7 +67,7 @@ public class EmailMessagingService {
 		final MimeMultipart mimeMultipart = mimeMultipartBuilder.build();
 
 		final String resolvedSubjectLine = getResolvedSubjectLine(model);
-		final Message message = createMessage(emailAddresses, resolvedSubjectLine, session, mimeMultipart);
+		final Message message = createMessage(emailAddress, resolvedSubjectLine, session, mimeMultipart);
 		sendMessage(customerProperties, session, message);
 	}
 
@@ -134,15 +138,13 @@ public class EmailMessagingService {
 		return Session.getInstance(props);
 	}
 
-	private Message createMessage(final List<String> recipientEmailAddresses, final String subjectLine,
-			final Session session, final MimeMultipart mimeMultipart) throws MessagingException {
+	private Message createMessage(final String emailAddress, final String subjectLine, final Session session,
+			final MimeMultipart mimeMultipart) throws MessagingException {
 		final List<InternetAddress> addresses = new ArrayList<>();
-		for (final String recipient : recipientEmailAddresses) {
-			try {
-				addresses.add(new InternetAddress(recipient));
-			} catch (final AddressException e) {
-				log.warn(String.format("Could not create the address from %s: %s", recipient, e.getMessage()));
-			}
+		try {
+			addresses.add(new InternetAddress(emailAddress));
+		} catch (final AddressException e) {
+			log.warn(String.format("Could not create the address from %s: %s", emailAddress, e.getMessage()));
 		}
 
 		if (addresses.isEmpty()) {

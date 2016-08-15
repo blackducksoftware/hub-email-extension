@@ -9,7 +9,7 @@ import com.blackducksoftware.integration.email.notifier.routers.AbstractEmailRou
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 import com.blackducksoftware.integration.email.notifier.routers.factory.AbstractEmailFactory;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.email.transforms.templates.AbstractContentTransform;
+import com.blackducksoftware.integration.email.transformer.templates.AbstractContentTransform;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
 
 public class MockRouterFactory extends AbstractEmailFactory {

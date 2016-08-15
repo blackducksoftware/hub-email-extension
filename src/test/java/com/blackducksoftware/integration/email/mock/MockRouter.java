@@ -11,7 +11,7 @@ import com.blackducksoftware.integration.email.model.EmailData;
 import com.blackducksoftware.integration.email.notifier.routers.AbstractEmailRouter;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.email.transforms.templates.AbstractContentTransform;
+import com.blackducksoftware.integration.email.transformer.templates.AbstractContentTransform;
 import com.blackducksoftware.integration.hub.notification.NotificationService;
 
 public class MockRouter extends AbstractEmailRouter<String> {

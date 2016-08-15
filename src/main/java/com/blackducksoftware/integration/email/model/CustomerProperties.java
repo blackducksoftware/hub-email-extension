@@ -195,4 +195,9 @@ public class CustomerProperties {
 	public Map<String, String> getOptOutProperties() {
 		return optOutProperties;
 	}
+
+	public String getProperty(final String key) {
+		return appProperties.getProperty(key);
+	}
+
 }

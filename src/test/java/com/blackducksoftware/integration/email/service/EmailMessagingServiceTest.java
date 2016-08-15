@@ -13,9 +13,11 @@ import java.util.Map;
 import javax.mail.MessagingException;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.blackducksoftware.integration.email.notifier.EmailEngine;
+import com.blackducksoftware.integration.email.notifier.routers.DigestRouter;
 
 import freemarker.template.TemplateException;
 
@@ -42,16 +44,26 @@ public class EmailMessagingServiceTest {
 	}
 
 	@Test
+	public void testRouter() throws Exception {
+		final DigestRouter digestRouter = new DigestRouter(engine.customerProperties, engine.notificationService,
+				engine.userRestService, engine.emailMessagingService);
+		digestRouter.run();
+	}
+
+	@Test
+	@Ignore
 	public void testSendingEmail() throws IOException, MessagingException, TemplateException {
 		final Map<String, Object> model = new HashMap<>();
 		model.put("title", "A Glorious Day");
 		model.put("message", "this should have html and plain text parts");
 		model.put("items", Arrays.asList("apple", "orange", "pear", "banana"));
 
-		engine.emailMessagingService.sendEmailMessage(engine.customerProperties, recipients, model, "htmlTemplate.ftl");
+		// engine.emailMessagingService.sendEmailMessage(engine.customerProperties,
+		// recipients, model, "htmlTemplate.ftl");
 	}
 
 	@Test
+	@Ignore
 	public void testDigest() throws Exception {
 		final List<Map<String, String>> policyViolations = new ArrayList<>();
 		policyViolations.add(
@@ -101,7 +113,8 @@ public class EmailMessagingServiceTest {
 		model.put("securityVulnerabilities", securityVulnerabilities);
 		model.put("hubServerUrl", "http://eng-hub-valid03.dc1.lan/");
 
-		engine.emailMessagingService.sendEmailMessage(engine.customerProperties, recipients, model, "dailyDigest.ftl");
+		// engine.emailMessagingService.sendEmailMessage(engine.customerProperties,
+		// recipients, model, "dailyDigest.ftl");
 	}
 
 	private Map<String, String> createPolicyViolation(final String projectName, final String projectVersionName,
