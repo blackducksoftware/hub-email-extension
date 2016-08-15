@@ -17,10 +17,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.email.model.EmailContentItem;
 import com.blackducksoftware.integration.email.notifier.routers.AbstractEmailRouter;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 import com.blackducksoftware.integration.email.notifier.routers.factory.AbstractEmailFactory;
+import com.blackducksoftware.integration.hub.dataservices.items.NotificationContentItem;
 
 public abstract class AbstractPollingDispatcher extends TimerTask {
 	private final Logger logger = LoggerFactory.getLogger(AbstractPollingDispatcher.class);
@@ -141,7 +141,7 @@ public abstract class AbstractPollingDispatcher extends TimerTask {
 	@Override
 	public void run() {
 		currentRun = new Date();
-		final List<EmailContentItem> itemList = fetchData();
+		final List<NotificationContentItem> itemList = fetchData();
 		final Map<String, List<Object>> partitionedData = partitionData(itemList);
 		final Map<String, EmailTaskData> dataMap = filterData(partitionedData);
 		if (logger.isDebugEnabled()) {
@@ -205,9 +205,9 @@ public abstract class AbstractPollingDispatcher extends TimerTask {
 
 	public abstract void init();
 
-	public abstract List<EmailContentItem> fetchData();
+	public abstract List<NotificationContentItem> fetchData();
 
-	public Map<String, List<Object>> partitionData(final List<EmailContentItem> dataList) {
+	public Map<String, List<Object>> partitionData(final List<NotificationContentItem> dataList) {
 		final Map<String, List<Object>> partitionMap = new HashMap<>();
 		for (final Object item : dataList) {
 			final String classname = item.getClass().getName();

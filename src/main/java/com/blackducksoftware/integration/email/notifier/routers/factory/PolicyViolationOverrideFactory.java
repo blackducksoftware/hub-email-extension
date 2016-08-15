@@ -5,25 +5,23 @@ import java.util.Map;
 import java.util.Set;
 
 import com.blackducksoftware.integration.email.model.CustomerProperties;
-import com.blackducksoftware.integration.email.model.PolicyOverrideContentItem;
 import com.blackducksoftware.integration.email.notifier.routers.AbstractEmailRouter;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 import com.blackducksoftware.integration.email.notifier.routers.PolicyViolationOverrideRouter;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.transforms.templates.AbstractContentTransform;
-import com.blackducksoftware.integration.hub.notification.NotificationService;
+import com.blackducksoftware.integration.hub.dataservices.items.PolicyOverrideContentItem;
 
 public class PolicyViolationOverrideFactory extends AbstractEmailFactory {
 	public PolicyViolationOverrideFactory(final EmailMessagingService emailMessagingService,
-			final CustomerProperties customerProperties, final NotificationService notificationService,
-			final Map<String, AbstractContentTransform> transformMap) {
-		super(emailMessagingService, customerProperties, notificationService, transformMap);
+			final CustomerProperties customerProperties, final Map<String, AbstractContentTransform> transformMap) {
+		super(emailMessagingService, customerProperties, transformMap);
 	}
 
 	@Override
 	public AbstractEmailRouter<?> createInstance(final EmailTaskData data) {
 		final PolicyViolationOverrideRouter router = new PolicyViolationOverrideRouter(getEmailMessagingService(),
-				getCustomerProperties(), getNotificationService(), getTransformMap(), getTemplateName(), data);
+				getCustomerProperties(), getTransformMap(), getTemplateName(), data);
 		return router;
 	}
 

@@ -8,21 +8,17 @@ import com.blackducksoftware.integration.email.notifier.routers.AbstractEmailRou
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.transforms.templates.AbstractContentTransform;
-import com.blackducksoftware.integration.hub.notification.NotificationService;
 
 public abstract class AbstractEmailFactory {
 	public final static String TEMPLATE_DEFAULT = "htmlTemplate.ftl";
 	private final EmailMessagingService emailMessagingService;
 	private final CustomerProperties customerProperties;
-	private final NotificationService notificationService;
 	private final Map<String, AbstractContentTransform> transformMap;
 
 	public AbstractEmailFactory(final EmailMessagingService emailMessagingService,
-			final CustomerProperties customerProperties, final NotificationService notificationService,
-			final Map<String, AbstractContentTransform> transformMap) {
+			final CustomerProperties customerProperties, final Map<String, AbstractContentTransform> transformMap) {
 		this.emailMessagingService = emailMessagingService;
 		this.customerProperties = customerProperties;
-		this.notificationService = notificationService;
 		this.transformMap = transformMap;
 	}
 
@@ -32,10 +28,6 @@ public abstract class AbstractEmailFactory {
 
 	public CustomerProperties getCustomerProperties() {
 		return customerProperties;
-	}
-
-	public NotificationService getNotificationService() {
-		return notificationService;
 	}
 
 	public Map<String, AbstractContentTransform> getTransformMap() {

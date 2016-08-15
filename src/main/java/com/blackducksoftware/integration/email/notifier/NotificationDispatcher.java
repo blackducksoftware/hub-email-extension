@@ -2,7 +2,6 @@ package com.blackducksoftware.integration.email.notifier;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -17,17 +16,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.model.CustomerProperties;
-import com.blackducksoftware.integration.email.model.EmailContentItem;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
-import com.blackducksoftware.integration.email.transforms.AbstractNotificationTransform;
 import com.blackducksoftware.integration.hub.api.UserRestService;
-import com.blackducksoftware.integration.hub.api.notification.NotificationItem;
 import com.blackducksoftware.integration.hub.api.user.UserItem;
+import com.blackducksoftware.integration.hub.dataservices.NotificationDataService;
+import com.blackducksoftware.integration.hub.dataservices.items.NotificationContentItem;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
-import com.blackducksoftware.integration.hub.exception.NotificationServiceException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
-import com.blackducksoftware.integration.hub.notification.NotificationDateRange;
-import com.blackducksoftware.integration.hub.notification.NotificationService;
 
 public class NotificationDispatcher extends AbstractPollingDispatcher {
 	public static long DEFAULT_POLLING_INTERVAL_SECONDS = 10;
@@ -39,20 +34,17 @@ public class NotificationDispatcher extends AbstractPollingDispatcher {
 	private final Date applicationStartDate;
 	private final CustomerProperties systemProperties;
 	private final ExecutorService executorService;
-	private final NotificationService notificationService;
-	private final Map<String, AbstractNotificationTransform> notificationTransformMap;
+	private final NotificationDataService notificationService;
 	private final UserRestService userRestService;
 
 	public NotificationDispatcher(final HubServerConfig hubConfig, final Date applicationStartDate,
 			final CustomerProperties systemProperties, final ExecutorService executorService,
-			final NotificationService notificationService,
-			final Map<String, AbstractNotificationTransform> transformMap, final UserRestService userRestService) {
+			final NotificationDataService notificationService, final UserRestService userRestService) {
 		this.hubServerConfig = hubConfig;
 		this.applicationStartDate = applicationStartDate;
 		this.systemProperties = systemProperties;
 		this.executorService = executorService;
 		this.notificationService = notificationService;
-		this.notificationTransformMap = transformMap;
 		this.userRestService = userRestService;
 	}
 
@@ -71,18 +63,11 @@ public class NotificationDispatcher extends AbstractPollingDispatcher {
 	}
 
 	@Override
-	public List<EmailContentItem> fetchData() {
-		final List<EmailContentItem> contentList = new Vector<>();
+	public List<NotificationContentItem> fetchData() {
+		List<NotificationContentItem> contentList = new Vector<>();
 		if (hubServerConfig != null) {
 			final Date startDate = findStartDate();
-			final List<NotificationItem> itemList = fetchNotifications(startDate, getCurrentRun());
-
-			for (final NotificationItem item : itemList) {
-				final Class<?> key = item.getClass();
-				if (notificationTransformMap.containsKey(key.getName())) {
-					contentList.addAll(notificationTransformMap.get(key.getName()).transform(item));
-				}
-			}
+			contentList = fetchNotifications(startDate, getCurrentRun());
 		}
 		return contentList;
 	}
@@ -95,12 +80,11 @@ public class NotificationDispatcher extends AbstractPollingDispatcher {
 		}
 	}
 
-	private List<NotificationItem> fetchNotifications(final Date startDate, final Date endDate) {
-		List<NotificationItem> items = new Vector<>();
+	private List<NotificationContentItem> fetchNotifications(final Date startDate, final Date endDate) {
+		List<NotificationContentItem> items = new Vector<>();
 		try {
-			final NotificationDateRange dateRange = new NotificationDateRange(startDate, endDate);
-			items = notificationService.fetchNotifications(dateRange);
-		} catch (ParseException | NotificationServiceException e) {
+			items = notificationService.getNotifications(startDate, endDate, 1000);
+		} catch (IOException | URISyntaxException | BDRestException e) {
 			logger.error("Error occurred fetching notifications.", e);
 		}
 		return items;

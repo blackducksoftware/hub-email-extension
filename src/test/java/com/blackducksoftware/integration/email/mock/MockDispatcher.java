@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.blackducksoftware.integration.email.model.EmailContentItem;
 import com.blackducksoftware.integration.email.notifier.AbstractPollingDispatcher;
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
+import com.blackducksoftware.integration.hub.dataservices.items.NotificationContentItem;
 
 public class MockDispatcher extends AbstractPollingDispatcher {
 	public final static String NAME = "Mock Dispatcher";
@@ -24,15 +24,15 @@ public class MockDispatcher extends AbstractPollingDispatcher {
 	}
 
 	@Override
-	public List<EmailContentItem> fetchData() {
-		final List<EmailContentItem> data = new ArrayList<>();
-		data.add(new EmailContentItem(TEST_DATA, TEST_DATA, TEST_DATA, TEST_DATA));
+	public List<NotificationContentItem> fetchData() {
+		final List<NotificationContentItem> data = new ArrayList<>();
+		data.add(new NotificationContentItem(TEST_DATA, TEST_DATA, TEST_DATA, TEST_DATA));
 
 		return data;
 	}
 
 	@Override
-	public Map<String, List<Object>> partitionData(final List<EmailContentItem> dataList) {
+	public Map<String, List<Object>> partitionData(final List<NotificationContentItem> dataList) {
 		final HashMap<String, List<Object>> map = new HashMap<>();
 		final List<Object> data = new ArrayList<>();
 		data.addAll(dataList);

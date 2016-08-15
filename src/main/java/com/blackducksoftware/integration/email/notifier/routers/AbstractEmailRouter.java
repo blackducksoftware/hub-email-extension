@@ -13,7 +13,6 @@ import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.EmailData;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.transforms.templates.AbstractContentTransform;
-import com.blackducksoftware.integration.hub.notification.NotificationService;
 
 import freemarker.template.TemplateException;
 
@@ -26,28 +25,21 @@ public abstract class AbstractEmailRouter<T> implements Runnable {
 	private final EmailMessagingService emailMessagingService;
 	private final EmailTaskData taskData;
 	private final CustomerProperties customerProperties;
-	private final NotificationService notificationService;
 	private final Map<String, AbstractContentTransform> transformMap;
 	private final String templateName;
 
 	public AbstractEmailRouter(final EmailMessagingService emailMessagingService,
-			final CustomerProperties customerProperties, final NotificationService notificationService,
-			final Map<String, AbstractContentTransform> transformMap, final String templateName,
-			final EmailTaskData taskData) {
+			final CustomerProperties customerProperties, final Map<String, AbstractContentTransform> transformMap,
+			final String templateName, final EmailTaskData taskData) {
 		this.emailMessagingService = emailMessagingService;
 		this.taskData = taskData;
 		this.customerProperties = customerProperties;
-		this.notificationService = notificationService;
 		this.transformMap = transformMap;
 		this.templateName = templateName;
 	}
 
 	public String getName() {
 		return getClass().getName();
-	}
-
-	public NotificationService getNotificationService() {
-		return notificationService;
 	}
 
 	public Map<String, AbstractContentTransform> getTransformMap() {

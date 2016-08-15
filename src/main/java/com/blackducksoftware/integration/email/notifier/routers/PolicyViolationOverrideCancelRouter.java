@@ -10,14 +10,12 @@ import com.blackducksoftware.integration.email.model.EmailData;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.transforms.templates.AbstractContentTransform;
 import com.blackducksoftware.integration.hub.api.notification.PolicyOverrideNotificationItem;
-import com.blackducksoftware.integration.hub.notification.NotificationService;
 
 public class PolicyViolationOverrideCancelRouter extends AbstractEmailRouter<PolicyOverrideNotificationItem> {
 	public PolicyViolationOverrideCancelRouter(final EmailMessagingService emailMessagingService,
-			final CustomerProperties customerProperties, final NotificationService notificationService,
-			final Map<String, AbstractContentTransform> transformMap, final String templateName,
-			final EmailTaskData taskData) {
-		super(emailMessagingService, customerProperties, notificationService, transformMap, templateName, taskData);
+			final CustomerProperties customerProperties, final Map<String, AbstractContentTransform> transformMap,
+			final String templateName, final EmailTaskData taskData) {
+		super(emailMessagingService, customerProperties, transformMap, templateName, taskData);
 	}
 
 	@Override

@@ -12,16 +12,15 @@ import com.blackducksoftware.integration.email.notifier.routers.AbstractEmailRou
 import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.transforms.templates.AbstractContentTransform;
-import com.blackducksoftware.integration.hub.notification.NotificationService;
 
 public class MockRouter extends AbstractEmailRouter<String> {
 	public final static String ROUTER_NAME = "Mock Router";
 	private final String expectedData;
 
 	public MockRouter(final EmailMessagingService emailMessagingService, final CustomerProperties customerProperties,
-			final NotificationService notificationService, final Map<String, AbstractContentTransform> transformMap,
-			final String templateName, final EmailTaskData taskData, final String expectedData) {
-		super(emailMessagingService, customerProperties, notificationService, transformMap, templateName, taskData);
+			final Map<String, AbstractContentTransform> transformMap, final String templateName,
+			final EmailTaskData taskData, final String expectedData) {
+		super(emailMessagingService, customerProperties, transformMap, templateName, taskData);
 		this.expectedData = expectedData;
 	}
 

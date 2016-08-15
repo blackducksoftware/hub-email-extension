@@ -7,19 +7,17 @@ import java.util.Map;
 
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.EmailData;
-import com.blackducksoftware.integration.email.model.PolicyViolationContentItem;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.transforms.templates.AbstractContentTransform;
-import com.blackducksoftware.integration.hub.notification.NotificationService;
+import com.blackducksoftware.integration.hub.dataservices.items.PolicyViolationContentItem;
 
 public class PolicyViolationRouter extends AbstractEmailRouter<PolicyViolationContentItem> {
 	private final static String LIST_POLICY_VIOLATIONS = "policyViolations";
 
 	public PolicyViolationRouter(final EmailMessagingService emailMessagingService,
-			final CustomerProperties customerProperties, final NotificationService notificationService,
-			final Map<String, AbstractContentTransform> transformMap, final String templateName,
-			final EmailTaskData taskData) {
-		super(emailMessagingService, customerProperties, notificationService, transformMap, templateName, taskData);
+			final CustomerProperties customerProperties, final Map<String, AbstractContentTransform> transformMap,
+			final String templateName, final EmailTaskData taskData) {
+		super(emailMessagingService, customerProperties, transformMap, templateName, taskData);
 	}
 
 	@Override

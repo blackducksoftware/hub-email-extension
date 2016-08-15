@@ -6,34 +6,32 @@ import java.util.List;
 import java.util.Map;
 
 import com.blackducksoftware.integration.email.model.CustomerProperties;
-import com.blackducksoftware.integration.email.model.EmailContentItem;
 import com.blackducksoftware.integration.email.model.EmailData;
-import com.blackducksoftware.integration.email.model.PolicyOverrideContentItem;
-import com.blackducksoftware.integration.email.model.PolicyViolationContentItem;
-import com.blackducksoftware.integration.email.model.VulnerabilityContentItem;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.transforms.templates.AbstractContentTransform;
-import com.blackducksoftware.integration.hub.notification.NotificationService;
+import com.blackducksoftware.integration.hub.dataservices.items.NotificationContentItem;
+import com.blackducksoftware.integration.hub.dataservices.items.PolicyOverrideContentItem;
+import com.blackducksoftware.integration.hub.dataservices.items.PolicyViolationContentItem;
+import com.blackducksoftware.integration.hub.dataservices.items.VulnerabilityContentItem;
 
-public class DailyDigestRouter extends AbstractEmailRouter<EmailContentItem> {
+public class DailyDigestRouter extends AbstractEmailRouter<NotificationContentItem> {
 	private final static String LIST_POLICY_VIOLATIONS = "policyViolations";
 	private final static String LIST_POLICY_OVERRIDES = "policyViolationOverrides";
 	private final static String LIST_POLICY_OVERRIDE_CANCEL = "policyViolationOverrides";
 	private final static String LIST_VULNERABILITIES = "securityVulnerabilities";
 
 	public DailyDigestRouter(final EmailMessagingService emailMessagingService,
-			final CustomerProperties customerProperties, final NotificationService notificationService,
-			final Map<String, AbstractContentTransform> transformMap, final String templateName,
-			final EmailTaskData taskData) {
-		super(emailMessagingService, customerProperties, notificationService, transformMap, templateName, taskData);
+			final CustomerProperties customerProperties, final Map<String, AbstractContentTransform> transformMap,
+			final String templateName, final EmailTaskData taskData) {
+		super(emailMessagingService, customerProperties, transformMap, templateName, taskData);
 	}
 
 	@Override
-	public EmailData transform(final List<EmailContentItem> data) {
+	public EmailData transform(final List<NotificationContentItem> data) {
 		final List<String> addresses = new ArrayList<>();
 		final Map<String, Object> templateMap = initTempateMap();
 		final Map<String, AbstractContentTransform> transformMap = getTransformMap();
-		for (final EmailContentItem item : data) {
+		for (final NotificationContentItem item : data) {
 			final Class<?> key = item.getClass();
 			if (key.equals(PolicyViolationContentItem.class)) {
 				if (transformMap.containsKey(key.getName())) {
@@ -67,7 +65,7 @@ public class DailyDigestRouter extends AbstractEmailRouter<EmailContentItem> {
 
 	@SuppressWarnings("unchecked")
 	private void processRuleViolation(final AbstractContentTransform converter, final Map<String, Object> templateMap,
-			final EmailContentItem item) {
+			final NotificationContentItem item) {
 		final List<Map<String, Object>> violationList = (List<Map<String, Object>>) templateMap
 				.get(LIST_POLICY_VIOLATIONS);
 		violationList.addAll(converter.transform(item));
@@ -75,7 +73,7 @@ public class DailyDigestRouter extends AbstractEmailRouter<EmailContentItem> {
 
 	@SuppressWarnings("unchecked")
 	private void processPolicyOverride(final AbstractContentTransform converter, final Map<String, Object> templateMap,
-			final EmailContentItem item) {
+			final NotificationContentItem item) {
 		final List<Map<String, Object>> policyOverrides = (List<Map<String, Object>>) templateMap
 				.get(LIST_POLICY_OVERRIDES);
 
@@ -84,7 +82,7 @@ public class DailyDigestRouter extends AbstractEmailRouter<EmailContentItem> {
 
 	@SuppressWarnings("unchecked")
 	private void processVulnerabilities(final AbstractContentTransform converter, final Map<String, Object> templateMap,
-			final EmailContentItem item) {
+			final NotificationContentItem item) {
 		final List<Map<String, Object>> vulnerabilityList = (List<Map<String, Object>>) templateMap
 				.get(LIST_VULNERABILITIES);
 		vulnerabilityList.addAll(converter.transform(item));
