@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.TimerTask;
 
 import org.apache.commons.io.FileUtils;
 
@@ -27,25 +26,17 @@ import com.blackducksoftware.integration.hub.dataservices.items.PolicyOverrideCo
 import com.blackducksoftware.integration.hub.dataservices.items.PolicyViolationContentItem;
 import com.blackducksoftware.integration.hub.dataservices.items.VulnerabilityContentItem;
 
-public class DigestRouter extends TimerTask implements EmailRouter {
+public class DigestRouter extends AbstractRouter {
 	private static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
 
 	private static final String LIST_POLICY_VIOLATIONS = "policyViolations";
 	private static final String LIST_POLICY_OVERRIDES = "policyViolationOverrides";
 	private static final String LIST_VULNERABILITIES = "securityVulnerabilities";
 
-	private final CustomerProperties customerProperties;
-	private final NotificationDataService notificationDataService;
-	private final UserRestService userRestService;
-	private final EmailMessagingService emailMessagingService;
-
 	public DigestRouter(final CustomerProperties customerProperties,
 			final NotificationDataService notificationDataService, final UserRestService userRestService,
 			final EmailMessagingService emailMessagingService) {
-		this.customerProperties = customerProperties;
-		this.notificationDataService = notificationDataService;
-		this.userRestService = userRestService;
-		this.emailMessagingService = emailMessagingService;
+		super(customerProperties, notificationDataService, userRestService, emailMessagingService);
 	}
 
 	@Override
@@ -59,16 +50,16 @@ public class DigestRouter extends TimerTask implements EmailRouter {
 				startDate = df.parse(lastRunValue);
 				startDate = new Date(startDate.getTime() + 1);
 			} else {
-				final String lastRunValue = customerProperties.getProperty("hub.email.digest.start.date");
+				final String lastRunValue = getCustomerProperties().getProperty("hub.email.digest.start.date");
 				startDate = df.parse(lastRunValue);
 			}
 
 			final Date endDate = new Date();
 			FileUtils.write(lastRunFile, df.format(endDate), "UTF-8");
 
-			final List<NotificationContentItem> notifications = notificationDataService.getNotifications(startDate,
+			final List<NotificationContentItem> notifications = getNotificationDataService().getNotifications(startDate,
 					endDate, -1);
-			final List<UserItem> users = userRestService.getAllUsers();
+			final List<UserItem> users = getUserRestService().getAllUsers();
 		} catch (final Exception e) {
 			// do something intelligent
 		}
@@ -103,6 +94,17 @@ public class DigestRouter extends TimerTask implements EmailRouter {
 		freemarkerMap.put(LIST_POLICY_OVERRIDES, policyOverrides);
 		freemarkerMap.put(LIST_VULNERABILITIES, vulnerabilities);
 		return freemarkerMap;
+	}
+
+	@Override
+	public String getTemplateName() {
+		return "dailyDigest.ftl";
+	}
+
+	@Override
+	public long getIntervalMilliseconds() {
+		// TODO fix the interval
+		return 5000;
 	}
 
 }
