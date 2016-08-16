@@ -9,11 +9,8 @@ import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -22,10 +19,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.model.CustomerProperties;
-import com.blackducksoftware.integration.email.notifier.routers.factory.AbstractEmailFactory;
+import com.blackducksoftware.integration.email.model.HubServerBeanConfiguration;
+import com.blackducksoftware.integration.email.notifier.routers.AbstractRouter;
+import com.blackducksoftware.integration.email.notifier.routers.RouterManager;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.email.service.properties.HubServerBeanConfiguration;
-import com.blackducksoftware.integration.email.transforms.templates.AbstractContentTransform;
 import com.blackducksoftware.integration.hub.api.UserRestService;
 import com.blackducksoftware.integration.hub.dataservices.NotificationDataService;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
@@ -48,16 +45,14 @@ public class EmailEngine {
 	public final Date applicationStartDate;
 	public final ExecutorService executorService;
 
-	public final List<AbstractEmailFactory> routerFactoryList;
 	public final EmailMessagingService emailMessagingService;
-	public final NotificationDispatcher notificationDispatcher;
 	public final HubServerConfig hubServerConfig;
 	public final RestConnection restConnection;
 	public final Properties appProperties;
 	public final CustomerProperties customerProperties;
-	public final NotificationDataService notificationService;
-	public final Map<String, AbstractContentTransform> contentTransformMap;
+	public final NotificationDataService notificationDataService;
 	public final UserRestService userRestService;
+	public final RouterManager routerManager;
 
 	public EmailEngine() throws IOException, EncryptionException, URISyntaxException, BDRestException {
 		gson = new Gson();
@@ -72,19 +67,15 @@ public class EmailEngine {
 		applicationStartDate = createApplicationStartDate();
 		executorService = createExecutorService();
 		emailMessagingService = createEmailMessagingService();
-		notificationService = createNotificationService();
+		notificationDataService = createNotificationDataService();
 		userRestService = createUserRestService();
-		contentTransformMap = createContentTransformMap();
-		routerFactoryList = createRouterFactoryList();
-		notificationDispatcher = createDispatcher();
+		routerManager = createRouterManager();
 
-		notificationDispatcher.init();
-		notificationDispatcher.attachRouters(routerFactoryList);
-		notificationDispatcher.start();
+		routerManager.startRouters();
 	}
 
 	public void shutDown() {
-		notificationDispatcher.stop();
+		routerManager.stopRouters();
 	}
 
 	private Properties createAppProperties() throws IOException {
@@ -131,37 +122,10 @@ public class EmailEngine {
 		return new EmailMessagingService(customerProperties, configuration);
 	}
 
-	@SuppressWarnings("unchecked")
-	private List<AbstractEmailFactory> createRouterFactoryList() {
-		final List<AbstractEmailFactory> factoryList = new Vector<>();
-
-		final List<String> factoryClassNames = customerProperties.getFactoryClassNames();
-
-		for (final String className : factoryClassNames) {
-			Class<? extends AbstractEmailFactory> clazz;
-			try {
-				clazz = (Class<? extends AbstractEmailFactory>) Class.forName(className);
-				final Constructor<? extends AbstractEmailFactory> constructor = clazz
-						.getConstructor(EmailMessagingService.class, CustomerProperties.class, Map.class);
-				factoryList
-						.add(constructor.newInstance(emailMessagingService, customerProperties, contentTransformMap));
-			} catch (final ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException
-					| IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-				logger.error("Error initializing router factory.", e);
-			}
-		}
-		return factoryList;
-	}
-
 	private HubServerConfig createHubConfig() {
 		final HubServerBeanConfiguration serverBeanConfig = new HubServerBeanConfiguration(customerProperties);
 
 		return serverBeanConfig.build();
-	}
-
-	private NotificationDispatcher createDispatcher() {
-		return new NotificationDispatcher(hubServerConfig, applicationStartDate, customerProperties, executorService,
-				notificationService, userRestService);
 	}
 
 	private RestConnection createRestConnection() throws EncryptionException, URISyntaxException, BDRestException {
@@ -174,13 +138,10 @@ public class EmailEngine {
 		return userRestService;
 	}
 
-	private NotificationDataService createNotificationService()
-			throws EncryptionException, URISyntaxException, BDRestException {
-		if (hubServerConfig == null) {
-			return new NotificationDataService(null, null, null);
-		} else {
-			return new NotificationDataService(restConnection, gson, jsonParser);
-		}
+	private NotificationDataService createNotificationDataService() {
+		final NotificationDataService notificationDataService = new NotificationDataService(restConnection, gson,
+				jsonParser);
+		return notificationDataService;
 	}
 
 	private RestConnection initRestConnection() throws EncryptionException, URISyntaxException, BDRestException {
@@ -195,21 +156,23 @@ public class EmailEngine {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Map<String, AbstractContentTransform> createContentTransformMap() {
-		final Map<String, AbstractContentTransform> transformMap = new HashMap<>();
-		final List<String> notificationTransformList = customerProperties.getContentTransformerList();
-		for (final String className : notificationTransformList) {
-			Class<? extends AbstractContentTransform> clazz;
+	private RouterManager createRouterManager() {
+		final RouterManager manager = new RouterManager();
+		final List<String> factoryClassNames = customerProperties.getRouterClassNames();
+
+		for (final String className : factoryClassNames) {
+			Class<? extends AbstractRouter> clazz;
 			try {
-				clazz = (Class<? extends AbstractContentTransform>) Class.forName(className);
-				final Constructor<? extends AbstractContentTransform> constructor = clazz.getConstructor();
-				final AbstractContentTransform transformer = constructor.newInstance();
-				transformMap.put(transformer.getContentItemType(), transformer);
+				clazz = (Class<? extends AbstractRouter>) Class.forName(className);
+				final Constructor<? extends AbstractRouter> constructor = clazz.getConstructor(CustomerProperties.class,
+						NotificationDataService.class, UserRestService.class, EmailMessagingService.class);
+				manager.startRouter(constructor.newInstance(customerProperties, notificationDataService,
+						userRestService, emailMessagingService));
 			} catch (final ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException
 					| IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 				logger.error("Error initializing router factory.", e);
 			}
 		}
-		return transformMap;
+		return manager;
 	}
 }

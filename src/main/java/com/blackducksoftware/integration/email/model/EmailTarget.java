@@ -1,4 +1,4 @@
-package com.blackducksoftware.integration.email.service;
+package com.blackducksoftware.integration.email.model;
 
 import java.util.Map;
 
