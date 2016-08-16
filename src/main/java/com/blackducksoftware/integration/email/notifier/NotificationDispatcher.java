@@ -83,7 +83,7 @@ public class NotificationDispatcher extends AbstractPollingDispatcher {
 	private List<NotificationContentItem> fetchNotifications(final Date startDate, final Date endDate) {
 		List<NotificationContentItem> items = new Vector<>();
 		try {
-			items = notificationService.getNotifications(startDate, endDate, 1000);
+			items = notificationService.getAllNotifications(startDate, endDate);
 		} catch (IOException | URISyntaxException | BDRestException e) {
 			logger.error("Error occurred fetching notifications.", e);
 		}
@@ -109,4 +109,5 @@ public class NotificationDispatcher extends AbstractPollingDispatcher {
 		}
 		return userItems;
 	}
+
 }
