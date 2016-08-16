@@ -1,11 +1,10 @@
 package com.blackducksoftware.integration.email.messaging;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -13,11 +12,9 @@ import org.junit.Test;
 
 import com.blackducksoftware.integration.email.mock.MockRouter;
 import com.blackducksoftware.integration.email.notifier.EmailEngine;
-import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
-import com.blackducksoftware.integration.email.notifier.routers.factory.AbstractEmailFactory;
 
 public class ItemRouterTest {
-	private final static String RECEIVE_DATA = "receive data string";
+	private final static String ROUTER_KEY = "router.key";
 	private MockRouter router;
 	private EmailEngine engine;
 
@@ -28,11 +25,8 @@ public class ItemRouterTest {
 		final File file = new File(propFileUrl.toURI());
 		System.setProperty("customer.properties", file.getCanonicalPath());
 		engine = new EmailEngine();
-		final List<Object> data = new ArrayList<>();
-		data.add(RECEIVE_DATA);
-		final EmailTaskData taskData = new EmailTaskData(data);
-		router = new MockRouter(engine.emailMessagingService, engine.customerProperties, engine.contentTransformMap,
-				AbstractEmailFactory.TEMPLATE_DEFAULT, taskData, RECEIVE_DATA);
+		router = new MockRouter(engine.customerProperties, engine.notificationDataService, engine.userRestService,
+				engine.emailMessagingService, ROUTER_KEY);
 	}
 
 	@After
@@ -41,19 +35,28 @@ public class ItemRouterTest {
 	}
 
 	@Test
-	public void testReceive() {
-		final List<Object> dataList = new ArrayList<>();
-		dataList.add(RECEIVE_DATA);
-		router.execute(new EmailTaskData(dataList));
-	}
-
-	@Test
 	public void testGetName() {
-		assertEquals(MockRouter.ROUTER_NAME, router.getName());
+		assertEquals(MockRouter.class.getName(), router.getName());
 	}
 
 	@Test
-	public void testGetTemplateName() {
-		assertEquals(AbstractEmailFactory.TEMPLATE_DEFAULT, router.getTemplateName());
+	public void testGetRouterKey() {
+		assertEquals(ROUTER_KEY, router.getRouterKey());
+	}
+
+	@Test
+	public void testGetInterval() {
+		assertEquals(MockRouter.ROUTER_INTERVAL, router.getIntervalMilliseconds());
+	}
+
+	@Test
+	public void testGetDelay() {
+		assertEquals(0, router.getStartDelayMilliseconds());
+	}
+
+	@Test
+	public void testRun() {
+		router.run();
+		assertTrue(router.hasRun());
 	}
 }
