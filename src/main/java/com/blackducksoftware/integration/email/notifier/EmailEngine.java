@@ -3,10 +3,13 @@ package com.blackducksoftware.integration.email.notifier;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -17,6 +20,8 @@ import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.HubServerBeanConfiguration;
+import com.blackducksoftware.integration.email.notifier.routers.AbstractRouter;
+import com.blackducksoftware.integration.email.notifier.routers.RouterManager;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.api.UserRestService;
 import com.blackducksoftware.integration.hub.dataservices.NotificationDataService;
@@ -47,6 +52,7 @@ public class EmailEngine {
 	public final CustomerProperties customerProperties;
 	public final NotificationDataService notificationDataService;
 	public final UserRestService userRestService;
+	public final RouterManager routerManager;
 
 	public EmailEngine() throws IOException, EncryptionException, URISyntaxException, BDRestException {
 		gson = new Gson();
@@ -63,9 +69,13 @@ public class EmailEngine {
 		emailMessagingService = createEmailMessagingService();
 		notificationDataService = createNotificationDataService();
 		userRestService = createUserRestService();
+		routerManager = createRouterManager();
+
+		routerManager.startRouters();
 	}
 
 	public void shutDown() {
+		routerManager.stopRouters();
 	}
 
 	private Properties createAppProperties() throws IOException {
@@ -145,4 +155,24 @@ public class EmailEngine {
 		return restConnection;
 	}
 
+	@SuppressWarnings("unchecked")
+	private RouterManager createRouterManager() {
+		final RouterManager manager = new RouterManager();
+		final List<String> factoryClassNames = customerProperties.getRouterClassNames();
+
+		for (final String className : factoryClassNames) {
+			Class<? extends AbstractRouter> clazz;
+			try {
+				clazz = (Class<? extends AbstractRouter>) Class.forName(className);
+				final Constructor<? extends AbstractRouter> constructor = clazz.getConstructor(CustomerProperties.class,
+						NotificationDataService.class, UserRestService.class, EmailMessagingService.class);
+				manager.startRouter(constructor.newInstance(customerProperties, notificationDataService,
+						userRestService, emailMessagingService));
+			} catch (final ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException
+					| IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				logger.error("Error initializing router factory.", e);
+			}
+		}
+		return manager;
+	}
 }

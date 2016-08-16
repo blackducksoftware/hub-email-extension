@@ -43,7 +43,7 @@ public abstract class AbstractRouter extends TimerTask {
 		return getClass().getName();
 	}
 
-	public abstract String getTemplateName();
+	public abstract String getRouterKey();
 
 	public abstract long getIntervalMilliseconds();
 

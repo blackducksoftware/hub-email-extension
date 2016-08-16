@@ -1,41 +1,39 @@
 package com.blackducksoftware.integration.email.mock;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-import java.util.List;
-import java.util.Map;
-
 import com.blackducksoftware.integration.email.model.CustomerProperties;
-import com.blackducksoftware.integration.email.model.EmailData;
-import com.blackducksoftware.integration.email.notifier.routers.AbstractEmailRouter;
-import com.blackducksoftware.integration.email.notifier.routers.EmailTaskData;
+import com.blackducksoftware.integration.email.notifier.routers.AbstractRouter;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.email.transformer.templates.AbstractContentTransform;
-import com.blackducksoftware.integration.hub.notification.NotificationService;
+import com.blackducksoftware.integration.hub.api.UserRestService;
+import com.blackducksoftware.integration.hub.dataservices.NotificationDataService;
 
-public class MockRouter extends AbstractEmailRouter<String> {
-	public final static String ROUTER_NAME = "Mock Router";
-	private final String expectedData;
+public class MockRouter extends AbstractRouter {
+	public final static long ROUTER_INTERVAL = 5000;
+	private final String templateName;
+	private boolean ran = false;
 
-	public MockRouter(final EmailMessagingService emailMessagingService, final CustomerProperties customerProperties,
-			final NotificationService notificationService, final Map<String, AbstractContentTransform> transformMap,
-			final String templateName, final EmailTaskData taskData, final String expectedData) {
-		super(emailMessagingService, customerProperties, notificationService, transformMap, templateName, taskData);
-		this.expectedData = expectedData;
+	public MockRouter(final CustomerProperties customerProperties, final NotificationDataService notificationService,
+			final UserRestService userRestService, final EmailMessagingService emailMessagingService,
+			final String templateName) {
+		super(customerProperties, notificationService, userRestService, emailMessagingService);
+		this.templateName = templateName;
 	}
 
 	@Override
-	public String getName() {
-		return ROUTER_NAME;
+	public String getRouterKey() {
+		return templateName;
 	}
 
 	@Override
-	public EmailData transform(final List<String> data) {
-		assertNotNull(data);
-		assertEquals(1, data.size());
-		final String item = data.get(0);
-		assertEquals(expectedData, item);
-		return null;
+	public long getIntervalMilliseconds() {
+		return ROUTER_INTERVAL;
+	}
+
+	@Override
+	public void run() {
+		ran = true;
+	}
+
+	public boolean hasRun() {
+		return ran;
 	}
 }

@@ -45,7 +45,7 @@ public class EmailMessagingServiceTest {
 
 	@Test
 	public void testRouter() throws Exception {
-		final DigestRouter digestRouter = new DigestRouter(engine.customerProperties, engine.notificationService,
+		final DigestRouter digestRouter = new DigestRouter(engine.customerProperties, engine.notificationDataService,
 				engine.userRestService, engine.emailMessagingService);
 		digestRouter.run();
 	}

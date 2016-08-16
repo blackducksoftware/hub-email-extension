@@ -97,7 +97,7 @@ public class DigestRouter extends AbstractRouter {
 	}
 
 	@Override
-	public String getTemplateName() {
+	public String getRouterKey() {
 		return "dailyDigest.ftl";
 	}
 
