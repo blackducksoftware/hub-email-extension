@@ -1,17 +1,15 @@
 package com.blackducksoftware.integration.email.notifier.routers;
 
 import java.io.File;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 
 import org.apache.commons.io.FileUtils;
 
 import com.blackducksoftware.integration.email.model.CustomerProperties;
+import com.blackducksoftware.integration.email.model.EmailTarget;
 import com.blackducksoftware.integration.email.model.FreemarkerTarget;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.transformer.NotificationTransformer;
@@ -25,10 +23,9 @@ import com.blackducksoftware.integration.hub.dataservices.items.NotificationCont
 import com.blackducksoftware.integration.hub.dataservices.items.PolicyOverrideContentItem;
 import com.blackducksoftware.integration.hub.dataservices.items.PolicyViolationContentItem;
 import com.blackducksoftware.integration.hub.dataservices.items.VulnerabilityContentItem;
+import com.blackducksoftware.integration.hub.rest.RestConnection;
 
 public class DigestRouter extends AbstractRouter {
-	private static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
-
 	private static final String LIST_POLICY_VIOLATIONS = "policyViolations";
 	private static final String LIST_POLICY_OVERRIDES = "policyViolationOverrides";
 	private static final String LIST_VULNERABILITIES = "securityVulnerabilities";
@@ -42,33 +39,34 @@ public class DigestRouter extends AbstractRouter {
 	@Override
 	public void run() {
 		try {
-			final DateFormat df = getDateFormat();
 			Date startDate = null;
 			final File lastRunFile = new File("/Users/ekerwin/Documents/email_ext/digestLastRun.txt");
 			if (lastRunFile.exists()) {
 				final String lastRunValue = FileUtils.readFileToString(lastRunFile, "UTF-8");
-				startDate = df.parse(lastRunValue);
+				startDate = RestConnection.parseDateString(lastRunValue);
 				startDate = new Date(startDate.getTime() + 1);
 			} else {
 				final String lastRunValue = getCustomerProperties().getProperty("hub.email.digest.start.date");
-				startDate = df.parse(lastRunValue);
+				startDate = RestConnection.parseDateString(lastRunValue);
 			}
 
 			final Date endDate = new Date();
-			FileUtils.write(lastRunFile, df.format(endDate), "UTF-8");
+			FileUtils.write(lastRunFile, RestConnection.formatDate(endDate), "UTF-8");
 
-			final List<NotificationContentItem> notifications = getNotificationDataService().getAllNotifications(startDate,
-					endDate)
+			final List<NotificationContentItem> notifications = getNotificationDataService()
+					.getAllNotifications(startDate, endDate);
+			final Map<String, FreemarkerTarget> notificationsMap = createMap(notifications);
 			final List<UserItem> users = getUserRestService().getAllUsers();
+			for (final UserItem user : users) {
+				final Map<String, Object> model = new HashMap<>();
+				model.putAll(notificationsMap);
+				model.put("hubUserName", user.getUserName());
+				final EmailTarget emailTarget = new EmailTarget(user.getEmail(), getRouterKey(), model);
+				getEmailMessagingService().sendEmailMessage(emailTarget);
+			}
 		} catch (final Exception e) {
 			// do something intelligent
 		}
-	}
-
-	private DateFormat getDateFormat() {
-		final SimpleDateFormat sdf = new SimpleDateFormat(DATE_TIME_FORMAT);
-		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-		return sdf;
 	}
 
 	private Map<String, FreemarkerTarget> createMap(final List<NotificationContentItem> notifications) {
@@ -87,8 +85,11 @@ public class DigestRouter extends AbstractRouter {
 		transformers.put(VulnerabilityContentItem.class, new VulnerabilityTransformer());
 
 		for (final NotificationContentItem notification : notifications) {
-
+			final FreemarkerTarget freemarkerTarget = freemarkerTargets.get(notification.getClass());
+			final NotificationTransformer notificationTransformer = transformers.get(notification.getClass());
+			freemarkerTarget.addAll(notificationTransformer.transform(notification));
 		}
+
 		final Map<String, FreemarkerTarget> freemarkerMap = new HashMap<>();
 		freemarkerMap.put(LIST_POLICY_VIOLATIONS, policyViolations);
 		freemarkerMap.put(LIST_POLICY_OVERRIDES, policyOverrides);
@@ -98,7 +99,7 @@ public class DigestRouter extends AbstractRouter {
 
 	@Override
 	public String getRouterKey() {
-		return "dailyDigest.ftl";
+		return "digest.ftl";
 	}
 
 	@Override

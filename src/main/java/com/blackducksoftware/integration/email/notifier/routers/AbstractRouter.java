@@ -8,7 +8,6 @@ import com.blackducksoftware.integration.hub.api.UserRestService;
 import com.blackducksoftware.integration.hub.dataservices.NotificationDataService;
 
 public abstract class AbstractRouter extends TimerTask {
-
 	private final CustomerProperties customerProperties;
 	private final NotificationDataService notificationDataService;
 	private final UserRestService userRestService;
@@ -50,4 +49,5 @@ public abstract class AbstractRouter extends TimerTask {
 	public long getStartDelayMilliseconds() {
 		return 0;
 	}
+
 }
