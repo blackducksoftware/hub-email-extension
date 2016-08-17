@@ -19,7 +19,7 @@ public class MockRouter extends AbstractRouter {
 	}
 
 	@Override
-	public String getRouterKey() {
+	public String getTemplateName() {
 		return templateName;
 	}
 
