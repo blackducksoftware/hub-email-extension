@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.HubServerBeanConfiguration;
+import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.notifier.routers.AbstractRouter;
 import com.blackducksoftware.integration.email.notifier.routers.RouterManager;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
@@ -44,6 +45,7 @@ public class EmailEngine {
 	public final DateFormat notificationDateFormat;
 	public final Date applicationStartDate;
 	public final ExecutorService executorService;
+	public final JavaMailWrapper javaMailWrapper;
 
 	public final EmailMessagingService emailMessagingService;
 	public final HubServerConfig hubServerConfig;
@@ -62,6 +64,7 @@ public class EmailEngine {
 		configuration = createFreemarkerConfig();
 		hubServerConfig = createHubConfig();
 		restConnection = createRestConnection();
+		javaMailWrapper = createJavaMailWrapper();
 
 		notificationDateFormat = createNotificationDateFormat();
 		applicationStartDate = createApplicationStartDate();
@@ -120,8 +123,12 @@ public class EmailEngine {
 		return new CustomerProperties(appProperties);
 	}
 
+	private JavaMailWrapper createJavaMailWrapper() {
+		return new JavaMailWrapper();
+	}
+
 	private EmailMessagingService createEmailMessagingService() {
-		return new EmailMessagingService(customerProperties, configuration);
+		return new EmailMessagingService(customerProperties, configuration, javaMailWrapper);
 	}
 
 	private HubServerConfig createHubConfig() {
