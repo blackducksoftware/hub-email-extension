@@ -50,9 +50,10 @@ public class DigestRouter extends AbstractRouter {
 				startDate = RestConnection.parseDateString(lastRunValue);
 			}
 
-			final Date endDate = new Date();
+			Date endDate = new Date();
 			FileUtils.write(lastRunFile, RestConnection.formatDate(endDate), "UTF-8");
-
+			startDate = RestConnection.parseDateString("2016-08-16T00:00:00.000Z");
+			endDate = RestConnection.parseDateString("2016-08-17T00:14:10.859Z");
 			final List<NotificationContentItem> notifications = getNotificationDataService()
 					.getAllNotifications(startDate, endDate);
 			final Map<String, FreemarkerTarget> notificationsMap = createMap(notifications);

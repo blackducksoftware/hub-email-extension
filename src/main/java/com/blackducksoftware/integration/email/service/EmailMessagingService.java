@@ -12,7 +12,6 @@ import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
-import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -25,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.EmailTarget;
+import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.model.MimeMultipartBuilder;
 
 import freemarker.core.ParseException;
@@ -38,11 +38,14 @@ public class EmailMessagingService {
 	private final Logger log = LoggerFactory.getLogger(EmailMessagingService.class);
 
 	private final CustomerProperties customerProperties;
+	private final JavaMailWrapper javaMailWrapper;
 	private final Configuration configuration;
 
-	public EmailMessagingService(final CustomerProperties customerProperties, final Configuration configuration) {
+	public EmailMessagingService(final CustomerProperties customerProperties, final Configuration configuration,
+			final JavaMailWrapper javaMailWrapper) {
 		this.customerProperties = customerProperties;
 		this.configuration = configuration;
+		this.javaMailWrapper = new JavaMailWrapper();
 	}
 
 	public void sendEmailMessage(final EmailTarget emailTarget) throws MessagingException, TemplateNotFoundException,
@@ -68,7 +71,7 @@ public class EmailMessagingService {
 
 		final String resolvedSubjectLine = getResolvedSubjectLine(model);
 		final Message message = createMessage(emailAddress, resolvedSubjectLine, session, mimeMultipart);
-		sendMessage(customerProperties, session, message);
+		javaMailWrapper.sendMessage(customerProperties, session, message);
 	}
 
 	private String getResolvedTemplate(final Map<String, Object> model, final String templateName)
@@ -159,31 +162,6 @@ public class EmailMessagingService {
 		message.setSubject(subjectLine);
 
 		return message;
-	}
-
-	private void sendMessage(final CustomerProperties customerProperties, final Session session, final Message message)
-			throws MessagingException {
-		if (customerProperties.isAuth()) {
-			sendAuthenticated(customerProperties, message, session);
-		} else {
-			Transport.send(message);
-		}
-	}
-
-	private void sendAuthenticated(final CustomerProperties customerProperties, final Message message,
-			final Session session) throws MessagingException {
-		final String host = customerProperties.getHost();
-		final int port = customerProperties.getPort();
-		final String username = customerProperties.getUsername();
-		final String password = customerProperties.getPassword();
-
-		final Transport transport = session.getTransport("smtp");
-		try {
-			transport.connect(host, port, username, password);
-			transport.sendMessage(message, message.getAllRecipients());
-		} finally {
-			transport.close();
-		}
 	}
 
 	private String generateContentId(final String value) {
