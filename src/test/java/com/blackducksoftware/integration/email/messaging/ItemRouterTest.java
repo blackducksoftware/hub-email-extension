@@ -27,10 +27,10 @@ public class ItemRouterTest {
 		final URL propFileUrl = classLoader.getResource("test.properties");
 		final File file = new File(propFileUrl.toURI());
 		System.setProperty("customer.properties", file.getCanonicalPath());
+		engine = new EmailEngine();
 		final JavaMailWrapper mailWrapper = new MockMailWrapper(false);
 		final EmailMessagingService messageService = new EmailMessagingService(engine.customerProperties,
 				engine.configuration, mailWrapper);
-		engine = new EmailEngine();
 		router = new MockRouter(engine.customerProperties, engine.notificationDataService, engine.userRestService,
 				messageService, ROUTER_KEY);
 	}
