@@ -7,10 +7,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.EmailTarget;
 import com.blackducksoftware.integration.email.model.FreemarkerTarget;
+import com.blackducksoftware.integration.email.model.UserPreferences;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.transformer.NotificationTransformer;
 import com.blackducksoftware.integration.email.transformer.PolicyOverrideTransformer;
@@ -30,6 +33,8 @@ public class DigestRouter extends AbstractRouter {
 	private static final String LIST_POLICY_OVERRIDES = "policyViolationOverrides";
 	private static final String LIST_VULNERABILITIES = "securityVulnerabilities";
 
+	private final Logger logger = LoggerFactory.getLogger(DigestRouter.class);
+
 	public DigestRouter(final CustomerProperties customerProperties,
 			final NotificationDataService notificationDataService, final UserRestService userRestService,
 			final EmailMessagingService emailMessagingService) {
@@ -40,7 +45,7 @@ public class DigestRouter extends AbstractRouter {
 	public void run() {
 		try {
 			Date startDate = null;
-			final File lastRunFile = new File("/Users/ekerwin/Documents/email_ext/digestLastRun.txt");
+			final File lastRunFile = new File(getCustomerProperties().getProperty("hub.email.digest.lastrun.file"));
 			if (lastRunFile.exists()) {
 				final String lastRunValue = FileUtils.readFileToString(lastRunFile, "UTF-8");
 				startDate = RestConnection.parseDateString(lastRunValue);
@@ -58,15 +63,24 @@ public class DigestRouter extends AbstractRouter {
 					.getAllNotifications(startDate, endDate);
 			final Map<String, FreemarkerTarget> notificationsMap = createMap(notifications);
 			final List<UserItem> users = getUserRestService().getAllUsers();
+			final UserPreferences userPreferences = new UserPreferences(getCustomerProperties());
 			for (final UserItem user : users) {
-				final Map<String, Object> model = new HashMap<>();
-				model.putAll(notificationsMap);
-				model.put("hubUserName", user.getUserName());
-				final EmailTarget emailTarget = new EmailTarget(user.getEmail(), getRouterKey(), model);
-				getEmailMessagingService().sendEmailMessage(emailTarget);
+				try {
+					final Map<String, Object> model = new HashMap<>();
+					model.putAll(notificationsMap);
+					model.put("hubUserName", user.getUserName());
+					final String emailAddress = user.getEmail();
+					final String templateName = getTemplateName();
+					final EmailTarget emailTarget = new EmailTarget(emailAddress, templateName, model);
+					if (!userPreferences.isOptedOut(emailAddress, templateName)) {
+						getEmailMessagingService().sendEmailMessage(emailTarget);
+					}
+				} catch (final Exception e) {
+					logger.error("Error sending email to user", e);
+				}
 			}
 		} catch (final Exception e) {
-			// do something intelligent
+			logger.error("Error sending the email", e);
 		}
 	}
 
@@ -99,14 +113,13 @@ public class DigestRouter extends AbstractRouter {
 	}
 
 	@Override
-	public String getRouterKey() {
+	public String getTemplateName() {
 		return "digest.ftl";
 	}
 
 	@Override
 	public long getIntervalMilliseconds() {
-		// TODO fix the interval
-		return 5000;
+		final String value = getCustomerProperties().getProperty("hub.email.digest.interval.in.milliseconds");
+		return Long.valueOf(value);
 	}
-
 }

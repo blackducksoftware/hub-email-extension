@@ -41,7 +41,7 @@ public class ItemRouterTest {
 
 	@Test
 	public void testGetRouterKey() {
-		assertEquals(ROUTER_KEY, router.getRouterKey());
+		assertEquals(ROUTER_KEY, router.getTemplateName());
 	}
 
 	@Test

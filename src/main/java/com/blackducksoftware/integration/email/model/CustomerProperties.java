@@ -41,6 +41,7 @@ public class CustomerProperties {
 	public static final String ROUTER_PREFIX = "email.service.router.";
 	public static final String TRANSFORMER_CONTENT_ITEM_PREFIX = "email.service.transformer.content.";
 	public static final String OPT_OUT_PREFIX = "hub.email.user.preference.opt.out.";
+	public static final String ROUTER_LAST_RUN_PREFIX = "email.service.router.lastrun.";
 
 	private final List<String> javamailConfigKeys = new ArrayList<>();
 	private final Map<String, String> suppliedJavamailConfigProperties = new HashMap<>();
