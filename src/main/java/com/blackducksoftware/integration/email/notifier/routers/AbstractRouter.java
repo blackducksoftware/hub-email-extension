@@ -46,8 +46,9 @@ public abstract class AbstractRouter extends TimerTask {
 
 	public abstract long getIntervalMilliseconds();
 
+	public abstract String getRouterPropertyKey();
+
 	public long getStartDelayMilliseconds() {
 		return 0;
 	}
-
 }

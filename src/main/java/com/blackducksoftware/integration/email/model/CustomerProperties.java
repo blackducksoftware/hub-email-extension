@@ -42,6 +42,7 @@ public class CustomerProperties {
 	public static final String TRANSFORMER_CONTENT_ITEM_PREFIX = "email.service.transformer.content.";
 	public static final String OPT_OUT_PREFIX = "hub.email.user.preference.opt.out.";
 	public static final String ROUTER_LAST_RUN_PREFIX = "email.service.router.lastrun.";
+	public static final String ROUTER_VARIABLE_PREFIX = "email.router.variable.";
 
 	private final List<String> javamailConfigKeys = new ArrayList<>();
 	private final Map<String, String> suppliedJavamailConfigProperties = new HashMap<>();
@@ -51,6 +52,7 @@ public class CustomerProperties {
 
 	private final List<String> routerClassNames = new ArrayList<>();
 	private final Map<String, String> optOutProperties = new HashMap<>();
+	private final Map<String, String> routerVariableProperties = new HashMap<>();
 	private final Properties appProperties;
 
 	public CustomerProperties(final Properties appProperties) {
@@ -80,6 +82,9 @@ public class CustomerProperties {
 					} else if (key.startsWith(OPT_OUT_PREFIX)) {
 						final String cleanedKey = key.replace(OPT_OUT_PREFIX, "");
 						optOutProperties.put(cleanedKey, value);
+					} else if (key.startsWith(ROUTER_VARIABLE_PREFIX)) {
+						final String cleanedKey = key.replace(ROUTER_VARIABLE_PREFIX, "");
+						routerVariableProperties.put(cleanedKey, value);
 					}
 				}
 			}
@@ -186,4 +191,7 @@ public class CustomerProperties {
 		return appProperties.getProperty(key);
 	}
 
+	public Map<String, String> getRouterVariableProperties() {
+		return routerVariableProperties;
+	}
 }

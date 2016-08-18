@@ -70,7 +70,9 @@ public class EmailEngine {
 		notificationDataService = createNotificationDataService();
 		userRestService = createUserRestService();
 		routerManager = createRouterManager();
+	}
 
+	public void start() {
 		routerManager.startRouters();
 	}
 

@@ -24,6 +24,11 @@ public class MockRouter extends AbstractRouter {
 	}
 
 	@Override
+	public String getRouterPropertyKey() {
+		return templateName;
+	}
+
+	@Override
 	public long getIntervalMilliseconds() {
 		return ROUTER_INTERVAL;
 	}

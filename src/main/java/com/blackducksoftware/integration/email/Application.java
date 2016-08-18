@@ -36,5 +36,6 @@ public class Application {
 
 	public Application() throws Exception {
 		emailEngine = new EmailEngine();
+		emailEngine.start();
 	}
 }

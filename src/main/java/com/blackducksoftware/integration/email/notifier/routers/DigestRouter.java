@@ -34,24 +34,33 @@ public class DigestRouter extends AbstractRouter {
 	private static final String LIST_VULNERABILITIES = "securityVulnerabilities";
 
 	private final Logger logger = LoggerFactory.getLogger(DigestRouter.class);
+	private final long interval;
+	private final String lastRunPath;
+	private final String initialStartDate;
 
 	public DigestRouter(final CustomerProperties customerProperties,
 			final NotificationDataService notificationDataService, final UserRestService userRestService,
 			final EmailMessagingService emailMessagingService) {
 		super(customerProperties, notificationDataService, userRestService, emailMessagingService);
+		interval = Long.valueOf(
+				getCustomerProperties().getRouterVariableProperties().get(getRouterPropertyKey() + ".lastrun.file"));
+		lastRunPath = getCustomerProperties().getRouterVariableProperties()
+				.get(getRouterPropertyKey() + ".interval.in.milliseconds");
+		initialStartDate = getCustomerProperties().getRouterVariableProperties()
+				.get(getRouterPropertyKey() + ".start.date");
 	}
 
 	@Override
 	public void run() {
 		try {
 			Date startDate = null;
-			final File lastRunFile = new File(getCustomerProperties().getProperty("hub.email.digest.lastrun.file"));
+			final File lastRunFile = new File(getCustomerProperties().getProperty(lastRunPath));
 			if (lastRunFile.exists()) {
 				final String lastRunValue = FileUtils.readFileToString(lastRunFile, "UTF-8");
 				startDate = RestConnection.parseDateString(lastRunValue);
 				startDate = new Date(startDate.getTime() + 1);
 			} else {
-				final String lastRunValue = getCustomerProperties().getProperty("hub.email.digest.start.date");
+				final String lastRunValue = getCustomerProperties().getProperty(initialStartDate);
 				startDate = RestConnection.parseDateString(lastRunValue);
 			}
 
@@ -117,8 +126,12 @@ public class DigestRouter extends AbstractRouter {
 	}
 
 	@Override
+	public String getRouterPropertyKey() {
+		return "digest";
+	}
+
+	@Override
 	public long getIntervalMilliseconds() {
-		final String value = getCustomerProperties().getProperty("hub.email.digest.interval.in.milliseconds");
-		return Long.valueOf(value);
+		return interval;
 	}
 }
