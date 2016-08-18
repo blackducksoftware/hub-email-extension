@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,10 +12,10 @@ import java.util.Map;
 import javax.mail.MessagingException;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.blackducksoftware.integration.email.mock.MockMailWrapper;
+import com.blackducksoftware.integration.email.model.EmailTarget;
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.notifier.EmailEngine;
 import com.blackducksoftware.integration.email.notifier.routers.DigestRouter;
@@ -24,17 +23,10 @@ import com.blackducksoftware.integration.email.notifier.routers.DigestRouter;
 import freemarker.template.TemplateException;
 
 public class EmailMessagingServiceTest {
-	private static final List<String> recipients = Collections.emptyList();
-	// private static final List<String> recipients =
-	// Arrays.asList("ekerwin@blackducksoftware.com",
-	// "akamen@blackducksoftware.com", "psantos@blackducksoftware.com",
-	// "eric.kerwin@gmail.com");
-	// private static final List<String> recipients =
-	// Arrays.asList("ekerwin@blackducksoftware.com");
-	// private static final List<String> recipients =
-	// Arrays.asList("psantos@blackducksoftware.com");
 
 	private EmailEngine engine;
+	private DigestRouter digestRouter;
+	private JavaMailWrapper mockMailWrapper;
 
 	@Before
 	public void init() throws Exception {
@@ -43,32 +35,36 @@ public class EmailMessagingServiceTest {
 		final File file = new File(propFileUrl.toURI());
 		System.setProperty("customer.properties", file.getCanonicalPath());
 		engine = new EmailEngine();
+		// this code disables the default EmailMessagingService that is created
+		// by the EmailEngine. Instead it creates a
+		// router that uses a different email messaging service in order prevent
+		// sending emails through java mail if you do not do this you may spam
+		// emails to the users of the hub server configured in the
+		// customer.properties file.
+		mockMailWrapper = new MockMailWrapper(false);
+		final EmailMessagingService messagingService = new EmailMessagingService(engine.customerProperties,
+				engine.configuration, mockMailWrapper);
+		digestRouter = new DigestRouter(engine.customerProperties, engine.notificationDataService,
+				engine.userRestService, messagingService);
+		engine.routerManager.attachRouter(digestRouter);
 	}
 
 	@Test
 	public void testRouter() throws Exception {
-		final JavaMailWrapper mockMailWrapper = new MockMailWrapper(false);
-		final EmailMessagingService messagingService = new EmailMessagingService(engine.customerProperties,
-				engine.configuration, mockMailWrapper);
-		final DigestRouter digestRouter = new DigestRouter(engine.customerProperties, engine.notificationDataService,
-				engine.userRestService, messagingService);
 		digestRouter.run();
 	}
 
 	@Test
-	@Ignore
 	public void testSendingEmail() throws IOException, MessagingException, TemplateException {
 		final Map<String, Object> model = new HashMap<>();
 		model.put("title", "A Glorious Day");
 		model.put("message", "this should have html and plain text parts");
 		model.put("items", Arrays.asList("apple", "orange", "pear", "banana"));
-
-		// engine.emailMessagingService.sendEmailMessage(engine.customerProperties,
-		// recipients, model, "htmlTemplate.ftl");
+		final EmailTarget target = new EmailTarget("testUser@a.domain.com1", "htmlTemplate.ftl", model);
+		engine.emailMessagingService.sendEmailMessage(target);
 	}
 
 	@Test
-	@Ignore
 	public void testDigest() throws Exception {
 		final List<Map<String, String>> policyViolations = new ArrayList<>();
 		policyViolations.add(
@@ -118,8 +114,8 @@ public class EmailMessagingServiceTest {
 		model.put("securityVulnerabilities", securityVulnerabilities);
 		model.put("hubServerUrl", "http://eng-hub-valid03.dc1.lan/");
 
-		// engine.emailMessagingService.sendEmailMessage(engine.customerProperties,
-		// recipients, model, "dailyDigest.ftl");
+		final EmailTarget target = new EmailTarget("testUser@a.domain.com1", "digest.ftl", model);
+		engine.emailMessagingService.sendEmailMessage(target);
 	}
 
 	private Map<String, String> createPolicyViolation(final String projectName, final String projectVersionName,
@@ -146,20 +142,4 @@ public class EmailMessagingServiceTest {
 		policyViolationOverride.put("policyName", policyName);
 		return policyViolationOverride;
 	}
-
-	private Map<String, String> createPolicyViolationOverrideCancellation() {
-		final Map<String, String> policyViolationOverrideCancellation = new HashMap<>();
-		return policyViolationOverrideCancellation;
-	}
-
-	private Map<String, String> createSecurityVulnerability(final String projectName, final String projectVersionName,
-			final String componentName, final String componentVersionName) {
-		final Map<String, String> securityVulnerability = new HashMap<>();
-		securityVulnerability.put("projectName", projectName);
-		securityVulnerability.put("projectVersionName", projectVersionName);
-		securityVulnerability.put("componentName", componentName);
-		securityVulnerability.put("componentVersionName", componentVersionName);
-		return securityVulnerability;
-	}
-
 }
