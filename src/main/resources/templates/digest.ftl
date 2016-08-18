@@ -51,43 +51,19 @@ Dear ${hubUserName},
       <li>
         ${securityVulnerability.projectName} / ${securityVulnerability.projectVersionName} / ${securityVulnerability.componentName} / ${securityVulnerability.componentVersionName}
         <dl>
-        <#if securityVulnerability.vulnAddedList?? && securityVulnerability.vulnAddedList?size gt 0>
+        <#if securityVulnerability.vulnAddedList??>
             <dt>Added:</dt>
-                <#list securityVulnerability.vulnAddedList as vulnAdded>
-                    <dd>${vulnAdded}</dd>
-                </#list>
+            <dd>${securityVulnerability.vulnAddedList}</dd>
         </#if>
-        <#if securityVulnerability.vulnUpdatedList?? && securityVulnerability.vulnUpdatedList?size gt 0>
+        <#if securityVulnerability.vulnUpdatedList??>
             <dt>Updated:</dt>
-                <#list securityVulnerability.vulnUpdatedList as vulnUpdated>
-                    <dd>${vulnUpdated}</dd>
-                </#list>
+            <dd>${securityVulnerability.vulnUpdatedList}</dd>
         </#if>
-        <#if securityVulnerability.vulnDeletedList?? && securityVulnerability.vulnDeletedList?size gt 0>
+        <#if securityVulnerability.vulnDeletedList??>
             <dt>Deleted:</dt>
-                <#list securityVulnerability.vulnDeletedList as vulnDeleted>
-                    <dd>${vulnDeleted}</dd>
-                </#list>
+            <dd>${securityVulnerability.vulnDeletedList}</dd>
         </#if>
         </dl>
-        <!--
-        <br />
-        ---don't know how to get these values---
-        <br />
-        CVE Identifier
-        <br />
-        Published Date
-        <br />
-        Base Score
-        <br />
-        Exploitability
-        <br />
-        Impact Score
-        <br />
-        Logged Date
-        <br />
-        ---end unknown values---
-        -->
       </li>
     </#list>
   </ul>

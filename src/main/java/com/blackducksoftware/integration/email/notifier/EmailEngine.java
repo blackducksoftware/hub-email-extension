@@ -175,7 +175,7 @@ public class EmailEngine {
 				clazz = (Class<? extends AbstractRouter>) Class.forName(className);
 				final Constructor<? extends AbstractRouter> constructor = clazz.getConstructor(CustomerProperties.class,
 						NotificationDataService.class, UserRestService.class, EmailMessagingService.class);
-				manager.startRouter(constructor.newInstance(customerProperties, notificationDataService,
+				manager.attachRouter(constructor.newInstance(customerProperties, notificationDataService,
 						userRestService, emailMessagingService));
 			} catch (final ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException
 					| IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {

@@ -16,6 +16,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.blackducksoftware.integration.email.mock.MockMailWrapper;
+import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.notifier.EmailEngine;
 import com.blackducksoftware.integration.email.notifier.routers.DigestRouter;
 
@@ -45,8 +47,11 @@ public class EmailMessagingServiceTest {
 
 	@Test
 	public void testRouter() throws Exception {
+		final JavaMailWrapper mockMailWrapper = new MockMailWrapper(false);
+		final EmailMessagingService messagingService = new EmailMessagingService(engine.customerProperties,
+				engine.configuration, mockMailWrapper);
 		final DigestRouter digestRouter = new DigestRouter(engine.customerProperties, engine.notificationDataService,
-				engine.userRestService, engine.emailMessagingService);
+				engine.userRestService, messagingService);
 		digestRouter.run();
 	}
 

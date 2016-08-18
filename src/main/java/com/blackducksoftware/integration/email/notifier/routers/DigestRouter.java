@@ -42,10 +42,10 @@ public class DigestRouter extends AbstractRouter {
 			final NotificationDataService notificationDataService, final UserRestService userRestService,
 			final EmailMessagingService emailMessagingService) {
 		super(customerProperties, notificationDataService, userRestService, emailMessagingService);
-		interval = Long.valueOf(
-				getCustomerProperties().getRouterVariableProperties().get(getRouterPropertyKey() + ".lastrun.file"));
+		interval = Long.valueOf(getCustomerProperties().getRouterVariableProperties()
+				.get(getRouterPropertyKey() + ".interval.in.milliseconds"));
 		lastRunPath = getCustomerProperties().getRouterVariableProperties()
-				.get(getRouterPropertyKey() + ".interval.in.milliseconds");
+				.get(getRouterPropertyKey() + ".lastrun.file");
 		initialStartDate = getCustomerProperties().getRouterVariableProperties()
 				.get(getRouterPropertyKey() + ".start.date");
 	}
@@ -54,20 +54,20 @@ public class DigestRouter extends AbstractRouter {
 	public void run() {
 		try {
 			Date startDate = null;
-			final File lastRunFile = new File(getCustomerProperties().getProperty(lastRunPath));
+			final File lastRunFile = new File(lastRunPath);
 			if (lastRunFile.exists()) {
 				final String lastRunValue = FileUtils.readFileToString(lastRunFile, "UTF-8");
 				startDate = RestConnection.parseDateString(lastRunValue);
 				startDate = new Date(startDate.getTime() + 1);
 			} else {
-				final String lastRunValue = getCustomerProperties().getProperty(initialStartDate);
+				final String lastRunValue = initialStartDate;
 				startDate = RestConnection.parseDateString(lastRunValue);
 			}
 
 			Date endDate = new Date();
 			FileUtils.write(lastRunFile, RestConnection.formatDate(endDate), "UTF-8");
-			startDate = RestConnection.parseDateString("2016-08-16T00:00:00.000Z");
-			endDate = RestConnection.parseDateString("2016-08-17T00:14:10.859Z");
+			startDate = RestConnection.parseDateString("2016-08-17T00:00:00.000Z");
+			endDate = RestConnection.parseDateString("2016-08-18T00:00:00.000Z");
 			final List<NotificationContentItem> notifications = getNotificationDataService()
 					.getAllNotifications(startDate, endDate);
 			final Map<String, FreemarkerTarget> notificationsMap = createMap(notifications);

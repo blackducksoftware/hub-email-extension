@@ -45,7 +45,7 @@ public class EmailMessagingService {
 			final JavaMailWrapper javaMailWrapper) {
 		this.customerProperties = customerProperties;
 		this.configuration = configuration;
-		this.javaMailWrapper = new JavaMailWrapper();
+		this.javaMailWrapper = javaMailWrapper;
 	}
 
 	public void sendEmailMessage(final EmailTarget emailTarget) throws MessagingException, TemplateNotFoundException,

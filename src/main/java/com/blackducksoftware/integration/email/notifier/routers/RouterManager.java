@@ -52,6 +52,10 @@ public class RouterManager {
 
 	public void startRouter(final AbstractRouter router) {
 		final String routerKey = router.getTemplateName();
+		if (timerMap.containsKey(routerKey)) {
+			stopRouter(router);
+			timerMap.remove(routerKey);
+		}
 		final Timer timer = new Timer("RouterTimer-" + routerKey);
 		timerMap.put(routerKey, timer);
 		timer.scheduleAtFixedRate(router, router.getStartDelayMilliseconds(), router.getIntervalMilliseconds());
