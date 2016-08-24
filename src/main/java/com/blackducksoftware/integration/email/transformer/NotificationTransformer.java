@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.blackducksoftware.integration.email.model.FreemarkerTarget;
-import com.blackducksoftware.integration.hub.dataservices.notifications.items.NotificationContentItem;
+import com.blackducksoftware.integration.hub.dataservices.notification.items.NotificationContentItem;
 
 public abstract class NotificationTransformer {
 	public static final String KEY_PROJECT_NAME = "projectName";

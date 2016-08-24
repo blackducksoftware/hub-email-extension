@@ -4,8 +4,8 @@ import java.util.Map;
 
 import com.blackducksoftware.integration.email.model.FreemarkerTarget;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
-import com.blackducksoftware.integration.hub.dataservices.notifications.items.NotificationContentItem;
-import com.blackducksoftware.integration.hub.dataservices.notifications.items.PolicyOverrideContentItem;
+import com.blackducksoftware.integration.hub.dataservices.notification.items.NotificationContentItem;
+import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyOverrideContentItem;
 
 public class PolicyOverrideTransformer extends NotificationTransformer {
 	@Override

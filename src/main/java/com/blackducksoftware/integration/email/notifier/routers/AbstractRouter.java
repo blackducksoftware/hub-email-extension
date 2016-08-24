@@ -5,7 +5,7 @@ import java.util.TimerTask;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.api.UserRestService;
-import com.blackducksoftware.integration.hub.dataservices.notifications.NotificationDataService;
+import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 
 public abstract class AbstractRouter extends TimerTask {
 	private final CustomerProperties customerProperties;
