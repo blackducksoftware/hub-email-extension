@@ -25,7 +25,8 @@ import com.blackducksoftware.integration.email.notifier.routers.AbstractRouter;
 import com.blackducksoftware.integration.email.notifier.routers.RouterManager;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.api.UserRestService;
-import com.blackducksoftware.integration.hub.dataservices.NotificationDataService;
+import com.blackducksoftware.integration.hub.dataservices.notifications.NotificationDataService;
+import com.blackducksoftware.integration.hub.dataservices.notifications.items.PolicyNotificationFilter;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
 import com.blackducksoftware.integration.hub.exception.EncryptionException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
@@ -149,7 +150,7 @@ public class EmailEngine {
 
 	private NotificationDataService createNotificationDataService() {
 		final NotificationDataService notificationDataService = new NotificationDataService(restConnection, gson,
-				jsonParser);
+				jsonParser, new PolicyNotificationFilter(null));
 		return notificationDataService;
 	}
 

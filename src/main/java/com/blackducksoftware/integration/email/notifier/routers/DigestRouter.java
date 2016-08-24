@@ -21,11 +21,11 @@ import com.blackducksoftware.integration.email.transformer.PolicyViolationTransf
 import com.blackducksoftware.integration.email.transformer.VulnerabilityTransformer;
 import com.blackducksoftware.integration.hub.api.UserRestService;
 import com.blackducksoftware.integration.hub.api.user.UserItem;
-import com.blackducksoftware.integration.hub.dataservices.NotificationDataService;
-import com.blackducksoftware.integration.hub.dataservices.items.NotificationContentItem;
-import com.blackducksoftware.integration.hub.dataservices.items.PolicyOverrideContentItem;
-import com.blackducksoftware.integration.hub.dataservices.items.PolicyViolationContentItem;
-import com.blackducksoftware.integration.hub.dataservices.items.VulnerabilityContentItem;
+import com.blackducksoftware.integration.hub.dataservices.notifications.NotificationDataService;
+import com.blackducksoftware.integration.hub.dataservices.notifications.items.NotificationContentItem;
+import com.blackducksoftware.integration.hub.dataservices.notifications.items.PolicyOverrideContentItem;
+import com.blackducksoftware.integration.hub.dataservices.notifications.items.PolicyViolationContentItem;
+import com.blackducksoftware.integration.hub.dataservices.notifications.items.VulnerabilityContentItem;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 
 public class DigestRouter extends AbstractRouter {

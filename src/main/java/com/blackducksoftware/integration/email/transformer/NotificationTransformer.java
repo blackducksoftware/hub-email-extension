@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.blackducksoftware.integration.email.model.FreemarkerTarget;
-import com.blackducksoftware.integration.hub.dataservices.items.NotificationContentItem;
+import com.blackducksoftware.integration.hub.dataservices.notifications.items.NotificationContentItem;
 
 public abstract class NotificationTransformer {
 	public static final String KEY_PROJECT_NAME = "projectName";
@@ -23,8 +23,8 @@ public abstract class NotificationTransformer {
 
 	public Map<String, String> transformNotificationContentItem(final NotificationContentItem notificationContentItem) {
 		final Map<String, String> map = new HashMap<>();
-		map.put(KEY_PROJECT_NAME, notificationContentItem.getProjectName());
-		map.put(KEY_PROJECT_VERSION, notificationContentItem.getProjectVersion());
+		map.put(KEY_PROJECT_NAME, notificationContentItem.getProjectVersion().getProjectName());
+		map.put(KEY_PROJECT_VERSION, notificationContentItem.getProjectVersion().getProjectVersionName());
 		map.put(KEY_COMPONENT_NAME, notificationContentItem.getComponentName());
 		map.put(KEY_COMPONENT_VERSION, notificationContentItem.getComponentVersion());
 

@@ -27,6 +27,7 @@ public class EmailMessagingServiceTest {
 	private EmailEngine engine;
 	private DigestRouter digestRouter;
 	private JavaMailWrapper mockMailWrapper;
+	private EmailMessagingService emailMessagingService;
 
 	@Before
 	public void init() throws Exception {
@@ -42,10 +43,10 @@ public class EmailMessagingServiceTest {
 		// emails to the users of the hub server configured in the
 		// customer.properties file.
 		mockMailWrapper = new MockMailWrapper(false);
-		final EmailMessagingService messagingService = new EmailMessagingService(engine.customerProperties,
-				engine.configuration, mockMailWrapper);
+		this.emailMessagingService = new EmailMessagingService(engine.customerProperties, engine.configuration,
+				mockMailWrapper);
 		digestRouter = new DigestRouter(engine.customerProperties, engine.notificationDataService,
-				engine.userRestService, messagingService);
+				engine.userRestService, emailMessagingService);
 		engine.routerManager.attachRouter(digestRouter);
 	}
 
@@ -61,7 +62,7 @@ public class EmailMessagingServiceTest {
 		model.put("message", "this should have html and plain text parts");
 		model.put("items", Arrays.asList("apple", "orange", "pear", "banana"));
 		final EmailTarget target = new EmailTarget("testUser@a.domain.com1", "htmlTemplate.ftl", model);
-		engine.emailMessagingService.sendEmailMessage(target);
+		emailMessagingService.sendEmailMessage(target);
 	}
 
 	@Test
@@ -115,7 +116,7 @@ public class EmailMessagingServiceTest {
 		model.put("hubServerUrl", "http://eng-hub-valid03.dc1.lan/");
 
 		final EmailTarget target = new EmailTarget("testUser@a.domain.com1", "digest.ftl", model);
-		engine.emailMessagingService.sendEmailMessage(target);
+		emailMessagingService.sendEmailMessage(target);
 	}
 
 	private Map<String, String> createPolicyViolation(final String projectName, final String projectVersionName,

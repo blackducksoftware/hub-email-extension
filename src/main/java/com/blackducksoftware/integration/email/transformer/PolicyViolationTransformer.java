@@ -3,8 +3,9 @@ package com.blackducksoftware.integration.email.transformer;
 import java.util.Map;
 
 import com.blackducksoftware.integration.email.model.FreemarkerTarget;
-import com.blackducksoftware.integration.hub.dataservices.items.NotificationContentItem;
-import com.blackducksoftware.integration.hub.dataservices.items.PolicyViolationContentItem;
+import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
+import com.blackducksoftware.integration.hub.dataservices.notifications.items.NotificationContentItem;
+import com.blackducksoftware.integration.hub.dataservices.notifications.items.PolicyViolationContentItem;
 
 public class PolicyViolationTransformer extends NotificationTransformer {
 	@Override
@@ -13,9 +14,9 @@ public class PolicyViolationTransformer extends NotificationTransformer {
 
 		if (notification instanceof PolicyViolationContentItem) {
 			final PolicyViolationContentItem policyViolationContentItem = (PolicyViolationContentItem) notification;
-			for (final String policyName : policyViolationContentItem.getPolicyNameList()) {
+			for (final PolicyRule policyRule : policyViolationContentItem.getPolicyRuleList()) {
 				final Map<String, String> map = transformNotificationContentItem(policyViolationContentItem);
-				map.put(KEY_POLICY_NAME, policyName);
+				map.put(KEY_POLICY_NAME, policyRule.getName());
 				templateData.add(map);
 			}
 		}
