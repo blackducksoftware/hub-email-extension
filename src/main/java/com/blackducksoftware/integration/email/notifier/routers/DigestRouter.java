@@ -3,7 +3,6 @@ package com.blackducksoftware.integration.email.notifier.routers;
 import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -13,22 +12,25 @@ import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.EmailTarget;
-import com.blackducksoftware.integration.email.model.ProjectCategory;
+import com.blackducksoftware.integration.email.model.FreemarkerTarget;
 import com.blackducksoftware.integration.email.model.ProjectsDigest;
 import com.blackducksoftware.integration.email.model.UserPreferences;
-import com.blackducksoftware.integration.email.model.VersionCategory;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.transformer.NotificationCountTransformer;
 import com.blackducksoftware.integration.hub.api.UserRestService;
 import com.blackducksoftware.integration.hub.api.user.UserItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.NotificationCountData;
+import com.blackducksoftware.integration.hub.dataservices.notification.items.ProjectAggregateData;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 
 public class DigestRouter extends AbstractRouter {
-	private static final String LIST_NOTIFICATION_COUNTS = "notificationCounts";
+	private static final String KEY_PROJECT_DIGEST = "projectsDigest";
 	public static final String KEY_START_DATE = "startDate";
 	public static final String KEY_END_DATE = "endDate";
+	public static final String KEY_TOTAL_NOTIFICATIONS = "totalNotifications";
+	public static final String KEY_TOTAL_POLICY_VIOLATIONS = "totalPolicyViolations";
+	public static final String KEY_TOTAL_POLICY_OVERRIDES = "totalPolicyOverrides";
+	public static final String KEY_TOTAL_VULNERABILITIES = "totalVulnerabilities";
 
 	private final Logger logger = LoggerFactory.getLogger(DigestRouter.class);
 	private final long interval;
@@ -63,7 +65,7 @@ public class DigestRouter extends AbstractRouter {
 
 			final Date endDate = new Date();
 			FileUtils.write(lastRunFile, RestConnection.formatDate(endDate), "UTF-8");
-			final List<NotificationCountData> notifications = getNotificationDataService()
+			final List<ProjectAggregateData> notifications = getNotificationDataService()
 					.getNotificationCounts(startDate, endDate);
 			if (!notifications.isEmpty()) {
 				final ProjectsDigest projectsDigest = createMap(notifications);
@@ -72,7 +74,7 @@ public class DigestRouter extends AbstractRouter {
 				for (final UserItem user : users) {
 					try {
 						final Map<String, Object> model = new HashMap<>();
-						model.put(LIST_NOTIFICATION_COUNTS, projectsDigest);
+						model.put(KEY_PROJECT_DIGEST, projectsDigest);
 						model.put(KEY_START_DATE, String.valueOf(startDate));
 						model.put(KEY_END_DATE, String.valueOf(endDate));
 						model.put("hubUserName", user.getUserName());
@@ -92,30 +94,27 @@ public class DigestRouter extends AbstractRouter {
 		}
 	}
 
-	private ProjectsDigest createMap(final List<NotificationCountData> notifications) {
-		final Map<String, ProjectCategory> projectsMap = new HashMap<>();
+	private ProjectsDigest createMap(final List<ProjectAggregateData> notifications) {
 		final NotificationCountTransformer transformer = new NotificationCountTransformer();
-		for (final NotificationCountData notification : notifications) {
-			final String projectName = notification.getProjectVersion().getProjectName();
-			final String projectVersion = notification.getProjectVersion().getProjectVersionName();
-			final ProjectCategory projectCategory;
-			if (projectsMap.containsKey(projectName)) {
-				projectCategory = projectsMap.get(projectName);
-			} else {
-				projectCategory = new ProjectCategory(projectName, new HashSet<VersionCategory>());
-				projectsMap.put(projectName, projectCategory);
-			}
-			// combination of project name and version should be unique and each
-			// notification is for a specific project and version
-			final VersionCategory versionCategory = new VersionCategory(projectVersion,
-					transformer.transform(notification));
-			projectCategory.getCategoryData().add(versionCategory);
+		final FreemarkerTarget projectData = new FreemarkerTarget();
+		int totalNotifications = 0;
+		int totalPolicyViolations = 0;
+		int totalPolicyOverrides = 0;
+		int totalVulnerabilities = 0;
+		for (final ProjectAggregateData notification : notifications) {
+			totalNotifications += notification.getTotal();
+			totalPolicyViolations += notification.getPolicyViolationCount();
+			totalPolicyOverrides += notification.getPolicyOverrideCount();
+			totalVulnerabilities += notification.getVulnerabilityCount();
+			projectData.add(transformer.transform(notification));
 		}
 
-		final ProjectsDigest digest = new ProjectsDigest();
-		for (final Map.Entry<String, ProjectCategory> entry : projectsMap.entrySet()) {
-			digest.add(entry.getValue());
-		}
+		final Map<String, String> totalsMap = new HashMap<>();
+		totalsMap.put(KEY_TOTAL_NOTIFICATIONS, String.valueOf(totalNotifications));
+		totalsMap.put(KEY_TOTAL_POLICY_VIOLATIONS, String.valueOf(totalPolicyViolations));
+		totalsMap.put(KEY_TOTAL_POLICY_OVERRIDES, String.valueOf(totalPolicyOverrides));
+		totalsMap.put(KEY_TOTAL_VULNERABILITIES, String.valueOf(totalVulnerabilities));
+		final ProjectsDigest digest = new ProjectsDigest(totalsMap, projectData);
 		return digest;
 	}
 
