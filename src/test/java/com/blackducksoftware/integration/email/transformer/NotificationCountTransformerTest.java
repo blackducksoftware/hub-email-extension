@@ -5,14 +5,15 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.junit.Test;
 
+import com.blackducksoftware.integration.email.model.ProjectDigest;
 import com.blackducksoftware.integration.hub.api.notification.VulnerabilitySourceQualifiedId;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
 import com.blackducksoftware.integration.hub.api.project.ProjectVersion;
+import com.blackducksoftware.integration.hub.dataservices.notification.items.ComponentAggregateData;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyOverrideContentItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyViolationContentItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.ProjectAggregateData;
@@ -54,28 +55,34 @@ public class NotificationCountTransformerTest {
 		overrideList.add(overrideContent);
 		vulnerabilityList.add(vulnerabilityContent);
 		final int sourceIDSize = sourceIdList.size();
-		final ProjectAggregateData countData = new ProjectAggregateData(new Date(), new Date(), projectVersion,
+		final int total = violationList.size() + overrideList.size() + vulnerabilityList.size();
+		final ComponentAggregateData componentData = new ComponentAggregateData(componentName, componentVersion,
 				violationList, overrideList, vulnerabilityList, sourceIDSize, sourceIDSize, sourceIDSize);
+		final List<ComponentAggregateData> componentList = new ArrayList<>();
+		componentList.add(componentData);
+		final ProjectAggregateData countData = new ProjectAggregateData(new Date(), new Date(), projectVersion,
+				violationList.size(), overrideList.size(), vulnerabilityList.size(), total, sourceIDSize, sourceIDSize,
+				sourceIDSize, componentList);
 		final NotificationCountTransformer transformer = new NotificationCountTransformer();
-		final Map<String, String> dataMap = transformer.transform(countData);
+		final ProjectDigest digest = transformer.transform(countData);
 
-		assertEquals(projectName, dataMap.get(NotificationCountTransformer.KEY_PROJECT_NAME));
-		assertEquals(versionName, dataMap.get(NotificationCountTransformer.KEY_PROJECT_VERSION));
+		assertEquals(projectName, digest.getProjectData().get(NotificationCountTransformer.KEY_PROJECT_NAME));
+		assertEquals(versionName, digest.getProjectData().get(NotificationCountTransformer.KEY_PROJECT_VERSION));
 		assertEquals(projectVersion.getProjectVersionLink(),
-				dataMap.get(NotificationCountTransformer.KEY_PROJECT_VERSION_LINK));
+				digest.getProjectData().get(NotificationCountTransformer.KEY_PROJECT_VERSION_LINK));
 		assertEquals(String.valueOf(countData.getTotal()),
-				dataMap.get(NotificationCountTransformer.KEY_TOTAL_NOTIFICATION_COUNT));
+				digest.getProjectData().get(NotificationCountTransformer.KEY_TOTAL_NOTIFICATION_COUNT));
 		assertEquals(String.valueOf(countData.getPolicyViolationCount()),
-				dataMap.get(NotificationCountTransformer.KEY_POLICY_VIOLATION_COUNT));
+				digest.getProjectData().get(NotificationCountTransformer.KEY_POLICY_VIOLATION_COUNT));
 		assertEquals(String.valueOf(countData.getPolicyOverrideCount()),
-				dataMap.get(NotificationCountTransformer.KEY_POLICY_OVERRIDE_COUNT));
+				digest.getProjectData().get(NotificationCountTransformer.KEY_POLICY_OVERRIDE_COUNT));
 		assertEquals(String.valueOf(countData.getVulnerabilityCount()),
-				dataMap.get(NotificationCountTransformer.KEY_VULNERABILITY_COUNT));
+				digest.getProjectData().get(NotificationCountTransformer.KEY_VULNERABILITY_COUNT));
 		assertEquals(String.valueOf(countData.getVulnAddedCount()),
-				dataMap.get(NotificationCountTransformer.KEY_VULN_ADDED_COUNT));
+				digest.getProjectData().get(NotificationCountTransformer.KEY_VULN_ADDED_COUNT));
 		assertEquals(String.valueOf(countData.getVulnUpdatedCount()),
-				dataMap.get(NotificationCountTransformer.KEY_VULN_UPDATED_COUNT));
+				digest.getProjectData().get(NotificationCountTransformer.KEY_VULN_UPDATED_COUNT));
 		assertEquals(String.valueOf(countData.getVulnDeletedCount()),
-				dataMap.get(NotificationCountTransformer.KEY_VULN_DELETED_COUNT));
+				digest.getProjectData().get(NotificationCountTransformer.KEY_VULN_DELETED_COUNT));
 	}
 }

@@ -1,73 +1,81 @@
 <style>
-  table {
-      border-collapse: collapse; 
+  a.indented {
+      margin-top: 0px;
+      margin-bottom: 0px;
+      margin-left: 10px;
+      margin-right: 0px;
+      padding: 0px;
   }
-  table, th, td {
-      border: 1px solid black;
-      padding: 3px
-  }
-  th {
-     background-color:lightgray
-  }
-  td {
-    text-align:center;
+  p.indented {
+      margin-top: 0px;
+      margin-bottom: 0px;
+      margin-left: 10px;
+      margin-right: 0px;
+      padding: 0px;
   }
   p.bold {
-    font-weight: bold
+      padding-top: 5px;
+      font-weight: bold;
+  }
+  p.project {
+      font-size: 110%;
+      margin-top: 0px;
+      margin-bottom: 0px;
+      margin-left: 0px;
+      margin-right: 0px;
   }
 </style>
+
+<#macro displayCount type size> 
+  <p class="bold indented">${size} ${type}</p>
+</#macro>
+<#macro moreItemsLink size projectVersionID>
+  <#if size gt 10>
+      <#if projectVersionID?? && projectVersionID?trim?length gt 0>
+        <a class="indented" href="${hub_server_url}/#versions/id:${projectVersionID}/view:bom">${size - 10} more</a>
+      <#else>
+        <p class="indented">${size - 10} more</p>
+      </#if>
+  </#if>
+</#macro>
 
 Dear ${hubUserName},
 <br />
 <br />
 The Black Duck Hub's monitoring system captured the following notification data.
 <br/>
-<h2>Summary</h2>
-<h3>Range: ${startDate} to ${endDate}</h3>
-<#if projectsDigest?? && projectsDigest.totalsMap?? && projectsDigest.totalsMap?size gt 0>
-    <table>
-      <tr>
-          <th>Total</th>
-          <th>Policy Violations</th>
-          <th>Policy Overrides</th>
-          <th>Vulnerabilities</th>
-      </tr>
-      <tr>
-          <td>${projectsDigest.totalsMap['totalNotifications']}</td>
-          <td>${projectsDigest.totalsMap['totalPolicyViolations']}</td>
-          <td>${projectsDigest.totalsMap['totalPolicyOverrides']}</td>
-          <td>${projectsDigest.totalsMap['totalVulnerabilities']}</td>
-      </tr>  
-    </table>
-</#if>    
-<h2>Project/Version Summary</h2>
-<ol type="1">
+<ul style="list-style-type: none;">
   <#if projectsDigest?? && projectsDigest.projectList?? && projectsDigest.projectList?size gt 0>
-      <#list projectsDigest.projectList as projectData>
-          <li><a href="${projectData.projectVersionLink}">${projectData.projectName}/${projectData.projectVersionName}</a>
-            <div>
-              <table>
-                <tr>
-                    <th>Total</th>
-                    <th>Policy Violations</th>
-                    <th>Policy Overrides</th>
-                    <th>Vulnerabilities</th>
-                </tr>
-                <tr>
-                    <td>${projectData.totalNotificationCount}</td>
-                    <td>${projectData.policyViolationCount}</td>
-                    <td>${projectData.policyOverrideCount}</td>
-                    <td>${projectData.vulnerabilityCount}</td>
-                </tr>  
-              </table>
-              <p class="bold">Policy Violations:${projectData.policyViolations}</p>
-              <p class="bold">Policy Overrides: ${projectData.policyOverrides}</p>
-              <p class="bold">Vulnerabilities: New: ${projectData.vulnAddedCount} Updated: ${projectData.vulnUpdatedCount} Deleted: ${projectData.vulnDeletedCount}</p> 
-            </div>
+      <#list projectsDigest.projectList as projectDigest>
+          <li><p class="bold project">${projectDigest.projectData['projectName']} > ${projectDigest.projectData['projectVersionName']}</p>
+                <#if projectDigest.policyViolations?? && projectDigest.policyViolations?size gt 0>
+                    <@displayCount size=projectDigest.projectData['policyViolationCount'] type="Policy Violations"/>
+                    <#list projectDigest.policyViolations as policyViolation>
+                        <p class="indented">RULE: ${policyViolation['policyName']} COMPONENT: ${policyViolation['componentName']} ${policyViolation['componentVersion']}</p>
+                       <#if policyViolation?counter == 10><#break></#if>
+                    </#list>
+                    <@moreItemsLink projectDigest.policyViolations?size projectDigest.projectData['projectVersionID']/>
+                </#if>
+                <#if projectDigest.policyOverrides?? && projectDigest.policyOverrides?size gt 0>
+                    <@displayCount size=projectDigest.projectData['policyOverrideCount'] type="Policy Overrides"/>
+                    <#list projectDigest.policyOverrides as policyOverride>
+                       <p class="indented">RULE: ${policyOverride['policyName']} COMPONENT: ${policyOverride['componentName']} ${policyOverride['componentVersion']} By: ${policyOverride['firstName']} ${policyOverride['lastName']}</p>    
+                       <#if policyOverride?counter == 10><#break></#if>
+                    </#list>
+                    <@moreItemsLink projectDigest.policyOverrides?size projectDigest.projectData['projectVersionID']/>
+                </#if>
+                <#if projectDigest.vulnerabilities?? && projectDigest.vulnerabilities?size gt 0>
+                    <@displayCount size=projectDigest.projectData['vulnerabilityCount'] type="Vulnerabilities"/>
+                    <#list projectDigest.vulnerabilities as vulnerability>
+                       <p class="indented">COMPONENT: ${vulnerability['componentName']} ${vulnerability['componentVersion']} New: ${vulnerability['vulnAddedCount']} Updated: ${vulnerability['vulnUpdatedCount']} Deleted: ${vulnerability['vulnDeletedCount']}</p>
+                       <#if vulnerability?counter == 10><#break></#if>
+                    </#list>
+                    <@moreItemsLink projectDigest.vulnerabilities?size projectDigest.projectData['projectVersionID']/>
+                </#if>
           </li>
       </#list>
   </#if>
-</ol>
+</ul>
 To manage these items and/or see more details, please log in to your <a href="${hub_server_url}">Black Duck Hub</a>
 <br />
 <br />

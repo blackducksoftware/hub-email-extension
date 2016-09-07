@@ -1,13 +1,14 @@
 package com.blackducksoftware.integration.email.model;
 
+import java.util.List;
 import java.util.Map;
 
 public class ProjectsDigest {
 
 	private final Map<String, String> totalsMap;
-	private final FreemarkerTarget projectList;
+	private final List<ProjectDigest> projectList;
 
-	public ProjectsDigest(final Map<String, String> totalsMap, final FreemarkerTarget projectList) {
+	public ProjectsDigest(final Map<String, String> totalsMap, final List<ProjectDigest> projectList) {
 		this.totalsMap = totalsMap;
 		this.projectList = projectList;
 	}
@@ -16,7 +17,7 @@ public class ProjectsDigest {
 		return totalsMap;
 	}
 
-	public FreemarkerTarget getProjectList() {
+	public List<ProjectDigest> getProjectList() {
 		return projectList;
 	}
 }

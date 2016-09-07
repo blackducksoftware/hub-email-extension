@@ -18,8 +18,8 @@ import org.junit.Test;
 
 import com.blackducksoftware.integration.email.mock.MockMailWrapper;
 import com.blackducksoftware.integration.email.model.EmailTarget;
-import com.blackducksoftware.integration.email.model.FreemarkerTarget;
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
+import com.blackducksoftware.integration.email.model.ProjectDigest;
 import com.blackducksoftware.integration.email.model.ProjectsDigest;
 import com.blackducksoftware.integration.email.notifier.EmailEngine;
 import com.blackducksoftware.integration.email.notifier.routers.DigestRouter;
@@ -27,6 +27,7 @@ import com.blackducksoftware.integration.email.transformer.NotificationCountTran
 import com.blackducksoftware.integration.hub.api.notification.VulnerabilitySourceQualifiedId;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
 import com.blackducksoftware.integration.hub.api.project.ProjectVersion;
+import com.blackducksoftware.integration.hub.dataservices.notification.items.ComponentAggregateData;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyOverrideContentItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyViolationContentItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.ProjectAggregateData;
@@ -109,12 +110,18 @@ public class EmailMessagingServiceTest {
 		overrideList.add(overrideContent);
 		vulnerabilityList.add(vulnerabilityContent);
 		final int sourceIDSize = sourceIdList.size();
-		final ProjectAggregateData countData = new ProjectAggregateData(new Date(), new Date(), projectVersion,
+		final int total = violationList.size() + overrideList.size() + vulnerabilityList.size();
+		final ComponentAggregateData componentData = new ComponentAggregateData(componentName, componentVersion,
 				violationList, overrideList, vulnerabilityList, sourceIDSize, sourceIDSize, sourceIDSize);
-		final FreemarkerTarget projectData = new FreemarkerTarget();
+		final List<ComponentAggregateData> componentList = new ArrayList<>();
+		componentList.add(componentData);
+		final ProjectAggregateData countData = new ProjectAggregateData(new Date(), new Date(), projectVersion,
+				violationList.size(), overrideList.size(), vulnerabilityList.size(), total, sourceIDSize, sourceIDSize,
+				sourceIDSize, componentList);
+		final List<ProjectDigest> projectData = new ArrayList<>();
 		final NotificationCountTransformer transformer = new NotificationCountTransformer();
-		final Map<String, String> dataMap = transformer.transform(countData);
-		projectData.add(dataMap);
+		final ProjectDigest digest = transformer.transform(countData);
+		projectData.add(digest);
 
 		final Map<String, String> totalsMap = new HashMap<>();
 		totalsMap.put(DigestRouter.KEY_TOTAL_NOTIFICATIONS, String.valueOf(countData.getTotal()));

@@ -1,6 +1,7 @@
 package com.blackducksoftware.integration.email.notifier.routers;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.EmailTarget;
-import com.blackducksoftware.integration.email.model.FreemarkerTarget;
+import com.blackducksoftware.integration.email.model.ProjectDigest;
 import com.blackducksoftware.integration.email.model.ProjectsDigest;
 import com.blackducksoftware.integration.email.model.UserPreferences;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
@@ -96,7 +97,7 @@ public class DigestRouter extends AbstractRouter {
 
 	private ProjectsDigest createMap(final List<ProjectAggregateData> notifications) {
 		final NotificationCountTransformer transformer = new NotificationCountTransformer();
-		final FreemarkerTarget projectData = new FreemarkerTarget();
+		final List<ProjectDigest> projectData = new ArrayList<>();
 		int totalNotifications = 0;
 		int totalPolicyViolations = 0;
 		int totalPolicyOverrides = 0;
