@@ -65,7 +65,7 @@ The Black Duck Hub's monitoring system captured the following notification data.
                     <@moreItemsLink projectDigest.policyOverrides?size projectDigest.projectData['projectVersionID']/>
                 </#if>
                 <#if projectDigest.vulnerabilities?? && projectDigest.vulnerabilities?size gt 0>
-                    <@displayCount size=projectDigest.projectData['vulnerabilityCount'] type="Vulnerabilities"/>
+                    <@displayCount size=projectDigest.vulnerabilities?size type="Vulnerabilities"/>
                     <#list projectDigest.vulnerabilities as vulnerability>
                        <p class="indented">COMPONENT: ${vulnerability['componentName']} ${vulnerability['componentVersion']} Total: ${vulnerability['vulnTotalCount']} High: ${vulnerability['vulnHighCount']} Medium: ${vulnerability['vulnMediumCount']} Low: ${vulnerability['vulnLowCount']}</p>
                        <#if vulnerability?counter == 10><#break></#if>

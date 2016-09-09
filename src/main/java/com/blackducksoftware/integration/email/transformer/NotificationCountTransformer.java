@@ -70,7 +70,9 @@ public class NotificationCountTransformer {
 			compMap.put(KEY_VULN_DELETED_COUNT, String.valueOf(compData.getVulnDeletedCount()));
 			policyViolations.addAll(createPolicyViolationData(compData.getPolicyViolationList()));
 			policyOverrides.addAll(createPolicyOverrideData(compData.getPolicyOverrideList()));
-			vulnerabilities.addAll(createVulnerabilityData(compData.getVulnerabilitySummary()));
+			if (compData.getVulnerabilityCount() > 0) {
+				vulnerabilities.addAll(createVulnerabilityData(compData.getVulnerabilitySummary()));
+			}
 		}
 		return new ProjectDigest(map, policyViolations, policyOverrides, vulnerabilities);
 	}

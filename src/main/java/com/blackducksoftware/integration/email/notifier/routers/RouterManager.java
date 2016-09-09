@@ -21,7 +21,7 @@ public class RouterManager {
 
 	public void attachRouters(final List<AbstractRouter> routers) {
 		for (final AbstractRouter router : routers) {
-			final String routerKey = router.getTemplateName();
+			final String routerKey = router.getRouterPropertyKey();
 			routerMap.put(routerKey, router);
 		}
 	}
@@ -34,7 +34,7 @@ public class RouterManager {
 
 	public void unattachRouters(final List<AbstractRouter> routerList) {
 		for (final AbstractRouter router : routerList) {
-			final String routerKey = router.getTemplateName();
+			final String routerKey = router.getRouterPropertyKey();
 			if (routerMap.containsKey(routerKey)) {
 				routerMap.remove(routerKey);
 			}
@@ -51,7 +51,7 @@ public class RouterManager {
 	}
 
 	public void startRouter(final AbstractRouter router) {
-		final String routerKey = router.getTemplateName();
+		final String routerKey = router.getRouterPropertyKey();
 		if (timerMap.containsKey(routerKey)) {
 			stopRouter(router);
 			timerMap.remove(routerKey);
@@ -73,7 +73,7 @@ public class RouterManager {
 	}
 
 	public void stopRouter(final AbstractRouter router) {
-		final String routerKey = router.getTemplateName();
+		final String routerKey = router.getRouterPropertyKey();
 		if (timerMap.containsKey(routerKey)) {
 			final Timer timer = timerMap.get(routerKey);
 			timer.cancel();
