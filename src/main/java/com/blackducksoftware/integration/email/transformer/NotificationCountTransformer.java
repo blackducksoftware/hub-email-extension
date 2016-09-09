@@ -9,10 +9,10 @@ import com.blackducksoftware.integration.email.model.ProjectDigest;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
 import com.blackducksoftware.integration.hub.api.project.ProjectVersion;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.ComponentAggregateData;
+import com.blackducksoftware.integration.hub.dataservices.notification.items.ComponentVulnerabilitySummary;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyOverrideContentItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyViolationContentItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.ProjectAggregateData;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.VulnerabilityContentItem;
 import com.blackducksoftware.integration.hub.exception.MissingUUIDException;
 
 public class NotificationCountTransformer {
@@ -29,7 +29,10 @@ public class NotificationCountTransformer {
 	public static final String KEY_VULN_ADDED_COUNT = "vulnAddedCount";
 	public static final String KEY_VULN_UPDATED_COUNT = "vulnUpdatedCount";
 	public static final String KEY_VULN_DELETED_COUNT = "vulnDeletedCount";
-
+	public static final String KEY_VULN_HIGH_COUNT = "vulnHighCount";
+	public static final String KEY_VULN_MEDIUM_COUNT = "vulnMediumCount";
+	public static final String KEY_VULN_LOW_COUNT = "vulnLowCount";
+	public static final String KEY_VULN_TOTAL_COUNT = "vulnTotalCount";
 	public static final String KEY_COMPONENT_NAME = "componentName";
 	public static final String KEY_COMPONENT_VERSION = "componentVersion";
 	public static final String KEY_POLICY_NAME = "policyName";
@@ -67,7 +70,7 @@ public class NotificationCountTransformer {
 			compMap.put(KEY_VULN_DELETED_COUNT, String.valueOf(compData.getVulnDeletedCount()));
 			policyViolations.addAll(createPolicyViolationData(compData.getPolicyViolationList()));
 			policyOverrides.addAll(createPolicyOverrideData(compData.getPolicyOverrideList()));
-			vulnerabilities.addAll(createVulnerabilityData(compData.getVulnerabilityList()));
+			vulnerabilities.addAll(createVulnerabilityData(compData.getVulnerabilitySummary()));
 		}
 		return new ProjectDigest(map, policyViolations, policyOverrides, vulnerabilities);
 	}
@@ -102,17 +105,16 @@ public class NotificationCountTransformer {
 		return templateData;
 	}
 
-	private FreemarkerTarget createVulnerabilityData(final List<VulnerabilityContentItem> notifications) {
+	private FreemarkerTarget createVulnerabilityData(final ComponentVulnerabilitySummary vulnSummary) {
 		final FreemarkerTarget templateData = new FreemarkerTarget();
-		for (final VulnerabilityContentItem item : notifications) {
-			final Map<String, String> itemMap = new HashMap<>();
-			itemMap.put(KEY_COMPONENT_NAME, item.getComponentName());
-			itemMap.put(KEY_COMPONENT_VERSION, item.getComponentVersion());
-			itemMap.put(KEY_VULN_ADDED_COUNT, String.valueOf(item.getAddedVulnList().size()));
-			itemMap.put(KEY_VULN_UPDATED_COUNT, String.valueOf(item.getUpdatedVulnList().size()));
-			itemMap.put(KEY_VULN_DELETED_COUNT, String.valueOf(item.getDeletedVulnList().size()));
-			templateData.add(itemMap);
-		}
+		final Map<String, String> itemMap = new HashMap<>();
+		itemMap.put(KEY_COMPONENT_NAME, vulnSummary.getComponentName());
+		itemMap.put(KEY_COMPONENT_VERSION, vulnSummary.getComponentVersion());
+		itemMap.put(KEY_VULN_HIGH_COUNT, String.valueOf(vulnSummary.getHighCount()));
+		itemMap.put(KEY_VULN_MEDIUM_COUNT, String.valueOf(vulnSummary.getMediumCount()));
+		itemMap.put(KEY_VULN_LOW_COUNT, String.valueOf(vulnSummary.getLowCount()));
+		itemMap.put(KEY_VULN_TOTAL_COUNT, String.valueOf(vulnSummary.getTotalCount()));
+		templateData.add(itemMap);
 		return templateData;
 	}
 
