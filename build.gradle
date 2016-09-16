@@ -12,10 +12,11 @@ description = ''
 mainClassName = 'com.blackducksoftware.integration.email.Application'
 applicationDefaultJvmArgs = ['-DAPP_HOME=APP_HOME_VAR_TOKEN', '-Dlog4j.configurationFile=APP_HOME_VAR_TOKEN/log4j.xml', '-Dcustomer.properties=APP_HOME_VAR_TOKEN/customer.properties']
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 repositories {
+    maven { url "https://maven.restlet.com" }
 	mavenCentral()
 	mavenLocal()
 }
@@ -33,7 +34,16 @@ dependencies {
 	compile 'org.jsoup:jsoup:1.9.2'
 	compile 'javax.mail:mail:1.4.7'
 	compile 'org.freemarker:freemarker:2.3.25-incubating'
-
+	
+	// hub-extension specific dependencies.
+	compile 'javax.inject:javax.inject:1'
+    compile 'com.google.code.findbugs:jsr305:3.0.1'
+	compile 'com.google.guava:guava:19.0'
+	compile 'org.springframework:spring-context:4.2.5.RELEASE'
+	compile 'org.restlet.jse:org.restlet.ext.oauth:2.3.7'
+	compile 'org.restlet.jse:org.restlet.ext.jackson:2.3.7'
+    compile 'com.fasterxml.jackson.core:jackson-annotations:2.4.0'
+	
 	testCompile 'junit:junit:4.12'
 }
 
