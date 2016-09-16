@@ -20,9 +20,10 @@ public abstract class AbstractOAuthApplication extends Application {
 		getContext().getAttributes().put(TokenManager.CONTEXT_ATTRIBUTE_KEY, tokenManager);
 		final Router router = new Router(getContext());
 
-		router.attach(ServerConstants.REGISTRATION, ClientIdRegistrationResource.class);
-		router.attach(ServerConstants.CALLBACK, TokenCallbackResource.class);
-		router.attach(ServerConstants.AUTH_GRANT, TokenAuthenticationResource.class);
+		router.attach(OAuthServerConstants.REGISTRATION, ClientIdRegistrationResource.class);
+		router.attach(OAuthServerConstants.EXTENSION_CONFIG, OAuthConfigurationResource.class);
+		router.attach(OAuthServerConstants.CALLBACK, TokenCallbackResource.class);
+		router.attach(OAuthServerConstants.AUTH_GRANT, TokenAuthenticationResource.class);
 		additionalRouterConfig(router);
 		return router;
 	}
