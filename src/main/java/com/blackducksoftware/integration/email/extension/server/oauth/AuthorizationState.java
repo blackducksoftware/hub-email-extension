@@ -1,4 +1,4 @@
-package com.blackducksoftware.integration.email.extension.oauth;
+package com.blackducksoftware.integration.email.extension.server.oauth;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;

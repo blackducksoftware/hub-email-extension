@@ -1,4 +1,4 @@
-package com.blackducksoftware.integration.email.extension.oauth.server;
+package com.blackducksoftware.integration.email.extension.server.oauth;
 
 import org.restlet.Component;
 import org.restlet.data.ChallengeScheme;

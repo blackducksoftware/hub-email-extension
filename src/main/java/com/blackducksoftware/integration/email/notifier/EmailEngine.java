@@ -3,13 +3,10 @@ package com.blackducksoftware.integration.email.notifier;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,10 +15,14 @@ import java.util.concurrent.ThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.email.extension.server.RestletApplication;
+import com.blackducksoftware.integration.email.extension.server.oauth.OAuthEndpoint;
+import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
+import com.blackducksoftware.integration.email.model.ExtensionInfoData;
 import com.blackducksoftware.integration.email.model.HubServerBeanConfiguration;
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
-import com.blackducksoftware.integration.email.notifier.routers.AbstractRouter;
+import com.blackducksoftware.integration.email.notifier.routers.DigestRouter;
 import com.blackducksoftware.integration.email.notifier.routers.RouterManager;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.api.UserRestService;
@@ -56,6 +57,8 @@ public class EmailEngine {
 	public final NotificationDataService notificationDataService;
 	public final UserRestService userRestService;
 	public final RouterManager routerManager;
+	public final TokenManager tokenManager;
+	public final OAuthEndpoint restletComponent;
 
 	public EmailEngine() throws IOException, EncryptionException, URISyntaxException, BDRestException {
 		gson = new Gson();
@@ -64,6 +67,7 @@ public class EmailEngine {
 		customerProperties = createCustomerProperties();
 		configuration = createFreemarkerConfig();
 		hubServerConfig = createHubConfig();
+		tokenManager = new TokenManager();
 		restConnection = createRestConnection();
 		javaMailWrapper = createJavaMailWrapper();
 
@@ -74,14 +78,25 @@ public class EmailEngine {
 		notificationDataService = createNotificationDataService();
 		userRestService = createUserRestService();
 		routerManager = createRouterManager();
+		restletComponent = createRestletComponent();
 	}
 
 	public void start() {
-		routerManager.startRouters();
+		try {
+			// restletComponent.start();
+			routerManager.startRouters();
+		} catch (final Exception e) {
+			logger.error("Error Starting Email Engine", e);
+		}
 	}
 
 	public void shutDown() {
-		routerManager.stopRouters();
+		try {
+			routerManager.stopRouters();
+			// restletComponent.stop();
+		} catch (final Exception e) {
+			logger.error("Error stopping Email Engine", e);
+		}
 	}
 
 	private Properties createAppProperties() throws IOException {
@@ -165,24 +180,21 @@ public class EmailEngine {
 		return restConnection;
 	}
 
-	@SuppressWarnings("unchecked")
 	private RouterManager createRouterManager() {
 		final RouterManager manager = new RouterManager();
-		final List<String> factoryClassNames = customerProperties.getRouterClassNames();
 
-		for (final String className : factoryClassNames) {
-			Class<? extends AbstractRouter> clazz;
-			try {
-				clazz = (Class<? extends AbstractRouter>) Class.forName(className);
-				final Constructor<? extends AbstractRouter> constructor = clazz.getConstructor(CustomerProperties.class,
-						NotificationDataService.class, UserRestService.class, EmailMessagingService.class);
-				manager.attachRouter(constructor.newInstance(customerProperties, notificationDataService,
-						userRestService, emailMessagingService));
-			} catch (final ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException
-					| IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-				logger.error("Error initializing router factory.", e);
-			}
-		}
+		final DigestRouter digestRouter = new DigestRouter(customerProperties, notificationDataService, userRestService,
+				emailMessagingService);
+		manager.attachRouter(digestRouter);
 		return manager;
+	}
+
+	private ExtensionInfoData createExtensionInfoData() {
+		return new ExtensionInfoData();
+	}
+
+	private OAuthEndpoint createRestletComponent() {
+		final RestletApplication application = new RestletApplication(tokenManager);
+		return new OAuthEndpoint(application);
 	}
 }

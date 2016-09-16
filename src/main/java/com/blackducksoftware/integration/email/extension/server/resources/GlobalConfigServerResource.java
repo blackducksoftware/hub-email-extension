@@ -1,11 +1,11 @@
-package com.blackducksoftware.integration.email.extension.server;
+package com.blackducksoftware.integration.email.extension.server.resources;
 
 import java.util.Collection;
 import java.util.Collections;
 
 import org.restlet.resource.ServerResource;
 
-import com.blackducksoftware.integration.email.extension.ConfigOption;
+import com.blackducksoftware.integration.email.extension.server.api.model.ConfigOption;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;

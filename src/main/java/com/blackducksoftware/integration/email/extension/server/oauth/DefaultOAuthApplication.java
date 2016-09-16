@@ -1,8 +1,6 @@
-package com.blackducksoftware.integration.email.extension.oauth.server;
+package com.blackducksoftware.integration.email.extension.server.oauth;
 
 import org.restlet.routing.Router;
-
-import com.blackducksoftware.integration.email.extension.oauth.TokenManager;
 
 public class DefaultOAuthApplication extends AbstractOAuthApplication {
 

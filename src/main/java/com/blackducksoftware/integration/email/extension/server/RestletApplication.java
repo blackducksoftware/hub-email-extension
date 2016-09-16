@@ -3,8 +3,11 @@ package com.blackducksoftware.integration.email.extension.server;
 import org.restlet.routing.Redirector;
 import org.restlet.routing.Router;
 
-import com.blackducksoftware.integration.email.extension.oauth.TokenManager;
-import com.blackducksoftware.integration.email.extension.oauth.server.AbstractOAuthApplication;
+import com.blackducksoftware.integration.email.extension.server.oauth.AbstractOAuthApplication;
+import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
+import com.blackducksoftware.integration.email.extension.server.resources.ExtensionInfoServerResource;
+import com.blackducksoftware.integration.email.extension.server.resources.GlobalConfigServerResource;
+import com.blackducksoftware.integration.email.extension.server.resources.UserConfigServerResource;
 
 public class RestletApplication extends AbstractOAuthApplication {
 

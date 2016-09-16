@@ -1,4 +1,4 @@
-package com.blackducksoftware.integration.email.extension.oauth.server;
+package com.blackducksoftware.integration.email.extension.server.oauth;
 
 public class OAuthServerConstants {
 

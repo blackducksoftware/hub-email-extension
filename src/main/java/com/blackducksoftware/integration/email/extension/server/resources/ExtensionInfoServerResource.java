@@ -1,4 +1,4 @@
-package com.blackducksoftware.integration.email.extension.server;
+package com.blackducksoftware.integration.email.extension.server.resources;
 
 import java.util.List;
 
@@ -6,12 +6,13 @@ import org.restlet.data.Reference;
 import org.restlet.data.Status;
 import org.restlet.resource.Get;
 
-import com.blackducksoftware.integration.email.extension.ExtensionDescriptor;
-import com.blackducksoftware.integration.email.extension.ResourceLink;
-import com.blackducksoftware.integration.email.extension.ResourceMetadata;
-import com.blackducksoftware.integration.email.extension.oauth.TokenManager;
-import com.blackducksoftware.integration.email.extension.oauth.server.OAuthServerConstants;
-import com.blackducksoftware.integration.email.extension.oauth.server.OAuthServerResource;
+import com.blackducksoftware.integration.email.extension.server.ExtensionServerConstants;
+import com.blackducksoftware.integration.email.extension.server.api.model.ExtensionDescriptor;
+import com.blackducksoftware.integration.email.extension.server.api.model.ResourceLink;
+import com.blackducksoftware.integration.email.extension.server.api.model.ResourceMetadata;
+import com.blackducksoftware.integration.email.extension.server.oauth.OAuthServerConstants;
+import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
+import com.blackducksoftware.integration.email.extension.server.oauth.resources.OAuthServerResource;
 import com.google.common.collect.Lists;
 
 public class ExtensionInfoServerResource extends OAuthServerResource {

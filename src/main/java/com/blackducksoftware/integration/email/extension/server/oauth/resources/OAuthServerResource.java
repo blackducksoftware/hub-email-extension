@@ -1,8 +1,8 @@
-package com.blackducksoftware.integration.email.extension.oauth.server;
+package com.blackducksoftware.integration.email.extension.server.oauth.resources;
 
 import org.restlet.resource.ServerResource;
 
-import com.blackducksoftware.integration.email.extension.oauth.TokenManager;
+import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
 
 public class OAuthServerResource extends ServerResource {
 

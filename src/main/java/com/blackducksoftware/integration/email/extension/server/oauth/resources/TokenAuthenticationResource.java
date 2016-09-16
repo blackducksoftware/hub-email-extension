@@ -1,4 +1,4 @@
-package com.blackducksoftware.integration.email.extension.oauth.server;
+package com.blackducksoftware.integration.email.extension.server.oauth.resources;
 
 import java.util.Optional;
 
@@ -6,8 +6,8 @@ import org.restlet.data.Reference;
 import org.restlet.data.Status;
 import org.restlet.resource.Get;
 
-import com.blackducksoftware.integration.email.extension.oauth.AuthorizationState;
-import com.blackducksoftware.integration.email.extension.oauth.TokenManager;
+import com.blackducksoftware.integration.email.extension.server.oauth.AuthorizationState;
+import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
 
 public class TokenAuthenticationResource extends OAuthServerResource {
 

@@ -1,4 +1,4 @@
-package com.blackducksoftware.integration.email.extension;
+package com.blackducksoftware.integration.email.extension.server.api.model;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

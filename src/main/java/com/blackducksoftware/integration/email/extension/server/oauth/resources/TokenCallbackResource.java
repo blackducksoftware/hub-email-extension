@@ -1,4 +1,4 @@
-package com.blackducksoftware.integration.email.extension.oauth.server;
+package com.blackducksoftware.integration.email.extension.server.oauth.resources;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -11,10 +11,10 @@ import org.restlet.resource.ClientResource;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 
-import com.blackducksoftware.integration.email.extension.oauth.AccessType;
-import com.blackducksoftware.integration.email.extension.oauth.AuthorizationState;
-import com.blackducksoftware.integration.email.extension.oauth.TokenClientResource;
-import com.blackducksoftware.integration.email.extension.oauth.TokenManager;
+import com.blackducksoftware.integration.email.extension.server.oauth.AccessType;
+import com.blackducksoftware.integration.email.extension.server.oauth.AuthorizationState;
+import com.blackducksoftware.integration.email.extension.server.oauth.TokenClientResource;
+import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;

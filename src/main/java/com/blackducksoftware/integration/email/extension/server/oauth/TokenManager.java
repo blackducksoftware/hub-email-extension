@@ -1,4 +1,4 @@
-package com.blackducksoftware.integration.email.extension.oauth;
+package com.blackducksoftware.integration.email.extension.server.oauth;
 
 import java.io.IOException;
 import java.net.URI;

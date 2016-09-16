@@ -24,5 +24,4 @@ public class EmailTarget {
 	public Map<String, Object> getModel() {
 		return model;
 	}
-
 }

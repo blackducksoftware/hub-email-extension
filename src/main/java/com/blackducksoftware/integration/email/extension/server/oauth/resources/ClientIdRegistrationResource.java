@@ -1,11 +1,11 @@
-package com.blackducksoftware.integration.email.extension.oauth.server;
+package com.blackducksoftware.integration.email.extension.server.oauth.resources;
 
 import org.apache.commons.lang3.StringUtils;
 import org.restlet.data.Status;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.resource.Post;
 
-import com.blackducksoftware.integration.email.extension.oauth.TokenManager;
+import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
 
 public class ClientIdRegistrationResource extends OAuthServerResource {
 
