@@ -9,6 +9,8 @@ import org.restlet.ext.oauth.AccessTokenClientResource;
 import org.restlet.ext.oauth.OAuthException;
 import org.restlet.ext.oauth.internal.Token;
 
+import com.blackducksoftware.integration.email.extension.model.ExtensionInfoData;
+
 public class TokenManager {
 
 	public final static String CONTEXT_ATTRIBUTE_KEY = "blackduck-oauth-token-manager";
@@ -17,10 +19,11 @@ public class TokenManager {
 	// Internal storage for tokens - done in-memory as a simple example
 	private Token userToken = null;
 	private Token clientToken = null;
-	private String localAddress;
+	private final ExtensionInfoData extensionInfo;
 
-	public TokenManager() {
+	public TokenManager(final ExtensionInfoData extensionInfo) {
 		configuration = new OAuthConfiguration();
+		this.extensionInfo = extensionInfo;
 	}
 
 	public OAuthConfiguration getConfiguration() {
@@ -32,11 +35,7 @@ public class TokenManager {
 	}
 
 	public String getLocalAddress() {
-		return localAddress;
-	}
-
-	public void setLocalAddress(final String localAddress) {
-		this.localAddress = localAddress;
+		return extensionInfo.getBaseUrl();
 	}
 
 	public void updateClientId(final String clientId) {

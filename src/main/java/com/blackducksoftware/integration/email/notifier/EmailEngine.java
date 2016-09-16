@@ -12,14 +12,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
+import org.restlet.data.Protocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.email.extension.model.ExtensionInfoData;
 import com.blackducksoftware.integration.email.extension.server.RestletApplication;
 import com.blackducksoftware.integration.email.extension.server.oauth.OAuthEndpoint;
 import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
-import com.blackducksoftware.integration.email.model.ExtensionInfoData;
 import com.blackducksoftware.integration.email.model.HubServerBeanConfiguration;
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.notifier.routers.DigestRouter;
@@ -59,6 +60,7 @@ public class EmailEngine {
 	public final RouterManager routerManager;
 	public final TokenManager tokenManager;
 	public final OAuthEndpoint restletComponent;
+	public final ExtensionInfoData extensionInfoData;
 
 	public EmailEngine() throws IOException, EncryptionException, URISyntaxException, BDRestException {
 		gson = new Gson();
@@ -67,10 +69,10 @@ public class EmailEngine {
 		customerProperties = createCustomerProperties();
 		configuration = createFreemarkerConfig();
 		hubServerConfig = createHubConfig();
-		tokenManager = new TokenManager();
+		extensionInfoData = createExtensionInfoData();
+		tokenManager = createTokenManager();
 		restConnection = createRestConnection();
 		javaMailWrapper = createJavaMailWrapper();
-
 		notificationDateFormat = createNotificationDateFormat();
 		applicationStartDate = createApplicationStartDate();
 		executorService = createExecutorService();
@@ -83,7 +85,7 @@ public class EmailEngine {
 
 	public void start() {
 		try {
-			// restletComponent.start();
+			restletComponent.start();
 			routerManager.startRouters();
 		} catch (final Exception e) {
 			logger.error("Error Starting Email Engine", e);
@@ -93,7 +95,7 @@ public class EmailEngine {
 	public void shutDown() {
 		try {
 			routerManager.stopRouters();
-			// restletComponent.stop();
+			restletComponent.stop();
 		} catch (final Exception e) {
 			logger.error("Error stopping Email Engine", e);
 		}
@@ -190,11 +192,27 @@ public class EmailEngine {
 	}
 
 	private ExtensionInfoData createExtensionInfoData() {
-		return new ExtensionInfoData();
+		final String id = customerProperties.getExtensionId();
+		final String name = customerProperties.getExtensionName();
+		final String description = customerProperties.getExtensionDescription();
+		final String baseUrl = customerProperties.getExtensionBaseUrl();
+		final int port = customerProperties.getExtensionPort();
+
+		return new ExtensionInfoData(id, name, description, baseUrl, port);
 	}
 
 	private OAuthEndpoint createRestletComponent() {
 		final RestletApplication application = new RestletApplication(tokenManager);
-		return new OAuthEndpoint(application);
+		final OAuthEndpoint endpoint = new OAuthEndpoint(application);
+		if (extensionInfoData.getPort() > 0) {
+			endpoint.getServers().add(Protocol.HTTP, extensionInfoData.getPort());
+		}
+
+		return endpoint;
+
+	}
+
+	private TokenManager createTokenManager() {
+		return new TokenManager(extensionInfoData);
 	}
 }

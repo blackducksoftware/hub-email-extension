@@ -13,9 +13,9 @@ public class OAuthRestConnection extends RestConnection {
 	private final TokenManager tokenManager;
 	private AccessType accessType;
 
-	public OAuthRestConnection(final String baseUrl) {
+	public OAuthRestConnection(final String baseUrl, final TokenManager tokenManager) {
 		super(baseUrl);
-		this.tokenManager = new TokenManager();
+		this.tokenManager = tokenManager;
 	}
 
 	public TokenManager getTokenManager() {
