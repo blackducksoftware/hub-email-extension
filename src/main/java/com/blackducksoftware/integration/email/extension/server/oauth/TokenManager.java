@@ -3,6 +3,8 @@ package com.blackducksoftware.integration.email.extension.server.oauth;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONException;
 import org.restlet.ext.oauth.AccessTokenClientResource;
@@ -12,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.extension.model.ExtensionInfoData;
+import com.blackducksoftware.integration.email.extension.server.oauth.listeners.IAuthorizedListener;
 
 public class TokenManager {
 
@@ -24,10 +27,12 @@ public class TokenManager {
 	private Token userToken = null;
 	private Token clientToken = null;
 	private final ExtensionInfoData extensionInfo;
+	private final List<IAuthorizedListener> authorizedListeners;
 
 	public TokenManager(final ExtensionInfoData extensionInfo) {
 		configuration = new OAuthConfiguration();
 		this.extensionInfo = extensionInfo;
+		authorizedListeners = new ArrayList<>();
 	}
 
 	public OAuthConfiguration getConfiguration() {
@@ -59,6 +64,20 @@ public class TokenManager {
 		logger.info("Received hub addresses hubUri: {}, extensionUri: {}, oAuthAuthorizeUri: {}, oAuthTokenUri: {}",
 				hubUri, extensionUri, oAuthAuthorizeUri, oAuthTokenUri);
 		configuration.setAddresses(hubUri, extensionUri, oAuthAuthorizeUri, oAuthTokenUri);
+	}
+
+	public boolean addAuthorizedListener(final IAuthorizedListener listener) {
+		return authorizedListeners.add(listener);
+	}
+
+	public boolean removeAuthorizedListener(final IAuthorizedListener listener) {
+		return authorizedListeners.remove(listener);
+	}
+
+	public void notifyAuthorizedListeners() {
+		for (final IAuthorizedListener listener : authorizedListeners) {
+			listener.onAuthorized();
+		}
 	}
 
 	public void exchangeForToken(final String authorizationCode) throws IOException {

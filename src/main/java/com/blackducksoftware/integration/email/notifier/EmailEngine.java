@@ -21,6 +21,7 @@ import com.blackducksoftware.integration.email.extension.server.RestletApplicati
 import com.blackducksoftware.integration.email.extension.server.oauth.OAuthEndpoint;
 import com.blackducksoftware.integration.email.extension.server.oauth.OAuthRestConnection;
 import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
+import com.blackducksoftware.integration.email.extension.server.oauth.listeners.IAuthorizedListener;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.FileMailWrapper;
 import com.blackducksoftware.integration.email.model.HubServerBeanConfiguration;
@@ -41,7 +42,7 @@ import com.google.gson.JsonParser;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateExceptionHandler;
 
-public class EmailEngine {
+public class EmailEngine implements IAuthorizedListener {
 	private final Logger logger = LoggerFactory.getLogger(EmailEngine.class);
 
 	public final Gson gson;
@@ -88,7 +89,6 @@ public class EmailEngine {
 	public void start() {
 		try {
 			restletComponent.start();
-			routerManager.startRouters();
 		} catch (final Exception e) {
 			logger.error("Error Starting Email Engine", e);
 		}
@@ -216,6 +216,13 @@ public class EmailEngine {
 	}
 
 	private TokenManager createTokenManager() {
-		return new TokenManager(extensionInfoData);
+		final TokenManager tokenManager = new TokenManager(extensionInfoData);
+		tokenManager.addAuthorizedListener(this);
+		return tokenManager;
+	}
+
+	@Override
+	public void onAuthorized() {
+		routerManager.startRouters();
 	}
 }

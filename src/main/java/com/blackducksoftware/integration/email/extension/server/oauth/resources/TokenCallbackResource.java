@@ -60,6 +60,7 @@ public class TokenCallbackResource extends OAuthServerResource {
 						throw e;
 					}
 				}
+				tokenManager.notifyAuthorizedListeners();
 				getResponse().redirectSeeOther(redirectTo);
 			} catch (final IOException | URISyntaxException e) {
 				getResponse().setStatus(Status.SERVER_ERROR_INTERNAL, e);

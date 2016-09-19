@@ -16,8 +16,9 @@ public class FileMailWrapper extends JavaMailWrapper {
 	public void sendMessage(final CustomerProperties customerProperties, final Session session, final Message message)
 			throws MessagingException {
 		final File parent = new File(customerProperties.getEmailTemplateDirectory());
-		final File file = new File(parent.getParentFile(), createFileName());
-
+		final File messagesDir = new File(parent.getParentFile(), "Test_Messages");
+		messagesDir.mkdirs();
+		final File file = new File(messagesDir, createFileName());
 		try (FileOutputStream fileOutput = new FileOutputStream(file)) {
 			file.createNewFile();
 			message.writeTo(fileOutput);
@@ -27,6 +28,6 @@ public class FileMailWrapper extends JavaMailWrapper {
 	}
 
 	private String createFileName() {
-		return "Test_Message_" + index++;
+		return "Test_Message_" + ++index;
 	}
 }
