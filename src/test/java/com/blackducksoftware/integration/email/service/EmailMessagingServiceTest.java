@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.blackducksoftware.integration.email.mock.MockMailWrapper;
+import com.blackducksoftware.integration.email.mock.MockNotificationDataService;
 import com.blackducksoftware.integration.email.model.EmailTarget;
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.model.ProjectDigest;
@@ -27,8 +28,10 @@ import com.blackducksoftware.integration.email.transformer.NotificationCountTran
 import com.blackducksoftware.integration.hub.api.notification.VulnerabilitySourceQualifiedId;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
 import com.blackducksoftware.integration.hub.api.project.ProjectVersion;
+import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.ComponentAggregateData;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.ComponentVulnerabilitySummary;
+import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyNotificationFilter;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyOverrideContentItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyViolationContentItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.ProjectAggregateData;
@@ -42,6 +45,7 @@ public class EmailMessagingServiceTest {
 	private DigestRouter digestRouter;
 	private JavaMailWrapper mockMailWrapper;
 	private EmailMessagingService emailMessagingService;
+	private NotificationDataService dataService;
 
 	@Before
 	public void init() throws Exception {
@@ -59,8 +63,10 @@ public class EmailMessagingServiceTest {
 		mockMailWrapper = new MockMailWrapper(false);
 		this.emailMessagingService = new EmailMessagingService(engine.customerProperties, engine.configuration,
 				mockMailWrapper);
-		digestRouter = new DigestRouter(engine.customerProperties, engine.notificationDataService,
-				engine.userRestService, emailMessagingService);
+		dataService = new MockNotificationDataService(engine.restConnection, engine.gson, engine.jsonParser,
+				new PolicyNotificationFilter(null));
+		digestRouter = new DigestRouter(engine.customerProperties, dataService, engine.userRestService,
+				emailMessagingService);
 		engine.routerManager.attachRouter(digestRouter);
 	}
 
