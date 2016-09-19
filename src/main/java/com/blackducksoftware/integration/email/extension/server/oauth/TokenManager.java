@@ -8,10 +8,14 @@ import org.json.JSONException;
 import org.restlet.ext.oauth.AccessTokenClientResource;
 import org.restlet.ext.oauth.OAuthException;
 import org.restlet.ext.oauth.internal.Token;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.extension.model.ExtensionInfoData;
 
 public class TokenManager {
+
+	private final Logger logger = LoggerFactory.getLogger(TokenManager.class);
 
 	public final static String CONTEXT_ATTRIBUTE_KEY = "blackduck-oauth-token-manager";
 
@@ -38,8 +42,23 @@ public class TokenManager {
 		return extensionInfo.getBaseUrl();
 	}
 
+	public int getPort() {
+		return extensionInfo.getPort();
+	}
+
+	public void updateCallbackUrl(final String callbackUrl) {
+		configuration.setCallbackUrl(callbackUrl);
+	}
+
 	public void updateClientId(final String clientId) {
 		configuration.setClientId(clientId);
+	}
+
+	public void setAddresses(final String hubUri, final String extensionUri, final String oAuthAuthorizeUri,
+			final String oAuthTokenUri) {
+		logger.info("Received hub addresses hubUri: {}, extensionUri: {}, oAuthAuthorizeUri: {}, oAuthTokenUri: {}",
+				hubUri, extensionUri, oAuthAuthorizeUri, oAuthTokenUri);
+		configuration.setAddresses(hubUri, extensionUri, oAuthAuthorizeUri, oAuthTokenUri);
 	}
 
 	public void exchangeForToken(final String authorizationCode) throws IOException {

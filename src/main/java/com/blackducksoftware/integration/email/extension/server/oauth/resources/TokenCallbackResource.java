@@ -10,6 +10,8 @@ import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.extension.server.oauth.AccessType;
 import com.blackducksoftware.integration.email.extension.server.oauth.AuthorizationState;
@@ -20,6 +22,8 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 
 public class TokenCallbackResource extends OAuthServerResource {
+
+	private final Logger logger = LoggerFactory.getLogger(TokenCallbackResource.class);
 
 	@Get
 	public void accept() {
@@ -69,6 +73,7 @@ public class TokenCallbackResource extends OAuthServerResource {
 		final Representation rep = resource.get();
 		final JsonParser parser = new JsonParser();
 		try {
+			logger.info("Updating hub of authentication status");
 			final JsonElement json = parser.parse(rep.getText());
 			json.getAsJsonObject().add("authenticated", new JsonPrimitive(true));
 

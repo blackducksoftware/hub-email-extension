@@ -5,11 +5,15 @@ import java.util.Optional;
 import org.restlet.data.Reference;
 import org.restlet.data.Status;
 import org.restlet.resource.Get;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.extension.server.oauth.AuthorizationState;
 import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
 
 public class TokenAuthenticationResource extends OAuthServerResource {
+
+	private final Logger logger = LoggerFactory.getLogger(TokenAuthenticationResource.class);
 
 	@Get
 	public void authenticate() {
@@ -24,6 +28,7 @@ public class TokenAuthenticationResource extends OAuthServerResource {
 		}
 		final TokenManager tokenManager = getTokenManager();
 		if (tokenManager != null) {
+			logger.info("Authenticate method called to obtain authorization url");
 			final Reference authUrl = tokenManager.getConfiguration().getOAuthAuthorizationUrl(Optional.of(state));
 			getResponse().redirectSeeOther(authUrl);
 		} else {

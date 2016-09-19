@@ -15,8 +15,8 @@ public class OAuthConfigurationResource extends OAuthServerResource {
 		final TokenManager tokenManager = getTokenManager();
 
 		if (tokenManager != null) {
-			tokenManager.getConfiguration().setAddresses(item.getHubBaseUrl(), item.getExtensionUrl(),
-					item.getoAuthAuthorizeUrl(), item.getoAuthTokenUrl());
+			tokenManager.setAddresses(item.getHubBaseUrl(), item.getExtensionUrl(), item.getoAuthAuthorizeUrl(),
+					item.getoAuthTokenUrl());
 		} else {
 			getResponse().setStatus(Status.SERVER_ERROR_INTERNAL);
 		}

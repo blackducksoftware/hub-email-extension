@@ -28,7 +28,8 @@ public class ExtensionInfoServerResource extends OAuthServerResource {
 			final String clientConfigAddress = buildAddress(tokenManager, OAuthServerConstants.REGISTRATION);
 			final String authAddress = buildAddress(tokenManager, OAuthServerConstants.AUTH_GRANT);
 			final String callbackAddress = buildAddress(tokenManager, OAuthServerConstants.CALLBACK);
-
+			// update tokenManager with the callback address
+			tokenManager.updateCallbackUrl(callbackAddress);
 			// extension configuration paths.
 			final String infoAddress = buildAddress(tokenManager, ExtensionServerConstants.EXTENSION_INFO);
 			final String globalOptionsAddress = buildAddress(tokenManager,
@@ -57,6 +58,7 @@ public class ExtensionInfoServerResource extends OAuthServerResource {
 	private String buildAddress(final TokenManager tokenManager, final String path) {
 		final Reference ref = new Reference(tokenManager.getLocalAddress());
 		ref.setPath(path);
+		ref.setHostPort(tokenManager.getPort());
 		return ref.toString();
 	}
 }

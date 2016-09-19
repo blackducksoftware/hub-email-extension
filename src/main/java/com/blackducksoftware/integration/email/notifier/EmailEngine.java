@@ -19,8 +19,10 @@ import org.slf4j.LoggerFactory;
 import com.blackducksoftware.integration.email.extension.model.ExtensionInfoData;
 import com.blackducksoftware.integration.email.extension.server.RestletApplication;
 import com.blackducksoftware.integration.email.extension.server.oauth.OAuthEndpoint;
+import com.blackducksoftware.integration.email.extension.server.oauth.OAuthRestConnection;
 import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
+import com.blackducksoftware.integration.email.model.FileMailWrapper;
 import com.blackducksoftware.integration.email.model.HubServerBeanConfiguration;
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.notifier.routers.DigestRouter;
@@ -142,7 +144,7 @@ public class EmailEngine {
 	}
 
 	private JavaMailWrapper createJavaMailWrapper() {
-		return new JavaMailWrapper();
+		return new FileMailWrapper();
 	}
 
 	private EmailMessagingService createEmailMessagingService() {
@@ -172,10 +174,11 @@ public class EmailEngine {
 	}
 
 	private RestConnection initRestConnection() throws EncryptionException, URISyntaxException, BDRestException {
-		final RestConnection restConnection = new RestConnection(hubServerConfig.getHubUrl().toString());
+		final RestConnection restConnection = new OAuthRestConnection(hubServerConfig.getHubUrl().toString(),
+				tokenManager);
 
-		restConnection.setCookies(hubServerConfig.getGlobalCredentials().getUsername(),
-				hubServerConfig.getGlobalCredentials().getDecryptedPassword());
+		// restConnection.setCookies(hubServerConfig.getGlobalCredentials().getUsername(),
+		// hubServerConfig.getGlobalCredentials().getDecryptedPassword());
 		restConnection.setProxyProperties(hubServerConfig.getProxyInfo());
 
 		restConnection.setTimeout(hubServerConfig.getTimeout());

@@ -11,7 +11,6 @@ import com.blackducksoftware.integration.hub.rest.RestConnection;
 public class OAuthRestConnection extends RestConnection {
 
 	private final TokenManager tokenManager;
-	private AccessType accessType;
 
 	public OAuthRestConnection(final String baseUrl, final TokenManager tokenManager) {
 		super(baseUrl);
@@ -22,17 +21,13 @@ public class OAuthRestConnection extends RestConnection {
 		return tokenManager;
 	}
 
-	public void applyAccessType(final AccessType accessType) {
-		this.accessType = accessType;
-	}
-
 	@Override
-	public ClientResource createClientResource(final String providedUrl, final Context context)
+	public ClientResource createClientResource(final Context context, final String providedUrl)
 			throws URISyntaxException {
 		try {
-			return tokenManager.createClientResource(providedUrl, accessType);
+			return tokenManager.createClientResource(providedUrl, AccessType.USER);
 		} catch (final IOException e) {
-			return super.createClientResource(providedUrl, context);
+			return super.createClientResource(context, providedUrl);
 		}
 	}
 }

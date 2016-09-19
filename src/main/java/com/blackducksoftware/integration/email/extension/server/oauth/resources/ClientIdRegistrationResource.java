@@ -13,7 +13,7 @@ public class ClientIdRegistrationResource extends OAuthServerResource {
 	public void accept(final JsonRepresentation entity) {
 		final String clientId = entity.getJsonObject().getString("clientId");
 
-		if (!StringUtils.isNotBlank(clientId)) {
+		if (StringUtils.isNotBlank(clientId)) {
 			final TokenManager tokenManager = getTokenManager();
 			if (tokenManager != null) {
 				getTokenManager().updateClientId(clientId);
