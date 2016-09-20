@@ -18,6 +18,8 @@ import org.junit.Test;
 
 import com.blackducksoftware.integration.email.mock.MockMailWrapper;
 import com.blackducksoftware.integration.email.mock.MockNotificationDataService;
+import com.blackducksoftware.integration.email.mock.TestDigestRouter;
+import com.blackducksoftware.integration.email.mock.TestEmailEngine;
 import com.blackducksoftware.integration.email.model.EmailTarget;
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.model.ProjectDigest;
@@ -53,7 +55,7 @@ public class EmailMessagingServiceTest {
 		final URL propFileUrl = classLoader.getResource("test.properties");
 		final File file = new File(propFileUrl.toURI());
 		System.setProperty("customer.properties", file.getCanonicalPath());
-		engine = new EmailEngine();
+		engine = new TestEmailEngine();
 		// this code disables the default EmailMessagingService that is created
 		// by the EmailEngine. Instead it creates a
 		// router that uses a different email messaging service in order prevent
@@ -65,7 +67,7 @@ public class EmailMessagingServiceTest {
 				mockMailWrapper);
 		dataService = new MockNotificationDataService(engine.restConnection, engine.gson, engine.jsonParser,
 				new PolicyNotificationFilter(null));
-		digestRouter = new DigestRouter(engine.customerProperties, dataService, engine.userRestService,
+		digestRouter = new TestDigestRouter(engine.customerProperties, dataService, engine.userRestService,
 				emailMessagingService);
 		engine.routerManager.attachRouter(digestRouter);
 	}

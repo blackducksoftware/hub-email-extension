@@ -23,11 +23,12 @@ import com.blackducksoftware.integration.email.extension.server.oauth.OAuthRestC
 import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
 import com.blackducksoftware.integration.email.extension.server.oauth.listeners.IAuthorizedListener;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
-import com.blackducksoftware.integration.email.model.FileMailWrapper;
 import com.blackducksoftware.integration.email.model.HubServerBeanConfiguration;
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
-import com.blackducksoftware.integration.email.notifier.routers.DigestRouter;
+import com.blackducksoftware.integration.email.notifier.routers.DailyDigestRouter;
+import com.blackducksoftware.integration.email.notifier.routers.MonthlyDigestRouter;
 import com.blackducksoftware.integration.email.notifier.routers.RouterManager;
+import com.blackducksoftware.integration.email.notifier.routers.WeeklyDigestRouter;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.api.UserRestService;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
@@ -103,7 +104,7 @@ public class EmailEngine implements IAuthorizedListener {
 		}
 	}
 
-	private Properties createAppProperties() throws IOException {
+	public Properties createAppProperties() throws IOException {
 		final Properties appProperties = new Properties();
 		final String customerPropertiesPath = System.getProperty("customer.properties");
 		final File customerPropertiesFile = new File(customerPropertiesPath);
@@ -114,7 +115,7 @@ public class EmailEngine implements IAuthorizedListener {
 		return appProperties;
 	}
 
-	private Configuration createFreemarkerConfig() throws IOException {
+	public Configuration createFreemarkerConfig() throws IOException {
 		final Configuration cfg = new Configuration(Configuration.VERSION_2_3_25);
 		cfg.setDirectoryForTemplateLoading(new File(customerProperties.getEmailTemplateDirectory()));
 		cfg.setDefaultEncoding("UTF-8");
@@ -124,77 +125,79 @@ public class EmailEngine implements IAuthorizedListener {
 		return cfg;
 	}
 
-	private DateFormat createNotificationDateFormat() {
+	public DateFormat createNotificationDateFormat() {
 		final DateFormat dateFormat = new SimpleDateFormat(RestConnection.JSON_DATE_FORMAT);
 		dateFormat.setTimeZone(java.util.TimeZone.getTimeZone("Zulu"));
 		return dateFormat;
 	}
 
-	private Date createApplicationStartDate() {
+	public Date createApplicationStartDate() {
 		return new Date();
 	}
 
-	private ExecutorService createExecutorService() {
+	public ExecutorService createExecutorService() {
 		final ThreadFactory threadFactory = Executors.defaultThreadFactory();
 		return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), threadFactory);
 	}
 
-	private CustomerProperties createCustomerProperties() {
+	public CustomerProperties createCustomerProperties() {
 		return new CustomerProperties(appProperties);
 	}
 
-	private JavaMailWrapper createJavaMailWrapper() {
-		return new FileMailWrapper();
+	public JavaMailWrapper createJavaMailWrapper() {
+		return new JavaMailWrapper();
 	}
 
-	private EmailMessagingService createEmailMessagingService() {
+	public EmailMessagingService createEmailMessagingService() {
 		return new EmailMessagingService(customerProperties, configuration, javaMailWrapper);
 	}
 
-	private HubServerConfig createHubConfig() {
+	public HubServerConfig createHubConfig() {
 		final HubServerBeanConfiguration serverBeanConfig = new HubServerBeanConfiguration(customerProperties);
 
 		return serverBeanConfig.build();
 	}
 
-	private RestConnection createRestConnection() throws EncryptionException, URISyntaxException, BDRestException {
+	public RestConnection createRestConnection() throws EncryptionException, URISyntaxException, BDRestException {
 		final RestConnection restConnection = initRestConnection();
 		return restConnection;
 	}
 
-	private UserRestService createUserRestService() {
+	public UserRestService createUserRestService() {
 		final UserRestService userRestService = new UserRestService(restConnection, gson, jsonParser);
 		return userRestService;
 	}
 
-	private NotificationDataService createNotificationDataService() {
+	public NotificationDataService createNotificationDataService() {
 		final NotificationDataService notificationDataService = new NotificationDataService(restConnection, gson,
 				jsonParser, new PolicyNotificationFilter(null));
 		return notificationDataService;
 	}
 
-	private RestConnection initRestConnection() throws EncryptionException, URISyntaxException, BDRestException {
+	public RestConnection initRestConnection() throws EncryptionException, URISyntaxException, BDRestException {
 		final RestConnection restConnection = new OAuthRestConnection(hubServerConfig.getHubUrl().toString(),
 				tokenManager);
-
-		// restConnection.setCookies(hubServerConfig.getGlobalCredentials().getUsername(),
-		// hubServerConfig.getGlobalCredentials().getDecryptedPassword());
 		restConnection.setProxyProperties(hubServerConfig.getProxyInfo());
-
 		restConnection.setTimeout(hubServerConfig.getTimeout());
 		return restConnection;
 	}
 
-	private RouterManager createRouterManager() {
+	public RouterManager createRouterManager() {
 		final RouterManager manager = new RouterManager();
 
-		final DigestRouter digestRouter = new DigestRouter(customerProperties, notificationDataService, userRestService,
-				emailMessagingService);
-		manager.attachRouter(digestRouter);
+		final DailyDigestRouter dailyRouter = new DailyDigestRouter(customerProperties, notificationDataService,
+				userRestService, emailMessagingService);
+		final WeeklyDigestRouter weeklyRouter = new WeeklyDigestRouter(customerProperties, notificationDataService,
+				userRestService, emailMessagingService);
+		final MonthlyDigestRouter monthlyRouter = new MonthlyDigestRouter(customerProperties, notificationDataService,
+				userRestService, emailMessagingService);
+		manager.attachRouter(dailyRouter);
+		manager.attachRouter(weeklyRouter);
+		manager.attachRouter(monthlyRouter);
 		return manager;
 	}
 
-	private ExtensionInfoData createExtensionInfoData() {
+	public ExtensionInfoData createExtensionInfoData() {
 		final String id = customerProperties.getExtensionId();
 		final String name = customerProperties.getExtensionName();
 		final String description = customerProperties.getExtensionDescription();
@@ -204,7 +207,7 @@ public class EmailEngine implements IAuthorizedListener {
 		return new ExtensionInfoData(id, name, description, baseUrl, port);
 	}
 
-	private OAuthEndpoint createRestletComponent() {
+	public OAuthEndpoint createRestletComponent() {
 		final RestletApplication application = new RestletApplication(tokenManager);
 		final OAuthEndpoint endpoint = new OAuthEndpoint(application);
 		if (extensionInfoData.getPort() > 0) {
@@ -212,10 +215,9 @@ public class EmailEngine implements IAuthorizedListener {
 		}
 
 		return endpoint;
-
 	}
 
-	private TokenManager createTokenManager() {
+	public TokenManager createTokenManager() {
 		final TokenManager tokenManager = new TokenManager(extensionInfoData);
 		tokenManager.addAuthorizedListener(this);
 		return tokenManager;

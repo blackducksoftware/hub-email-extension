@@ -41,6 +41,12 @@ public class RouterManager {
 		}
 	}
 
+	public void unattachAllRouters() {
+		routerMap.entrySet().forEach(e -> {
+			unattachRouter(e.getValue());
+		});
+	}
+
 	public void startRouters() {
 		final Set<String> routerKeyList = routerMap.keySet();
 		for (final String routerKey : routerKeyList) {
@@ -78,5 +84,13 @@ public class RouterManager {
 			final Timer timer = timerMap.get(routerKey);
 			timer.cancel();
 		}
+	}
+
+	public List<AbstractRouter> getRouters() {
+		final List<AbstractRouter> list = new ArrayList<>();
+		routerMap.entrySet().forEach(e -> {
+			e.getValue();
+		});
+		return list;
 	}
 }

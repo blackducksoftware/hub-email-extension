@@ -1,17 +1,16 @@
 package com.blackducksoftware.integration.email.notifier.routers;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.model.CustomerProperties;
+import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.model.EmailTarget;
 import com.blackducksoftware.integration.email.model.ProjectDigest;
 import com.blackducksoftware.integration.email.model.ProjectsDigest;
@@ -22,9 +21,8 @@ import com.blackducksoftware.integration.hub.api.UserRestService;
 import com.blackducksoftware.integration.hub.api.user.UserItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.ProjectAggregateData;
-import com.blackducksoftware.integration.hub.rest.RestConnection;
 
-public class DigestRouter extends AbstractRouter {
+public abstract class DigestRouter extends AbstractRouter {
 	private static final String KEY_PROJECT_DIGEST = "projectsDigest";
 	public static final String KEY_START_DATE = "startDate";
 	public static final String KEY_END_DATE = "endDate";
@@ -35,8 +33,6 @@ public class DigestRouter extends AbstractRouter {
 
 	private final Logger logger = LoggerFactory.getLogger(DigestRouter.class);
 	private final long interval;
-	private final String lastRunPath;
-	private final String initialStartDate;
 
 	public DigestRouter(final CustomerProperties customerProperties,
 			final NotificationDataService notificationDataService, final UserRestService userRestService,
@@ -44,28 +40,16 @@ public class DigestRouter extends AbstractRouter {
 		super(customerProperties, notificationDataService, userRestService, emailMessagingService);
 		interval = Long.valueOf(getCustomerProperties().getRouterVariableProperties()
 				.get(getRouterPropertyKey() + ".interval.in.milliseconds"));
-		lastRunPath = getCustomerProperties().getRouterVariableProperties()
-				.get(getRouterPropertyKey() + ".lastrun.file");
-		initialStartDate = getCustomerProperties().getRouterVariableProperties()
-				.get(getRouterPropertyKey() + ".start.date");
 	}
+
+	public abstract DateRange createDateRange();
 
 	@Override
 	public void run() {
 		try {
-			Date startDate = null;
-			final File lastRunFile = new File(lastRunPath);
-			if (lastRunFile.exists()) {
-				final String lastRunValue = FileUtils.readFileToString(lastRunFile, "UTF-8");
-				startDate = RestConnection.parseDateString(lastRunValue);
-				startDate = new Date(startDate.getTime() + 1);
-			} else {
-				final String lastRunValue = initialStartDate;
-				startDate = RestConnection.parseDateString(lastRunValue);
-			}
-
-			final Date endDate = new Date();
-			FileUtils.write(lastRunFile, RestConnection.formatDate(endDate), "UTF-8");
+			final DateRange dateRange = createDateRange();
+			final Date startDate = dateRange.getStart();
+			final Date endDate = dateRange.getEnd();
 			final List<ProjectAggregateData> notifications = getNotificationDataService()
 					.getNotificationCounts(startDate, endDate);
 			if (!notifications.isEmpty()) {
@@ -122,11 +106,6 @@ public class DigestRouter extends AbstractRouter {
 	@Override
 	public String getTemplateName() {
 		return "digest.ftl";
-	}
-
-	@Override
-	public String getRouterPropertyKey() {
-		return "digest";
 	}
 
 	@Override
