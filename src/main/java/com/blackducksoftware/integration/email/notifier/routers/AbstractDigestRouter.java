@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +23,7 @@ import com.blackducksoftware.integration.hub.api.user.UserItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.ProjectAggregateData;
 
-public abstract class DigestRouter extends AbstractRouter {
+public abstract class AbstractDigestRouter extends AbstractRouter {
 	private static final String KEY_PROJECT_DIGEST = "projectsDigest";
 	public static final String KEY_START_DATE = "startDate";
 	public static final String KEY_END_DATE = "endDate";
@@ -31,15 +32,25 @@ public abstract class DigestRouter extends AbstractRouter {
 	public static final String KEY_TOTAL_POLICY_OVERRIDES = "totalPolicyOverrides";
 	public static final String KEY_TOTAL_VULNERABILITIES = "totalVulnerabilities";
 
-	private final Logger logger = LoggerFactory.getLogger(DigestRouter.class);
-	private final long interval;
+	private final Logger logger = LoggerFactory.getLogger(AbstractDigestRouter.class);
+	private long interval;
 
-	public DigestRouter(final CustomerProperties customerProperties,
+	public AbstractDigestRouter(final CustomerProperties customerProperties,
 			final NotificationDataService notificationDataService, final UserRestService userRestService,
 			final EmailMessagingService emailMessagingService) {
 		super(customerProperties, notificationDataService, userRestService, emailMessagingService);
-		interval = Long.valueOf(getCustomerProperties().getRouterVariableProperties()
-				.get(getRouterPropertyKey() + ".interval.in.milliseconds"));
+		final String intervalPropValue = getCustomerProperties().getRouterVariableProperties()
+				.get(getRouterPropertyKey() + ".interval.in.milliseconds");
+		final String intervalString = StringUtils.trimToNull(intervalPropValue);
+		if (intervalString != null) {
+			try {
+				interval = Long.valueOf(intervalString);
+			} catch (final NumberFormatException e) {
+				interval = 0;
+			}
+		} else {
+			interval = 0;
+		}
 	}
 
 	public abstract DateRange createDateRange();

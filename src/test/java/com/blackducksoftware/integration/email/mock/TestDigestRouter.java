@@ -9,13 +9,13 @@ import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.DateRange;
-import com.blackducksoftware.integration.email.notifier.routers.DigestRouter;
+import com.blackducksoftware.integration.email.notifier.routers.AbstractDigestRouter;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.api.UserRestService;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 
-public class TestDigestRouter extends DigestRouter {
+public class TestDigestRouter extends AbstractDigestRouter {
 	private final Logger logger = LoggerFactory.getLogger(TestDigestRouter.class);
 	private final String lastRunPath;
 	private final String initialStartDate;

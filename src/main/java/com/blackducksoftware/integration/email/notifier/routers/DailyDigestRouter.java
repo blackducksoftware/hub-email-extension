@@ -8,7 +8,7 @@ import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.api.UserRestService;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 
-public class DailyDigestRouter extends DigestRouter {
+public class DailyDigestRouter extends AbstractDigestRouter {
 
 	public DailyDigestRouter(final CustomerProperties customerProperties,
 			final NotificationDataService notificationDataService, final UserRestService userRestService,

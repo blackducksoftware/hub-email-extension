@@ -25,7 +25,7 @@ import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.model.ProjectDigest;
 import com.blackducksoftware.integration.email.model.ProjectsDigest;
 import com.blackducksoftware.integration.email.notifier.EmailEngine;
-import com.blackducksoftware.integration.email.notifier.routers.DigestRouter;
+import com.blackducksoftware.integration.email.notifier.routers.AbstractDigestRouter;
 import com.blackducksoftware.integration.email.transformer.NotificationCountTransformer;
 import com.blackducksoftware.integration.hub.api.notification.VulnerabilitySourceQualifiedId;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
@@ -44,7 +44,7 @@ import freemarker.template.TemplateException;
 public class EmailMessagingServiceTest {
 
 	private EmailEngine engine;
-	private DigestRouter digestRouter;
+	private AbstractDigestRouter digestRouter;
 	private JavaMailWrapper mockMailWrapper;
 	private EmailMessagingService emailMessagingService;
 	private NotificationDataService dataService;
@@ -135,10 +135,10 @@ public class EmailMessagingServiceTest {
 		projectData.add(digest);
 
 		final Map<String, String> totalsMap = new HashMap<>();
-		totalsMap.put(DigestRouter.KEY_TOTAL_NOTIFICATIONS, String.valueOf(countData.getTotal()));
-		totalsMap.put(DigestRouter.KEY_TOTAL_POLICY_VIOLATIONS, String.valueOf(countData.getPolicyViolationCount()));
-		totalsMap.put(DigestRouter.KEY_TOTAL_POLICY_OVERRIDES, String.valueOf(countData.getPolicyOverrideCount()));
-		totalsMap.put(DigestRouter.KEY_TOTAL_VULNERABILITIES, String.valueOf(countData.getVulnerabilityCount()));
+		totalsMap.put(AbstractDigestRouter.KEY_TOTAL_NOTIFICATIONS, String.valueOf(countData.getTotal()));
+		totalsMap.put(AbstractDigestRouter.KEY_TOTAL_POLICY_VIOLATIONS, String.valueOf(countData.getPolicyViolationCount()));
+		totalsMap.put(AbstractDigestRouter.KEY_TOTAL_POLICY_OVERRIDES, String.valueOf(countData.getPolicyOverrideCount()));
+		totalsMap.put(AbstractDigestRouter.KEY_TOTAL_VULNERABILITIES, String.valueOf(countData.getVulnerabilityCount()));
 		final ProjectsDigest projectsDigest = new ProjectsDigest(totalsMap, projectData);
 
 		final Map<String, Object> model = new HashMap<>();

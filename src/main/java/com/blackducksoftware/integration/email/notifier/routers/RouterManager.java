@@ -51,7 +51,6 @@ public class RouterManager {
 		final Set<String> routerKeyList = routerMap.keySet();
 		for (final String routerKey : routerKeyList) {
 			final AbstractRouter router = routerMap.get(routerKey);
-			stopRouter(router);
 			startRouter(router);
 		}
 	}
@@ -62,9 +61,12 @@ public class RouterManager {
 			stopRouter(router);
 			timerMap.remove(routerKey);
 		}
-		final Timer timer = new Timer("RouterTimer-" + routerKey);
-		timerMap.put(routerKey, timer);
-		timer.scheduleAtFixedRate(router, router.getStartDelayMilliseconds(), router.getIntervalMilliseconds());
+		// if no interval is defined then don't start the router
+		if (router.getIntervalMilliseconds() > 0) {
+			final Timer timer = new Timer("RouterTimer-" + routerKey);
+			timerMap.put(routerKey, timer);
+			timer.scheduleAtFixedRate(router, router.getStartDelayMilliseconds(), router.getIntervalMilliseconds());
+		}
 	}
 
 	public void stopRouters() {
