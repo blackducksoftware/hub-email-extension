@@ -13,6 +13,9 @@ public class Application {
 	public static void main(final String[] args) {
 		Thread shutDownThread = null;
 		try {
+			// Set slf4j logger facade
+			System.setProperty("org.restlet.engine.loggerFacadeClass", "org.restlet.ext.slf4j.Slf4jLoggerFacade");
+
 			final Application app = new Application();
 			shutDownThread = new Thread() {
 				@Override
