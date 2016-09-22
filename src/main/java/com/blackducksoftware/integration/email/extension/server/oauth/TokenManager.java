@@ -6,15 +6,24 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
+import org.restlet.data.Status;
+import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.ext.oauth.AccessTokenClientResource;
 import org.restlet.ext.oauth.OAuthException;
 import org.restlet.ext.oauth.internal.Token;
+import org.restlet.representation.Representation;
+import org.restlet.resource.ClientResource;
+import org.restlet.resource.ResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.extension.model.ExtensionInfoData;
 import com.blackducksoftware.integration.email.extension.server.oauth.listeners.IAuthorizedListener;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 
 public class TokenManager {
 
@@ -28,9 +37,11 @@ public class TokenManager {
 	private Token clientToken = null;
 	private final ExtensionInfoData extensionInfo;
 	private final List<IAuthorizedListener> authorizedListeners;
+	private final ConfigManager configManager;
 
 	public TokenManager(final ExtensionInfoData extensionInfo) {
-		configuration = new OAuthConfiguration();
+		configManager = new ConfigManager();
+		configuration = configManager.load();
 		this.extensionInfo = extensionInfo;
 		authorizedListeners = new ArrayList<>();
 	}
@@ -84,7 +95,8 @@ public class TokenManager {
 		final AccessTokenClientResource tokenResource = configuration.getTokenResource();
 		try {
 			userToken = tokenResource.requestToken(configuration.getAccessTokenParameters(authorizationCode));
-		} catch (JSONException | OAuthException e) {
+			completeAuthorization();
+		} catch (JSONException | OAuthException | URISyntaxException e) {
 			throw new IOException(e);
 		}
 	}
@@ -101,6 +113,28 @@ public class TokenManager {
 			throws IOException, URISyntaxException {
 		final Token token = getToken(accessType);
 		return new TokenClientResource(new URI(reference), token);
+	}
+
+	public void completeAuthorization() throws IOException, URISyntaxException {
+		// Update authorization status
+		// this is hub specific as far as I can tell to send status for
+		// the authorization.
+		final String ackUrl = getConfiguration().getExtensionUri();
+		final TokenClientResource resource = createClientResource(ackUrl, AccessType.CLIENT);
+		try {
+			updateAuthorized(resource);
+		} catch (final ResourceException e) {
+			if (Status.CLIENT_ERROR_UNAUTHORIZED.equals(e.getStatus())) {
+				// Try one more time, after refreshing tokens
+				refreshToken(AccessType.CLIENT);
+				updateAuthorized(resource);
+			} else {
+				throw e;
+			}
+		}
+		configuration.setUserRefreshToken(userToken.getRefreshToken());
+		configManager.persist(configuration);
+		notifyAuthorizedListeners();
 	}
 
 	private Token getToken(final AccessType accessType) throws IOException {
@@ -123,12 +157,13 @@ public class TokenManager {
 	}
 
 	private void refreshUserAccessToken() throws IOException {
-		if (userToken != null) {
+		if (StringUtils.isNotBlank(configuration.getUserRefreshToken())) {
 			final AccessTokenClientResource tokenResource = configuration.getTokenResource();
 			try {
 				userToken = tokenResource
-						.requestToken(configuration.getRefreshTokenParameters(userToken.getRefreshToken()));
-			} catch (JSONException | OAuthException e) {
+						.requestToken(configuration.getRefreshTokenParameters(configuration.getUserRefreshToken()));
+				completeAuthorization();
+			} catch (JSONException | OAuthException | URISyntaxException e) {
 				throw new IOException(e);
 			}
 		} else {
@@ -142,6 +177,20 @@ public class TokenManager {
 			clientToken = tokenResource.requestToken(configuration.getClientTokenParameters());
 		} catch (JSONException | OAuthException e) {
 			throw new IOException(e);
+		}
+	}
+
+	private void updateAuthorized(final ClientResource resource) throws IOException {
+		final Representation rep = resource.get();
+		final JsonParser parser = new JsonParser();
+		try {
+			logger.info("Updating hub of authentication status");
+			final JsonElement json = parser.parse(rep.getText());
+			json.getAsJsonObject().add("authenticated", new JsonPrimitive(true));
+
+			resource.put(new JsonRepresentation(json.toString()));
+		} catch (final IOException e) {
+			throw e;
 		}
 	}
 }

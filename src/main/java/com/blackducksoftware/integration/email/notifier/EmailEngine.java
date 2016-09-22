@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.extension.model.ExtensionInfoData;
 import com.blackducksoftware.integration.email.extension.server.RestletApplication;
+import com.blackducksoftware.integration.email.extension.server.oauth.AccessType;
 import com.blackducksoftware.integration.email.extension.server.oauth.OAuthEndpoint;
 import com.blackducksoftware.integration.email.extension.server.oauth.OAuthRestConnection;
 import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
@@ -90,6 +91,7 @@ public class EmailEngine implements IAuthorizedListener {
 	public void start() {
 		try {
 			restletComponent.start();
+			tokenManager.refreshToken(AccessType.USER);
 		} catch (final Exception e) {
 			logger.error("Error Starting Email Engine", e);
 		}
