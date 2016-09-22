@@ -36,6 +36,13 @@ public class CustomerProperties {
 	// auto-parsing for javamail properties to get the password
 	public static final String JAVAMAIL_PASSWORD_KEY = "mail.smtp.password";
 
+	// keys for extension descriptor data.
+	public static final String EXTENSION_URL_KEY = "url";
+	public static final String EXTENSION_NAME_KEY = "name";
+	public static final String EXTENSION_DESCRIPTION_KEY = "description";
+	public static final String EXTENSION_ID_KEY = "id";
+	public static final String EXTENSION_PORT_KEY = "port";
+
 	public static final String JAVAMAIL_CONFIG_PREFIX = "hub.email.javamail.config.";
 	public static final String TEMPLATE_VARIABLE_PREFIX = "hub.email.template.variable.";
 	public static final String ROUTER_PREFIX = "email.service.router.";
@@ -43,6 +50,7 @@ public class CustomerProperties {
 	public static final String OPT_OUT_PREFIX = "hub.email.user.preference.opt.out.";
 	public static final String ROUTER_LAST_RUN_PREFIX = "email.service.router.lastrun.";
 	public static final String ROUTER_VARIABLE_PREFIX = "email.router.variable.";
+	public static final String EXTENSION_PREFIX = "extension.";
 
 	private final List<String> javamailConfigKeys = new ArrayList<>();
 	private final Map<String, String> suppliedJavamailConfigProperties = new HashMap<>();
@@ -53,6 +61,8 @@ public class CustomerProperties {
 	private final List<String> routerClassNames = new ArrayList<>();
 	private final Map<String, String> optOutProperties = new HashMap<>();
 	private final Map<String, String> routerVariableProperties = new HashMap<>();
+	private final List<String> extensionConfigKeys = new ArrayList<>();
+	private final Map<String, String> extensionProperties = new HashMap<>();
 	private final Properties appProperties;
 
 	public CustomerProperties(final Properties appProperties) {
@@ -69,7 +79,11 @@ public class CustomerProperties {
 				final String key = (String) obj;
 				final String value = properties.getProperty(key);
 				if (StringUtils.isNotBlank(value)) {
-					if (key.startsWith(JAVAMAIL_CONFIG_PREFIX)) {
+					if (key.startsWith(EXTENSION_PREFIX)) {
+						extensionConfigKeys.add(key);
+						final String cleanedKey = key.replace(EXTENSION_PREFIX, "");
+						extensionProperties.put(cleanedKey, value);
+					} else if (key.startsWith(JAVAMAIL_CONFIG_PREFIX)) {
 						javamailConfigKeys.add(key);
 						final String cleanedKey = key.replace(JAVAMAIL_CONFIG_PREFIX, "");
 						suppliedJavamailConfigProperties.put(cleanedKey, value);
@@ -193,5 +207,25 @@ public class CustomerProperties {
 
 	public Map<String, String> getRouterVariableProperties() {
 		return routerVariableProperties;
+	}
+
+	public String getExtensionId() {
+		return extensionProperties.get(EXTENSION_ID_KEY);
+	}
+
+	public String getExtensionName() {
+		return extensionProperties.get(EXTENSION_NAME_KEY);
+	}
+
+	public String getExtensionDescription() {
+		return extensionProperties.get(EXTENSION_DESCRIPTION_KEY);
+	}
+
+	public String getExtensionBaseUrl() {
+		return extensionProperties.get(EXTENSION_URL_KEY);
+	}
+
+	public int getExtensionPort() {
+		return NumberUtils.toInt(extensionProperties.get(EXTENSION_PORT_KEY), -1);
 	}
 }

@@ -17,18 +17,23 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.blackducksoftware.integration.email.mock.MockMailWrapper;
+import com.blackducksoftware.integration.email.mock.MockNotificationDataService;
+import com.blackducksoftware.integration.email.mock.TestDigestRouter;
+import com.blackducksoftware.integration.email.mock.TestEmailEngine;
 import com.blackducksoftware.integration.email.model.EmailTarget;
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.model.ProjectDigest;
 import com.blackducksoftware.integration.email.model.ProjectsDigest;
 import com.blackducksoftware.integration.email.notifier.EmailEngine;
-import com.blackducksoftware.integration.email.notifier.routers.DigestRouter;
+import com.blackducksoftware.integration.email.notifier.routers.AbstractDigestRouter;
 import com.blackducksoftware.integration.email.transformer.NotificationCountTransformer;
 import com.blackducksoftware.integration.hub.api.notification.VulnerabilitySourceQualifiedId;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
 import com.blackducksoftware.integration.hub.api.project.ProjectVersion;
+import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.ComponentAggregateData;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.ComponentVulnerabilitySummary;
+import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyNotificationFilter;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyOverrideContentItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyViolationContentItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.ProjectAggregateData;
@@ -39,9 +44,10 @@ import freemarker.template.TemplateException;
 public class EmailMessagingServiceTest {
 
 	private EmailEngine engine;
-	private DigestRouter digestRouter;
+	private AbstractDigestRouter digestRouter;
 	private JavaMailWrapper mockMailWrapper;
 	private EmailMessagingService emailMessagingService;
+	private NotificationDataService dataService;
 
 	@Before
 	public void init() throws Exception {
@@ -49,7 +55,7 @@ public class EmailMessagingServiceTest {
 		final URL propFileUrl = classLoader.getResource("test.properties");
 		final File file = new File(propFileUrl.toURI());
 		System.setProperty("customer.properties", file.getCanonicalPath());
-		engine = new EmailEngine();
+		engine = new TestEmailEngine();
 		// this code disables the default EmailMessagingService that is created
 		// by the EmailEngine. Instead it creates a
 		// router that uses a different email messaging service in order prevent
@@ -59,8 +65,10 @@ public class EmailMessagingServiceTest {
 		mockMailWrapper = new MockMailWrapper(false);
 		this.emailMessagingService = new EmailMessagingService(engine.customerProperties, engine.configuration,
 				mockMailWrapper);
-		digestRouter = new DigestRouter(engine.customerProperties, engine.notificationDataService,
-				engine.userRestService, emailMessagingService);
+		dataService = new MockNotificationDataService(engine.restConnection, engine.gson, engine.jsonParser,
+				new PolicyNotificationFilter(null));
+		digestRouter = new TestDigestRouter(engine.customerProperties, dataService, engine.userRestService,
+				emailMessagingService);
 		engine.routerManager.attachRouter(digestRouter);
 	}
 
@@ -97,14 +105,14 @@ public class EmailMessagingServiceTest {
 		final PolicyRule rule = new PolicyRule(null, "aRule", "", true, true, null, "", "", "", "");
 		final List<PolicyRule> ruleList = new ArrayList<>();
 		ruleList.add(rule);
-		final PolicyViolationContentItem violationContent = new PolicyViolationContentItem(projectVersion,
+		final PolicyViolationContentItem violationContent = new PolicyViolationContentItem(new Date(), projectVersion,
 				componentName, componentVersion, componentId, componentVersionId, ruleList);
-		final PolicyOverrideContentItem overrideContent = new PolicyOverrideContentItem(projectVersion, componentName,
-				componentVersion, componentId, componentVersionId, ruleList, firstName, lastName);
+		final PolicyOverrideContentItem overrideContent = new PolicyOverrideContentItem(new Date(), projectVersion,
+				componentName, componentVersion, componentId, componentVersionId, ruleList, firstName, lastName);
 
 		final List<VulnerabilitySourceQualifiedId> sourceIdList = new ArrayList<>();
 		sourceIdList.add(new VulnerabilitySourceQualifiedId("source", "id"));
-		final VulnerabilityContentItem vulnerabilityContent = new VulnerabilityContentItem(projectVersion,
+		final VulnerabilityContentItem vulnerabilityContent = new VulnerabilityContentItem(new Date(), projectVersion,
 				componentName, componentVersion, componentId, componentVersionId, sourceIdList, sourceIdList,
 				sourceIdList);
 		violationList.add(violationContent);
@@ -127,10 +135,13 @@ public class EmailMessagingServiceTest {
 		projectData.add(digest);
 
 		final Map<String, String> totalsMap = new HashMap<>();
-		totalsMap.put(DigestRouter.KEY_TOTAL_NOTIFICATIONS, String.valueOf(countData.getTotal()));
-		totalsMap.put(DigestRouter.KEY_TOTAL_POLICY_VIOLATIONS, String.valueOf(countData.getPolicyViolationCount()));
-		totalsMap.put(DigestRouter.KEY_TOTAL_POLICY_OVERRIDES, String.valueOf(countData.getPolicyOverrideCount()));
-		totalsMap.put(DigestRouter.KEY_TOTAL_VULNERABILITIES, String.valueOf(countData.getVulnerabilityCount()));
+		totalsMap.put(AbstractDigestRouter.KEY_TOTAL_NOTIFICATIONS, String.valueOf(countData.getTotal()));
+		totalsMap.put(AbstractDigestRouter.KEY_TOTAL_POLICY_VIOLATIONS,
+				String.valueOf(countData.getPolicyViolationCount()));
+		totalsMap.put(AbstractDigestRouter.KEY_TOTAL_POLICY_OVERRIDES,
+				String.valueOf(countData.getPolicyOverrideCount()));
+		totalsMap.put(AbstractDigestRouter.KEY_TOTAL_VULNERABILITIES,
+				String.valueOf(countData.getVulnerabilityCount()));
 		final ProjectsDigest projectsDigest = new ProjectsDigest(totalsMap, projectData);
 
 		final Map<String, Object> model = new HashMap<>();

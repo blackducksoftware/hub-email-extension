@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import com.blackducksoftware.integration.email.mock.MockMailWrapper;
 import com.blackducksoftware.integration.email.mock.MockRouter;
+import com.blackducksoftware.integration.email.mock.TestEmailEngine;
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.notifier.EmailEngine;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
@@ -27,7 +28,7 @@ public class ItemRouterTest {
 		final URL propFileUrl = classLoader.getResource("test.properties");
 		final File file = new File(propFileUrl.toURI());
 		System.setProperty("customer.properties", file.getCanonicalPath());
-		engine = new EmailEngine();
+		engine = new TestEmailEngine();
 		final JavaMailWrapper mailWrapper = new MockMailWrapper(false);
 		final EmailMessagingService messageService = new EmailMessagingService(engine.customerProperties,
 				engine.configuration, mailWrapper);
