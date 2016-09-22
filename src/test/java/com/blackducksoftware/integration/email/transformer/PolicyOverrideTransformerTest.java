@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -36,7 +37,7 @@ public class PolicyOverrideTransformerTest {
 		final PolicyRule rule = new PolicyRule(null, policyRuleName, "", true, true, null, "", "", "", "");
 		policyRuleList.add(rule);
 
-		final PolicyOverrideContentItem item = new PolicyOverrideContentItem(projectVersion, componentName,
+		final PolicyOverrideContentItem item = new PolicyOverrideContentItem(new Date(), projectVersion, componentName,
 				componentVersion, componentID, componentVersionID, policyRuleList, firstName, lastName);
 		final PolicyOverrideTransformer transformer = new PolicyOverrideTransformer();
 		final FreemarkerTarget target = transformer.transform(item);

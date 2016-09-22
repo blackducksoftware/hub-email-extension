@@ -16,6 +16,7 @@ import org.restlet.data.Protocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.email.ExtensionLogger;
 import com.blackducksoftware.integration.email.extension.model.ExtensionInfoData;
 import com.blackducksoftware.integration.email.extension.server.RestletApplication;
 import com.blackducksoftware.integration.email.extension.server.oauth.AccessType;
@@ -33,7 +34,6 @@ import com.blackducksoftware.integration.email.notifier.routers.WeeklyDigestRout
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.api.UserRestService;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyNotificationFilter;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
 import com.blackducksoftware.integration.hub.exception.EncryptionException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
@@ -171,8 +171,10 @@ public class EmailEngine implements IAuthorizedListener {
 	}
 
 	public NotificationDataService createNotificationDataService() {
-		final NotificationDataService notificationDataService = new NotificationDataService(restConnection, gson,
-				jsonParser, new PolicyNotificationFilter(null));
+		final Logger notificationLogger = LoggerFactory.getLogger(NotificationDataService.class);
+		final ExtensionLogger serviceLogger = new ExtensionLogger(notificationLogger);
+		final NotificationDataService notificationDataService = new NotificationDataService(serviceLogger,
+				restConnection, gson, jsonParser);
 		return notificationDataService;
 	}
 

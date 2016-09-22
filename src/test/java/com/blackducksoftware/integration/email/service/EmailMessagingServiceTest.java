@@ -105,14 +105,14 @@ public class EmailMessagingServiceTest {
 		final PolicyRule rule = new PolicyRule(null, "aRule", "", true, true, null, "", "", "", "");
 		final List<PolicyRule> ruleList = new ArrayList<>();
 		ruleList.add(rule);
-		final PolicyViolationContentItem violationContent = new PolicyViolationContentItem(projectVersion,
+		final PolicyViolationContentItem violationContent = new PolicyViolationContentItem(new Date(), projectVersion,
 				componentName, componentVersion, componentId, componentVersionId, ruleList);
-		final PolicyOverrideContentItem overrideContent = new PolicyOverrideContentItem(projectVersion, componentName,
-				componentVersion, componentId, componentVersionId, ruleList, firstName, lastName);
+		final PolicyOverrideContentItem overrideContent = new PolicyOverrideContentItem(new Date(), projectVersion,
+				componentName, componentVersion, componentId, componentVersionId, ruleList, firstName, lastName);
 
 		final List<VulnerabilitySourceQualifiedId> sourceIdList = new ArrayList<>();
 		sourceIdList.add(new VulnerabilitySourceQualifiedId("source", "id"));
-		final VulnerabilityContentItem vulnerabilityContent = new VulnerabilityContentItem(projectVersion,
+		final VulnerabilityContentItem vulnerabilityContent = new VulnerabilityContentItem(new Date(), projectVersion,
 				componentName, componentVersion, componentId, componentVersionId, sourceIdList, sourceIdList,
 				sourceIdList);
 		violationList.add(violationContent);
@@ -136,9 +136,12 @@ public class EmailMessagingServiceTest {
 
 		final Map<String, String> totalsMap = new HashMap<>();
 		totalsMap.put(AbstractDigestRouter.KEY_TOTAL_NOTIFICATIONS, String.valueOf(countData.getTotal()));
-		totalsMap.put(AbstractDigestRouter.KEY_TOTAL_POLICY_VIOLATIONS, String.valueOf(countData.getPolicyViolationCount()));
-		totalsMap.put(AbstractDigestRouter.KEY_TOTAL_POLICY_OVERRIDES, String.valueOf(countData.getPolicyOverrideCount()));
-		totalsMap.put(AbstractDigestRouter.KEY_TOTAL_VULNERABILITIES, String.valueOf(countData.getVulnerabilityCount()));
+		totalsMap.put(AbstractDigestRouter.KEY_TOTAL_POLICY_VIOLATIONS,
+				String.valueOf(countData.getPolicyViolationCount()));
+		totalsMap.put(AbstractDigestRouter.KEY_TOTAL_POLICY_OVERRIDES,
+				String.valueOf(countData.getPolicyOverrideCount()));
+		totalsMap.put(AbstractDigestRouter.KEY_TOTAL_VULNERABILITIES,
+				String.valueOf(countData.getVulnerabilityCount()));
 		final ProjectsDigest projectsDigest = new ProjectsDigest(totalsMap, projectData);
 
 		final Map<String, Object> model = new HashMap<>();

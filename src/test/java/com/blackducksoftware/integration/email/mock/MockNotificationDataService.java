@@ -5,6 +5,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import com.blackducksoftware.integration.hub.api.notification.VulnerabilitySourceQualifiedId;
@@ -23,20 +25,19 @@ import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 
 public class MockNotificationDataService extends NotificationDataService {
-
 	public MockNotificationDataService(final RestConnection restConnection, final Gson gson,
 			final JsonParser jsonParser, final PolicyNotificationFilter policyFilter) {
-		super(restConnection, gson, jsonParser, policyFilter);
+		super(new MockLogger(), restConnection, gson, jsonParser, policyFilter);
 	}
 
 	@Override
-	public List<NotificationContentItem> getAllNotifications(final Date startDate, final Date endDate)
+	public SortedSet<NotificationContentItem> getAllNotifications(final Date startDate, final Date endDate)
 			throws IOException, URISyntaxException, BDRestException {
 		return createNotificationList();
 	}
 
-	private List<NotificationContentItem> createNotificationList() {
-		final List<NotificationContentItem> contentList = new ArrayList<>();
+	private SortedSet<NotificationContentItem> createNotificationList() {
+		final SortedSet<NotificationContentItem> contentList = new TreeSet<>();
 		contentList.addAll(createPolicyViolations());
 		contentList.addAll(createPolicyOverrides());
 		contentList.addAll(createVulnerabilities());
@@ -53,8 +54,8 @@ public class MockNotificationDataService extends NotificationDataService {
 			final UUID componentId = UUID.randomUUID();
 			final UUID componentVersionId = UUID.randomUUID();
 			final List<PolicyRule> policyRuleList = new ArrayList<>();
-			final PolicyViolationContentItem item = new PolicyViolationContentItem(projectVersion, componentName,
-					componentVersion, componentId, componentVersionId, policyRuleList);
+			final PolicyViolationContentItem item = new PolicyViolationContentItem(new Date(), projectVersion,
+					componentName, componentVersion, componentId, componentVersionId, policyRuleList);
 			itemList.add(item);
 		}
 		return itemList;
@@ -72,8 +73,9 @@ public class MockNotificationDataService extends NotificationDataService {
 			final String firstName = "firstName";
 			final String lastName = "lastName";
 			final List<PolicyRule> policyRuleList = new ArrayList<>();
-			final PolicyOverrideContentItem item = new PolicyOverrideContentItem(projectVersion, componentName,
-					componentVersion, componentId, componentVersionId, policyRuleList, firstName, lastName);
+			final PolicyOverrideContentItem item = new PolicyOverrideContentItem(new Date(), projectVersion,
+					componentName, componentVersion, componentId, componentVersionId, policyRuleList, firstName,
+					lastName);
 			itemList.add(item);
 		}
 		return itemList;
@@ -87,9 +89,9 @@ public class MockNotificationDataService extends NotificationDataService {
 			final String componentVersion = "Version" + index;
 			final UUID componentId = UUID.randomUUID();
 			final UUID componentVersionId = UUID.randomUUID();
-			final VulnerabilityContentItem item = new VulnerabilityContentItem(projectVersion, componentName,
-					componentVersion, componentId, componentVersionId, createVulnSourceIds(), createVulnSourceIds(),
-					createVulnSourceIds());
+			final VulnerabilityContentItem item = new VulnerabilityContentItem(new Date(), projectVersion,
+					componentName, componentVersion, componentId, componentVersionId, createVulnSourceIds(),
+					createVulnSourceIds(), createVulnSourceIds());
 			itemList.add(item);
 		}
 		return itemList;
@@ -113,8 +115,8 @@ public class MockNotificationDataService extends NotificationDataService {
 			final UUID componentId = UUID.randomUUID();
 			final UUID componentVersionId = UUID.randomUUID();
 			final List<PolicyRule> policyRuleList = new ArrayList<>();
-			final PolicyViolationClearedContentItem item = new PolicyViolationClearedContentItem(projectVersion,
-					componentName, componentVersion, componentId, componentVersionId, policyRuleList);
+			final PolicyViolationClearedContentItem item = new PolicyViolationClearedContentItem(new Date(),
+					projectVersion, componentName, componentVersion, componentId, componentVersionId, policyRuleList);
 			itemList.add(item);
 		}
 		return itemList;
