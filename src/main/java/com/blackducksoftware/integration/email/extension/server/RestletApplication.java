@@ -3,6 +3,7 @@ package com.blackducksoftware.integration.email.extension.server;
 import org.restlet.routing.Redirector;
 import org.restlet.routing.Router;
 
+import com.blackducksoftware.integration.email.extension.config.ExtensionConfigManager;
 import com.blackducksoftware.integration.email.extension.server.oauth.AbstractOAuthApplication;
 import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
 import com.blackducksoftware.integration.email.extension.server.resources.ExtensionInfoServerResource;
@@ -11,12 +12,16 @@ import com.blackducksoftware.integration.email.extension.server.resources.UserCo
 
 public class RestletApplication extends AbstractOAuthApplication {
 
-	public RestletApplication(final TokenManager tokenManager) {
+	private final ExtensionConfigManager extConfigManager;
+
+	public RestletApplication(final TokenManager tokenManager, final ExtensionConfigManager extConfigManager) {
 		super(tokenManager);
+		this.extConfigManager = extConfigManager;
 	}
 
 	@Override
 	public void additionalRouterConfig(final Router router) {
+		getContext().getAttributes().put(ExtensionConfigManager.CONTEXT_ATTRIBUTE_KEY, extConfigManager);
 		router.attach("/",
 				new Redirector(getContext(), ExtensionServerConstants.EXTENSION_INFO, Redirector.MODE_CLIENT_FOUND));
 

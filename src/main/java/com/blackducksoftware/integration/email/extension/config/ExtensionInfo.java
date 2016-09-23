@@ -1,6 +1,6 @@
-package com.blackducksoftware.integration.email.extension.model;
+package com.blackducksoftware.integration.email.extension.config;
 
-public class ExtensionInfoData {
+public class ExtensionInfo {
 
 	private final String id;
 	private final String name;
@@ -8,7 +8,7 @@ public class ExtensionInfoData {
 	private final String baseUrl;
 	private final int port;
 
-	public ExtensionInfoData(final String id, final String name, final String description, final String baseUrl,
+	public ExtensionInfo(final String id, final String name, final String description, final String baseUrl,
 			final int port) {
 		this.id = id;
 		this.name = name;
@@ -60,7 +60,7 @@ public class ExtensionInfoData {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		final ExtensionInfoData other = (ExtensionInfoData) obj;
+		final ExtensionInfo other = (ExtensionInfo) obj;
 		if (baseUrl == null) {
 			if (other.baseUrl != null) {
 				return false;

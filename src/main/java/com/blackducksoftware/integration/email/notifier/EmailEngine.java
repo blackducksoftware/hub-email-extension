@@ -17,7 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.ExtensionLogger;
-import com.blackducksoftware.integration.email.extension.model.ExtensionInfoData;
+import com.blackducksoftware.integration.email.extension.config.ExtensionConfigManager;
+import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.extension.server.RestletApplication;
 import com.blackducksoftware.integration.email.extension.server.oauth.AccessType;
 import com.blackducksoftware.integration.email.extension.server.oauth.OAuthEndpoint;
@@ -65,7 +66,8 @@ public class EmailEngine implements IAuthorizedListener {
 	public final RouterManager routerManager;
 	public final TokenManager tokenManager;
 	public final OAuthEndpoint restletComponent;
-	public final ExtensionInfoData extensionInfoData;
+	public final ExtensionInfo extensionInfoData;
+	public final ExtensionConfigManager extConfigManager;
 
 	public EmailEngine() throws IOException, EncryptionException, URISyntaxException, BDRestException {
 		gson = new Gson();
@@ -76,6 +78,7 @@ public class EmailEngine implements IAuthorizedListener {
 		hubServerConfig = createHubConfig();
 		extensionInfoData = createExtensionInfoData();
 		tokenManager = createTokenManager();
+		extConfigManager = createExtensionConfigManager();
 		restConnection = createRestConnection();
 		javaMailWrapper = createJavaMailWrapper();
 		notificationDateFormat = createNotificationDateFormat();
@@ -201,18 +204,18 @@ public class EmailEngine implements IAuthorizedListener {
 		return manager;
 	}
 
-	public ExtensionInfoData createExtensionInfoData() {
+	public ExtensionInfo createExtensionInfoData() {
 		final String id = customerProperties.getExtensionId();
 		final String name = customerProperties.getExtensionName();
 		final String description = customerProperties.getExtensionDescription();
 		final String baseUrl = customerProperties.getExtensionBaseUrl();
 		final int port = customerProperties.getExtensionPort();
 
-		return new ExtensionInfoData(id, name, description, baseUrl, port);
+		return new ExtensionInfo(id, name, description, baseUrl, port);
 	}
 
 	public OAuthEndpoint createRestletComponent() {
-		final RestletApplication application = new RestletApplication(tokenManager);
+		final RestletApplication application = new RestletApplication(tokenManager, extConfigManager);
 		final OAuthEndpoint endpoint = new OAuthEndpoint(application);
 		if (extensionInfoData.getPort() > 0) {
 			endpoint.getServers().add(Protocol.HTTP, extensionInfoData.getPort());
@@ -225,6 +228,11 @@ public class EmailEngine implements IAuthorizedListener {
 		final TokenManager tokenManager = new TokenManager(extensionInfoData);
 		tokenManager.addAuthorizedListener(this);
 		return tokenManager;
+	}
+
+	public ExtensionConfigManager createExtensionConfigManager() {
+		final ExtensionConfigManager extConfigManager = new ExtensionConfigManager(extensionInfoData);
+		return extConfigManager;
 	}
 
 	@Override

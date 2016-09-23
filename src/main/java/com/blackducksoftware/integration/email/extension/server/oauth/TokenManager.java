@@ -19,7 +19,7 @@ import org.restlet.resource.ResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.email.extension.model.ExtensionInfoData;
+import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.extension.server.oauth.listeners.IAuthorizedListener;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -35,11 +35,11 @@ public class TokenManager {
 	// Internal storage for tokens - done in-memory as a simple example
 	private Token userToken = null;
 	private Token clientToken = null;
-	private final ExtensionInfoData extensionInfo;
+	private final ExtensionInfo extensionInfo;
 	private final List<IAuthorizedListener> authorizedListeners;
 	private final OAuthConfigManager configManager;
 
-	public TokenManager(final ExtensionInfoData extensionInfo) {
+	public TokenManager(final ExtensionInfo extensionInfo) {
 		configManager = new OAuthConfigManager();
 		configuration = configManager.load();
 		this.extensionInfo = extensionInfo;
@@ -56,10 +56,6 @@ public class TokenManager {
 
 	public String getLocalAddress() {
 		return extensionInfo.getBaseUrl();
-	}
-
-	public int getPort() {
-		return extensionInfo.getPort();
 	}
 
 	public void updateCallbackUrl(final String callbackUrl) {
