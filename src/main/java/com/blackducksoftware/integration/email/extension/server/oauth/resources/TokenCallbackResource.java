@@ -37,5 +37,4 @@ public class TokenCallbackResource extends OAuthServerResource {
 			getResponse().setStatus(Status.SERVER_ERROR_INTERNAL, "No token manager available");
 		}
 	}
-
 }

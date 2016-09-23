@@ -32,12 +32,13 @@ public class ExtensionConfigManager {
 	public String loadGlobalConfigJSON() {
 		final String configLocation = System.getProperty(CONFIG_LOCATION_PATH);
 		final File globalConfig = new File(configLocation, "config-options.json");
-
+		logger.info("Reading extension global configuration descriptor file {}", globalConfig);
 		if (!globalConfig.exists()) {
 			return "";
 		} else {
 			try (FileReader reader = new FileReader(globalConfig)) {
 				final String jsonString = createJSonString(reader);
+				logger.debug("global config descriptor: {}", jsonString);
 				return jsonString;
 			} catch (final IOException e) {
 				logger.error("Error reading global config file config-options.json");
@@ -49,12 +50,13 @@ public class ExtensionConfigManager {
 	public String loadUserConfigJSON() {
 		final String configLocation = System.getProperty(CONFIG_LOCATION_PATH);
 		final File userConfig = new File(configLocation, "user-config-options.json");
-
+		logger.info("Reading extension user configuration descriptor file {}", userConfig);
 		if (!userConfig.exists()) {
 			return loadGlobalConfigJSON();
 		} else {
 			try (FileReader reader = new FileReader(userConfig)) {
 				final String jsonString = createJSonString(reader);
+				logger.debug("user config descriptor: {}", jsonString);
 				return jsonString;
 			} catch (final IOException e) {
 				logger.error("Error reading global config file config-options.json");

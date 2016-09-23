@@ -1,6 +1,3 @@
-{
-    "totalCount":"4",
-    "items":
     [    
         {
             "name": "optIn",
@@ -37,12 +34,8 @@
             "required": true,
             "singleValue": true,
             "description": "the template for email rendering",
-            "options": [
-                {"name": "digest.ftl", "title": "Default Digest Template"}
-            ],
-            "defaultValue": [
-                "digest.ftl"
-            ]
+            "options": [],
+            "defaultValue": []
        },
        {
             "name": "emailTriggers",
@@ -63,4 +56,3 @@
             ]
        }
     ]
-}

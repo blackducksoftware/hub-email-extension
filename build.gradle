@@ -54,7 +54,7 @@ jar {
 	sourceSets {
 		main {
 			resources {
-				exclude 'customer.properties'
+				exclude 'extension.properties'
 				exclude '**/images/*'
 				exclude 'images'
 				exclude '**/templates/*'
@@ -78,7 +78,7 @@ distributions {
         contents {
             from ('src/main/resources/images/') {into 'images/'}
             from('src/main/resources/templates/') {into 'templates/'}
-            from('src/main/resources/customer.properties') {into 'config/'}
+            from('src/main/resources/extension.properties') {into 'config/'}
             from('src/main/resources/log4j.xml') {into 'config/'}
             from('src/main/resources/config-options.json') {into 'config/'}
         }
