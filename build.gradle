@@ -61,6 +61,7 @@ jar {
 				exclude 'templates'
 				exclude 'log4j.xml'
 				exclude 'config-options.json'
+				exclude 'user-config-options.json'
 			}
 		}
 	}
@@ -81,6 +82,7 @@ distributions {
             from('src/main/resources/extension.properties') {into 'config/'}
             from('src/main/resources/log4j.xml') {into 'config/'}
             from('src/main/resources/config-options.json') {into 'config/'}
+            from('src/main/resources/user-config-options.json') {into 'config/'}
         }
     }
 }

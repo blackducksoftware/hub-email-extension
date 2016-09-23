@@ -52,7 +52,7 @@ public class ExtensionConfigManager {
 		final File userConfig = new File(configLocation, "user-config-options.json");
 		logger.info("Reading extension user configuration descriptor file {}", userConfig);
 		if (!userConfig.exists()) {
-			return loadGlobalConfigJSON();
+			return "";
 		} else {
 			try (FileReader reader = new FileReader(userConfig)) {
 				final String jsonString = createJSonString(reader);
