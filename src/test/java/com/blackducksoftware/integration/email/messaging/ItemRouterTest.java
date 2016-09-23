@@ -25,9 +25,9 @@ public class ItemRouterTest {
 	@Before
 	public void initTest() throws Exception {
 		final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		final URL propFileUrl = classLoader.getResource("test.properties");
+		final URL propFileUrl = classLoader.getResource("extension.properties");
 		final File file = new File(propFileUrl.toURI());
-		System.setProperty("customer.properties", file.getCanonicalPath());
+		System.setProperty("ext.config.location", file.getCanonicalFile().getParent());
 		engine = new TestEmailEngine();
 		final JavaMailWrapper mailWrapper = new MockMailWrapper(false);
 		final EmailMessagingService messageService = new EmailMessagingService(engine.customerProperties,

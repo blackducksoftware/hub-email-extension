@@ -3,6 +3,7 @@ package com.blackducksoftware.integration.email.extension.server.resources;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;
 
 import com.blackducksoftware.integration.email.extension.server.api.model.ConfigOption;
@@ -13,6 +14,7 @@ import com.google.gson.JsonObject;
 
 public class GlobalConfigServerResource extends ServerResource {
 
+	@Get("json")
 	public String represent() {
 		final JsonObject json = new JsonObject();
 

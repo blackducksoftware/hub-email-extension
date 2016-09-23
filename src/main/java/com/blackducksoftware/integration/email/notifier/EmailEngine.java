@@ -108,8 +108,8 @@ public class EmailEngine implements IAuthorizedListener {
 
 	public Properties createAppProperties() throws IOException {
 		final Properties appProperties = new Properties();
-		final String customerPropertiesPath = System.getProperty("customer.properties");
-		final File customerPropertiesFile = new File(customerPropertiesPath);
+		final String configLocation = System.getProperty("ext.config.location");
+		final File customerPropertiesFile = new File(configLocation, "extension.properties");
 		try (FileInputStream fileInputStream = new FileInputStream(customerPropertiesFile)) {
 			appProperties.load(fileInputStream);
 		}

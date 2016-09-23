@@ -52,9 +52,9 @@ public class EmailMessagingServiceTest {
 	@Before
 	public void init() throws Exception {
 		final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		final URL propFileUrl = classLoader.getResource("test.properties");
+		final URL propFileUrl = classLoader.getResource("extension.properties");
 		final File file = new File(propFileUrl.toURI());
-		System.setProperty("customer.properties", file.getCanonicalPath());
+		System.setProperty("ext.config.location", file.getCanonicalFile().getParent());
 		engine = new TestEmailEngine();
 		// this code disables the default EmailMessagingService that is created
 		// by the EmailEngine. Instead it creates a

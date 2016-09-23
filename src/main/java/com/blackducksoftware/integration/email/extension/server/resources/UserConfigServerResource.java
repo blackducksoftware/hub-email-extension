@@ -3,6 +3,7 @@ package com.blackducksoftware.integration.email.extension.server.resources;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;
 
 import com.blackducksoftware.integration.email.extension.server.api.model.ConfigOption;
@@ -13,6 +14,7 @@ import com.google.gson.JsonObject;
 
 public class UserConfigServerResource extends ServerResource {
 
+	@Get("json")
 	public String represent() {
 		final JsonObject json = new JsonObject();
 
@@ -20,7 +22,7 @@ public class UserConfigServerResource extends ServerResource {
 
 		final JsonArray items = new JsonArray();
 
-		items.add(getConfigElement("optIn", "BOOLEAN", "Opt In \\/ Opt Out", true, true,
+		items.add(getConfigElement("optIn", "BOOLEAN", "Opt In / Opt Out", true, true,
 				"Whether or not emails should be triggered from published notifications", Collections.EMPTY_LIST,
 				Lists.newArrayList("false")));
 

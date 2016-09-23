@@ -37,10 +37,10 @@ public class TokenManager {
 	private Token clientToken = null;
 	private final ExtensionInfoData extensionInfo;
 	private final List<IAuthorizedListener> authorizedListeners;
-	private final ConfigManager configManager;
+	private final OAuthConfigManager configManager;
 
 	public TokenManager(final ExtensionInfoData extensionInfo) {
-		configManager = new ConfigManager();
+		configManager = new OAuthConfigManager();
 		configuration = configManager.load();
 		this.extensionInfo = extensionInfo;
 		authorizedListeners = new ArrayList<>();

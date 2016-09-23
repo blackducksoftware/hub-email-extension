@@ -10,9 +10,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConfigManager {
+public class OAuthConfigManager {
 
-	public static final String SYSTEM_PROPERTY_OAUTH_FILE_PATH = "oauth.properties";
+	public static final String OAUTH_CONFIG_FILE_NAME = "oauth.properties";
 	public static final String OAUTH_PROPERTY_CLIENT_ID = "client.id";
 	public static final String OAUTH_PROPERTY_USER_REFRESH_TOKEN = "user.refresh.token";
 	public static final String OAUTH_PROPERTY_CALLBACK_URL = "callback.url";
@@ -24,7 +24,7 @@ public class ConfigManager {
 	private static final String MSG_COULD_NOT_LOAD_PROPS = "Could not load properties file.  OAUTH client will need to be Authorized";
 	private static final String MSG_PROPERTY_FILE_LOCATION = "Property file location: {}";
 
-	public final Logger logger = LoggerFactory.getLogger(ConfigManager.class);
+	public final Logger logger = LoggerFactory.getLogger(OAuthConfigManager.class);
 
 	public OAuthConfiguration load() {
 		final File propFile = getPropFile();
@@ -81,12 +81,12 @@ public class ConfigManager {
 	}
 
 	private File getPropFile() {
-		final String propFilePath = System.getProperty(SYSTEM_PROPERTY_OAUTH_FILE_PATH);
+		final String parentLocation = System.getProperty("ext.config.location");
 
-		if (StringUtils.isNotBlank(propFilePath)) {
-			return new File(propFilePath);
+		if (StringUtils.isNotBlank(parentLocation)) {
+			return new File(parentLocation, OAUTH_CONFIG_FILE_NAME);
 		} else {
-			return new File(SYSTEM_PROPERTY_OAUTH_FILE_PATH);
+			return new File(OAUTH_CONFIG_FILE_NAME);
 		}
 	}
 
