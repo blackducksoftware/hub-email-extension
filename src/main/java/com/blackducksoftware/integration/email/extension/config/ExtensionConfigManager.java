@@ -20,9 +20,11 @@ public class ExtensionConfigManager {
 	private static final String CONFIG_LOCATION_PATH = "ext.config.location";
 
 	private final ExtensionInfo extensionInfo;
+	private final JsonParser parser;
 
-	public ExtensionConfigManager(final ExtensionInfo extensionInfo) {
+	public ExtensionConfigManager(final ExtensionInfo extensionInfo, final JsonParser parser) {
 		this.extensionInfo = extensionInfo;
+		this.parser = parser;
 	}
 
 	public ExtensionInfo getExtensionInfo() {
@@ -66,7 +68,6 @@ public class ExtensionConfigManager {
 	}
 
 	public String createJSonString(final Reader reader) {
-		final JsonParser parser = new JsonParser();
 		final JsonElement element = parser.parse(reader);
 		final JsonArray array = element.getAsJsonArray();
 		final JsonObject object = new JsonObject();

@@ -88,7 +88,8 @@ public class OAuthConfiguration {
 		this.oAuthTokenUri = oAuthTokenUri;
 	}
 
-	public Reference getOAuthAuthorizationUrl(final Optional<AuthorizationState> state) {
+	// TODO move the behavior into the oAuthconfigManager
+	public Reference getOAuthAuthorizationUrl(final Optional<StateUrlProcessor> state) {
 		final Reference reference = new Reference(oAuthAuthorizeUri);
 
 		final OAuthParameters parameters = new OAuthParameters();

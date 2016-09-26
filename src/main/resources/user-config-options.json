@@ -1,0 +1,58 @@
+    [    
+        {
+            "name": "optIn",
+            "optionType": "BOOLEAN",
+            "title": "Opt In / Opt Out",
+            "required": true,
+            "singleValue": true,
+            "description": "whether or not emails should be triggered from published notifications",
+            "options": [],
+            "defaultValue": [
+                "false"
+            ]
+        },
+        {
+            "name": "emailFrequency",
+            "optionType": "STRING",
+            "title": "Email Frequency",
+            "required": false,
+            "singleValue": true, 
+            "description": "how often the Hub should be checked for notifications that might trigger emails",
+            "options": [
+                {"name": "daily", "title": "Daily" },
+                {"name": "weekly", "title": "Weekly" },
+                {"name": "monthly", "title": "Monthly" },
+            ],
+            "defaultValue": [
+                "weekly"
+            ]
+       },
+       {
+            "name": "templateName",
+            "optionType": "STRING",
+            "title": "Template Name",
+            "required": true,
+            "singleValue": true,
+            "description": "the template for email rendering",
+            "options": [],
+            "defaultValue": []
+       },
+       {
+            "name": "emailTriggers",
+            "optionType": "ARRAY",
+            "title": "Reasons To Trigger Emails",
+            "required": false,
+            "singleValue": false,
+            "description": "the user can specify any number of reasons that will trigger an email",
+            "options": [
+                {"name": "policyViolation", "title": "Policy Violation" },
+                {"name": "policyViolationOverrideCancellation", "title": "Policy Violation Override Cancellation" },
+                {"name": "overridePolicyViolation", "title": "Override Policy Violation" },
+                {"name": "securityVulnerabilities", "title": "Security Vulnerabilities" }
+            ],
+            "defaultValue": [
+                "policyViolation",
+                "securityVulnerabilities"
+            ]
+       }
+    ]

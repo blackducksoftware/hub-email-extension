@@ -10,6 +10,11 @@ public class DefaultOAuthApplication extends AbstractOAuthApplication {
 
 	@Override
 	public void additionalRouterConfig(final Router router) {
-		// no additional configuration
+		// no additional router configuration
+	}
+
+	@Override
+	public void additionalContextConfig() {
+		// no additional context configuration
 	}
 }

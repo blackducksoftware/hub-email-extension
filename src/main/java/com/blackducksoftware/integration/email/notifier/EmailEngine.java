@@ -231,7 +231,7 @@ public class EmailEngine implements IAuthorizedListener {
 	}
 
 	public ExtensionConfigManager createExtensionConfigManager() {
-		final ExtensionConfigManager extConfigManager = new ExtensionConfigManager(extensionInfoData);
+		final ExtensionConfigManager extConfigManager = new ExtensionConfigManager(extensionInfoData, jsonParser);
 		return extConfigManager;
 	}
 
