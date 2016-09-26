@@ -6,15 +6,12 @@ public class ExtensionInfo {
 	private final String name;
 	private final String description;
 	private final String baseUrl;
-	private final int port;
 
-	public ExtensionInfo(final String id, final String name, final String description, final String baseUrl,
-			final int port) {
+	public ExtensionInfo(final String id, final String name, final String description, final String baseUrl) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
 		this.baseUrl = baseUrl;
-		this.port = port; // remove port just assume it is in the baseURL
 	}
 
 	public String getId() {
@@ -31,9 +28,5 @@ public class ExtensionInfo {
 
 	public String getBaseUrl() {
 		return baseUrl;
-	}
-
-	public int getPort() {
-		return port;
 	}
 }

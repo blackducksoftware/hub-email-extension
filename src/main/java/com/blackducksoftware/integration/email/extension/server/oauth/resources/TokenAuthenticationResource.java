@@ -29,7 +29,7 @@ public class TokenAuthenticationResource extends OAuthServerResource {
 		final TokenManager tokenManager = getTokenManager();
 		if (tokenManager != null) {
 			logger.info("Authenticate method called to obtain authorization url");
-			final Reference authUrl = tokenManager.getConfiguration().getOAuthAuthorizationUrl(Optional.of(state));
+			final Reference authUrl = new Reference(tokenManager.getOAuthAuthorizationUrl(Optional.of(state)));
 			getResponse().redirectSeeOther(authUrl);
 		} else {
 			getResponse().setStatus(Status.SERVER_ERROR_INTERNAL);

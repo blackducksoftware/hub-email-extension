@@ -17,7 +17,6 @@ import com.google.common.collect.Maps;
 
 public final class StateUrlProcessor {
 
-	// TODO rename this to url processing
 	private static final String REFERING_PATH_KEY = "refering_path";
 
 	private static final String RETURN_URL_KEY = "return_url";

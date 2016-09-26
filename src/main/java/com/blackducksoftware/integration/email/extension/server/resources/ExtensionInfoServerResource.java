@@ -36,9 +36,6 @@ public class ExtensionInfoServerResource extends ExtensionServerResource {
 	private String buildAddress(final ExtensionInfo extensionInfo, final String path) {
 		final Reference ref = new Reference(extensionInfo.getBaseUrl());
 		ref.setPath(path);
-		if (extensionInfo.getPort() > 0) {
-			ref.setHostPort(extensionInfo.getPort());
-		}
 		return ref.toString();
 	}
 

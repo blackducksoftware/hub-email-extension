@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
@@ -50,6 +51,10 @@ public class TokenManager {
 		return configuration;
 	}
 
+	public OAuthConfigManager getConfigManager() {
+		return configManager;
+	}
+
 	public boolean authenticationRequired() {
 		return userToken == null;
 	}
@@ -73,6 +78,10 @@ public class TokenManager {
 		configuration.setAddresses(hubUri, extensionUri, oAuthAuthorizeUri, oAuthTokenUri);
 	}
 
+	public String getOAuthAuthorizationUrl(final Optional<StateUrlProcessor> state) {
+		return configManager.getOAuthAuthorizationUrl(configuration, state);
+	}
+
 	public boolean addAuthorizedListener(final IAuthorizedListener listener) {
 		return authorizedListeners.add(listener);
 	}
@@ -88,9 +97,10 @@ public class TokenManager {
 	}
 
 	public void exchangeForToken(final String authorizationCode) throws IOException {
-		final AccessTokenClientResource tokenResource = configuration.getTokenResource();
+		final AccessTokenClientResource tokenResource = configManager.getTokenResource(configuration);
 		try {
-			userToken = tokenResource.requestToken(configuration.getAccessTokenParameters(authorizationCode));
+			userToken = tokenResource
+					.requestToken(configManager.getAccessTokenParameters(configuration, authorizationCode));
 			completeAuthorization();
 		} catch (JSONException | OAuthException | URISyntaxException e) {
 			throw new IOException(e);
@@ -154,10 +164,10 @@ public class TokenManager {
 
 	private void refreshUserAccessToken() throws IOException {
 		if (StringUtils.isNotBlank(configuration.getUserRefreshToken())) {
-			final AccessTokenClientResource tokenResource = configuration.getTokenResource();
+			final AccessTokenClientResource tokenResource = configManager.getTokenResource(configuration);
 			try {
 				userToken = tokenResource
-						.requestToken(configuration.getRefreshTokenParameters(configuration.getUserRefreshToken()));
+						.requestToken(configManager.getRefreshTokenParameters(configuration.getUserRefreshToken()));
 				completeAuthorization();
 			} catch (JSONException | OAuthException | URISyntaxException e) {
 				throw new IOException(e);
@@ -168,9 +178,9 @@ public class TokenManager {
 	}
 
 	private void refreshClientAccessToken() throws IOException {
-		final AccessTokenClientResource tokenResource = configuration.getTokenResource();
+		final AccessTokenClientResource tokenResource = configManager.getTokenResource(configuration);
 		try {
-			clientToken = tokenResource.requestToken(configuration.getClientTokenParameters());
+			clientToken = tokenResource.requestToken(configManager.getClientTokenParameters());
 		} catch (JSONException | OAuthException e) {
 			throw new IOException(e);
 		}

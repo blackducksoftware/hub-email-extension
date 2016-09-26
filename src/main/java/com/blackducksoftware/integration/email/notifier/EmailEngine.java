@@ -3,7 +3,9 @@ package com.blackducksoftware.integration.email.notifier;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -209,16 +211,21 @@ public class EmailEngine implements IAuthorizedListener {
 		final String name = customerProperties.getExtensionName();
 		final String description = customerProperties.getExtensionDescription();
 		final String baseUrl = customerProperties.getExtensionBaseUrl();
-		final int port = customerProperties.getExtensionPort();
 
-		return new ExtensionInfo(id, name, description, baseUrl, port);
+		return new ExtensionInfo(id, name, description, baseUrl);
 	}
 
 	public OAuthEndpoint createRestletComponent() {
 		final RestletApplication application = new RestletApplication(tokenManager, extConfigManager);
 		final OAuthEndpoint endpoint = new OAuthEndpoint(application);
-		if (extensionInfoData.getPort() > 0) {
-			endpoint.getServers().add(Protocol.HTTP, extensionInfoData.getPort());
+		try {
+			final URL url = new URL(extensionInfoData.getBaseUrl());
+			final int port = url.getPort();
+			if (port > 0) {
+				endpoint.getServers().add(Protocol.HTTP, port);
+			}
+		} catch (final MalformedURLException e) {
+			logger.error("createRestletComponent error with base URL", e);
 		}
 
 		return endpoint;
