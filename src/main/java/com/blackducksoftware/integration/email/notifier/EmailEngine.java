@@ -35,15 +35,13 @@ import com.blackducksoftware.integration.email.notifier.routers.MonthlyDigestRou
 import com.blackducksoftware.integration.email.notifier.routers.RouterManager;
 import com.blackducksoftware.integration.email.notifier.routers.WeeklyDigestRouter;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.hub.api.UserRestService;
+import com.blackducksoftware.integration.hub.dataservices.DataServicesFactory;
 import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
 import com.blackducksoftware.integration.hub.exception.EncryptionException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
-import com.google.gson.Gson;
-import com.google.gson.JsonParser;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateExceptionHandler;
@@ -51,8 +49,6 @@ import freemarker.template.TemplateExceptionHandler;
 public class EmailEngine implements IAuthorizedListener {
 	private final Logger logger = LoggerFactory.getLogger(EmailEngine.class);
 
-	public final Gson gson;
-	public final JsonParser jsonParser;
 	public final Configuration configuration;
 	public final DateFormat notificationDateFormat;
 	public final Date applicationStartDate;
@@ -65,32 +61,30 @@ public class EmailEngine implements IAuthorizedListener {
 	public final Properties appProperties;
 	public final CustomerProperties customerProperties;
 	public final NotificationDataService notificationDataService;
-	public final UserRestService userRestService;
 	public final RouterManager routerManager;
 	public final TokenManager tokenManager;
 	public final OAuthEndpoint restletComponent;
 	public final ExtensionInfo extensionInfoData;
 	public final ExtensionConfigManager extConfigManager;
 	public final ExtensionConfigDataService extConfigDataService;
+	public final DataServicesFactory dataServicesFactory;
 
 	public EmailEngine() throws IOException, EncryptionException, URISyntaxException, BDRestException {
-		gson = new Gson();
-		jsonParser = new JsonParser();
 		appProperties = createAppProperties();
 		customerProperties = createCustomerProperties();
 		configuration = createFreemarkerConfig();
 		hubServerConfig = createHubConfig();
 		extensionInfoData = createExtensionInfoData();
 		tokenManager = createTokenManager();
-		extConfigManager = createExtensionConfigManager();
 		restConnection = createRestConnection();
+		dataServicesFactory = createDataServicesFactory();
+		extConfigManager = createExtensionConfigManager();
 		javaMailWrapper = createJavaMailWrapper();
 		notificationDateFormat = createNotificationDateFormat();
 		applicationStartDate = createApplicationStartDate();
 		executorService = createExecutorService();
 		emailMessagingService = createEmailMessagingService();
 		notificationDataService = createNotificationDataService();
-		userRestService = createUserRestService();
 		extConfigDataService = createExtensionConfigDataService();
 		routerManager = createRouterManager();
 		restletComponent = createRestletComponent();
@@ -173,16 +167,11 @@ public class EmailEngine implements IAuthorizedListener {
 		return restConnection;
 	}
 
-	public UserRestService createUserRestService() {
-		final UserRestService userRestService = new UserRestService(restConnection, gson, jsonParser);
-		return userRestService;
-	}
-
 	public NotificationDataService createNotificationDataService() {
 		final Logger notificationLogger = LoggerFactory.getLogger(NotificationDataService.class);
 		final ExtensionLogger serviceLogger = new ExtensionLogger(notificationLogger);
-		final NotificationDataService notificationDataService = new NotificationDataService(serviceLogger,
-				restConnection, gson, jsonParser);
+		final NotificationDataService notificationDataService = dataServicesFactory
+				.createNotificationDataService(serviceLogger);
 		return notificationDataService;
 	}
 
@@ -241,16 +230,21 @@ public class EmailEngine implements IAuthorizedListener {
 	}
 
 	public ExtensionConfigManager createExtensionConfigManager() {
-		final ExtensionConfigManager extConfigManager = new ExtensionConfigManager(extensionInfoData, jsonParser);
+		final ExtensionConfigManager extConfigManager = new ExtensionConfigManager(extensionInfoData,
+				dataServicesFactory.getJsonParser());
 		return extConfigManager;
 	}
 
 	public ExtensionConfigDataService createExtensionConfigDataService() {
 		final Logger extensionServiceLogger = LoggerFactory.getLogger(ExtensionConfigDataService.class);
 		final ExtensionLogger serviceLogger = new ExtensionLogger(extensionServiceLogger);
-		final ExtensionConfigDataService extConfigDataService = new ExtensionConfigDataService(serviceLogger,
-				restConnection, gson, jsonParser);
+		final ExtensionConfigDataService extConfigDataService = dataServicesFactory
+				.createExtensionConfigDataService(serviceLogger);
 		return extConfigDataService;
+	}
+
+	public DataServicesFactory createDataServicesFactory() {
+		return new DataServicesFactory(restConnection);
 	}
 
 	@Override

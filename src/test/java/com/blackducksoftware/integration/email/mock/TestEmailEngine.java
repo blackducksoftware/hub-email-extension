@@ -51,7 +51,8 @@ public class TestEmailEngine extends EmailEngine {
 
 	@Override
 	public NotificationDataService createNotificationDataService() {
-		return new MockNotificationDataService(restConnection, gson, jsonParser, new PolicyNotificationFilter(null));
+		return new MockNotificationDataService(restConnection, dataServicesFactory.getGson(),
+				dataServicesFactory.getJsonParser(), new PolicyNotificationFilter(null));
 	}
 
 	@Override

@@ -75,7 +75,6 @@ public abstract class AbstractDigestRouter extends AbstractRouter {
 						.getUserOverrideConfigList(getHubExtensionId());
 				final UserPreferences userPreferences = new UserPreferences(getCustomerProperties());
 				for (final UserConfigItem userConfig : userConfigList) {
-					final String username = userConfig.getUser().getUserName();
 					final boolean optedIn = isOptedIn(userConfig);
 					final boolean frequencyMatch = doesFrequencyMatch(userConfig);
 					if (optedIn && frequencyMatch) {
