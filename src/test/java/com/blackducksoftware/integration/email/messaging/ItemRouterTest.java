@@ -10,12 +10,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.blackducksoftware.integration.email.mock.MockMailWrapper;
 import com.blackducksoftware.integration.email.mock.MockRouter;
 import com.blackducksoftware.integration.email.mock.TestEmailEngine;
-import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.notifier.EmailEngine;
-import com.blackducksoftware.integration.email.service.EmailMessagingService;
 
 public class ItemRouterTest {
 	private final static String ROUTER_KEY = "router.key";
@@ -29,11 +26,8 @@ public class ItemRouterTest {
 		final File file = new File(propFileUrl.toURI());
 		System.setProperty("ext.config.location", file.getCanonicalFile().getParent());
 		engine = new TestEmailEngine();
-		final JavaMailWrapper mailWrapper = new MockMailWrapper(false);
-		final EmailMessagingService messageService = new EmailMessagingService(engine.customerProperties,
-				engine.configuration, mailWrapper);
 		router = new MockRouter(engine.customerProperties, engine.notificationDataService, engine.extConfigDataService,
-				messageService, ROUTER_KEY);
+				engine.emailMessagingService, ROUTER_KEY);
 	}
 
 	@After
