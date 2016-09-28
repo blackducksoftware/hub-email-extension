@@ -5,6 +5,9 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.notifier.EmailEngine;
 import com.blackducksoftware.integration.email.notifier.routers.RouterManager;
@@ -20,6 +23,8 @@ import com.blackducksoftware.integration.hub.rest.RestConnection;
 
 public class TestEmailEngine extends EmailEngine {
 
+	private final Logger logger = LoggerFactory.getLogger(TestEmailEngine.class);
+
 	public TestEmailEngine() throws IOException, EncryptionException, URISyntaxException, BDRestException {
 		super();
 	}
@@ -31,11 +36,10 @@ public class TestEmailEngine extends EmailEngine {
 			HubCredentials credentials;
 			credentials = new HubCredentials("user", "password");
 
-			final HubProxyInfo proxyInfo = new HubProxyInfoBuilder().build().getConstructedObject();
+			final HubProxyInfo proxyInfo = new HubProxyInfoBuilder().buildResults().getConstructedObject();
 			serverConfig = new HubServerConfig(new URL("http://localhost"), 120, credentials, proxyInfo);
 		} catch (final EncryptionException | MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Error creating hub server config", e);
 		}
 		return serverConfig;
 	}
