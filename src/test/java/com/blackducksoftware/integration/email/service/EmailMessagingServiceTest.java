@@ -67,7 +67,7 @@ public class EmailMessagingServiceTest {
 				mockMailWrapper);
 		dataService = new MockNotificationDataService(engine.restConnection, engine.gson, engine.jsonParser,
 				new PolicyNotificationFilter(null));
-		digestRouter = new TestDigestRouter(engine.customerProperties, dataService, engine.userRestService,
+		digestRouter = new TestDigestRouter(engine.customerProperties, dataService, engine.extConfigDataService,
 				emailMessagingService);
 		engine.routerManager.attachRouter(digestRouter);
 	}
@@ -130,7 +130,7 @@ public class EmailMessagingServiceTest {
 				violationList.size(), overrideList.size(), vulnerabilityList.size(), total, sourceIDSize, sourceIDSize,
 				sourceIDSize, componentList);
 		final List<ProjectDigest> projectData = new ArrayList<>();
-		final NotificationCountTransformer transformer = new NotificationCountTransformer();
+		final NotificationCountTransformer transformer = new NotificationCountTransformer(true, true, true, true);
 		final ProjectDigest digest = transformer.transform(countData);
 		projectData.add(digest);
 

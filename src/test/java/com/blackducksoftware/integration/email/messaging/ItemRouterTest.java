@@ -32,7 +32,7 @@ public class ItemRouterTest {
 		final JavaMailWrapper mailWrapper = new MockMailWrapper(false);
 		final EmailMessagingService messageService = new EmailMessagingService(engine.customerProperties,
 				engine.configuration, mailWrapper);
-		router = new MockRouter(engine.customerProperties, engine.notificationDataService, engine.userRestService,
+		router = new MockRouter(engine.customerProperties, engine.notificationDataService, engine.extConfigDataService,
 				messageService, ROUTER_KEY);
 	}
 

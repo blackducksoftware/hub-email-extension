@@ -2,18 +2,20 @@ package com.blackducksoftware.integration.email.notifier.routers;
 
 import org.joda.time.DateTime;
 
+import com.blackducksoftware.integration.email.EmailFrequency;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.hub.api.UserRestService;
+import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 
 public class MonthlyDigestRouter extends AbstractDigestRouter {
 
 	public MonthlyDigestRouter(final CustomerProperties customerProperties,
-			final NotificationDataService notificationDataService, final UserRestService userRestService,
+			final NotificationDataService notificationDataService,
+			final ExtensionConfigDataService extensionConfigDataService,
 			final EmailMessagingService emailMessagingService) {
-		super(customerProperties, notificationDataService, userRestService, emailMessagingService);
+		super(customerProperties, notificationDataService, extensionConfigDataService, emailMessagingService);
 	}
 
 	@Override
@@ -34,5 +36,10 @@ public class MonthlyDigestRouter extends AbstractDigestRouter {
 	@Override
 	public String getRouterPropertyKey() {
 		return "monthlyDigest";
+	}
+
+	@Override
+	public EmailFrequency getEmailFrequency() {
+		return EmailFrequency.MONTHLY;
 	}
 }

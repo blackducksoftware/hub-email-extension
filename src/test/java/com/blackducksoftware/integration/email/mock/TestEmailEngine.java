@@ -37,7 +37,7 @@ public class TestEmailEngine extends EmailEngine {
 	public RouterManager createRouterManager() {
 		final RouterManager manager = new RouterManager();
 		final TestDigestRouter digestRouter = new TestDigestRouter(customerProperties, notificationDataService,
-				userRestService, emailMessagingService);
+				extConfigDataService, emailMessagingService);
 		manager.attachRouter(digestRouter);
 		return manager;
 	}

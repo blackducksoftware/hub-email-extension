@@ -4,21 +4,23 @@ import java.util.TimerTask;
 
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.hub.api.UserRestService;
+import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 
 public abstract class AbstractRouter extends TimerTask {
 	private final CustomerProperties customerProperties;
 	private final NotificationDataService notificationDataService;
-	private final UserRestService userRestService;
+	private final ExtensionConfigDataService extensionConfigDataService;
 	private final EmailMessagingService emailMessagingService;
+	private String hubExtensionId;
 
 	public AbstractRouter(final CustomerProperties customerProperties,
-			final NotificationDataService notificationDataService, final UserRestService userRestService,
+			final NotificationDataService notificationDataService,
+			final ExtensionConfigDataService extensionConfigDataService,
 			final EmailMessagingService emailMessagingService) {
 		this.customerProperties = customerProperties;
 		this.notificationDataService = notificationDataService;
-		this.userRestService = userRestService;
+		this.extensionConfigDataService = extensionConfigDataService;
 		this.emailMessagingService = emailMessagingService;
 	}
 
@@ -30,8 +32,8 @@ public abstract class AbstractRouter extends TimerTask {
 		return notificationDataService;
 	}
 
-	public UserRestService getUserRestService() {
-		return userRestService;
+	public ExtensionConfigDataService getExtensionConfigDataService() {
+		return extensionConfigDataService;
 	}
 
 	public EmailMessagingService getEmailMessagingService() {
@@ -40,6 +42,14 @@ public abstract class AbstractRouter extends TimerTask {
 
 	public String getName() {
 		return getClass().getName();
+	}
+
+	public String getHubExtensionId() {
+		return hubExtensionId;
+	}
+
+	public void setHubExtensionId(final String hubExtensionId) {
+		this.hubExtensionId = hubExtensionId;
 	}
 
 	public abstract String getTemplateName();

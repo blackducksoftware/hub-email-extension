@@ -36,6 +36,7 @@ import com.blackducksoftware.integration.email.notifier.routers.RouterManager;
 import com.blackducksoftware.integration.email.notifier.routers.WeeklyDigestRouter;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.api.UserRestService;
+import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
 import com.blackducksoftware.integration.hub.exception.EncryptionException;
@@ -70,6 +71,7 @@ public class EmailEngine implements IAuthorizedListener {
 	public final OAuthEndpoint restletComponent;
 	public final ExtensionInfo extensionInfoData;
 	public final ExtensionConfigManager extConfigManager;
+	public final ExtensionConfigDataService extConfigDataService;
 
 	public EmailEngine() throws IOException, EncryptionException, URISyntaxException, BDRestException {
 		gson = new Gson();
@@ -89,6 +91,7 @@ public class EmailEngine implements IAuthorizedListener {
 		emailMessagingService = createEmailMessagingService();
 		notificationDataService = createNotificationDataService();
 		userRestService = createUserRestService();
+		extConfigDataService = createExtensionConfigDataService();
 		routerManager = createRouterManager();
 		restletComponent = createRestletComponent();
 	}
@@ -195,11 +198,11 @@ public class EmailEngine implements IAuthorizedListener {
 		final RouterManager manager = new RouterManager();
 
 		final DailyDigestRouter dailyRouter = new DailyDigestRouter(customerProperties, notificationDataService,
-				userRestService, emailMessagingService);
+				extConfigDataService, emailMessagingService);
 		final WeeklyDigestRouter weeklyRouter = new WeeklyDigestRouter(customerProperties, notificationDataService,
-				userRestService, emailMessagingService);
+				extConfigDataService, emailMessagingService);
 		final MonthlyDigestRouter monthlyRouter = new MonthlyDigestRouter(customerProperties, notificationDataService,
-				userRestService, emailMessagingService);
+				extConfigDataService, emailMessagingService);
 		manager.attachRouter(dailyRouter);
 		manager.attachRouter(weeklyRouter);
 		manager.attachRouter(monthlyRouter);
@@ -242,8 +245,17 @@ public class EmailEngine implements IAuthorizedListener {
 		return extConfigManager;
 	}
 
+	public ExtensionConfigDataService createExtensionConfigDataService() {
+		final Logger extensionServiceLogger = LoggerFactory.getLogger(ExtensionConfigDataService.class);
+		final ExtensionLogger serviceLogger = new ExtensionLogger(extensionServiceLogger);
+		final ExtensionConfigDataService extConfigDataService = new ExtensionConfigDataService(serviceLogger,
+				restConnection, gson, jsonParser);
+		return extConfigDataService;
+	}
+
 	@Override
 	public void onAuthorized() {
+		routerManager.updateHubExtensionId(tokenManager.getHubExtensionId());
 		routerManager.startRouters();
 	}
 }

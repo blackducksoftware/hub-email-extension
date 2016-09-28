@@ -13,6 +13,12 @@ public class RouterManager {
 	private final Map<String, AbstractRouter> routerMap = new ConcurrentHashMap<>();
 	private final Map<String, Timer> timerMap = new ConcurrentHashMap<>();
 
+	public void updateHubExtensionId(final String hubExtensionId) {
+		for (final Map.Entry<String, AbstractRouter> entry : routerMap.entrySet()) {
+			entry.getValue().setHubExtensionId(hubExtensionId);
+		}
+	}
+
 	public void attachRouter(final AbstractRouter router) {
 		final List<AbstractRouter> routerList = new Vector<>();
 		routerList.add(router);
@@ -48,10 +54,8 @@ public class RouterManager {
 	}
 
 	public void startRouters() {
-		final Set<String> routerKeyList = routerMap.keySet();
-		for (final String routerKey : routerKeyList) {
-			final AbstractRouter router = routerMap.get(routerKey);
-			startRouter(router);
+		for (final Map.Entry<String, AbstractRouter> entry : routerMap.entrySet()) {
+			startRouter(entry.getValue());
 		}
 	}
 

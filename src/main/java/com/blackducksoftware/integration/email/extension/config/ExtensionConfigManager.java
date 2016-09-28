@@ -40,6 +40,7 @@ public class ExtensionConfigManager {
 		} else {
 			try (FileReader reader = new FileReader(globalConfig)) {
 				final String jsonString = createJSonString(reader);
+				jsonString.replaceAll("null", ""); // remove any null strings
 				logger.debug("global config descriptor: {}", jsonString);
 				return jsonString;
 			} catch (final IOException e) {

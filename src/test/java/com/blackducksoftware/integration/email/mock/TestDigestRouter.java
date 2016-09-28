@@ -7,11 +7,12 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.email.EmailFrequency;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.notifier.routers.AbstractDigestRouter;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.hub.api.UserRestService;
+import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 
@@ -21,9 +22,10 @@ public class TestDigestRouter extends AbstractDigestRouter {
 	private final String initialStartDate;
 
 	public TestDigestRouter(final CustomerProperties customerProperties,
-			final NotificationDataService notificationDataService, final UserRestService userRestService,
+			final NotificationDataService notificationDataService,
+			final ExtensionConfigDataService extensionConfigDataService,
 			final EmailMessagingService emailMessagingService) {
-		super(customerProperties, notificationDataService, userRestService, emailMessagingService);
+		super(customerProperties, notificationDataService, extensionConfigDataService, emailMessagingService);
 		lastRunPath = getCustomerProperties().getRouterVariableProperties()
 				.get(getRouterPropertyKey() + ".lastrun.file");
 		initialStartDate = getCustomerProperties().getRouterVariableProperties()
@@ -57,5 +59,11 @@ public class TestDigestRouter extends AbstractDigestRouter {
 	@Override
 	public String getRouterPropertyKey() {
 		return "digest";
+	}
+
+	@Override
+	public EmailFrequency getEmailFrequency() {
+		// TODO Auto-generated method stub
+		return EmailFrequency.DAILY;
 	}
 }

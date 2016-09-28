@@ -3,7 +3,7 @@ package com.blackducksoftware.integration.email.mock;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.notifier.routers.AbstractRouter;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.hub.api.UserRestService;
+import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 
 public class MockRouter extends AbstractRouter {
@@ -12,9 +12,9 @@ public class MockRouter extends AbstractRouter {
 	private boolean ran = false;
 
 	public MockRouter(final CustomerProperties customerProperties, final NotificationDataService notificationService,
-			final UserRestService userRestService, final EmailMessagingService emailMessagingService,
-			final String templateName) {
-		super(customerProperties, notificationService, userRestService, emailMessagingService);
+			final ExtensionConfigDataService extensionConfigDataService,
+			final EmailMessagingService emailMessagingService, final String templateName) {
+		super(customerProperties, notificationService, extensionConfigDataService, emailMessagingService);
 		this.templateName = templateName;
 	}
 

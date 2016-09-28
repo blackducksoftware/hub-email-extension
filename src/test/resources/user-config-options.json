@@ -21,7 +21,7 @@
             "options": [
                 {"name": "daily", "title": "Daily" },
                 {"name": "weekly", "title": "Weekly" },
-                {"name": "monthly", "title": "Monthly" },
+                {"name": "monthly", "title": "Monthly" }
             ],
             "defaultValue": [
                 "weekly"
@@ -34,8 +34,12 @@
             "required": true,
             "singleValue": true,
             "description": "the template for email rendering",
-            "options": [],
-            "defaultValue": []
+            "options": [ 
+                {"name": "digest.ftl", "title": "Default Digest Template"}
+            ],
+            "defaultValue": [
+                "digest.ftl"
+            ]
        },
        {
             "name": "emailTriggers",
