@@ -5,7 +5,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
 import com.blackducksoftware.integration.hub.builder.ValidationResultEnum;
 import com.blackducksoftware.integration.hub.builder.ValidationResults;
@@ -42,7 +41,7 @@ public class HubServerBeanConfiguration {
 		logger.info("Hub Ignored Proxy Hosts = " + configBuilder.getIgnoredProxyHosts());
 		logger.info("Hub Proxy User          = " + configBuilder.getProxyUsername());
 
-		final ValidationResults<GlobalFieldKey, HubServerConfig> results = configBuilder.build();
+		final ValidationResults<GlobalFieldKey, HubServerConfig> results = configBuilder.buildResults();
 
 		if (results.hasErrors()) {
 			logger.error("##### Properties file contains errors.####");

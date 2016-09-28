@@ -86,7 +86,7 @@ public class EmailMessagingService {
 	private String getResolvedSubjectLine(final Map<String, Object> model) throws IOException, TemplateException {
 		String subjectLine = (String) model.get("subject_line");
 		if (StringUtils.isBlank(subjectLine)) {
-			subjectLine = "Default Subject Line - please define one in customer.properties";
+			subjectLine = "Default Subject Line - please define one in extension.properties";
 		}
 		final Template subjectLineTemplate = new Template("subjectLineTemplate", subjectLine, configuration);
 		final StringWriter stringWriter = new StringWriter();

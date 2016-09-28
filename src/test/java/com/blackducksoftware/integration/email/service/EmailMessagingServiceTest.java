@@ -16,12 +16,8 @@ import javax.mail.MessagingException;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.blackducksoftware.integration.email.mock.MockMailWrapper;
-import com.blackducksoftware.integration.email.mock.MockNotificationDataService;
-import com.blackducksoftware.integration.email.mock.TestDigestRouter;
 import com.blackducksoftware.integration.email.mock.TestEmailEngine;
 import com.blackducksoftware.integration.email.model.EmailTarget;
-import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.model.ProjectDigest;
 import com.blackducksoftware.integration.email.model.ProjectsDigest;
 import com.blackducksoftware.integration.email.notifier.EmailEngine;
@@ -30,10 +26,8 @@ import com.blackducksoftware.integration.email.transformer.NotificationCountTran
 import com.blackducksoftware.integration.hub.api.notification.VulnerabilitySourceQualifiedId;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
 import com.blackducksoftware.integration.hub.api.project.ProjectVersion;
-import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.ComponentAggregateData;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.ComponentVulnerabilitySummary;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyNotificationFilter;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyOverrideContentItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyViolationContentItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.ProjectAggregateData;
@@ -45,36 +39,20 @@ public class EmailMessagingServiceTest {
 
 	private EmailEngine engine;
 	private AbstractDigestRouter digestRouter;
-	private JavaMailWrapper mockMailWrapper;
 	private EmailMessagingService emailMessagingService;
-	private NotificationDataService dataService;
 
 	@Before
 	public void init() throws Exception {
 		final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		final URL propFileUrl = classLoader.getResource("test.properties");
+		final URL propFileUrl = classLoader.getResource("extension.properties");
 		final File file = new File(propFileUrl.toURI());
-		System.setProperty("customer.properties", file.getCanonicalPath());
+		System.setProperty("ext.config.location", file.getCanonicalFile().getParent());
 		engine = new TestEmailEngine();
-		// this code disables the default EmailMessagingService that is created
-		// by the EmailEngine. Instead it creates a
-		// router that uses a different email messaging service in order prevent
-		// sending emails through java mail if you do not do this you may spam
-		// emails to the users of the hub server configured in the
-		// customer.properties file.
-		mockMailWrapper = new MockMailWrapper(false);
-		this.emailMessagingService = new EmailMessagingService(engine.customerProperties, engine.configuration,
-				mockMailWrapper);
-		dataService = new MockNotificationDataService(engine.restConnection, engine.gson, engine.jsonParser,
-				new PolicyNotificationFilter(null));
-		digestRouter = new TestDigestRouter(engine.customerProperties, dataService, engine.userRestService,
-				emailMessagingService);
-		engine.routerManager.attachRouter(digestRouter);
 	}
 
 	@Test
 	public void testRouter() throws Exception {
-		digestRouter.run();
+		engine.start();
 	}
 
 	@Test
@@ -84,7 +62,7 @@ public class EmailMessagingServiceTest {
 		model.put("message", "this should have html and plain text parts");
 		model.put("items", Arrays.asList("apple", "orange", "pear", "banana"));
 		final EmailTarget target = new EmailTarget("testUser@a.domain.com1", "htmlTemplate.ftl", model);
-		emailMessagingService.sendEmailMessage(target);
+		engine.emailMessagingService.sendEmailMessage(target);
 	}
 
 	@Test
@@ -130,7 +108,7 @@ public class EmailMessagingServiceTest {
 				violationList.size(), overrideList.size(), vulnerabilityList.size(), total, sourceIDSize, sourceIDSize,
 				sourceIDSize, componentList);
 		final List<ProjectDigest> projectData = new ArrayList<>();
-		final NotificationCountTransformer transformer = new NotificationCountTransformer();
+		final NotificationCountTransformer transformer = new NotificationCountTransformer(true, true, true, true);
 		final ProjectDigest digest = transformer.transform(countData);
 		projectData.add(digest);
 
@@ -152,6 +130,6 @@ public class EmailMessagingServiceTest {
 		model.put("hubServerUrl", "http://hub-a.domain.com1/");
 
 		final EmailTarget target = new EmailTarget("testUser@a.domain.com1", "digest.ftl", model);
-		emailMessagingService.sendEmailMessage(target);
+		engine.emailMessagingService.sendEmailMessage(target);
 	}
 }

@@ -10,7 +10,7 @@ group = 'com.blackducksoftware.integration'
 version = '1.0.0-SNAPSHOT'
 description = ''
 mainClassName = 'com.blackducksoftware.integration.email.Application'
-applicationDefaultJvmArgs = ['-DAPP_HOME=APP_HOME_VAR_TOKEN', '-Dlog4j.configurationFile=APP_HOME_VAR_TOKEN/log4j.xml', '-Dcustomer.properties=APP_HOME_VAR_TOKEN/customer.properties', '-Doauth.properties=APP_HOME_VAR_TOKEN/oauth/oauth.properties']
+applicationDefaultJvmArgs = ['-DAPP_HOME=APP_HOME_VAR_TOKEN', '-Dlog4j.configurationFile=APP_HOME_VAR_TOKEN/config/log4j.xml', '-Dext.config.location=APP_HOME_VAR_TOKEN/config']
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -22,13 +22,13 @@ repositories {
 }
 
 dependencies {
-	compile 'com.blackducksoftware.integration:hub-common:1.4.6-SNAPSHOT'
+	compile 'com.blackducksoftware.integration:hub-common:1.4.8-SNAPSHOT'
     
     // logging dependencies
 	compile 'org.slf4j:slf4j-api:1.7.21'
 	compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.6.2'
 	compile 'org.apache.logging.log4j:log4j-core:2.6.2'
-	runtime group: 'org.restlet.jse', name: 'org.restlet.ext.slf4j', version: '2.3.7'
+	runtime 'org.restlet.jse:org.restlet.ext.slf4j:2.3.7'
 	
 	compile 'org.apache.commons:commons-lang3:3.4'
 	compile 'commons-io:commons-io:2.5'
@@ -54,12 +54,14 @@ jar {
 	sourceSets {
 		main {
 			resources {
-				exclude 'customer.properties'
+				exclude 'extension.properties'
 				exclude '**/images/*'
 				exclude 'images'
 				exclude '**/templates/*'
 				exclude 'templates'
 				exclude 'log4j.xml'
+				exclude 'config-options.json'
+				exclude 'user-config-options.json'
 			}
 		}
 	}
@@ -77,8 +79,10 @@ distributions {
         contents {
             from ('src/main/resources/images/') {into 'images/'}
             from('src/main/resources/templates/') {into 'templates/'}
-            from('src/main/resources/customer.properties') {into ''}
-            from('src/main/resources/log4j.xml') {into ''}
+            from('src/main/resources/extension.properties') {into 'config/'}
+            from('src/main/resources/log4j.xml') {into 'config/'}
+            from('src/main/resources/config-options.json') {into 'config/'}
+            from('src/main/resources/user-config-options.json') {into 'config/'}
         }
     }
 }

@@ -15,7 +15,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-public final class AuthorizationState {
+public final class StateUrlProcessor {
 
 	private static final String REFERING_PATH_KEY = "refering_path";
 
@@ -25,7 +25,7 @@ public final class AuthorizationState {
 
 	private Optional<String> returnUrl;
 
-	public AuthorizationState(final String urlState) {
+	public StateUrlProcessor(final String urlState) {
 		final Map<String, String> decoded = decodeMap(urlState);
 
 		referingPath = Optional.empty();
@@ -42,7 +42,7 @@ public final class AuthorizationState {
 		}
 	}
 
-	public AuthorizationState() {
+	public StateUrlProcessor() {
 		referingPath = Optional.empty();
 		returnUrl = Optional.empty();
 	}
@@ -131,8 +131,8 @@ public final class AuthorizationState {
 	public boolean equals(@Nullable final Object obj) {
 		boolean result = false;
 
-		if (obj instanceof AuthorizationState) {
-			final AuthorizationState compare = (AuthorizationState) obj;
+		if (obj instanceof StateUrlProcessor) {
+			final StateUrlProcessor compare = (StateUrlProcessor) obj;
 
 			result = Objects.equals(compare.getReferingPath(), getReferingPath())
 					&& Objects.equals(compare.getReturnUrl(), getReturnUrl());

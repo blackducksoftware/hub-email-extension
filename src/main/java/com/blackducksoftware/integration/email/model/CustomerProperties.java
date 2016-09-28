@@ -41,7 +41,6 @@ public class CustomerProperties {
 	public static final String EXTENSION_NAME_KEY = "name";
 	public static final String EXTENSION_DESCRIPTION_KEY = "description";
 	public static final String EXTENSION_ID_KEY = "id";
-	public static final String EXTENSION_PORT_KEY = "port";
 
 	public static final String JAVAMAIL_CONFIG_PREFIX = "hub.email.javamail.config.";
 	public static final String TEMPLATE_VARIABLE_PREFIX = "hub.email.template.variable.";
@@ -223,9 +222,5 @@ public class CustomerProperties {
 
 	public String getExtensionBaseUrl() {
 		return extensionProperties.get(EXTENSION_URL_KEY);
-	}
-
-	public int getExtensionPort() {
-		return NumberUtils.toInt(extensionProperties.get(EXTENSION_PORT_KEY), -1);
 	}
 }

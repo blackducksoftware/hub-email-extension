@@ -5,6 +5,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
@@ -19,8 +21,10 @@ import org.restlet.resource.ResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.email.extension.model.ExtensionInfoData;
+import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.extension.server.oauth.listeners.IAuthorizedListener;
+import com.blackducksoftware.integration.hub.exception.MissingUUIDException;
+import com.blackducksoftware.integration.hub.util.HubUrlParser;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
@@ -30,24 +34,44 @@ public class TokenManager {
 	private final Logger logger = LoggerFactory.getLogger(TokenManager.class);
 
 	public final static String CONTEXT_ATTRIBUTE_KEY = "blackduck-oauth-token-manager";
+	public static final String EXTENSIONS_URL_IDENTIFIER = "externalextensions";
 
 	private final OAuthConfiguration configuration;
 	// Internal storage for tokens - done in-memory as a simple example
 	private Token userToken = null;
 	private Token clientToken = null;
-	private final ExtensionInfoData extensionInfo;
+	private final ExtensionInfo extensionInfo;
 	private final List<IAuthorizedListener> authorizedListeners;
-	private final ConfigManager configManager;
+	private final OAuthConfigManager configManager;
 
-	public TokenManager(final ExtensionInfoData extensionInfo) {
-		configManager = new ConfigManager();
+	public TokenManager(final ExtensionInfo extensionInfo) {
+		configManager = new OAuthConfigManager();
 		configuration = configManager.load();
 		this.extensionInfo = extensionInfo;
 		authorizedListeners = new ArrayList<>();
 	}
 
+	public String getHubExtensionId() {
+		if (StringUtils.isNotBlank(configuration.getExtensionUri())) {
+			try {
+				final UUID extensionID = HubUrlParser.getUUIDFromURLString(EXTENSIONS_URL_IDENTIFIER,
+						configuration.getExtensionUri());
+				return extensionID.toString();
+			} catch (final MissingUUIDException e) {
+				logger.error("Error retrieving the extensionID from the url", e);
+				return "";
+			}
+		} else {
+			return "";
+		}
+	}
+
 	public OAuthConfiguration getConfiguration() {
 		return configuration;
+	}
+
+	public OAuthConfigManager getConfigManager() {
+		return configManager;
 	}
 
 	public boolean authenticationRequired() {
@@ -56,10 +80,6 @@ public class TokenManager {
 
 	public String getLocalAddress() {
 		return extensionInfo.getBaseUrl();
-	}
-
-	public int getPort() {
-		return extensionInfo.getPort();
 	}
 
 	public void updateCallbackUrl(final String callbackUrl) {
@@ -77,6 +97,10 @@ public class TokenManager {
 		configuration.setAddresses(hubUri, extensionUri, oAuthAuthorizeUri, oAuthTokenUri);
 	}
 
+	public String getOAuthAuthorizationUrl(final Optional<StateUrlProcessor> state) {
+		return configManager.getOAuthAuthorizationUrl(configuration, state);
+	}
+
 	public boolean addAuthorizedListener(final IAuthorizedListener listener) {
 		return authorizedListeners.add(listener);
 	}
@@ -92,9 +116,10 @@ public class TokenManager {
 	}
 
 	public void exchangeForToken(final String authorizationCode) throws IOException {
-		final AccessTokenClientResource tokenResource = configuration.getTokenResource();
+		final AccessTokenClientResource tokenResource = configManager.getTokenResource(configuration);
 		try {
-			userToken = tokenResource.requestToken(configuration.getAccessTokenParameters(authorizationCode));
+			userToken = tokenResource
+					.requestToken(configManager.getAccessTokenParameters(configuration, authorizationCode));
 			completeAuthorization();
 		} catch (JSONException | OAuthException | URISyntaxException e) {
 			throw new IOException(e);
@@ -119,8 +144,8 @@ public class TokenManager {
 		// Update authorization status
 		// this is hub specific as far as I can tell to send status for
 		// the authorization.
-		final String ackUrl = getConfiguration().getExtensionUri();
-		final TokenClientResource resource = createClientResource(ackUrl, AccessType.CLIENT);
+		final String hubExtensionUri = getConfiguration().getExtensionUri();
+		final TokenClientResource resource = createClientResource(hubExtensionUri, AccessType.CLIENT);
 		try {
 			updateAuthorized(resource);
 		} catch (final ResourceException e) {
@@ -158,10 +183,10 @@ public class TokenManager {
 
 	private void refreshUserAccessToken() throws IOException {
 		if (StringUtils.isNotBlank(configuration.getUserRefreshToken())) {
-			final AccessTokenClientResource tokenResource = configuration.getTokenResource();
+			final AccessTokenClientResource tokenResource = configManager.getTokenResource(configuration);
 			try {
 				userToken = tokenResource
-						.requestToken(configuration.getRefreshTokenParameters(configuration.getUserRefreshToken()));
+						.requestToken(configManager.getRefreshTokenParameters(configuration.getUserRefreshToken()));
 				completeAuthorization();
 			} catch (JSONException | OAuthException | URISyntaxException e) {
 				throw new IOException(e);
@@ -172,9 +197,9 @@ public class TokenManager {
 	}
 
 	private void refreshClientAccessToken() throws IOException {
-		final AccessTokenClientResource tokenResource = configuration.getTokenResource();
+		final AccessTokenClientResource tokenResource = configManager.getTokenResource(configuration);
 		try {
-			clientToken = tokenResource.requestToken(configuration.getClientTokenParameters());
+			clientToken = tokenResource.requestToken(configManager.getClientTokenParameters());
 		} catch (JSONException | OAuthException e) {
 			throw new IOException(e);
 		}

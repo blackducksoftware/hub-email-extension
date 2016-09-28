@@ -8,7 +8,7 @@ import org.restlet.resource.Get;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.email.extension.server.oauth.AuthorizationState;
+import com.blackducksoftware.integration.email.extension.server.oauth.StateUrlProcessor;
 import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
 
 public class TokenAuthenticationResource extends OAuthServerResource {
@@ -19,7 +19,7 @@ public class TokenAuthenticationResource extends OAuthServerResource {
 	public void authenticate() {
 		// Use state if provided
 		final String next = getRequest().getResourceRef().getQueryAsForm(true).getFirstValue("next");
-		final AuthorizationState state = new AuthorizationState(getQueryValue("state"));
+		final StateUrlProcessor state = new StateUrlProcessor(getQueryValue("state"));
 
 		if (state.getReturnUrl().isPresent() && next != null) {
 			state.setReturnUrl(next);
@@ -29,7 +29,7 @@ public class TokenAuthenticationResource extends OAuthServerResource {
 		final TokenManager tokenManager = getTokenManager();
 		if (tokenManager != null) {
 			logger.info("Authenticate method called to obtain authorization url");
-			final Reference authUrl = tokenManager.getConfiguration().getOAuthAuthorizationUrl(Optional.of(state));
+			final Reference authUrl = new Reference(tokenManager.getOAuthAuthorizationUrl(Optional.of(state)));
 			getResponse().redirectSeeOther(authUrl);
 		} else {
 			getResponse().setStatus(Status.SERVER_ERROR_INTERNAL);

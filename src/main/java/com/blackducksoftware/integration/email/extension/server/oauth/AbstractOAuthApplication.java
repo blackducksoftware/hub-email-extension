@@ -21,6 +21,7 @@ public abstract class AbstractOAuthApplication extends Application {
 	@Override
 	public Restlet createInboundRoot() {
 		getContext().getAttributes().put(TokenManager.CONTEXT_ATTRIBUTE_KEY, tokenManager);
+		additionalContextConfig();
 		final Router router = new Router(getContext());
 
 		router.attach(OAuthServerConstants.REGISTRATION, ClientIdRegistrationResource.class);
@@ -31,5 +32,8 @@ public abstract class AbstractOAuthApplication extends Application {
 		return router;
 	}
 
+	public abstract void additionalContextConfig();
+
 	public abstract void additionalRouterConfig(final Router router);
+
 }

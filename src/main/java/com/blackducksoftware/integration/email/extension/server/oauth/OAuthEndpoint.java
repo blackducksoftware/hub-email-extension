@@ -9,12 +9,12 @@ import org.restlet.engine.security.AuthenticatorHelper;
 public class OAuthEndpoint extends Component {
 
 	public OAuthEndpoint(final AbstractOAuthApplication application) {
-		super();
 
 		getDefaultHost().attachDefault(application);
 
 		getClients().add(Protocol.FILE);
 		getClients().add(Protocol.HTTP);
+		// TODO look into HTTPS protocol
 		// Prevent warnings about unsupported authentication
 		Engine.getInstance().getRegisteredAuthenticators()
 				.add(new AuthenticatorHelper(ChallengeScheme.HTTP_OAUTH_BEARER, true, false) {

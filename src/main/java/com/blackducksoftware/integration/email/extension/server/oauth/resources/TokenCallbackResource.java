@@ -6,7 +6,7 @@ import org.restlet.data.Reference;
 import org.restlet.data.Status;
 import org.restlet.resource.Get;
 
-import com.blackducksoftware.integration.email.extension.server.oauth.AuthorizationState;
+import com.blackducksoftware.integration.email.extension.server.oauth.StateUrlProcessor;
 import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
 
 public class TokenCallbackResource extends OAuthServerResource {
@@ -18,7 +18,7 @@ public class TokenCallbackResource extends OAuthServerResource {
 			final String authorizationCode = getQuery().getFirstValue("code");
 			final String urlState = getQuery().getFirstValue("state");
 
-			final AuthorizationState state = new AuthorizationState(urlState);
+			final StateUrlProcessor state = new StateUrlProcessor(urlState);
 			final Reference redirectTo;
 
 			if (state.getReturnUrl().isPresent()) {
@@ -37,5 +37,4 @@ public class TokenCallbackResource extends OAuthServerResource {
 			getResponse().setStatus(Status.SERVER_ERROR_INTERNAL, "No token manager available");
 		}
 	}
-
 }

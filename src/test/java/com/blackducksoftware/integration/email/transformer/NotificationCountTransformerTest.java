@@ -66,7 +66,7 @@ public class NotificationCountTransformerTest {
 		final ProjectAggregateData countData = new ProjectAggregateData(new Date(), new Date(), projectVersion,
 				violationList.size(), overrideList.size(), vulnerabilityList.size(), total, sourceIDSize, sourceIDSize,
 				sourceIDSize, componentList);
-		final NotificationCountTransformer transformer = new NotificationCountTransformer();
+		final NotificationCountTransformer transformer = new NotificationCountTransformer(true, true, true, true);
 		final ProjectDigest digest = transformer.transform(countData);
 
 		assertEquals(projectName, digest.getProjectData().get(NotificationCountTransformer.KEY_PROJECT_NAME));

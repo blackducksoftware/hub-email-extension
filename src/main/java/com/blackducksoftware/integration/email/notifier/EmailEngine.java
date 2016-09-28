@@ -3,7 +3,9 @@ package com.blackducksoftware.integration.email.notifier;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -17,7 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.ExtensionLogger;
-import com.blackducksoftware.integration.email.extension.model.ExtensionInfoData;
+import com.blackducksoftware.integration.email.extension.config.ExtensionConfigManager;
+import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.extension.server.RestletApplication;
 import com.blackducksoftware.integration.email.extension.server.oauth.AccessType;
 import com.blackducksoftware.integration.email.extension.server.oauth.OAuthEndpoint;
@@ -33,6 +36,7 @@ import com.blackducksoftware.integration.email.notifier.routers.RouterManager;
 import com.blackducksoftware.integration.email.notifier.routers.WeeklyDigestRouter;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.api.UserRestService;
+import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
 import com.blackducksoftware.integration.hub.exception.EncryptionException;
@@ -65,7 +69,9 @@ public class EmailEngine implements IAuthorizedListener {
 	public final RouterManager routerManager;
 	public final TokenManager tokenManager;
 	public final OAuthEndpoint restletComponent;
-	public final ExtensionInfoData extensionInfoData;
+	public final ExtensionInfo extensionInfoData;
+	public final ExtensionConfigManager extConfigManager;
+	public final ExtensionConfigDataService extConfigDataService;
 
 	public EmailEngine() throws IOException, EncryptionException, URISyntaxException, BDRestException {
 		gson = new Gson();
@@ -76,6 +82,7 @@ public class EmailEngine implements IAuthorizedListener {
 		hubServerConfig = createHubConfig();
 		extensionInfoData = createExtensionInfoData();
 		tokenManager = createTokenManager();
+		extConfigManager = createExtensionConfigManager();
 		restConnection = createRestConnection();
 		javaMailWrapper = createJavaMailWrapper();
 		notificationDateFormat = createNotificationDateFormat();
@@ -84,6 +91,7 @@ public class EmailEngine implements IAuthorizedListener {
 		emailMessagingService = createEmailMessagingService();
 		notificationDataService = createNotificationDataService();
 		userRestService = createUserRestService();
+		extConfigDataService = createExtensionConfigDataService();
 		routerManager = createRouterManager();
 		restletComponent = createRestletComponent();
 	}
@@ -108,8 +116,8 @@ public class EmailEngine implements IAuthorizedListener {
 
 	public Properties createAppProperties() throws IOException {
 		final Properties appProperties = new Properties();
-		final String customerPropertiesPath = System.getProperty("customer.properties");
-		final File customerPropertiesFile = new File(customerPropertiesPath);
+		final String configLocation = System.getProperty("ext.config.location");
+		final File customerPropertiesFile = new File(configLocation, "extension.properties");
 		try (FileInputStream fileInputStream = new FileInputStream(customerPropertiesFile)) {
 			appProperties.load(fileInputStream);
 		}
@@ -190,32 +198,37 @@ public class EmailEngine implements IAuthorizedListener {
 		final RouterManager manager = new RouterManager();
 
 		final DailyDigestRouter dailyRouter = new DailyDigestRouter(customerProperties, notificationDataService,
-				userRestService, emailMessagingService);
+				extConfigDataService, emailMessagingService);
 		final WeeklyDigestRouter weeklyRouter = new WeeklyDigestRouter(customerProperties, notificationDataService,
-				userRestService, emailMessagingService);
+				extConfigDataService, emailMessagingService);
 		final MonthlyDigestRouter monthlyRouter = new MonthlyDigestRouter(customerProperties, notificationDataService,
-				userRestService, emailMessagingService);
+				extConfigDataService, emailMessagingService);
 		manager.attachRouter(dailyRouter);
 		manager.attachRouter(weeklyRouter);
 		manager.attachRouter(monthlyRouter);
 		return manager;
 	}
 
-	public ExtensionInfoData createExtensionInfoData() {
+	public ExtensionInfo createExtensionInfoData() {
 		final String id = customerProperties.getExtensionId();
 		final String name = customerProperties.getExtensionName();
 		final String description = customerProperties.getExtensionDescription();
 		final String baseUrl = customerProperties.getExtensionBaseUrl();
-		final int port = customerProperties.getExtensionPort();
 
-		return new ExtensionInfoData(id, name, description, baseUrl, port);
+		return new ExtensionInfo(id, name, description, baseUrl);
 	}
 
 	public OAuthEndpoint createRestletComponent() {
-		final RestletApplication application = new RestletApplication(tokenManager);
+		final RestletApplication application = new RestletApplication(tokenManager, extConfigManager);
 		final OAuthEndpoint endpoint = new OAuthEndpoint(application);
-		if (extensionInfoData.getPort() > 0) {
-			endpoint.getServers().add(Protocol.HTTP, extensionInfoData.getPort());
+		try {
+			final URL url = new URL(extensionInfoData.getBaseUrl());
+			final int port = url.getPort();
+			if (port > 0) {
+				endpoint.getServers().add(Protocol.HTTP, port);
+			}
+		} catch (final MalformedURLException e) {
+			logger.error("createRestletComponent error with base URL", e);
 		}
 
 		return endpoint;
@@ -227,8 +240,22 @@ public class EmailEngine implements IAuthorizedListener {
 		return tokenManager;
 	}
 
+	public ExtensionConfigManager createExtensionConfigManager() {
+		final ExtensionConfigManager extConfigManager = new ExtensionConfigManager(extensionInfoData, jsonParser);
+		return extConfigManager;
+	}
+
+	public ExtensionConfigDataService createExtensionConfigDataService() {
+		final Logger extensionServiceLogger = LoggerFactory.getLogger(ExtensionConfigDataService.class);
+		final ExtensionLogger serviceLogger = new ExtensionLogger(extensionServiceLogger);
+		final ExtensionConfigDataService extConfigDataService = new ExtensionConfigDataService(serviceLogger,
+				restConnection, gson, jsonParser);
+		return extConfigDataService;
+	}
+
 	@Override
 	public void onAuthorized() {
+		routerManager.updateHubExtensionId(tokenManager.getHubExtensionId());
 		routerManager.startRouters();
 	}
 }
