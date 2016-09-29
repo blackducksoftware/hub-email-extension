@@ -7,6 +7,7 @@ import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -95,8 +96,11 @@ public class RouterManager {
 		// if no interval is defined then don't start the router
 		if (router.getIntervalMilliseconds() > 0) {
 			try {
-				final JobDetail jobDetail = JobBuilder.newJob(router.getClass()).withIdentity("Job-" + router.getName())
-						.build();
+				final JobDataMap jobDataMap = new JobDataMap();
+				jobDataMap.put(RouterJob.JOB_DATA_KEY_ROUTER, router);
+
+				final JobDetail jobDetail = JobBuilder.newJob(RouterJob.class).setJobData(jobDataMap)
+						.withIdentity("Job-" + router.getName()).build();
 				final Trigger trigger = TriggerBuilder.newTrigger().withIdentity("Trigger-" + router.getName())
 						.startNow().withSchedule(SimpleScheduleBuilder.simpleSchedule()
 								.withIntervalInMilliseconds(router.getIntervalMilliseconds()).repeatForever())

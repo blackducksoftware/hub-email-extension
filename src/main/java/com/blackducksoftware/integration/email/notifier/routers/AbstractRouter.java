@@ -2,14 +2,12 @@ package com.blackducksoftware.integration.email.notifier.routers;
 
 import java.util.TimerTask;
 
-import org.quartz.Job;
-
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 
-public abstract class AbstractRouter extends TimerTask implements Job {
+public abstract class AbstractRouter extends TimerTask {
 	private final CustomerProperties customerProperties;
 	private final NotificationDataService notificationDataService;
 	private final ExtensionConfigDataService extensionConfigDataService;

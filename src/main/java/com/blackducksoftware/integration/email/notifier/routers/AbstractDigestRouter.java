@@ -9,8 +9,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,11 +61,6 @@ public abstract class AbstractDigestRouter extends AbstractRouter {
 	public abstract DateRange createDateRange();
 
 	public abstract EmailFrequency getEmailFrequency();
-
-	@Override
-	public void execute(final JobExecutionContext context) throws JobExecutionException {
-		run();
-	}
 
 	@Override
 	public void run() {
