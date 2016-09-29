@@ -5,13 +5,9 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
-
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -120,30 +116,5 @@ public final class StateUrlProcessor {
 		}
 
 		return result;
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(referingPath, returnUrl);
-	}
-
-	@Override
-	public boolean equals(@Nullable final Object obj) {
-		boolean result = false;
-
-		if (obj instanceof StateUrlProcessor) {
-			final StateUrlProcessor compare = (StateUrlProcessor) obj;
-
-			result = Objects.equals(compare.getReferingPath(), getReferingPath())
-					&& Objects.equals(compare.getReturnUrl(), getReturnUrl());
-		}
-
-		return result;
-	}
-
-	@Override
-	public String toString() {
-		return MoreObjects.toStringHelper(getClass()).omitNullValues().add("referingPath", getReferingPath())
-				.add("returnUrl", getReturnUrl()).toString();
 	}
 }

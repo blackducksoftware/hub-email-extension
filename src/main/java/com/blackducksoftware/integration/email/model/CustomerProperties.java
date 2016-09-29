@@ -44,12 +44,12 @@ public class CustomerProperties {
 
 	public static final String JAVAMAIL_CONFIG_PREFIX = "hub.email.javamail.config.";
 	public static final String TEMPLATE_VARIABLE_PREFIX = "hub.email.template.variable.";
-	public static final String ROUTER_PREFIX = "email.service.router.";
-	public static final String TRANSFORMER_CONTENT_ITEM_PREFIX = "email.service.transformer.content.";
+	public static final String ROUTER_PREFIX = "hub.email.service.router.";
+	public static final String TRANSFORMER_CONTENT_ITEM_PREFIX = "hub.email.service.transformer.content.";
 	public static final String OPT_OUT_PREFIX = "hub.email.user.preference.opt.out.";
-	public static final String ROUTER_LAST_RUN_PREFIX = "email.service.router.lastrun.";
-	public static final String ROUTER_VARIABLE_PREFIX = "email.router.variable.";
-	public static final String EXTENSION_PREFIX = "extension.";
+	public static final String ROUTER_LAST_RUN_PREFIX = "hub.email.service.router.lastrun.";
+	public static final String ROUTER_VARIABLE_PREFIX = "hub.email.router.variable.";
+	public static final String EXTENSION_PREFIX = "hub.extension.";
 
 	private final List<String> javamailConfigKeys = new ArrayList<>();
 	private final Map<String, String> suppliedJavamailConfigProperties = new HashMap<>();
