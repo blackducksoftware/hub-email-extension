@@ -1,5 +1,8 @@
 package com.blackducksoftware.integration.email.mock;
 
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.notifier.routers.AbstractRouter;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
@@ -40,5 +43,10 @@ public class MockRouter extends AbstractRouter {
 
 	public boolean hasRun() {
 		return ran;
+	}
+
+	@Override
+	public void execute(final JobExecutionContext context) throws JobExecutionException {
+		run();
 	}
 }
