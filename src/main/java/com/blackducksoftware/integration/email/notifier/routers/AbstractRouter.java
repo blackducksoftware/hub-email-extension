@@ -54,7 +54,7 @@ public abstract class AbstractRouter extends TimerTask {
 
 	public abstract String getTemplateName();
 
-	public abstract long getIntervalMilliseconds();
+	public abstract String getCronExpression();
 
 	public abstract String getRouterPropertyKey();
 

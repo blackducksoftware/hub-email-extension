@@ -52,7 +52,7 @@ public class ItemRouterTest {
 
 	@Test
 	public void testGetInterval() {
-		assertEquals(MockRouter.ROUTER_INTERVAL, router.getIntervalMilliseconds());
+		assertEquals(MockRouter.CRON_EXPRESSION, router.getCronExpression());
 	}
 
 	@Test

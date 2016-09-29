@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.EmailExtensionConstants;
-import com.blackducksoftware.integration.email.EmailFrequency;
+import com.blackducksoftware.integration.email.EmailFrequencyCategory;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.model.EmailTarget;
@@ -37,30 +37,22 @@ public abstract class AbstractDigestRouter extends AbstractRouter {
 	public static final String KEY_TOTAL_VULNERABILITIES = "totalVulnerabilities";
 
 	private final Logger logger = LoggerFactory.getLogger(AbstractDigestRouter.class);
-	private long interval;
+	private final String cronExpression;
 
 	public AbstractDigestRouter(final CustomerProperties customerProperties,
 			final NotificationDataService notificationDataService,
 			final ExtensionConfigDataService extensionConfigDataService,
 			final EmailMessagingService emailMessagingService) {
 		super(customerProperties, notificationDataService, extensionConfigDataService, emailMessagingService);
-		final String intervalPropValue = getCustomerProperties().getRouterVariableProperties()
-				.get(getRouterPropertyKey() + ".interval.in.milliseconds");
-		final String intervalString = StringUtils.trimToNull(intervalPropValue);
-		if (intervalString != null) {
-			try {
-				interval = Long.valueOf(intervalString);
-			} catch (final NumberFormatException e) {
-				interval = 0;
-			}
-		} else {
-			interval = 0;
-		}
+
+		final String quartzTriggerPropValue = getCustomerProperties().getRouterVariableProperties()
+				.get(getRouterPropertyKey() + ".cron.expression");
+		cronExpression = StringUtils.trimToNull(quartzTriggerPropValue);
 	}
 
 	public abstract DateRange createDateRange();
 
-	public abstract EmailFrequency getEmailFrequency();
+	public abstract EmailFrequencyCategory getCategory();
 
 	@Override
 	public void run() {
@@ -76,7 +68,7 @@ public abstract class AbstractDigestRouter extends AbstractRouter {
 				final UserPreferences userPreferences = new UserPreferences(getCustomerProperties());
 				for (final UserConfigItem userConfig : userConfigList) {
 					final boolean optedIn = isOptedIn(userConfig);
-					final boolean frequencyMatch = doesFrequencyMatch(userConfig);
+					final boolean frequencyMatch = doesCategoryMatch(userConfig);
 					if (optedIn && frequencyMatch) {
 						try {
 							// TODO need to simplify this more. too expensive
@@ -147,11 +139,11 @@ public abstract class AbstractDigestRouter extends AbstractRouter {
 		}
 	}
 
-	private boolean doesFrequencyMatch(final UserConfigItem userConfig) {
+	private boolean doesCategoryMatch(final UserConfigItem userConfig) {
 		final String emailFrequency = getSingleConfigValue(userConfig, EmailExtensionConstants.CONFIG_KEY_FREQUENCY);
-		final EmailFrequency configFrequency = EmailFrequency.getEmailFrequency(emailFrequency);
+		final EmailFrequencyCategory configFrequency = EmailFrequencyCategory.getEmailFrequency(emailFrequency);
 
-		return getEmailFrequency() == configFrequency;
+		return getCategory() == configFrequency;
 	}
 
 	private Set<String> getTriggerSet(final UserConfigItem userConfig) {
@@ -185,7 +177,7 @@ public abstract class AbstractDigestRouter extends AbstractRouter {
 	}
 
 	@Override
-	public long getIntervalMilliseconds() {
-		return interval;
+	public String getCronExpression() {
+		return cronExpression;
 	}
 }

@@ -6,12 +6,13 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang3.StringUtils;
+import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
@@ -21,7 +22,6 @@ import org.slf4j.LoggerFactory;
 public class RouterManager {
 	private final Logger logger = LoggerFactory.getLogger(RouterManager.class);
 	private final Map<String, AbstractRouter> routerMap = new ConcurrentHashMap<>();
-	private final Map<String, Trigger> timerMap = new ConcurrentHashMap<>();
 	private Scheduler scheduler;
 
 	public RouterManager() {
@@ -84,7 +84,6 @@ public class RouterManager {
 				for (final Map.Entry<String, AbstractRouter> entry : routerMap.entrySet()) {
 					startRouter(entry.getValue());
 				}
-
 				scheduler.start();
 			} catch (final SchedulerException e) {
 				logger.error("Exception occurred starting scheduler", e);
@@ -94,17 +93,15 @@ public class RouterManager {
 
 	public void startRouter(final AbstractRouter router) {
 		// if no interval is defined then don't start the router
-		if (router.getIntervalMilliseconds() > 0) {
+		if (StringUtils.isNotBlank(router.getCronExpression())) {
 			try {
 				final JobDataMap jobDataMap = new JobDataMap();
 				jobDataMap.put(RouterJob.JOB_DATA_KEY_ROUTER, router);
-
 				final JobDetail jobDetail = JobBuilder.newJob(RouterJob.class).setJobData(jobDataMap)
 						.withIdentity("Job-" + router.getName()).build();
+				final CronScheduleBuilder cronSchedule = CronScheduleBuilder.cronSchedule(router.getCronExpression());
 				final Trigger trigger = TriggerBuilder.newTrigger().withIdentity("Trigger-" + router.getName())
-						.startNow().withSchedule(SimpleScheduleBuilder.simpleSchedule()
-								.withIntervalInMilliseconds(router.getIntervalMilliseconds()).repeatForever())
-						.build();
+						.withSchedule(cronSchedule).forJob(jobDetail).build();
 				scheduler.scheduleJob(jobDetail, trigger);
 			} catch (final SchedulerException e) {
 				logger.error("Error scheduling router to start {}", router.getName(), e);
