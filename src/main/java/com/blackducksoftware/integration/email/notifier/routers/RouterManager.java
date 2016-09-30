@@ -3,15 +3,37 @@ package com.blackducksoftware.integration.email.notifier.routers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.Timer;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class RouterManager {
+import org.apache.commons.lang3.StringUtils;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.impl.StdSchedulerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+public class RouterManager {
+	private final Logger logger = LoggerFactory.getLogger(RouterManager.class);
 	private final Map<String, AbstractRouter> routerMap = new ConcurrentHashMap<>();
-	private final Map<String, Timer> timerMap = new ConcurrentHashMap<>();
+	private Scheduler scheduler;
+
+	public RouterManager() {
+		Scheduler tmpScheduler = null;
+		try {
+			tmpScheduler = StdSchedulerFactory.getDefaultScheduler();
+		} catch (final SchedulerException ex) {
+			logger.error("Error instantiating scheduler", ex);
+		} finally {
+			scheduler = tmpScheduler;
+		}
+	}
 
 	public void updateHubExtensionId(final String hubExtensionId) {
 		for (final Map.Entry<String, AbstractRouter> entry : routerMap.entrySet()) {
@@ -54,41 +76,48 @@ public class RouterManager {
 	}
 
 	public void startRouters() {
-		for (final Map.Entry<String, AbstractRouter> entry : routerMap.entrySet()) {
-			startRouter(entry.getValue());
-		}
-	}
+		if (scheduler == null) {
+			logger.error("scheduler is null; cannot start routers");
+		} else {
 
-	public void startRouter(final AbstractRouter router) {
-		final String routerKey = router.getRouterPropertyKey();
-		if (timerMap.containsKey(routerKey)) {
-			stopRouter(router);
-			timerMap.remove(routerKey);
-		}
-		// if no interval is defined then don't start the router
-		if (router.getIntervalMilliseconds() > 0) {
-			final Timer timer = new Timer("RouterTimer-" + routerKey);
-			timerMap.put(routerKey, timer);
-			timer.scheduleAtFixedRate(router, router.getStartDelayMilliseconds(), router.getIntervalMilliseconds());
-		}
-	}
-
-	public void stopRouters() {
-		final Set<String> routerKeyList = routerMap.keySet();
-		for (final String routerKey : routerKeyList) {
-			if (timerMap.containsKey(routerKey)) {
-				final Timer timer = timerMap.get(routerKey);
-				timer.cancel();
-				timerMap.remove(routerKey);
+			try {
+				for (final Map.Entry<String, AbstractRouter> entry : routerMap.entrySet()) {
+					startRouter(entry.getValue());
+				}
+				scheduler.start();
+			} catch (final SchedulerException e) {
+				logger.error("Exception occurred starting scheduler", e);
 			}
 		}
 	}
 
-	public void stopRouter(final AbstractRouter router) {
-		final String routerKey = router.getRouterPropertyKey();
-		if (timerMap.containsKey(routerKey)) {
-			final Timer timer = timerMap.get(routerKey);
-			timer.cancel();
+	public void startRouter(final AbstractRouter router) {
+		// if no interval is defined then don't start the router
+		if (StringUtils.isNotBlank(router.getCronExpression())) {
+			try {
+				final JobDataMap jobDataMap = new JobDataMap();
+				jobDataMap.put(RouterJob.JOB_DATA_KEY_ROUTER, router);
+				final JobDetail jobDetail = JobBuilder.newJob(RouterJob.class).setJobData(jobDataMap)
+						.withIdentity("Job-" + router.getName()).build();
+				final CronScheduleBuilder cronSchedule = CronScheduleBuilder.cronSchedule(router.getCronExpression());
+				final Trigger trigger = TriggerBuilder.newTrigger().withIdentity("Trigger-" + router.getName())
+						.withSchedule(cronSchedule).forJob(jobDetail).build();
+				scheduler.scheduleJob(jobDetail, trigger);
+			} catch (final SchedulerException e) {
+				logger.error("Error scheduling router to start {}", router.getName(), e);
+			}
+		}
+	}
+
+	public void stopRouters() {
+		try {
+			if (scheduler == null) {
+				logger.error("scheduler is null; cannot shutdown routers");
+			} else {
+				scheduler.shutdown();
+			}
+		} catch (final SchedulerException e) {
+			logger.error("Exception occurred stoping the scheduler", e);
 		}
 	}
 

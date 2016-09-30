@@ -42,7 +42,7 @@
 Dear ${hubUserName},
 <br />
 <br />
-The Black Duck Hub's monitoring system captured the following notification data.
+The Black Duck Hub's ${emailCategory} Digest.
 <br/>
 <ul style="list-style-type: none;">
   <#if projectsDigest?? && projectsDigest.projectList?? && projectsDigest.projectList?size gt 0>

@@ -7,6 +7,7 @@ import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionCon
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 
 public class MockRouter extends AbstractRouter {
+	public static final String CRON_EXPRESSION = "0 0/1 * 1/1 * ? *";
 	public final static long ROUTER_INTERVAL = 5000;
 	private final String templateName;
 	private boolean ran = false;
@@ -29,16 +30,16 @@ public class MockRouter extends AbstractRouter {
 	}
 
 	@Override
-	public long getIntervalMilliseconds() {
-		return ROUTER_INTERVAL;
-	}
-
-	@Override
 	public void run() {
 		ran = true;
 	}
 
 	public boolean hasRun() {
 		return ran;
+	}
+
+	@Override
+	public String getCronExpression() {
+		return CRON_EXPRESSION;
 	}
 }

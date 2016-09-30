@@ -2,7 +2,6 @@ package com.blackducksoftware.integration.email.notifier.routers;
 
 import org.joda.time.DateTime;
 
-import com.blackducksoftware.integration.email.EmailFrequency;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
@@ -36,7 +35,7 @@ public class DailyDigestRouter extends AbstractDigestRouter {
 	}
 
 	@Override
-	public EmailFrequency getEmailFrequency() {
-		return EmailFrequency.DAILY;
+	public String getCategory() {
+		return "Daily";
 	}
 }

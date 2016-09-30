@@ -37,14 +37,16 @@ dependencies {
 	compile 'org.jsoup:jsoup:1.9.2'
 	compile 'javax.mail:mail:1.4.7'
 	compile 'org.freemarker:freemarker:2.3.25-incubating'
+	compile 'org.quartz-scheduler:quartz:2.2.1'
+	compile 'org.quartz-scheduler:quartz-jobs:2.2.1'
 	
 	// hub-extension specific dependencies.
 	compile 'javax.inject:javax.inject:1'
     compile 'com.google.code.findbugs:jsr305:3.0.1'
-	compile 'com.google.guava:guava:19.0'
-	compile 'org.springframework:spring-context:4.2.5.RELEASE'
-	compile 'org.restlet.jse:org.restlet.ext.oauth:2.3.7'
-	compile 'org.restlet.jse:org.restlet.ext.jackson:2.3.7'
+    compile 'com.google.guava:guava:19.0'
+    compile 'org.springframework:spring-context:4.2.5.RELEASE'
+    compile 'org.restlet.jse:org.restlet.ext.oauth:2.3.7'
+    compile 'org.restlet.jse:org.restlet.ext.jackson:2.3.7'
     compile 'com.fasterxml.jackson.core:jackson-annotations:2.4.0'
 	
 	testCompile 'junit:junit:4.12'
@@ -62,15 +64,19 @@ jar {
 				exclude 'log4j.xml'
 				exclude 'config-options.json'
 				exclude 'user-config-options.json'
+				exclude 'quartz.properties'
 			}
 		}
 	}
 }
 
 startScripts {
+  classpath+= files('src/main/resources/quartz.properties')
   doLast {
     unixScript.text = unixScript.text.replace("APP_HOME_VAR_TOKEN", "\$APP_HOME")
     windowsScript.text = windowsScript.text.replace("APP_HOME_VAR_TOKEN", "%APP_HOME%")
+    unixScript.text = unixScript.text.replace("lib/quartz.properties" ,"config/quartz.properties")
+    windowsScript.text = windowsScript.text.replace("lib\\quartz.properties" ,"config\\quartz.properties")
   }
 }
 
@@ -83,6 +89,7 @@ distributions {
             from('src/main/resources/log4j.xml') {into 'config/'}
             from('src/main/resources/config-options.json') {into 'config/'}
             from('src/main/resources/user-config-options.json') {into 'config/'}
+            from('src/main/resources/quartz.properties') {into 'config/'}
         }
     }
 }
