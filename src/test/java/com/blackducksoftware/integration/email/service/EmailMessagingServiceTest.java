@@ -61,7 +61,7 @@ public class EmailMessagingServiceTest {
 		model.put("title", "A Glorious Day");
 		model.put("message", "this should have html and plain text parts");
 		model.put("items", Arrays.asList("apple", "orange", "pear", "banana"));
-		final EmailTarget target = new EmailTarget("testUser@a.domain.com1", "htmlTemplate.ftl", model);
+		final EmailTarget target = new EmailTarget("testUser@a.domain.com1", "sampleTemplate.ftl", model);
 		engine.emailMessagingService.sendEmailMessage(target);
 	}
 
@@ -128,6 +128,7 @@ public class EmailMessagingServiceTest {
 		model.put("hubUserName", "Mr./Ms. Hub User");
 		model.put("notificationCounts", projectsDigest);
 		model.put("hubServerUrl", "http://hub-a.domain.com1/");
+		model.put(AbstractDigestRouter.KEY_CATEGORY, "Daily");
 
 		final EmailTarget target = new EmailTarget("testUser@a.domain.com1", "digest.ftl", model);
 		engine.emailMessagingService.sendEmailMessage(target);

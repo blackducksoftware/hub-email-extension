@@ -13,13 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.EmailExtensionConstants;
-import com.blackducksoftware.integration.email.EmailFrequencyCategory;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.model.EmailTarget;
 import com.blackducksoftware.integration.email.model.ProjectDigest;
 import com.blackducksoftware.integration.email.model.ProjectsDigest;
-import com.blackducksoftware.integration.email.model.UserPreferences;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.transformer.NotificationCountTransformer;
 import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
@@ -35,6 +33,7 @@ public abstract class AbstractDigestRouter extends AbstractRouter {
 	public static final String KEY_TOTAL_POLICY_VIOLATIONS = "totalPolicyViolations";
 	public static final String KEY_TOTAL_POLICY_OVERRIDES = "totalPolicyOverrides";
 	public static final String KEY_TOTAL_VULNERABILITIES = "totalVulnerabilities";
+	public static final String KEY_CATEGORY = "emailCategory";
 
 	private final Logger logger = LoggerFactory.getLogger(AbstractDigestRouter.class);
 	private final String cronExpression;
@@ -52,38 +51,37 @@ public abstract class AbstractDigestRouter extends AbstractRouter {
 
 	public abstract DateRange createDateRange();
 
-	public abstract EmailFrequencyCategory getCategory();
+	public abstract String getCategory();
 
 	@Override
 	public void run() {
 		try {
-			final DateRange dateRange = createDateRange();
-			final Date startDate = dateRange.getStart();
-			final Date endDate = dateRange.getEnd();
-			final List<ProjectAggregateData> notifications = getNotificationDataService()
-					.getNotificationCounts(startDate, endDate);
-			if (!notifications.isEmpty()) {
-				final List<UserConfigItem> userConfigList = getExtensionConfigDataService()
-						.getUserOverrideConfigList(getHubExtensionId());
-				final UserPreferences userPreferences = new UserPreferences(getCustomerProperties());
-				for (final UserConfigItem userConfig : userConfigList) {
-					final boolean optedIn = isOptedIn(userConfig);
-					final boolean frequencyMatch = doesCategoryMatch(userConfig);
-					if (optedIn && frequencyMatch) {
+			final List<UserConfigItem> userConfigList = getExtensionConfigDataService()
+					.getUserOverrideConfigList(getHubExtensionId());
+			final List<UserConfigItem> usersInCategory = createUserListInCategory(userConfigList);
+
+			if (!usersInCategory.isEmpty()) {
+				final DateRange dateRange = createDateRange();
+				final Date startDate = dateRange.getStart();
+				final Date endDate = dateRange.getEnd();
+				final List<ProjectAggregateData> notifications = getNotificationDataService()
+						.getNotificationCounts(startDate, endDate);
+				if (!notifications.isEmpty()) {
+					for (final UserConfigItem userConfig : usersInCategory) {
 						try {
-							// TODO need to simplify this more. too expensive
+							// TODO need to simplify this more. too
+							// expensive
 							final ProjectsDigest projectsDigest = createMap(notifications, userConfig);
 							final Map<String, Object> model = new HashMap<>();
 							model.put(KEY_PROJECT_DIGEST, projectsDigest);
 							model.put(KEY_START_DATE, String.valueOf(startDate));
 							model.put(KEY_END_DATE, String.valueOf(endDate));
 							model.put("hubUserName", userConfig.getUser().getUserName());
+							model.put(KEY_CATEGORY, getCategory());
 							final String emailAddress = userConfig.getUser().getEmail();
 							final String templateName = getTemplateName(userConfig);
 							final EmailTarget emailTarget = new EmailTarget(emailAddress, templateName, model);
-							if (!userPreferences.isOptedOut(emailAddress, templateName)) {
-								getEmailMessagingService().sendEmailMessage(emailTarget);
-							}
+							getEmailMessagingService().sendEmailMessage(emailTarget);
 						} catch (final Exception e) {
 							logger.error("Error sending email to user", e);
 						}
@@ -125,6 +123,20 @@ public abstract class AbstractDigestRouter extends AbstractRouter {
 		return digest;
 	}
 
+	private List<UserConfigItem> createUserListInCategory(final List<UserConfigItem> userConfigList) {
+		final List<UserConfigItem> itemList = new ArrayList<>(userConfigList.size());
+
+		for (final UserConfigItem userConfig : userConfigList) {
+			final boolean optedIn = isOptedIn(userConfig);
+			final boolean categoryMatch = doesCategoryMatch(userConfig);
+			if (optedIn && categoryMatch) {
+				itemList.add(userConfig);
+			}
+		}
+
+		return itemList;
+	}
+
 	private boolean isOptedIn(final UserConfigItem userConfig) {
 		final String value = getSingleConfigValue(userConfig, EmailExtensionConstants.CONFIG_KEY_OPT_IN);
 		return Boolean.parseBoolean(value);
@@ -141,9 +153,7 @@ public abstract class AbstractDigestRouter extends AbstractRouter {
 
 	private boolean doesCategoryMatch(final UserConfigItem userConfig) {
 		final String emailFrequency = getSingleConfigValue(userConfig, EmailExtensionConstants.CONFIG_KEY_FREQUENCY);
-		final EmailFrequencyCategory configFrequency = EmailFrequencyCategory.getEmailFrequency(emailFrequency);
-
-		return getCategory() == configFrequency;
+		return getCategory().equals(emailFrequency);
 	}
 
 	private Set<String> getTriggerSet(final UserConfigItem userConfig) {

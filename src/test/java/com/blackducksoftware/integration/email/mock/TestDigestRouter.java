@@ -7,7 +7,6 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.email.EmailFrequencyCategory;
 import com.blackducksoftware.integration.email.model.CustomerProperties;
 import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.notifier.routers.AbstractDigestRouter;
@@ -62,8 +61,7 @@ public class TestDigestRouter extends AbstractDigestRouter {
 	}
 
 	@Override
-	public EmailFrequencyCategory getCategory() {
-		// TODO Auto-generated method stub
-		return EmailFrequencyCategory.DAILY;
+	public String getCategory() {
+		return "daily";
 	}
 }
