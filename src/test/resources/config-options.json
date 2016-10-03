@@ -24,12 +24,24 @@
             ]
        },
        {
-            "name": "email.reply.to.address=",
+            "name": "email.reply.to.address",
             "optionType": "STRING",
             "title": "Email Reply To Address",
             "required": false,
             "singleValue": true,
             "description": "The email address to reply to if the user chooses to reply",
+            "options": [],
+            "defaultValue": [
+                ""
+            ]
+       },
+       {
+            "name": "hub.email.template.variable.all.templates.subject.line",
+            "optionType": "STRING",
+            "title": "Default Subject Line for All Templates",
+            "required": false,
+            "singleValue": true,
+            "description": "The default Subject line for all templates if none is specified",
             "options": [],
             "defaultValue": [
                 ""

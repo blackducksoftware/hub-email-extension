@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,13 +14,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.EmailExtensionConstants;
-import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.model.EmailTarget;
+import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.model.ProjectDigest;
 import com.blackducksoftware.integration.email.model.ProjectsDigest;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.transformer.NotificationCountTransformer;
+import com.blackducksoftware.integration.hub.api.extension.ConfigurationItem;
 import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservices.extension.items.UserConfigItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
@@ -56,6 +58,7 @@ public abstract class AbstractDigestRouter extends AbstractRouter {
 	@Override
 	public void run() {
 		try {
+			final ExtensionProperties globalConfig = createPropertiesFromGlobalConfig();
 			final List<UserConfigItem> userConfigList = getExtensionConfigDataService()
 					.getUserConfigList(getHubExtensionId());
 			final List<UserConfigItem> usersInCategory = createUserListInCategory(userConfigList);
@@ -81,7 +84,7 @@ public abstract class AbstractDigestRouter extends AbstractRouter {
 							final String emailAddress = userConfig.getUser().getEmail();
 							final String templateName = getTemplateName(userConfig);
 							final EmailTarget emailTarget = new EmailTarget(emailAddress, templateName, model);
-							getEmailMessagingService().sendEmailMessage(emailTarget);
+							getEmailMessagingService().sendEmailMessage(emailTarget, globalConfig);
 						} catch (final Exception e) {
 							logger.error("Error sending email to user", e);
 						}
@@ -179,6 +182,16 @@ public abstract class AbstractDigestRouter extends AbstractRouter {
 		} else {
 			return new ArrayList<>();
 		}
+	}
+
+	private ExtensionProperties createPropertiesFromGlobalConfig() {
+		final Map<String, ConfigurationItem> globalMap = getExtensionConfigDataService()
+				.getGlobalConfigMap(getHubExtensionId());
+		final Properties globalProperties = new Properties();
+		for (final Map.Entry<String, ConfigurationItem> entry : globalMap.entrySet()) {
+			globalProperties.put(entry.getKey(), entry.getValue().getValue().get(0));
+		}
+		return new ExtensionProperties(globalProperties);
 	}
 
 	@Override

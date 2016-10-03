@@ -66,10 +66,22 @@ public class ExtensionProperties {
 
 	public ExtensionProperties(final Properties appProperties) {
 		if (appProperties == null) {
-			throw new IllegalArgumentException("properties argument cannot be null");
+			throw new IllegalArgumentException("appProperties argument cannot be null");
 		}
 		this.appProperties = appProperties;
 		extractProperties(appProperties);
+	}
+
+	public ExtensionProperties(final Properties defaults, final Properties appProperties) {
+		if (defaults == null) {
+			throw new IllegalArgumentException("defaults argument cannot be null");
+		}
+		if (appProperties == null) {
+			throw new IllegalArgumentException("appProperties argument cannot be null");
+		}
+		this.appProperties = new Properties(defaults);
+		this.appProperties.putAll(appProperties);
+		extractProperties(this.appProperties);
 	}
 
 	public void extractProperties(final Properties properties) {
@@ -222,5 +234,9 @@ public class ExtensionProperties {
 
 	public String getExtensionBaseUrl() {
 		return extensionProperties.get(EXTENSION_URL_KEY);
+	}
+
+	public Properties getAppProperties() {
+		return appProperties;
 	}
 }

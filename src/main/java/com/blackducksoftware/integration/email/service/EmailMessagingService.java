@@ -22,8 +22,8 @@ import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.model.EmailTarget;
+import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.model.MimeMultipartBuilder;
 
@@ -37,19 +37,25 @@ import freemarker.template.TemplateNotFoundException;
 public class EmailMessagingService {
 	private final Logger log = LoggerFactory.getLogger(EmailMessagingService.class);
 
-	private final ExtensionProperties customerProperties;
+	private final ExtensionProperties localProperties;
 	private final JavaMailWrapper javaMailWrapper;
 	private final Configuration configuration;
 
 	public EmailMessagingService(final ExtensionProperties customerProperties, final Configuration configuration,
 			final JavaMailWrapper javaMailWrapper) {
-		this.customerProperties = customerProperties;
+		this.localProperties = customerProperties;
 		this.configuration = configuration;
 		this.javaMailWrapper = javaMailWrapper;
 	}
 
 	public void sendEmailMessage(final EmailTarget emailTarget) throws MessagingException, TemplateNotFoundException,
 			MalformedTemplateNameException, ParseException, IOException, TemplateException {
+		sendEmailMessage(emailTarget, null);
+	}
+
+	public void sendEmailMessage(final EmailTarget emailTarget, final ExtensionProperties hubConfiguredProperties)
+			throws MessagingException, TemplateNotFoundException, MalformedTemplateNameException, ParseException,
+			IOException, TemplateException {
 		final String emailAddress = StringUtils.trimToEmpty(emailTarget.getEmailAddress());
 		final String templateName = StringUtils.trimToEmpty(emailTarget.getTemplateName());
 		final Map<String, Object> model = emailTarget.getModel();
@@ -58,9 +64,18 @@ public class EmailMessagingService {
 			return;
 		}
 
-		final Session session = createMailSession(customerProperties);
+		ExtensionProperties properties = localProperties;
+		// use the hub global configuration as default and let the local
+		// properties file value override the values from
+		// the Hub
+		if (hubConfiguredProperties != null) {
+			properties = new ExtensionProperties(hubConfiguredProperties.getAppProperties(),
+					localProperties.getAppProperties());
+		}
+
+		final Session session = createMailSession(properties);
 		final Map<String, String> contentIdsToFilePaths = new HashMap<>();
-		populateModelWithAdditionalProperties(customerProperties, model, templateName, contentIdsToFilePaths);
+		populateModelWithAdditionalProperties(properties, model, templateName, contentIdsToFilePaths);
 		final String html = getResolvedTemplate(model, templateName);
 
 		final MimeMultipartBuilder mimeMultipartBuilder = new MimeMultipartBuilder();
@@ -70,8 +85,8 @@ public class EmailMessagingService {
 		final MimeMultipart mimeMultipart = mimeMultipartBuilder.build();
 
 		final String resolvedSubjectLine = getResolvedSubjectLine(model);
-		final Message message = createMessage(emailAddress, resolvedSubjectLine, session, mimeMultipart);
-		javaMailWrapper.sendMessage(customerProperties, session, message);
+		final Message message = createMessage(emailAddress, resolvedSubjectLine, session, mimeMultipart, properties);
+		javaMailWrapper.sendMessage(properties, session, message);
 	}
 
 	private String getResolvedTemplate(final Map<String, Object> model, final String templateName)
@@ -142,7 +157,7 @@ public class EmailMessagingService {
 	}
 
 	private Message createMessage(final String emailAddress, final String subjectLine, final Session session,
-			final MimeMultipart mimeMultipart) throws MessagingException {
+			final MimeMultipart mimeMultipart, final ExtensionProperties properties) throws MessagingException {
 		final List<InternetAddress> addresses = new ArrayList<>();
 		try {
 			addresses.add(new InternetAddress(emailAddress));
@@ -157,7 +172,7 @@ public class EmailMessagingService {
 		final Message message = new MimeMessage(session);
 		message.setContent(mimeMultipart);
 
-		message.setFrom(new InternetAddress(customerProperties.getEmailFromAddress()));
+		message.setFrom(new InternetAddress(properties.getEmailFromAddress()));
 		message.setRecipients(Message.RecipientType.TO, addresses.toArray(new Address[addresses.size()]));
 		message.setSubject(subjectLine);
 

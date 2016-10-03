@@ -23,8 +23,10 @@ public class HubServerBeanConfiguration {
 	public HubServerConfig build() {
 		final HubServerConfigBuilder configBuilder = new HubServerConfigBuilder();
 		configBuilder.setHubUrl(emailConfig.getHubServerUrl());
-		configBuilder.setUsername(emailConfig.getHubServerUser());
-		configBuilder.setPassword(emailConfig.getHubServerPassword());
+		// using oauth the username and password aren't used but need to be set
+		// for the builder
+		configBuilder.setUsername("auser");
+		configBuilder.setPassword("apassword");
 		configBuilder.setTimeout(emailConfig.getHubServerTimeout());
 		configBuilder.setProxyHost(emailConfig.getHubProxyHost());
 		configBuilder.setProxyPort(emailConfig.getHubProxyPort());
@@ -34,7 +36,6 @@ public class HubServerBeanConfiguration {
 
 		// output the configuration details
 		logger.info("Hub Server URL          = " + configBuilder.getHubUrl());
-		logger.info("Hub User                = " + configBuilder.getUsername());
 		logger.info("Hub Timeout             = " + configBuilder.getTimeout());
 		logger.info("Hub Proxy Host          = " + configBuilder.getProxyHost());
 		logger.info("Hub Proxy Port          = " + configBuilder.getProxyPort());
