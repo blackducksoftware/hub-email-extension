@@ -6,7 +6,7 @@ import javax.mail.Session;
 import javax.mail.Transport;
 
 public class JavaMailWrapper {
-	public void sendMessage(final CustomerProperties customerProperties, final Session session, final Message message)
+	public void sendMessage(final ExtensionProperties customerProperties, final Session session, final Message message)
 			throws MessagingException {
 		if (customerProperties.isAuth()) {
 			sendAuthenticated(customerProperties, message, session);
@@ -15,7 +15,7 @@ public class JavaMailWrapper {
 		}
 	}
 
-	private void sendAuthenticated(final CustomerProperties customerProperties, final Message message,
+	private void sendAuthenticated(final ExtensionProperties customerProperties, final Message message,
 			final Session session) throws MessagingException {
 		final String host = customerProperties.getHost();
 		final int port = customerProperties.getPort();

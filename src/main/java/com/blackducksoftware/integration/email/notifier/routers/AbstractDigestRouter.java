@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.EmailExtensionConstants;
-import com.blackducksoftware.integration.email.model.CustomerProperties;
+import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.model.EmailTarget;
 import com.blackducksoftware.integration.email.model.ProjectDigest;
@@ -38,7 +38,7 @@ public abstract class AbstractDigestRouter extends AbstractRouter {
 	private final Logger logger = LoggerFactory.getLogger(AbstractDigestRouter.class);
 	private final String cronExpression;
 
-	public AbstractDigestRouter(final CustomerProperties customerProperties,
+	public AbstractDigestRouter(final ExtensionProperties customerProperties,
 			final NotificationDataService notificationDataService,
 			final ExtensionConfigDataService extensionConfigDataService,
 			final EmailMessagingService emailMessagingService) {
@@ -57,7 +57,7 @@ public abstract class AbstractDigestRouter extends AbstractRouter {
 	public void run() {
 		try {
 			final List<UserConfigItem> userConfigList = getExtensionConfigDataService()
-					.getUserOverrideConfigList(getHubExtensionId());
+					.getUserConfigList(getHubExtensionId());
 			final List<UserConfigItem> usersInCategory = createUserListInCategory(userConfigList);
 
 			if (!usersInCategory.isEmpty()) {

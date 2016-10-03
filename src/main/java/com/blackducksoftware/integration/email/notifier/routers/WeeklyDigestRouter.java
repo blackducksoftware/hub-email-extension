@@ -2,7 +2,7 @@ package com.blackducksoftware.integration.email.notifier.routers;
 
 import org.joda.time.DateTime;
 
-import com.blackducksoftware.integration.email.model.CustomerProperties;
+import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
@@ -10,7 +10,7 @@ import com.blackducksoftware.integration.hub.dataservices.notification.Notificat
 
 public class WeeklyDigestRouter extends AbstractDigestRouter {
 
-	public WeeklyDigestRouter(final CustomerProperties customerProperties,
+	public WeeklyDigestRouter(final ExtensionProperties customerProperties,
 			final NotificationDataService notificationDataService,
 			final ExtensionConfigDataService extensionConfigDataService,
 			final EmailMessagingService emailMessagingService) {

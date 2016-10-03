@@ -2,19 +2,19 @@ package com.blackducksoftware.integration.email.notifier.routers;
 
 import java.util.TimerTask;
 
-import com.blackducksoftware.integration.email.model.CustomerProperties;
+import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 
 public abstract class AbstractRouter extends TimerTask {
-	private final CustomerProperties customerProperties;
+	private final ExtensionProperties customerProperties;
 	private final NotificationDataService notificationDataService;
 	private final ExtensionConfigDataService extensionConfigDataService;
 	private final EmailMessagingService emailMessagingService;
 	private String hubExtensionId;
 
-	public AbstractRouter(final CustomerProperties customerProperties,
+	public AbstractRouter(final ExtensionProperties customerProperties,
 			final NotificationDataService notificationDataService,
 			final ExtensionConfigDataService extensionConfigDataService,
 			final EmailMessagingService emailMessagingService) {
@@ -24,7 +24,7 @@ public abstract class AbstractRouter extends TimerTask {
 		this.emailMessagingService = emailMessagingService;
 	}
 
-	public CustomerProperties getCustomerProperties() {
+	public ExtensionProperties getCustomerProperties() {
 		return customerProperties;
 	}
 

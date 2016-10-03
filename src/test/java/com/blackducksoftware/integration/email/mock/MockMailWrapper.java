@@ -4,7 +4,7 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 
-import com.blackducksoftware.integration.email.model.CustomerProperties;
+import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 
 public class MockMailWrapper extends JavaMailWrapper {
@@ -18,7 +18,7 @@ public class MockMailWrapper extends JavaMailWrapper {
 	}
 
 	@Override
-	public void sendMessage(final CustomerProperties customerProperties, final Session session, final Message message)
+	public void sendMessage(final ExtensionProperties customerProperties, final Session session, final Message message)
 			throws MessagingException {
 		if (throwException) {
 			throw new MessagingException(MESSAGE_EXCEPTION);

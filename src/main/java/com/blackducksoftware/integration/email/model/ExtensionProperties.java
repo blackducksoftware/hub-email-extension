@@ -9,7 +9,7 @@ import java.util.Properties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
-public class CustomerProperties {
+public class ExtensionProperties {
 	// property keys
 	public final static String EMAIL_FROM_ADDRESS_KEY = "email.from.address";
 	public final static String EMAIL_REPLY_TO_ADDRESS_KEY = "email.reply.to.address";
@@ -64,7 +64,7 @@ public class CustomerProperties {
 	private final Map<String, String> extensionProperties = new HashMap<>();
 	private final Properties appProperties;
 
-	public CustomerProperties(final Properties appProperties) {
+	public ExtensionProperties(final Properties appProperties) {
 		if (appProperties == null) {
 			throw new IllegalArgumentException("properties argument cannot be null");
 		}

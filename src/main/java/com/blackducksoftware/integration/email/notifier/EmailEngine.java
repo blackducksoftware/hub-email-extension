@@ -27,7 +27,7 @@ import com.blackducksoftware.integration.email.extension.server.oauth.OAuthEndpo
 import com.blackducksoftware.integration.email.extension.server.oauth.OAuthRestConnection;
 import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
 import com.blackducksoftware.integration.email.extension.server.oauth.listeners.IAuthorizedListener;
-import com.blackducksoftware.integration.email.model.CustomerProperties;
+import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.model.HubServerBeanConfiguration;
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.notifier.routers.DailyDigestRouter;
@@ -59,7 +59,7 @@ public class EmailEngine implements IAuthorizedListener {
 	public final HubServerConfig hubServerConfig;
 	public final RestConnection restConnection;
 	public final Properties appProperties;
-	public final CustomerProperties customerProperties;
+	public final ExtensionProperties customerProperties;
 	public final NotificationDataService notificationDataService;
 	public final RouterManager routerManager;
 	public final TokenManager tokenManager;
@@ -144,8 +144,8 @@ public class EmailEngine implements IAuthorizedListener {
 		return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), threadFactory);
 	}
 
-	public CustomerProperties createCustomerProperties() {
-		return new CustomerProperties(appProperties);
+	public ExtensionProperties createCustomerProperties() {
+		return new ExtensionProperties(appProperties);
 	}
 
 	public JavaMailWrapper createJavaMailWrapper() {

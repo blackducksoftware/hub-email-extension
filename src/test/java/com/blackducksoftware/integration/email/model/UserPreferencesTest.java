@@ -12,7 +12,7 @@ public class UserPreferencesTest {
 	public void testOptingOutOfAllTemplates() {
 		final Properties properties = new Properties();
 		properties.setProperty("hub.email.user.preference.opt.out.all.templates", "ekerwin@blackducksoftware.com");
-		final CustomerProperties customerProperties = new CustomerProperties(properties);
+		final ExtensionProperties customerProperties = new ExtensionProperties(properties);
 
 		final UserPreferences userPreferences = new UserPreferences(customerProperties);
 		assertTrue(userPreferences.isOptedOut("ekerwin@blackducksoftware.com", "anything"));
@@ -26,7 +26,7 @@ public class UserPreferencesTest {
 		final Properties properties = new Properties();
 		properties.setProperty("hub.email.user.preference.opt.out.specificTemplate.ftl",
 				"ekerwin@blackducksoftware.com");
-		final CustomerProperties customerProperties = new CustomerProperties(properties);
+		final ExtensionProperties customerProperties = new ExtensionProperties(properties);
 
 		final UserPreferences userPreferences = new UserPreferences(customerProperties);
 		assertFalse(userPreferences.isOptedOut("ekerwin@blackducksoftware.com", "anything"));
@@ -40,7 +40,7 @@ public class UserPreferencesTest {
 		final Properties properties = new Properties();
 		properties.setProperty("hub.email.user.preference.opt.out.all.templates",
 				"ekerwin@blackducksoftware.com, psantos@blackducksoftware.com");
-		final CustomerProperties customerProperties = new CustomerProperties(properties);
+		final ExtensionProperties customerProperties = new ExtensionProperties(properties);
 
 		final UserPreferences userPreferences = new UserPreferences(customerProperties);
 		assertTrue(userPreferences.isOptedOut("ekerwin@blackducksoftware.com", "anything"));
@@ -54,7 +54,7 @@ public class UserPreferencesTest {
 		final Properties properties = new Properties();
 		properties.setProperty("hub.email.user.preference.opt.out.specificTemplate.ftl",
 				"ekerwin@blackducksoftware.com,psantos@blackducksoftware.com");
-		final CustomerProperties customerProperties = new CustomerProperties(properties);
+		final ExtensionProperties customerProperties = new ExtensionProperties(properties);
 
 		final UserPreferences userPreferences = new UserPreferences(customerProperties);
 		assertFalse(userPreferences.isOptedOut("ekerwin@blackducksoftware.com", "anything"));
@@ -66,7 +66,7 @@ public class UserPreferencesTest {
 	@Test
 	public void testNoOptOut() {
 		final Properties properties = new Properties();
-		final CustomerProperties customerProperties = new CustomerProperties(properties);
+		final ExtensionProperties customerProperties = new ExtensionProperties(properties);
 
 		final UserPreferences userPreferences = new UserPreferences(customerProperties);
 		assertFalse(userPreferences.isOptedOut("ekerwin@blackducksoftware.com", "anything"));

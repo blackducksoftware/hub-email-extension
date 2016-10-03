@@ -13,7 +13,7 @@ public class FileMailWrapper extends JavaMailWrapper {
 	private int index = 0;
 
 	@Override
-	public void sendMessage(final CustomerProperties customerProperties, final Session session, final Message message)
+	public void sendMessage(final ExtensionProperties customerProperties, final Session session, final Message message)
 			throws MessagingException {
 		final File parent = new File(customerProperties.getEmailTemplateDirectory());
 		final File messagesDir = new File(parent.getParentFile(), "Test_Messages");

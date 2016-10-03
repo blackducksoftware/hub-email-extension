@@ -11,7 +11,7 @@ public class UserPreferences {
 	private final Set<String> globalOptedOutEmailAddresses = new HashSet<>();
 	private final Map<String, Set<String>> emailAddressToOptedOutTemplates = new HashMap<>();
 
-	public UserPreferences(final CustomerProperties customerProperties) {
+	public UserPreferences(final ExtensionProperties customerProperties) {
 		final Map<String, String> optOutProperties = customerProperties.getOptOutProperties();
 		for (final String templateName : optOutProperties.keySet()) {
 			final String emailAddressesValue = optOutProperties.get(templateName);

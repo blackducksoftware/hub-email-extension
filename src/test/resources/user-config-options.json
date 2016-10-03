@@ -20,8 +20,7 @@
             "description": "how often the Hub should be checked for notifications that might trigger emails",
             "options": [
                 {"name": "Daily", "title": "Daily" },
-                {"name": "Weekly", "title": "Weekly" },
-                {"name": "Monthly", "title": "Monthly" }
+                {"name": "Weekly", "title": "Weekly" }
             ],
             "defaultValue": [
                 "Weekly"

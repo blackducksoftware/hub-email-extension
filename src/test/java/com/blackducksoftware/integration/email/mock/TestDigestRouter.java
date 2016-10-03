@@ -7,7 +7,7 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.email.model.CustomerProperties;
+import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.notifier.routers.AbstractDigestRouter;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
@@ -20,7 +20,7 @@ public class TestDigestRouter extends AbstractDigestRouter {
 	private final String lastRunPath;
 	private final String initialStartDate;
 
-	public TestDigestRouter(final CustomerProperties customerProperties,
+	public TestDigestRouter(final ExtensionProperties customerProperties,
 			final NotificationDataService notificationDataService,
 			final ExtensionConfigDataService extensionConfigDataService,
 			final EmailMessagingService emailMessagingService) {

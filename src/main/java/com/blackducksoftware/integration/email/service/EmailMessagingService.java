@@ -22,7 +22,7 @@ import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.email.model.CustomerProperties;
+import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.model.EmailTarget;
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.model.MimeMultipartBuilder;
@@ -37,11 +37,11 @@ import freemarker.template.TemplateNotFoundException;
 public class EmailMessagingService {
 	private final Logger log = LoggerFactory.getLogger(EmailMessagingService.class);
 
-	private final CustomerProperties customerProperties;
+	private final ExtensionProperties customerProperties;
 	private final JavaMailWrapper javaMailWrapper;
 	private final Configuration configuration;
 
-	public EmailMessagingService(final CustomerProperties customerProperties, final Configuration configuration,
+	public EmailMessagingService(final ExtensionProperties customerProperties, final Configuration configuration,
 			final JavaMailWrapper javaMailWrapper) {
 		this.customerProperties = customerProperties;
 		this.configuration = configuration;
@@ -94,7 +94,7 @@ public class EmailMessagingService {
 		return stringWriter.toString();
 	}
 
-	private void populateModelWithAdditionalProperties(final CustomerProperties customerProperties,
+	private void populateModelWithAdditionalProperties(final ExtensionProperties customerProperties,
 			final Map<String, Object> model, final String templateName,
 			final Map<String, String> contentIdsToFilePaths) {
 		for (final Map.Entry<String, String> entry : customerProperties.getSuppliedTemplateVariableProperties()
@@ -133,7 +133,7 @@ public class EmailMessagingService {
 		}
 	}
 
-	private Session createMailSession(final CustomerProperties customerProperties) {
+	private Session createMailSession(final ExtensionProperties customerProperties) {
 		final Map<String, String> sessionProps = customerProperties.getPropertiesForSession();
 		final Properties props = new Properties();
 		props.putAll(sessionProps);
