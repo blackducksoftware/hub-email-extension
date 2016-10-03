@@ -65,6 +65,7 @@ jar {
 				exclude 'config-options.json'
 				exclude 'user-config-options.json'
 				exclude 'quartz.properties'
+				exclude 'email_extension.sh'
 			}
 		}
 	}
@@ -90,6 +91,7 @@ distributions {
             from('src/main/resources/config-options.json') {into 'config/'}
             from('src/main/resources/user-config-options.json') {into 'config/'}
             from('src/main/resources/quartz.properties') {into 'config/'}
+            from('src/main/resources/email_extension.sh') {into 'bin/'}
         }
     }
 }
