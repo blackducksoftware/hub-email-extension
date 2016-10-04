@@ -79,7 +79,8 @@ public class ExtensionProperties {
 		if (appProperties == null) {
 			throw new IllegalArgumentException("appProperties argument cannot be null");
 		}
-		this.appProperties = new Properties(defaults);
+		this.appProperties = new Properties();
+		this.appProperties.putAll(defaults);
 		this.appProperties.putAll(appProperties);
 		extractProperties(this.appProperties);
 	}
