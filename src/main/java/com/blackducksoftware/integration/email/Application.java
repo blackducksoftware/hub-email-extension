@@ -3,8 +3,6 @@ package com.blackducksoftware.integration.email;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.email.notifier.EmailEngine;
-
 public class Application {
 	private final static Logger logger = LoggerFactory.getLogger(Application.class);
 

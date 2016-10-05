@@ -1,4 +1,4 @@
-package com.blackducksoftware.integration.email.notifier.routers;
+package com.blackducksoftware.integration.email.notifier;
 
 import java.util.TimerTask;
 
@@ -7,14 +7,14 @@ import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 
-public abstract class AbstractRouter extends TimerTask {
+public abstract class AbstractNotifier extends TimerTask {
 	private final ExtensionProperties customerProperties;
 	private final NotificationDataService notificationDataService;
 	private final ExtensionConfigDataService extensionConfigDataService;
 	private final EmailMessagingService emailMessagingService;
 	private String hubExtensionId;
 
-	public AbstractRouter(final ExtensionProperties customerProperties,
+	public AbstractNotifier(final ExtensionProperties customerProperties,
 			final NotificationDataService notificationDataService,
 			final ExtensionConfigDataService extensionConfigDataService,
 			final EmailMessagingService emailMessagingService) {
@@ -56,7 +56,7 @@ public abstract class AbstractRouter extends TimerTask {
 
 	public abstract String getCronExpression();
 
-	public abstract String getRouterPropertyKey();
+	public abstract String getNotifierPropertyKey();
 
 	public long getStartDelayMilliseconds() {
 		return 0;

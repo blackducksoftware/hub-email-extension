@@ -1,4 +1,4 @@
-package com.blackducksoftware.integration.email.notifier.routers;
+package com.blackducksoftware.integration.email.notifier;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,7 +27,7 @@ import com.blackducksoftware.integration.hub.dataservices.extension.items.UserCo
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.ProjectAggregateData;
 
-public abstract class AbstractDigestRouter extends AbstractRouter {
+public abstract class AbstractDigestNotifier extends AbstractNotifier {
 	private static final String KEY_PROJECT_DIGEST = "projectsDigest";
 	public static final String KEY_START_DATE = "startDate";
 	public static final String KEY_END_DATE = "endDate";
@@ -37,17 +37,17 @@ public abstract class AbstractDigestRouter extends AbstractRouter {
 	public static final String KEY_TOTAL_VULNERABILITIES = "totalVulnerabilities";
 	public static final String KEY_CATEGORY = "emailCategory";
 
-	private final Logger logger = LoggerFactory.getLogger(AbstractDigestRouter.class);
+	private final Logger logger = LoggerFactory.getLogger(AbstractDigestNotifier.class);
 	private final String cronExpression;
 
-	public AbstractDigestRouter(final ExtensionProperties customerProperties,
+	public AbstractDigestNotifier(final ExtensionProperties customerProperties,
 			final NotificationDataService notificationDataService,
 			final ExtensionConfigDataService extensionConfigDataService,
 			final EmailMessagingService emailMessagingService) {
 		super(customerProperties, notificationDataService, extensionConfigDataService, emailMessagingService);
 
-		final String quartzTriggerPropValue = getCustomerProperties().getRouterVariableProperties()
-				.get(getRouterPropertyKey() + ".cron.expression");
+		final String quartzTriggerPropValue = getCustomerProperties().getNotifierVariableProperties()
+				.get(getNotifierPropertyKey() + ".cron.expression");
 		cronExpression = StringUtils.trimToNull(quartzTriggerPropValue);
 	}
 

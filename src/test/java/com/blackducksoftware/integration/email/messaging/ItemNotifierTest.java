@@ -10,13 +10,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.blackducksoftware.integration.email.mock.MockRouter;
+import com.blackducksoftware.integration.email.EmailEngine;
+import com.blackducksoftware.integration.email.mock.MockNotifier;
 import com.blackducksoftware.integration.email.mock.TestEmailEngine;
-import com.blackducksoftware.integration.email.notifier.EmailEngine;
 
-public class ItemRouterTest {
-	private final static String ROUTER_KEY = "router.key";
-	private MockRouter router;
+public class ItemNotifierTest {
+	private final static String NOTIFIER_KEY = "notifier.key";
+	private MockNotifier notifier;
 	private EmailEngine engine;
 
 	@Before
@@ -26,8 +26,8 @@ public class ItemRouterTest {
 		final File file = new File(propFileUrl.toURI());
 		System.setProperty("ext.config.location", file.getCanonicalFile().getParent());
 		engine = new TestEmailEngine();
-		router = new MockRouter(engine.customerProperties, engine.notificationDataService, engine.extConfigDataService,
-				engine.emailMessagingService, ROUTER_KEY);
+		notifier = new MockNotifier(engine.customerProperties, engine.notificationDataService,
+				engine.extConfigDataService, engine.emailMessagingService, NOTIFIER_KEY);
 	}
 
 	@After
@@ -37,32 +37,32 @@ public class ItemRouterTest {
 
 	@Test
 	public void testGetName() {
-		assertEquals(MockRouter.class.getName(), router.getName());
+		assertEquals(MockNotifier.class.getName(), notifier.getName());
 	}
 
 	@Test
-	public void testGetRouterTemplateName() {
-		assertEquals(ROUTER_KEY, router.getTemplateName());
+	public void testGetNotifierTemplateName() {
+		assertEquals(NOTIFIER_KEY, notifier.getTemplateName());
 	}
 
 	@Test
-	public void testGetRouterPropKey() {
-		assertEquals(ROUTER_KEY, router.getRouterPropertyKey());
+	public void testGetNotifierPropKey() {
+		assertEquals(NOTIFIER_KEY, notifier.getNotifierPropertyKey());
 	}
 
 	@Test
 	public void testGetInterval() {
-		assertEquals(MockRouter.CRON_EXPRESSION, router.getCronExpression());
+		assertEquals(MockNotifier.CRON_EXPRESSION, notifier.getCronExpression());
 	}
 
 	@Test
 	public void testGetDelay() {
-		assertEquals(0, router.getStartDelayMilliseconds());
+		assertEquals(0, notifier.getStartDelayMilliseconds());
 	}
 
 	@Test
 	public void testRun() {
-		router.run();
-		assertTrue(router.hasRun());
+		notifier.run();
+		assertTrue(notifier.hasRun());
 	}
 }

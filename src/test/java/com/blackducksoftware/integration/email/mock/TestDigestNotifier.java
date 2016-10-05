@@ -8,27 +8,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
+import com.blackducksoftware.integration.email.notifier.AbstractDigestNotifier;
 import com.blackducksoftware.integration.email.model.DateRange;
-import com.blackducksoftware.integration.email.notifier.routers.AbstractDigestRouter;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 
-public class TestDigestRouter extends AbstractDigestRouter {
-	private final Logger logger = LoggerFactory.getLogger(TestDigestRouter.class);
+public class TestDigestNotifier extends AbstractDigestNotifier {
+	private final Logger logger = LoggerFactory.getLogger(TestDigestNotifier.class);
 	private final String lastRunPath;
 	private final String initialStartDate;
 
-	public TestDigestRouter(final ExtensionProperties customerProperties,
+	public TestDigestNotifier(final ExtensionProperties customerProperties,
 			final NotificationDataService notificationDataService,
 			final ExtensionConfigDataService extensionConfigDataService,
 			final EmailMessagingService emailMessagingService) {
 		super(customerProperties, notificationDataService, extensionConfigDataService, emailMessagingService);
-		lastRunPath = getCustomerProperties().getRouterVariableProperties()
-				.get(getRouterPropertyKey() + ".lastrun.file");
-		initialStartDate = getCustomerProperties().getRouterVariableProperties()
-				.get(getRouterPropertyKey() + ".start.date");
+		lastRunPath = getCustomerProperties().getNotifierVariableProperties()
+				.get(getNotifierPropertyKey() + ".lastrun.file");
+		initialStartDate = getCustomerProperties().getNotifierVariableProperties()
+				.get(getNotifierPropertyKey() + ".start.date");
 	}
 
 	@Override
@@ -56,7 +56,7 @@ public class TestDigestRouter extends AbstractDigestRouter {
 	}
 
 	@Override
-	public String getRouterPropertyKey() {
+	public String getNotifierPropertyKey() {
 		return "digest";
 	}
 

@@ -1,4 +1,4 @@
-package com.blackducksoftware.integration.email.notifier.routers;
+package com.blackducksoftware.integration.email.notifier;
 
 import org.joda.time.DateTime;
 
@@ -8,9 +8,9 @@ import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 
-public class MonthlyDigestRouter extends AbstractDigestRouter {
+public class DailyDigestNotifier extends AbstractDigestNotifier {
 
-	public MonthlyDigestRouter(final ExtensionProperties customerProperties,
+	public DailyDigestNotifier(final ExtensionProperties customerProperties,
 			final NotificationDataService notificationDataService,
 			final ExtensionConfigDataService extensionConfigDataService,
 			final EmailMessagingService emailMessagingService) {
@@ -19,26 +19,23 @@ public class MonthlyDigestRouter extends AbstractDigestRouter {
 
 	@Override
 	public DateRange createDateRange() {
-		DateTime end = new DateTime();
+		DateTime end = new DateTime().minusDays(1);
 		end = end.withHourOfDay(23);
 		end = end.withMinuteOfHour(59);
 		end = end.withSecondOfMinute(59);
 		end = end.withMillisOfSecond(999);
-
-		DateTime start = end.withTimeAtStartOfDay();
-		start = start.minusMonths(1);
+		final DateTime start = end.withTimeAtStartOfDay();
 
 		return new DateRange(start.toDate(), end.toDate());
-
 	}
 
 	@Override
-	public String getRouterPropertyKey() {
-		return "monthlyDigest";
+	public String getNotifierPropertyKey() {
+		return "dailyDigest";
 	}
 
 	@Override
 	public String getCategory() {
-		return "Monthly";
+		return "Daily";
 	}
 }

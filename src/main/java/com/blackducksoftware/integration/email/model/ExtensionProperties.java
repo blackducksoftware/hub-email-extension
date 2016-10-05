@@ -44,11 +44,11 @@ public class ExtensionProperties {
 
 	public static final String JAVAMAIL_CONFIG_PREFIX = "hub.email.javamail.config.";
 	public static final String TEMPLATE_VARIABLE_PREFIX = "hub.email.template.variable.";
-	public static final String ROUTER_PREFIX = "hub.email.service.router.";
+	public static final String NOTIFIER_PREFIX = "hub.email.service.notifier.";
 	public static final String TRANSFORMER_CONTENT_ITEM_PREFIX = "hub.email.service.transformer.content.";
 	public static final String OPT_OUT_PREFIX = "hub.email.user.preference.opt.out.";
-	public static final String ROUTER_LAST_RUN_PREFIX = "hub.email.service.router.lastrun.";
-	public static final String ROUTER_VARIABLE_PREFIX = "hub.email.router.variable.";
+	public static final String NOTIFIER_LAST_RUN_PREFIX = "hub.email.service.notifier.lastrun.";
+	public static final String NOTIFIER_VARIABLE_PREFIX = "hub.email.notifier.variable.";
 	public static final String EXTENSION_PREFIX = "hub.extension.";
 
 	private final List<String> javamailConfigKeys = new ArrayList<>();
@@ -57,9 +57,9 @@ public class ExtensionProperties {
 	private final List<String> templateVariableKeys = new ArrayList<>();
 	private final Map<String, String> suppliedTemplateVariableProperties = new HashMap<>();
 
-	private final List<String> routerClassNames = new ArrayList<>();
+	private final List<String> notifierClassNames = new ArrayList<>();
 	private final Map<String, String> optOutProperties = new HashMap<>();
-	private final Map<String, String> routerVariableProperties = new HashMap<>();
+	private final Map<String, String> notifierVariableProperties = new HashMap<>();
 	private final List<String> extensionConfigKeys = new ArrayList<>();
 	private final Map<String, String> extensionProperties = new HashMap<>();
 	private final Properties appProperties;
@@ -103,14 +103,14 @@ public class ExtensionProperties {
 						templateVariableKeys.add(key);
 						final String cleanedKey = key.replace(TEMPLATE_VARIABLE_PREFIX, "");
 						suppliedTemplateVariableProperties.put(cleanedKey, value);
-					} else if (key.startsWith(ROUTER_PREFIX)) {
-						routerClassNames.add(value);
+					} else if (key.startsWith(NOTIFIER_PREFIX)) {
+						notifierClassNames.add(value);
 					} else if (key.startsWith(OPT_OUT_PREFIX)) {
 						final String cleanedKey = key.replace(OPT_OUT_PREFIX, "");
 						optOutProperties.put(cleanedKey, value);
-					} else if (key.startsWith(ROUTER_VARIABLE_PREFIX)) {
-						final String cleanedKey = key.replace(ROUTER_VARIABLE_PREFIX, "");
-						routerVariableProperties.put(cleanedKey, value);
+					} else if (key.startsWith(NOTIFIER_VARIABLE_PREFIX)) {
+						final String cleanedKey = key.replace(NOTIFIER_VARIABLE_PREFIX, "");
+						notifierVariableProperties.put(cleanedKey, value);
 					}
 				}
 			}
@@ -205,8 +205,8 @@ public class ExtensionProperties {
 		return appProperties.getProperty(EMAIL_TEMPLATE_DIRECTORY);
 	}
 
-	public List<String> getRouterClassNames() {
-		return routerClassNames;
+	public List<String> getNotifierClassNames() {
+		return notifierClassNames;
 	}
 
 	public Map<String, String> getOptOutProperties() {
@@ -217,8 +217,8 @@ public class ExtensionProperties {
 		return appProperties.getProperty(key);
 	}
 
-	public Map<String, String> getRouterVariableProperties() {
-		return routerVariableProperties;
+	public Map<String, String> getNotifierVariableProperties() {
+		return notifierVariableProperties;
 	}
 
 	public String getExtensionId() {

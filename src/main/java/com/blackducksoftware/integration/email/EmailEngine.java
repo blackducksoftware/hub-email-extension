@@ -1,4 +1,4 @@
-package com.blackducksoftware.integration.email.notifier;
+package com.blackducksoftware.integration.email;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,7 +18,6 @@ import org.restlet.data.Protocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.email.ExtensionLogger;
 import com.blackducksoftware.integration.email.extension.config.ExtensionConfigManager;
 import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.extension.server.RestletApplication;
@@ -30,10 +29,9 @@ import com.blackducksoftware.integration.email.extension.server.oauth.listeners.
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.model.HubServerBeanConfiguration;
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
-import com.blackducksoftware.integration.email.notifier.routers.DailyDigestRouter;
-import com.blackducksoftware.integration.email.notifier.routers.MonthlyDigestRouter;
-import com.blackducksoftware.integration.email.notifier.routers.RouterManager;
-import com.blackducksoftware.integration.email.notifier.routers.WeeklyDigestRouter;
+import com.blackducksoftware.integration.email.notifier.DailyDigestNotifier;
+import com.blackducksoftware.integration.email.notifier.NotifierManager;
+import com.blackducksoftware.integration.email.notifier.WeeklyDigestNotifier;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.dataservices.DataServicesFactory;
 import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
@@ -61,7 +59,7 @@ public class EmailEngine implements IAuthorizedListener {
 	public final Properties appProperties;
 	public final ExtensionProperties customerProperties;
 	public final NotificationDataService notificationDataService;
-	public final RouterManager routerManager;
+	public final NotifierManager notifierManager;
 	public final TokenManager tokenManager;
 	public final OAuthEndpoint restletComponent;
 	public final ExtensionInfo extensionInfoData;
@@ -86,7 +84,7 @@ public class EmailEngine implements IAuthorizedListener {
 		emailMessagingService = createEmailMessagingService();
 		notificationDataService = createNotificationDataService();
 		extConfigDataService = createExtensionConfigDataService();
-		routerManager = createRouterManager();
+		notifierManager = createNotifierManager();
 		restletComponent = createRestletComponent();
 	}
 
@@ -101,7 +99,7 @@ public class EmailEngine implements IAuthorizedListener {
 
 	public void shutDown() {
 		try {
-			routerManager.stopRouters();
+			notifierManager.stop();
 			restletComponent.stop();
 		} catch (final Exception e) {
 			logger.error("Error stopping Email Engine", e);
@@ -183,18 +181,19 @@ public class EmailEngine implements IAuthorizedListener {
 		return restConnection;
 	}
 
-	public RouterManager createRouterManager() {
-		final RouterManager manager = new RouterManager();
+	public NotifierManager createNotifierManager() {
+		final NotifierManager manager = new NotifierManager();
 
-		final DailyDigestRouter dailyRouter = new DailyDigestRouter(customerProperties, notificationDataService,
+		final DailyDigestNotifier dailyNotifier = new DailyDigestNotifier(customerProperties, notificationDataService,
 				extConfigDataService, emailMessagingService);
-		final WeeklyDigestRouter weeklyRouter = new WeeklyDigestRouter(customerProperties, notificationDataService,
-				extConfigDataService, emailMessagingService);
-		final MonthlyDigestRouter monthlyRouter = new MonthlyDigestRouter(customerProperties, notificationDataService,
-				extConfigDataService, emailMessagingService);
-		manager.attachRouter(dailyRouter);
-		manager.attachRouter(weeklyRouter);
-		manager.attachRouter(monthlyRouter);
+		final WeeklyDigestNotifier weeklyNotifier = new WeeklyDigestNotifier(customerProperties,
+				notificationDataService, extConfigDataService, emailMessagingService);
+		// final MonthlyDigestNotifier monthlyNotifier = new
+		// MonthlyDigestNotifier(customerProperties, notificationDataService,
+		// extConfigDataService, emailMessagingService);
+		manager.attach(dailyNotifier);
+		manager.attach(weeklyNotifier);
+		// manager.attach(monthlyNotifier);
 		return manager;
 	}
 
@@ -249,7 +248,7 @@ public class EmailEngine implements IAuthorizedListener {
 
 	@Override
 	public void onAuthorized() {
-		routerManager.updateHubExtensionId(tokenManager.getHubExtensionId());
-		routerManager.startRouters();
+		notifierManager.updateHubExtensionId(tokenManager.getHubExtensionId());
+		notifierManager.start();
 	}
 }

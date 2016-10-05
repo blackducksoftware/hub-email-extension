@@ -16,12 +16,12 @@ import javax.mail.MessagingException;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.blackducksoftware.integration.email.EmailEngine;
 import com.blackducksoftware.integration.email.mock.TestEmailEngine;
 import com.blackducksoftware.integration.email.model.EmailTarget;
 import com.blackducksoftware.integration.email.model.ProjectDigest;
 import com.blackducksoftware.integration.email.model.ProjectsDigest;
-import com.blackducksoftware.integration.email.notifier.EmailEngine;
-import com.blackducksoftware.integration.email.notifier.routers.AbstractDigestRouter;
+import com.blackducksoftware.integration.email.notifier.AbstractDigestNotifier;
 import com.blackducksoftware.integration.email.transformer.NotificationCountTransformer;
 import com.blackducksoftware.integration.hub.api.notification.VulnerabilitySourceQualifiedId;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
@@ -38,7 +38,7 @@ import freemarker.template.TemplateException;
 public class EmailMessagingServiceTest {
 
 	private EmailEngine engine;
-	private AbstractDigestRouter digestRouter;
+	private AbstractDigestNotifier digestNotifier;
 	private EmailMessagingService emailMessagingService;
 
 	@Before
@@ -51,7 +51,7 @@ public class EmailMessagingServiceTest {
 	}
 
 	@Test
-	public void testRouter() throws Exception {
+	public void testNotifier() throws Exception {
 		engine.start();
 	}
 
@@ -113,12 +113,12 @@ public class EmailMessagingServiceTest {
 		projectData.add(digest);
 
 		final Map<String, String> totalsMap = new HashMap<>();
-		totalsMap.put(AbstractDigestRouter.KEY_TOTAL_NOTIFICATIONS, String.valueOf(countData.getTotal()));
-		totalsMap.put(AbstractDigestRouter.KEY_TOTAL_POLICY_VIOLATIONS,
+		totalsMap.put(AbstractDigestNotifier.KEY_TOTAL_NOTIFICATIONS, String.valueOf(countData.getTotal()));
+		totalsMap.put(AbstractDigestNotifier.KEY_TOTAL_POLICY_VIOLATIONS,
 				String.valueOf(countData.getPolicyViolationCount()));
-		totalsMap.put(AbstractDigestRouter.KEY_TOTAL_POLICY_OVERRIDES,
+		totalsMap.put(AbstractDigestNotifier.KEY_TOTAL_POLICY_OVERRIDES,
 				String.valueOf(countData.getPolicyOverrideCount()));
-		totalsMap.put(AbstractDigestRouter.KEY_TOTAL_VULNERABILITIES,
+		totalsMap.put(AbstractDigestNotifier.KEY_TOTAL_VULNERABILITIES,
 				String.valueOf(countData.getVulnerabilityCount()));
 		final ProjectsDigest projectsDigest = new ProjectsDigest(totalsMap, projectData);
 
@@ -128,7 +128,7 @@ public class EmailMessagingServiceTest {
 		model.put("hubUserName", "Mr./Ms. Hub User");
 		model.put("notificationCounts", projectsDigest);
 		model.put("hubServerUrl", "http://hub-a.domain.com1/");
-		model.put(AbstractDigestRouter.KEY_CATEGORY, "Daily");
+		model.put(AbstractDigestNotifier.KEY_CATEGORY, "Daily");
 
 		final EmailTarget target = new EmailTarget("testUser@a.domain.com1", "digest.ftl", model);
 		engine.emailMessagingService.sendEmailMessage(target);

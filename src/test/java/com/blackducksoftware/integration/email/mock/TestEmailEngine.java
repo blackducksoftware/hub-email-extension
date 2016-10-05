@@ -8,9 +8,9 @@ import java.net.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.email.EmailEngine;
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
-import com.blackducksoftware.integration.email.notifier.EmailEngine;
-import com.blackducksoftware.integration.email.notifier.routers.RouterManager;
+import com.blackducksoftware.integration.email.notifier.NotifierManager;
 import com.blackducksoftware.integration.hub.builder.HubProxyInfoBuilder;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyNotificationFilter;
@@ -67,16 +67,16 @@ public class TestEmailEngine extends EmailEngine {
 	}
 
 	@Override
-	public RouterManager createRouterManager() {
-		final RouterManager manager = new RouterManager();
-		final TestDigestRouter digestRouter = new TestDigestRouter(customerProperties, notificationDataService,
+	public NotifierManager createNotifierManager() {
+		final NotifierManager manager = new NotifierManager();
+		final TestDigestNotifier digestNotifier = new TestDigestNotifier(customerProperties, notificationDataService,
 				extConfigDataService, emailMessagingService);
-		manager.attachRouter(digestRouter);
+		manager.attach(digestNotifier);
 		return manager;
 	}
 
 	@Override
 	public void start() {
-		routerManager.startRouters();
+		notifierManager.start();
 	}
 }

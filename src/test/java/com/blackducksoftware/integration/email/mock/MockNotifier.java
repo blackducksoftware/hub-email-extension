@@ -1,18 +1,18 @@
 package com.blackducksoftware.integration.email.mock;
 
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
-import com.blackducksoftware.integration.email.notifier.routers.AbstractRouter;
+import com.blackducksoftware.integration.email.notifier.AbstractNotifier;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 
-public class MockRouter extends AbstractRouter {
+public class MockNotifier extends AbstractNotifier {
 	public static final String CRON_EXPRESSION = "0 0/1 * 1/1 * ? *";
-	public final static long ROUTER_INTERVAL = 5000;
+	public final static long NOTIFIER_INTERVAL = 5000;
 	private final String templateName;
 	private boolean ran = false;
 
-	public MockRouter(final ExtensionProperties customerProperties, final NotificationDataService notificationService,
+	public MockNotifier(final ExtensionProperties customerProperties, final NotificationDataService notificationService,
 			final ExtensionConfigDataService extensionConfigDataService,
 			final EmailMessagingService emailMessagingService, final String templateName) {
 		super(customerProperties, notificationService, extensionConfigDataService, emailMessagingService);
@@ -25,7 +25,7 @@ public class MockRouter extends AbstractRouter {
 	}
 
 	@Override
-	public String getRouterPropertyKey() {
+	public String getNotifierPropertyKey() {
 		return templateName;
 	}
 
