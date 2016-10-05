@@ -6,7 +6,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
@@ -23,8 +22,6 @@ import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.extension.server.oauth.listeners.IAuthorizedListener;
-import com.blackducksoftware.integration.hub.exception.MissingUUIDException;
-import com.blackducksoftware.integration.hub.util.HubUrlParser;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
@@ -49,21 +46,6 @@ public class TokenManager {
 		configuration = configManager.load();
 		this.extensionInfo = extensionInfo;
 		authorizedListeners = new ArrayList<>();
-	}
-
-	public String getHubExtensionId() {
-		if (StringUtils.isNotBlank(configuration.getExtensionUri())) {
-			try {
-				final UUID extensionID = HubUrlParser.getUUIDFromURLString(EXTENSIONS_URL_IDENTIFIER,
-						configuration.getExtensionUri());
-				return extensionID.toString();
-			} catch (final MissingUUIDException e) {
-				logger.error("Error retrieving the extensionID from the url", e);
-				return "";
-			}
-		} else {
-			return "";
-		}
 	}
 
 	public OAuthConfiguration getConfiguration() {

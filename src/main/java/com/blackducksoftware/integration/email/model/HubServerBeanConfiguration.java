@@ -5,9 +5,9 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.builder.ValidationResultEnum;
+import com.blackducksoftware.integration.builder.ValidationResults;
 import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
-import com.blackducksoftware.integration.hub.builder.ValidationResultEnum;
-import com.blackducksoftware.integration.hub.builder.ValidationResults;
 import com.blackducksoftware.integration.hub.global.GlobalFieldKey;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 

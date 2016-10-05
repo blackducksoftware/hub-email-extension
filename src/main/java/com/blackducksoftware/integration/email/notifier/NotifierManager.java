@@ -35,9 +35,9 @@ public class NotifierManager {
 		}
 	}
 
-	public void updateHubExtensionId(final String hubExtensionId) {
+	public void updateHubExtensionUri(final String hubExtensionUri) {
 		for (final Map.Entry<String, AbstractNotifier> entry : notifierMap.entrySet()) {
-			entry.getValue().setHubExtensionId(hubExtensionId);
+			entry.getValue().setHubExtensionUri(hubExtensionUri);
 		}
 	}
 

@@ -2,8 +2,8 @@ package com.blackducksoftware.integration.email;
 
 import org.slf4j.Logger;
 
-import com.blackducksoftware.integration.hub.logging.IntLogger;
-import com.blackducksoftware.integration.hub.logging.LogLevel;
+import com.blackducksoftware.integration.log.IntLogger;
+import com.blackducksoftware.integration.log.LogLevel;
 
 public class ExtensionLogger extends IntLogger {
 	private final Logger logger;

@@ -33,11 +33,11 @@ import com.blackducksoftware.integration.email.notifier.DailyDigestNotifier;
 import com.blackducksoftware.integration.email.notifier.NotifierManager;
 import com.blackducksoftware.integration.email.notifier.WeeklyDigestNotifier;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
+import com.blackducksoftware.integration.exception.EncryptionException;
 import com.blackducksoftware.integration.hub.dataservices.DataServicesFactory;
 import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
-import com.blackducksoftware.integration.hub.exception.EncryptionException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 
@@ -248,7 +248,7 @@ public class EmailEngine implements IAuthorizedListener {
 
 	@Override
 	public void onAuthorized() {
-		notifierManager.updateHubExtensionId(tokenManager.getHubExtensionId());
+		notifierManager.updateHubExtensionUri(tokenManager.getConfiguration().getExtensionUri());
 		notifierManager.start();
 	}
 }
