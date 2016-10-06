@@ -33,7 +33,7 @@ public class TestEmailEngine extends EmailEngine {
 	@Override
 	public TokenManager createTokenManager() {
 		final TokenManager tokenManager = super.createTokenManager();
-		tokenManager.setAddresses("", "http://localhost:8100", "", "");
+		tokenManager.setAddresses("http://localhost:8080", "http://localhost:8100", "", "");
 		return tokenManager;
 	}
 
