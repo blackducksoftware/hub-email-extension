@@ -23,9 +23,10 @@ import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.email.transformer.NotificationCountTransformer;
 import com.blackducksoftware.integration.hub.api.extension.ConfigurationItem;
 import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
-import com.blackducksoftware.integration.hub.dataservices.extension.items.UserConfigItem;
+import com.blackducksoftware.integration.hub.dataservices.extension.item.UserConfigItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.ProjectAggregateData;
+import com.blackducksoftware.integration.hub.exception.UnexpectedHubResponseException;
 
 public abstract class AbstractDigestNotifier extends AbstractNotifier {
 	private static final String KEY_PROJECT_DIGEST = "projectsDigest";
@@ -60,7 +61,7 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 		try {
 			final ExtensionProperties globalConfig = createPropertiesFromGlobalConfig();
 			final List<UserConfigItem> userConfigList = getExtensionConfigDataService()
-					.getUserConfigList(getHubExtensionId());
+					.getUserConfigList(getHubExtensionUri());
 			final List<UserConfigItem> usersInCategory = createUserListInCategory(userConfigList);
 
 			if (!usersInCategory.isEmpty()) {
@@ -184,9 +185,9 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 		}
 	}
 
-	private ExtensionProperties createPropertiesFromGlobalConfig() {
+	private ExtensionProperties createPropertiesFromGlobalConfig() throws UnexpectedHubResponseException {
 		final Map<String, ConfigurationItem> globalMap = getExtensionConfigDataService()
-				.getGlobalConfigMap(getHubExtensionId());
+				.getGlobalConfigMap(getHubExtensionUri());
 		final Properties globalProperties = new Properties();
 		for (final Map.Entry<String, ConfigurationItem> entry : globalMap.entrySet()) {
 			globalProperties.put(entry.getKey(), entry.getValue().getValue().get(0));

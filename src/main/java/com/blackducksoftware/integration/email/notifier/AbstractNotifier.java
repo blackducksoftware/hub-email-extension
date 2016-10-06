@@ -12,7 +12,7 @@ public abstract class AbstractNotifier extends TimerTask {
 	private final NotificationDataService notificationDataService;
 	private final ExtensionConfigDataService extensionConfigDataService;
 	private final EmailMessagingService emailMessagingService;
-	private String hubExtensionId;
+	private String hubExtensionUri;
 
 	public AbstractNotifier(final ExtensionProperties customerProperties,
 			final NotificationDataService notificationDataService,
@@ -44,12 +44,12 @@ public abstract class AbstractNotifier extends TimerTask {
 		return getClass().getName();
 	}
 
-	public String getHubExtensionId() {
-		return hubExtensionId;
+	public String getHubExtensionUri() {
+		return hubExtensionUri;
 	}
 
-	public void setHubExtensionId(final String hubExtensionId) {
-		this.hubExtensionId = hubExtensionId;
+	public void setHubExtensionUri(final String hubExtensionUri) {
+		this.hubExtensionUri = hubExtensionUri;
 	}
 
 	public abstract String getTemplateName();

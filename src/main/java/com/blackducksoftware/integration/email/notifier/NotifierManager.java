@@ -3,6 +3,7 @@ package com.blackducksoftware.integration.email.notifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -35,9 +36,9 @@ public class NotifierManager {
 		}
 	}
 
-	public void updateHubExtensionId(final String hubExtensionId) {
+	public void updateHubExtensionUri(final String hubExtensionUri) {
 		for (final Map.Entry<String, AbstractNotifier> entry : notifierMap.entrySet()) {
-			entry.getValue().setHubExtensionId(hubExtensionId);
+			entry.getValue().setHubExtensionUri(hubExtensionUri);
 		}
 	}
 
@@ -99,7 +100,8 @@ public class NotifierManager {
 				jobDataMap.put(NotifierJob.JOB_DATA_KEY_NOTIFIER, notifier);
 				final JobDetail jobDetail = JobBuilder.newJob(NotifierJob.class).setJobData(jobDataMap)
 						.withIdentity("Job-" + notifier.getName()).build();
-				final CronScheduleBuilder cronSchedule = CronScheduleBuilder.cronSchedule(notifier.getCronExpression());
+				final CronScheduleBuilder cronSchedule = CronScheduleBuilder.cronSchedule(notifier.getCronExpression())
+						.inTimeZone(TimeZone.getTimeZone("UTC"));
 				final Trigger trigger = TriggerBuilder.newTrigger().withIdentity("Trigger-" + notifier.getName())
 						.withSchedule(cronSchedule).forJob(jobDetail).build();
 				scheduler.scheduleJob(jobDetail, trigger);

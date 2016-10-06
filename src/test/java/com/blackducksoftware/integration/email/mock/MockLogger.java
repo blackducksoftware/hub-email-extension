@@ -2,8 +2,8 @@ package com.blackducksoftware.integration.email.mock;
 
 import java.util.EnumSet;
 
-import com.blackducksoftware.integration.hub.logging.IntLogger;
-import com.blackducksoftware.integration.hub.logging.LogLevel;
+import com.blackducksoftware.integration.log.IntLogger;
+import com.blackducksoftware.integration.log.LogLevel;
 
 public class MockLogger extends IntLogger {
 

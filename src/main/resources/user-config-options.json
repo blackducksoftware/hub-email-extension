@@ -34,7 +34,8 @@
             "singleValue": true,
             "description": "the template for email rendering",
             "options": [ 
-                {"name": "digest.ftl", "title": "Default Digest Template"}
+                {"name": "digest.ftl", "title": "Default Digest Template"},
+                {"name": "sampleTemplate.ftl", "title": "Sample Email Template"}
             ],
             "defaultValue": [
                 "digest.ftl"

@@ -38,8 +38,6 @@ import freemarker.template.TemplateException;
 public class EmailMessagingServiceTest {
 
 	private EmailEngine engine;
-	private AbstractDigestNotifier digestNotifier;
-	private EmailMessagingService emailMessagingService;
 
 	@Before
 	public void init() throws Exception {
@@ -48,10 +46,6 @@ public class EmailMessagingServiceTest {
 		final File file = new File(propFileUrl.toURI());
 		System.setProperty("ext.config.location", file.getCanonicalFile().getParent());
 		engine = new TestEmailEngine();
-	}
-
-	@Test
-	public void testNotifier() throws Exception {
 		engine.start();
 	}
 
@@ -62,7 +56,7 @@ public class EmailMessagingServiceTest {
 		model.put("message", "this should have html and plain text parts");
 		model.put("items", Arrays.asList("apple", "orange", "pear", "banana"));
 		final EmailTarget target = new EmailTarget("testUser@a.domain.com1", "sampleTemplate.ftl", model);
-		engine.emailMessagingService.sendEmailMessage(target);
+		engine.getEmailMessagingService().sendEmailMessage(target);
 	}
 
 	@Test
@@ -131,6 +125,6 @@ public class EmailMessagingServiceTest {
 		model.put(AbstractDigestNotifier.KEY_CATEGORY, "Daily");
 
 		final EmailTarget target = new EmailTarget("testUser@a.domain.com1", "digest.ftl", model);
-		engine.emailMessagingService.sendEmailMessage(target);
+		engine.getEmailMessagingService().sendEmailMessage(target);
 	}
 }
