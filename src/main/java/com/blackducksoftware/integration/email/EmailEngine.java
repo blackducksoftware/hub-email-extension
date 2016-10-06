@@ -40,6 +40,7 @@ import com.blackducksoftware.integration.hub.dataservices.notification.Notificat
 import com.blackducksoftware.integration.hub.exception.BDRestException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
+import com.google.gson.JsonParser;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateExceptionHandler;
@@ -47,45 +48,94 @@ import freemarker.template.TemplateExceptionHandler;
 public class EmailEngine implements IAuthorizedListener {
 	private final Logger logger = LoggerFactory.getLogger(EmailEngine.class);
 
-	public final Configuration configuration;
-	public final DateFormat notificationDateFormat;
-	public final Date applicationStartDate;
-	public final ExecutorService executorService;
-	public final JavaMailWrapper javaMailWrapper;
-
-	public final EmailMessagingService emailMessagingService;
-	public final HubServerConfig hubServerConfig;
-	public final RestConnection restConnection;
-	public final Properties appProperties;
-	public final ExtensionProperties customerProperties;
-	public final NotificationDataService notificationDataService;
-	public final NotifierManager notifierManager;
-	public final TokenManager tokenManager;
-	public final OAuthEndpoint restletComponent;
-	public final ExtensionInfo extensionInfoData;
-	public final ExtensionConfigManager extConfigManager;
-	public final ExtensionConfigDataService extConfigDataService;
-	public final DataServicesFactory dataServicesFactory;
+	private final Configuration configuration;
+	private JavaMailWrapper javaMailWrapper;
+	private EmailMessagingService emailMessagingService;
+	private HubServerConfig hubServerConfig;
+	private RestConnection restConnection;
+	private final Properties appProperties;
+	private final ExtensionProperties customerProperties;
+	private NotificationDataService notificationDataService;
+	private NotifierManager notifierManager;
+	private final TokenManager tokenManager;
+	private final OAuthEndpoint restletComponent;
+	private final ExtensionInfo extensionInfoData;
+	private final ExtensionConfigManager extConfigManager;
+	private ExtensionConfigDataService extConfigDataService;
+	private DataServicesFactory dataServicesFactory;
 
 	public EmailEngine() throws IOException, EncryptionException, URISyntaxException, BDRestException {
 		appProperties = createAppProperties();
 		customerProperties = createCustomerProperties();
 		configuration = createFreemarkerConfig();
-		hubServerConfig = createHubConfig();
 		extensionInfoData = createExtensionInfoData();
 		tokenManager = createTokenManager();
-		restConnection = createRestConnection();
-		dataServicesFactory = createDataServicesFactory();
 		extConfigManager = createExtensionConfigManager();
-		javaMailWrapper = createJavaMailWrapper();
-		notificationDateFormat = createNotificationDateFormat();
-		applicationStartDate = createApplicationStartDate();
-		executorService = createExecutorService();
-		emailMessagingService = createEmailMessagingService();
-		notificationDataService = createNotificationDataService();
-		extConfigDataService = createExtensionConfigDataService();
-		notifierManager = createNotifierManager();
 		restletComponent = createRestletComponent();
+	}
+
+	public Logger getLogger() {
+		return logger;
+	}
+
+	public Configuration getConfiguration() {
+		return configuration;
+	}
+
+	public JavaMailWrapper getJavaMailWrapper() {
+		return javaMailWrapper;
+	}
+
+	public EmailMessagingService getEmailMessagingService() {
+		return emailMessagingService;
+	}
+
+	public HubServerConfig getHubServerConfig() {
+		return hubServerConfig;
+	}
+
+	public RestConnection getRestConnection() {
+		return restConnection;
+	}
+
+	public Properties getAppProperties() {
+		return appProperties;
+	}
+
+	public ExtensionProperties getCustomerProperties() {
+		return customerProperties;
+	}
+
+	public NotificationDataService getNotificationDataService() {
+		return notificationDataService;
+	}
+
+	public NotifierManager getNotifierManager() {
+		return notifierManager;
+	}
+
+	public TokenManager getTokenManager() {
+		return tokenManager;
+	}
+
+	public OAuthEndpoint getRestletComponent() {
+		return restletComponent;
+	}
+
+	public ExtensionInfo getExtensionInfoData() {
+		return extensionInfoData;
+	}
+
+	public ExtensionConfigManager getExtConfigManager() {
+		return extConfigManager;
+	}
+
+	public ExtensionConfigDataService getExtConfigDataService() {
+		return extConfigDataService;
+	}
+
+	public DataServicesFactory getDataServicesFactory() {
+		return dataServicesFactory;
 	}
 
 	public void start() {
@@ -154,14 +204,15 @@ public class EmailEngine implements IAuthorizedListener {
 		return new EmailMessagingService(customerProperties, configuration, javaMailWrapper);
 	}
 
-	public HubServerConfig createHubConfig() {
-		final HubServerBeanConfiguration serverBeanConfig = new HubServerBeanConfiguration(customerProperties);
+	public HubServerConfig createHubConfig(final String hubUri) {
+		final HubServerBeanConfiguration serverBeanConfig = new HubServerBeanConfiguration(hubUri, customerProperties);
 
 		return serverBeanConfig.build();
 	}
 
-	public RestConnection createRestConnection() throws EncryptionException, URISyntaxException, BDRestException {
-		final RestConnection restConnection = initRestConnection();
+	public RestConnection createRestConnection(final String hubUri)
+			throws EncryptionException, URISyntaxException, BDRestException {
+		final RestConnection restConnection = initRestConnection(hubUri);
 		return restConnection;
 	}
 
@@ -173,9 +224,9 @@ public class EmailEngine implements IAuthorizedListener {
 		return notificationDataService;
 	}
 
-	public RestConnection initRestConnection() throws EncryptionException, URISyntaxException, BDRestException {
-		final RestConnection restConnection = new OAuthRestConnection(hubServerConfig.getHubUrl().toString(),
-				tokenManager);
+	public RestConnection initRestConnection(final String hubUri)
+			throws EncryptionException, URISyntaxException, BDRestException {
+		final RestConnection restConnection = new OAuthRestConnection(hubUri, tokenManager);
 		restConnection.setProxyProperties(hubServerConfig.getProxyInfo());
 		restConnection.setTimeout(hubServerConfig.getTimeout());
 		return restConnection;
@@ -229,8 +280,9 @@ public class EmailEngine implements IAuthorizedListener {
 	}
 
 	public ExtensionConfigManager createExtensionConfigManager() {
-		final ExtensionConfigManager extConfigManager = new ExtensionConfigManager(extensionInfoData,
-				dataServicesFactory.getJsonParser());
+		// has to be separate from the dataservicesfactory otherwise we have a
+		// chicken and egg problem
+		final ExtensionConfigManager extConfigManager = new ExtensionConfigManager(extensionInfoData, new JsonParser());
 		return extConfigManager;
 	}
 
@@ -248,7 +300,28 @@ public class EmailEngine implements IAuthorizedListener {
 
 	@Override
 	public void onAuthorized() {
-		notifierManager.updateHubExtensionUri(tokenManager.getConfiguration().getExtensionUri());
-		notifierManager.start();
+		try {
+			final String hubUri = createHubBaseUrl(tokenManager.getConfiguration().getHubUri());
+			hubServerConfig = createHubConfig(hubUri);
+			restConnection = createRestConnection(hubUri);
+			javaMailWrapper = createJavaMailWrapper();
+			dataServicesFactory = createDataServicesFactory();
+			emailMessagingService = createEmailMessagingService();
+			notificationDataService = createNotificationDataService();
+			extConfigDataService = createExtensionConfigDataService();
+			notifierManager = createNotifierManager();
+			notifierManager.updateHubExtensionUri(tokenManager.getConfiguration().getExtensionUri());
+			notifierManager.start();
+		} catch (final EncryptionException | URISyntaxException | BDRestException | MalformedURLException e) {
+			logger.error("Error completing extension initialization", e);
+		}
+	}
+
+	// TODO file a ticket against the hub to give me the root URL not with a
+	// path
+	private String createHubBaseUrl(final String hubUri) throws MalformedURLException {
+		final URL original = new URL(hubUri);
+		final URL baseUrl = new URL(original.getProtocol(), original.getHost(), original.getPort(), "");
+		return baseUrl.toString();
 	}
 }

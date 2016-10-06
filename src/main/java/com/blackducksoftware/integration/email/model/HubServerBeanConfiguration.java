@@ -14,15 +14,17 @@ import com.blackducksoftware.integration.hub.global.HubServerConfig;
 public class HubServerBeanConfiguration {
 	private final Logger logger = LoggerFactory.getLogger(HubServerBeanConfiguration.class);
 
+	private final String hubUri;
 	private final ExtensionProperties emailConfig;
 
-	public HubServerBeanConfiguration(final ExtensionProperties emailConfig) {
+	public HubServerBeanConfiguration(final String hubUri, final ExtensionProperties emailConfig) {
 		this.emailConfig = emailConfig;
+		this.hubUri = hubUri;
 	}
 
 	public HubServerConfig build() {
 		final HubServerConfigBuilder configBuilder = new HubServerConfigBuilder();
-		configBuilder.setHubUrl(emailConfig.getHubServerUrl());
+		configBuilder.setHubUrl(hubUri);
 		// using oauth the username and password aren't used but need to be set
 		// for the builder
 		configBuilder.setUsername("auser");

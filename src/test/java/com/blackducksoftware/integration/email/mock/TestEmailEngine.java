@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.EmailEngine;
+import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.notifier.NotifierManager;
 import com.blackducksoftware.integration.exception.EncryptionException;
@@ -30,7 +31,14 @@ public class TestEmailEngine extends EmailEngine {
 	}
 
 	@Override
-	public HubServerConfig createHubConfig() {
+	public TokenManager createTokenManager() {
+		final TokenManager tokenManager = super.createTokenManager();
+		tokenManager.setAddresses("", "http://localhost:8100", "", "");
+		return tokenManager;
+	}
+
+	@Override
+	public HubServerConfig createHubConfig(final String hubUri) {
 		HubServerConfig serverConfig = null;
 		try {
 			HubCredentials credentials;
@@ -51,32 +59,33 @@ public class TestEmailEngine extends EmailEngine {
 
 	@Override
 	public NotificationDataService createNotificationDataService() {
-		return new MockNotificationDataService(restConnection, dataServicesFactory.getGson(),
-				dataServicesFactory.getJsonParser(), new PolicyNotificationFilter(null));
+		return new MockNotificationDataService(getRestConnection(), getDataServicesFactory().getGson(),
+				getDataServicesFactory().getJsonParser(), new PolicyNotificationFilter(null));
 	}
 
 	@Override
-	public RestConnection createRestConnection() throws EncryptionException, URISyntaxException, BDRestException {
-		final RestConnection restConnection = new RestConnection(hubServerConfig.getHubUrl().toString());
+	public RestConnection createRestConnection(final String hubUri)
+			throws EncryptionException, URISyntaxException, BDRestException {
+		final RestConnection restConnection = new RestConnection(hubUri.toString());
 
 		// restConnection.setCookies(hubServerConfig.getGlobalCredentials().getUsername(),
 		// hubServerConfig.getGlobalCredentials().getDecryptedPassword());
-		restConnection.setProxyProperties(hubServerConfig.getProxyInfo());
-		restConnection.setTimeout(hubServerConfig.getTimeout());
+		restConnection.setProxyProperties(getHubServerConfig().getProxyInfo());
+		restConnection.setTimeout(getHubServerConfig().getTimeout());
 		return restConnection;
 	}
 
 	@Override
 	public NotifierManager createNotifierManager() {
 		final NotifierManager manager = new NotifierManager();
-		final TestDigestNotifier digestNotifier = new TestDigestNotifier(customerProperties, notificationDataService,
-				extConfigDataService, emailMessagingService);
+		final TestDigestNotifier digestNotifier = new TestDigestNotifier(getCustomerProperties(),
+				getNotificationDataService(), getExtConfigDataService(), getEmailMessagingService());
 		manager.attach(digestNotifier);
 		return manager;
 	}
 
 	@Override
 	public void start() {
-		notifierManager.start();
+		onAuthorized(); // finish initialization
 	}
 }
