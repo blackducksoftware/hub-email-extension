@@ -5,7 +5,7 @@
             "title": "Opt In / Opt Out",
             "required": true,
             "singleValue": true,
-            "description": "whether or not emails should be triggered from published notifications",
+            "description": "Whether or not emails should be triggered from published notifications",
             "options": [],
             "defaultValue": [
                 "false"
@@ -17,7 +17,7 @@
             "title": "Email Frequency",
             "required": false,
             "singleValue": true, 
-            "description": "how often the Hub should be checked for notifications that might trigger emails",
+            "description": "How often the Hub should be checked for notifications that might trigger emails",
             "options": [
                 {"name": "Daily", "title": "Daily" },
                 {"name": "Weekly", "title": "Weekly" }
@@ -32,9 +32,10 @@
             "title": "Template Name",
             "required": true,
             "singleValue": true,
-            "description": "the template for email rendering",
+            "description": "The template for email rendering",
             "options": [ 
-                {"name": "digest.ftl", "title": "Default Digest Template"}
+                {"name": "digest.ftl", "title": "Default Digest Template"},
+                {"name": "sampleTemplate.ftl", "title": "Sample Email Template"}
             ],
             "defaultValue": [
                 "digest.ftl"
@@ -46,7 +47,7 @@
             "title": "Reasons To Trigger Emails",
             "required": false,
             "singleValue": false,
-            "description": "the user can specify any number of reasons that will trigger an email",
+            "description": "The user can specify any number of reasons that will trigger an email",
             "options": [
                 {"name": "policyViolation", "title": "Policy Violation" },
                 {"name": "policyViolationOverrideCancellation", "title": "Policy Violation Override Cancellation" },
