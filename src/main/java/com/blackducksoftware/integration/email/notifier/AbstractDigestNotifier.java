@@ -8,35 +8,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.SortedSet;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.EmailExtensionConstants;
+import com.blackducksoftware.integration.email.batch.processor.NotificationProcessor;
 import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.model.EmailTarget;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
-import com.blackducksoftware.integration.email.model.ProjectDigest;
-import com.blackducksoftware.integration.email.model.ProjectsDigest;
+import com.blackducksoftware.integration.email.model.batch.ProjectData;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.email.transformer.NotificationCountTransformer;
 import com.blackducksoftware.integration.hub.api.extension.ConfigurationItem;
 import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservices.extension.item.UserConfigItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.ProjectAggregateData;
+import com.blackducksoftware.integration.hub.dataservices.notification.items.NotificationContentItem;
 import com.blackducksoftware.integration.hub.exception.UnexpectedHubResponseException;
 
 public abstract class AbstractDigestNotifier extends AbstractNotifier {
-	private static final String KEY_PROJECT_DIGEST = "projectsDigest";
+	public static final String KEY_TOPICS_LIST = "topicsList";
 	public static final String KEY_START_DATE = "startDate";
 	public static final String KEY_END_DATE = "endDate";
 	public static final String KEY_TOTAL_NOTIFICATIONS = "totalNotifications";
 	public static final String KEY_TOTAL_POLICY_VIOLATIONS = "totalPolicyViolations";
 	public static final String KEY_TOTAL_POLICY_OVERRIDES = "totalPolicyOverrides";
 	public static final String KEY_TOTAL_VULNERABILITIES = "totalVulnerabilities";
-	public static final String KEY_CATEGORY = "emailCategory";
+	public static final String KEY_NOTIFIER_CATEGORY = "emailCategory";
+	public static final String KEY_USER_FIRST_NAME = "user_first_name";
+	public static final String KEY_USER_LAST_NAME = "user_last_name";
 
 	private final Logger logger = LoggerFactory.getLogger(AbstractDigestNotifier.class);
 	private final String cronExpression;
@@ -68,20 +70,23 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 				final DateRange dateRange = createDateRange();
 				final Date startDate = dateRange.getStart();
 				final Date endDate = dateRange.getEnd();
-				final List<ProjectAggregateData> notifications = getNotificationDataService()
-						.getNotificationCounts(startDate, endDate);
-				if (!notifications.isEmpty()) {
+				final SortedSet<NotificationContentItem> notifications = getNotificationDataService()
+						.getAllNotifications(startDate, endDate);
+				final NotificationProcessor processor = new NotificationProcessor();
+				final List<ProjectData> projectList = processor.process(notifications);
+				if (!projectList.isEmpty()) {
 					for (final UserConfigItem userConfig : usersInCategory) {
 						try {
 							// TODO need to simplify this more. too
 							// expensive
-							final ProjectsDigest projectsDigest = createMap(notifications, userConfig);
+							final List<ProjectData> projectsDigest = filterCategories(projectList, userConfig);
 							final Map<String, Object> model = new HashMap<>();
-							model.put(KEY_PROJECT_DIGEST, projectsDigest);
+							model.put(KEY_TOPICS_LIST, projectsDigest);
 							model.put(KEY_START_DATE, String.valueOf(startDate));
 							model.put(KEY_END_DATE, String.valueOf(endDate));
-							model.put("hubUserName", userConfig.getUser().getUserName());
-							model.put(KEY_CATEGORY, getCategory());
+							model.put(KEY_USER_FIRST_NAME, userConfig.getUser().getFirstName());
+							model.put(KEY_USER_LAST_NAME, userConfig.getUser().getLastName());
+							model.put(KEY_NOTIFIER_CATEGORY, getCategory());
 							final String emailAddress = userConfig.getUser().getEmail();
 							final String templateName = getTemplateName(userConfig);
 							final EmailTarget emailTarget = new EmailTarget(emailAddress, templateName, model);
@@ -97,34 +102,25 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 		}
 	}
 
-	private ProjectsDigest createMap(final List<ProjectAggregateData> notifications, final UserConfigItem userConfig) {
-		final Set<String> triggerSet = getTriggerSet(userConfig);
-		final boolean includePolicyViolations = triggerSet.contains("policyViolation");
-		final boolean includePolicyOverrides = triggerSet.contains("overridePolicyViolation");
-		final boolean includePolicyCleared = false; // not supported yet
-		final boolean includeVulnerabilities = triggerSet.contains("securityVulnerabilities");
-		final NotificationCountTransformer transformer = new NotificationCountTransformer(includePolicyViolations,
-				includePolicyOverrides, includePolicyCleared, includeVulnerabilities);
-		final List<ProjectDigest> projectData = new ArrayList<>();
-		int totalNotifications = 0;
-		int totalPolicyViolations = 0;
-		int totalPolicyOverrides = 0;
-		int totalVulnerabilities = 0;
-		for (final ProjectAggregateData notification : notifications) {
-			totalNotifications += notification.getTotal();
-			totalPolicyViolations += notification.getPolicyViolationCount();
-			totalPolicyOverrides += notification.getPolicyOverrideCount();
-			totalVulnerabilities += notification.getVulnerabilityCount();
-			projectData.add(transformer.transform(notification));
-		}
+	private List<ProjectData> filterCategories(final List<ProjectData> projectList, final UserConfigItem userConfig) {
+		// final List<ProjectData> filteredList = new ArrayList<>();
+		// for (int index = 0; index < 5; index++) {
+		// final List<ItemData> itemList = new ArrayList<>(15);
+		// for (int itemIndex = 0; itemIndex < 15; itemIndex++) {
+		// final Map<String, String> dataMap = new HashMap<>();
+		// dataMap.put("KEY_" + itemIndex, "VALUE_" + itemIndex);
+		// itemList.add(new ItemData(dataMap));
+		// }
+		// final List<CategoryData> categoryMap = new ArrayList<>();
+		// for (int catIndex = 0; catIndex < 5; catIndex++) {
+		// final String category = "CATEGORY_" + catIndex;
+		// categoryMap.add(new CategoryData(category, itemList));
+		// }
+		// filteredList.add(new ProjectData("PROJECT_NAME>PROJECT_VERSION",
+		// categoryMap));
+		// }
 
-		final Map<String, String> totalsMap = new HashMap<>();
-		totalsMap.put(KEY_TOTAL_NOTIFICATIONS, String.valueOf(totalNotifications));
-		totalsMap.put(KEY_TOTAL_POLICY_VIOLATIONS, String.valueOf(totalPolicyViolations));
-		totalsMap.put(KEY_TOTAL_POLICY_OVERRIDES, String.valueOf(totalPolicyOverrides));
-		totalsMap.put(KEY_TOTAL_VULNERABILITIES, String.valueOf(totalVulnerabilities));
-		final ProjectsDigest digest = new ProjectsDigest(totalsMap, projectData);
-		return digest;
+		return projectList;
 	}
 
 	private List<UserConfigItem> createUserListInCategory(final List<UserConfigItem> userConfigList) {
