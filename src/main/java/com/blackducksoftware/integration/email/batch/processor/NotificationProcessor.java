@@ -1,132 +1,125 @@
 package com.blackducksoftware.integration.email.batch.processor;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.email.batch.processor.converter.IItemConverter;
+import com.blackducksoftware.integration.email.batch.processor.converter.PolicyOverrideConverter;
+import com.blackducksoftware.integration.email.batch.processor.converter.PolicyViolationClearedConverter;
+import com.blackducksoftware.integration.email.batch.processor.converter.PolicyViolationConverter;
 import com.blackducksoftware.integration.email.model.batch.CategoryData;
 import com.blackducksoftware.integration.email.model.batch.ItemData;
 import com.blackducksoftware.integration.email.model.batch.ProjectData;
-import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.NotificationContentItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyOverrideContentItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyViolationClearedContentItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyViolationContentItem;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.VulnerabilityContentItem;
 
 public class NotificationProcessor {
 	private final Logger logger = LoggerFactory.getLogger(NotificationProcessor.class);
-	private final Set<Class<?>> policyViolationTypeSet = new HashSet<>();
-	private final Set<Class<?>> vulnerabilityTypeSet = new HashSet<>();
-	private final Map<Class<?>, ProcessingAction> policyViolationActionMap = new HashMap<>();
-
-	private final List<NotificationContentItem> policyViolations = new LinkedList<>();
-	private final List<NotificationContentItem> vulnerabilities = new LinkedList<>();
+	private final Map<Class<?>, IItemConverter> converterMap = new HashMap<>();
 
 	public NotificationProcessor() {
-		policyViolationTypeSet.add(PolicyViolationContentItem.class);
-		policyViolationTypeSet.add(PolicyViolationClearedContentItem.class);
-		policyViolationTypeSet.add(PolicyOverrideContentItem.class);
-		vulnerabilityTypeSet.add(VulnerabilityContentItem.class);
-
-		policyViolationActionMap.put(PolicyViolationContentItem.class, ProcessingAction.ADD);
-		policyViolationActionMap.put(PolicyViolationClearedContentItem.class, ProcessingAction.REMOVE);
-		policyViolationActionMap.put(PolicyOverrideContentItem.class, ProcessingAction.REMOVE);
+		converterMap.put(PolicyViolationContentItem.class, new PolicyViolationConverter());
+		converterMap.put(PolicyViolationClearedContentItem.class, new PolicyViolationClearedConverter());
+		converterMap.put(PolicyOverrideContentItem.class, new PolicyOverrideConverter());
 	}
 
-	public List<ProjectData> process(final SortedSet<NotificationContentItem> notifications) {
-		collectNotificationGroups(notifications);
-		final List<ProjectData> projectDataList = processActions();
+	public Collection<ProjectData> process(final SortedSet<NotificationContentItem> notifications) {
+		final List<NotificationEvent> events = createEvents(notifications);
+		final Collection<ProjectData> projectDataList = processEvents(events);
 		return projectDataList;
 	}
 
-	private void collectNotificationGroups(final SortedSet<NotificationContentItem> notifications) {
+	private List<NotificationEvent> createEvents(final SortedSet<NotificationContentItem> notifications) {
+		final List<NotificationEvent> eventList = new LinkedList<>();
 		for (final NotificationContentItem item : notifications) {
 			final Class<?> key = item.getClass();
-			if (policyViolationTypeSet.contains(key)) {
-				policyViolations.add(item);
-			} else if (vulnerabilityTypeSet.contains(key)) {
-				vulnerabilities.add(item);
+			if (!converterMap.containsKey(key)) {
+				logger.error("Could not find converter for notification: {}", item);
 			} else {
-				logger.info("Unknown notification seen {}", item);
+				final IItemConverter converter = converterMap.get(key);
+				eventList.addAll(converter.convert(item));
 			}
 		}
+		return eventList;
 	}
 
-	private List<ProjectData> processActions() {
-		final List<ProjectData> itemList = new LinkedList<>();
-		final Map<String, NotificationContentItem> policyViolationData = processPolicyViolationActions();
-		final Map<String, CategoryData> categoryData = convertMapToList(policyViolationData);
-		final List<CategoryData> categoryList = new LinkedList<>();
-		for (final String projectKey : categoryData.keySet()) {
-			categoryList.add(categoryData.get(projectKey));
-			itemList.add(new ProjectData(projectKey, categoryList));
-		}
-		return itemList;
-	}
-
-	private Map<String, CategoryData> convertMapToList(final Map<String, NotificationContentItem> policyViolationMap) {
-		final Map<String, CategoryData> dataList = new HashMap<>();
-		for (final Map.Entry<String, NotificationContentItem> entry : policyViolationMap.entrySet()) {
-			final NotificationContentItem item = entry.getValue();
-			final String projectKey = item.getProjectVersion().getProjectName() + " > "
-					+ item.getProjectVersion().getProjectVersionName();
-			final List<ItemData> itemDataList;
-			if (dataList.containsKey(projectKey)) {
-				final CategoryData categoryData = dataList.get(projectKey);
-				itemDataList = categoryData.getItemList();
-			} else {
-				itemDataList = new LinkedList<>();
-				dataList.put(projectKey, new CategoryData("Policy Violations", itemDataList));
-			}
-			final Map<String, String> dataMap = new HashMap<>();
-			final PolicyViolationContentItem policyViolation = (PolicyViolationContentItem) item;
-			for (final PolicyRule rule : policyViolation.getPolicyRuleList()) {
-				dataMap.put(rule.getName(), "Rule");
-				dataMap.put(item.getComponentName() + " " + item.getComponentVersion(), "Component:");
-				itemDataList.add(new ItemData(dataMap));
-			}
-		}
-		return dataList;
-	}
-
-	private Map<String, NotificationContentItem> processPolicyViolationActions() {
-		final Map<String, NotificationContentItem> projectMap = new HashMap<>();
-		for (final NotificationContentItem item : policyViolations) {
-			ProcessingAction action = ProcessingAction.ADD;
-			final Class<?> key = item.getClass();
-			if (policyViolationActionMap.containsKey(key)) {
-				action = policyViolationActionMap.get(key);
-			}
-			switch (action) {
+	private Collection<ProjectData> processEvents(final List<NotificationEvent> events) {
+		// TODO Streams work better?
+		final Map<String, NotificationEvent> eventMap = new LinkedHashMap<>(events.size());
+		for (final NotificationEvent event : events) {
+			final String key = event.getEventKey();
+			switch (event.getAction()) {
 			case REMOVE: {
-				final String notificationKey = constructNotificationKey(item);
-				projectMap.remove(notificationKey);
+				if (eventMap.containsKey(key)) {
+					final NotificationEvent storedEvent = eventMap.get(key);
+					final Map<String, String> storedEventDataMap = storedEvent.getDataMap();
+					final Map<String, String> eventDataMap = event.getDataMap();
+					for (final String mapKey : eventDataMap.keySet()) {
+						storedEvent.getDataMap().remove(mapKey);
+					}
+					if (storedEventDataMap.isEmpty()) {
+						eventMap.remove(key);
+					}
+				}
+				break;
 			}
 			default:
 			case ADD: {
-				final String notificationKey = constructNotificationKey(item);
-				projectMap.put(notificationKey, item);
+				if (!eventMap.containsKey(key)) {
+					eventMap.put(key, event);
+				} else {
+					final NotificationEvent storedEvent = eventMap.get(key);
+					final Map<String, String> storedEventDataMap = storedEvent.getDataMap();
+					final Map<String, String> eventDataMap = event.getDataMap();
+					for (final Map.Entry<String, String> entry : eventDataMap.entrySet()) {
+						storedEventDataMap.put(entry.getKey(), entry.getValue());
+					}
+				}
 				break;
 			}
-
 			}
 		}
-		return projectMap;
-	}
+		final Map<String, CategoryData> categoryMap = new LinkedHashMap<>();
+		for (final Map.Entry<String, NotificationEvent> entry : eventMap.entrySet()) {
+			final NotificationEvent event = entry.getValue();
+			CategoryData categoryData;
+			final String categoryKey = event.getCategoryType();
+			if (!categoryMap.containsKey(categoryKey)) {
+				categoryData = new CategoryData(event.getProjectName(), event.getProjectVersion(), categoryKey,
+						new LinkedList<>());
+				categoryMap.put(categoryKey, categoryData);
+			} else {
+				categoryData = categoryMap.get(categoryKey);
+			}
+			categoryData.getItemList().add(new ItemData(event.getDataMap()));
+		}
 
-	private String constructNotificationKey(final NotificationContentItem item) {
-		return item.getProjectVersion().getProjectVersionLink() + item.getComponentName() + item.getComponentVersion();
-	}
+		final Map<String, ProjectData> projectMap = new LinkedHashMap<>();
+		for (final CategoryData categoryData : categoryMap.values()) {
+			final String projectKey = categoryData.getProjectKey();
+			List<CategoryData> categoryList;
+			if (!projectMap.containsKey(projectKey)) {
+				categoryList = new LinkedList<>();
+				final ProjectData projectData = new ProjectData(categoryData.getProjectName(),
+						categoryData.getProjectVersion(), categoryList);
+				projectMap.put(projectData.getProjectKey(), projectData);
+			} else {
+				final ProjectData projectData = projectMap.get(projectKey);
+				categoryList = projectData.getCategoryList();
+			}
+			categoryList.add(categoryData);
+		}
 
-	private enum ProcessingAction {
-		ADD, REMOVE;
+		return projectMap.values();
 	}
 }

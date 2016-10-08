@@ -1,6 +1,7 @@
 package com.blackducksoftware.integration.email.notifier;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -73,13 +74,13 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 				final SortedSet<NotificationContentItem> notifications = getNotificationDataService()
 						.getAllNotifications(startDate, endDate);
 				final NotificationProcessor processor = new NotificationProcessor();
-				final List<ProjectData> projectList = processor.process(notifications);
+				final Collection<ProjectData> projectList = processor.process(notifications);
 				if (!projectList.isEmpty()) {
 					for (final UserConfigItem userConfig : usersInCategory) {
 						try {
 							// TODO need to simplify this more. too
 							// expensive
-							final List<ProjectData> projectsDigest = filterCategories(projectList, userConfig);
+							final Collection<ProjectData> projectsDigest = filterCategories(projectList, userConfig);
 							final Map<String, Object> model = new HashMap<>();
 							model.put(KEY_TOPICS_LIST, projectsDigest);
 							model.put(KEY_START_DATE, String.valueOf(startDate));
@@ -102,7 +103,8 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 		}
 	}
 
-	private List<ProjectData> filterCategories(final List<ProjectData> projectList, final UserConfigItem userConfig) {
+	private Collection<ProjectData> filterCategories(final Collection<ProjectData> projectList,
+			final UserConfigItem userConfig) {
 		// final List<ProjectData> filteredList = new ArrayList<>();
 		// for (int index = 0; index < 5; index++) {
 		// final List<ItemData> itemList = new ArrayList<>(15);

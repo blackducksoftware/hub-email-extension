@@ -74,12 +74,14 @@ public class EmailMessagingServiceTest {
 				dataMap.put("KEY_" + itemIndex, "VALUE_" + itemIndex);
 				itemList.add(new ItemData(dataMap));
 			}
+			final String projectName = "PROJECT_NAME";
+			final String projectVersion = "PROJECT_VERSION";
 			final List<CategoryData> categoryMap = new ArrayList<>();
 			for (int catIndex = 0; catIndex < 5; catIndex++) {
 				final String category = "CATEGORY_" + catIndex;
-				categoryMap.add(new CategoryData(category, itemList));
+				categoryMap.add(new CategoryData(projectName, projectVersion, category, itemList));
 			}
-			filteredList.add(new ProjectData("PROJECT_NAME>PROJECT_VERSION", categoryMap));
+			filteredList.add(new ProjectData(projectName, projectVersion, categoryMap));
 		}
 
 		return filteredList;
