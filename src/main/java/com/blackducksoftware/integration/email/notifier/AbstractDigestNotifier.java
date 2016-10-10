@@ -23,6 +23,7 @@ import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.model.batch.ProjectData;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.api.extension.ConfigurationItem;
+import com.blackducksoftware.integration.hub.dataservices.DataServicesFactory;
 import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservices.extension.item.UserConfigItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
@@ -47,8 +48,9 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 	public AbstractDigestNotifier(final ExtensionProperties customerProperties,
 			final NotificationDataService notificationDataService,
 			final ExtensionConfigDataService extensionConfigDataService,
-			final EmailMessagingService emailMessagingService) {
-		super(customerProperties, notificationDataService, extensionConfigDataService, emailMessagingService);
+			final EmailMessagingService emailMessagingService, final DataServicesFactory dataServicesFactory) {
+		super(customerProperties, notificationDataService, extensionConfigDataService, emailMessagingService,
+				dataServicesFactory);
 
 		final String quartzTriggerPropValue = getCustomerProperties().getNotifierVariableProperties()
 				.get(getNotifierPropertyKey() + ".cron.expression");
@@ -73,7 +75,7 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 				final Date endDate = dateRange.getEnd();
 				final SortedSet<NotificationContentItem> notifications = getNotificationDataService()
 						.getAllNotifications(startDate, endDate);
-				final NotificationProcessor processor = new NotificationProcessor();
+				final NotificationProcessor processor = new NotificationProcessor(getDataServicesFactory());
 				final Collection<ProjectData> projectList = processor.process(notifications);
 				if (!projectList.isEmpty()) {
 					for (final UserConfigItem userConfig : usersInCategory) {

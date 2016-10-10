@@ -256,11 +256,11 @@ public class EmailEngine implements IAuthorizedListener {
 
 	public NotifierManager createNotifierManager() {
 		final NotifierManager manager = new NotifierManager();
-
+		final DataServicesFactory dataServicesFactory = new DataServicesFactory(getRestConnection());
 		final DailyDigestNotifier dailyNotifier = new DailyDigestNotifier(customerProperties, notificationDataService,
-				extConfigDataService, emailMessagingService);
+				extConfigDataService, emailMessagingService, dataServicesFactory);
 		final WeeklyDigestNotifier weeklyNotifier = new WeeklyDigestNotifier(customerProperties,
-				notificationDataService, extConfigDataService, emailMessagingService);
+				notificationDataService, extConfigDataService, emailMessagingService, dataServicesFactory);
 		// final MonthlyDigestNotifier monthlyNotifier = new
 		// MonthlyDigestNotifier(customerProperties, notificationDataService,
 		// extConfigDataService, emailMessagingService);

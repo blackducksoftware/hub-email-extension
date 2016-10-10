@@ -15,22 +15,26 @@ import com.blackducksoftware.integration.email.batch.processor.converter.IItemCo
 import com.blackducksoftware.integration.email.batch.processor.converter.PolicyOverrideConverter;
 import com.blackducksoftware.integration.email.batch.processor.converter.PolicyViolationClearedConverter;
 import com.blackducksoftware.integration.email.batch.processor.converter.PolicyViolationConverter;
+import com.blackducksoftware.integration.email.batch.processor.converter.VulnerabilityConverter;
 import com.blackducksoftware.integration.email.model.batch.CategoryData;
 import com.blackducksoftware.integration.email.model.batch.ItemData;
 import com.blackducksoftware.integration.email.model.batch.ProjectData;
+import com.blackducksoftware.integration.hub.dataservices.DataServicesFactory;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.NotificationContentItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyOverrideContentItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyViolationClearedContentItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyViolationContentItem;
+import com.blackducksoftware.integration.hub.dataservices.notification.items.VulnerabilityContentItem;
 
 public class NotificationProcessor {
 	private final Logger logger = LoggerFactory.getLogger(NotificationProcessor.class);
 	private final Map<Class<?>, IItemConverter> converterMap = new HashMap<>();
 
-	public NotificationProcessor() {
+	public NotificationProcessor(final DataServicesFactory dataServicesFactory) {
 		converterMap.put(PolicyViolationContentItem.class, new PolicyViolationConverter());
 		converterMap.put(PolicyViolationClearedContentItem.class, new PolicyViolationClearedConverter());
 		converterMap.put(PolicyOverrideContentItem.class, new PolicyOverrideConverter());
+		converterMap.put(VulnerabilityContentItem.class, new VulnerabilityConverter(dataServicesFactory));
 	}
 
 	public Collection<ProjectData> process(final SortedSet<NotificationContentItem> notifications) {

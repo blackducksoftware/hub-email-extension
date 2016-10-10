@@ -14,6 +14,7 @@ import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.notifier.NotifierManager;
 import com.blackducksoftware.integration.exception.EncryptionException;
 import com.blackducksoftware.integration.hub.builder.HubProxyInfoBuilder;
+import com.blackducksoftware.integration.hub.dataservices.DataServicesFactory;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyNotificationFilter;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
@@ -78,8 +79,10 @@ public class TestEmailEngine extends EmailEngine {
 	@Override
 	public NotifierManager createNotifierManager() {
 		final NotifierManager manager = new NotifierManager();
+		final DataServicesFactory dataServicesFactory = new DataServicesFactory(getRestConnection());
 		final TestDigestNotifier digestNotifier = new TestDigestNotifier(getCustomerProperties(),
-				getNotificationDataService(), getExtConfigDataService(), getEmailMessagingService());
+				getNotificationDataService(), getExtConfigDataService(), getEmailMessagingService(),
+				dataServicesFactory);
 		manager.attach(digestNotifier);
 		return manager;
 	}

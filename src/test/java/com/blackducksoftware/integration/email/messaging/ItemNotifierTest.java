@@ -13,6 +13,7 @@ import org.junit.Test;
 import com.blackducksoftware.integration.email.EmailEngine;
 import com.blackducksoftware.integration.email.mock.MockNotifier;
 import com.blackducksoftware.integration.email.mock.TestEmailEngine;
+import com.blackducksoftware.integration.hub.dataservices.DataServicesFactory;
 
 public class ItemNotifierTest {
 	private final static String NOTIFIER_KEY = "notifier.key";
@@ -26,8 +27,9 @@ public class ItemNotifierTest {
 		final File file = new File(propFileUrl.toURI());
 		System.setProperty("ext.config.location", file.getCanonicalFile().getParent());
 		engine = new TestEmailEngine();
+		final DataServicesFactory dataservicesFactory = new DataServicesFactory(engine.getRestConnection());
 		notifier = new MockNotifier(engine.getCustomerProperties(), engine.getNotificationDataService(),
-				engine.getExtConfigDataService(), engine.getEmailMessagingService(), NOTIFIER_KEY);
+				engine.getExtConfigDataService(), engine.getEmailMessagingService(), dataservicesFactory, NOTIFIER_KEY);
 	}
 
 	@After
