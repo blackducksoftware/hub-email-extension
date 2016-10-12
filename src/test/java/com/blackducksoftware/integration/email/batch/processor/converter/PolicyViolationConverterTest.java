@@ -7,7 +7,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -16,6 +16,7 @@ import com.blackducksoftware.integration.email.batch.processor.NotificationCateg
 import com.blackducksoftware.integration.email.batch.processor.NotificationEvent;
 import com.blackducksoftware.integration.email.batch.processor.NotificationItemType;
 import com.blackducksoftware.integration.email.batch.processor.ProcessingAction;
+import com.blackducksoftware.integration.email.model.batch.ItemEntry;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
 import com.blackducksoftware.integration.hub.api.project.ProjectVersion;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyViolationContentItem;
@@ -56,20 +57,18 @@ public class PolicyViolationConverterTest {
 			assertEquals(ProcessingAction.ADD, event.getAction());
 			assertEquals(PROJECT_NAME, event.getProjectName());
 			assertEquals(PROJECT_VERSION_NAME, event.getProjectVersion());
-			assertEquals(NotificationCategory.CATEGORY_POLICY_VIOLATON, event.getCategoryType());
+			assertEquals(NotificationCategory.CATEGORY_POLICY_VIOLATION, event.getCategoryType());
 			assertTrue(event.getVulnerabilityIdSet().isEmpty());
-			final Map<String, String> dataMap = event.getDataMap();
-			final String componentKey = COMPONENT;
-			assertTrue(dataMap.containsKey(componentKey));
-			assertEquals(NotificationItemType.ITEM_TYPE_COMPONENT.name(), dataMap.get(componentKey));
+			final Set<ItemEntry> dataSet = event.getDataSet();
+			final ItemEntry componentKey = new ItemEntry(NotificationItemType.ITEM_TYPE_COMPONENT.name(), COMPONENT);
 
-			final String versionKey = VERSION;
-			assertTrue(dataMap.containsKey(versionKey));
-			assertEquals("", dataMap.get(versionKey));
+			assertTrue(dataSet.contains(componentKey));
 
-			final String ruleKey = PREFIX_RULE + index;
-			assertTrue(dataMap.containsKey(ruleKey));
-			assertEquals(NotificationItemType.ITEM_TYPE_RULE.name(), dataMap.get(ruleKey));
+			final ItemEntry versionKey = new ItemEntry("", VERSION);
+			assertTrue(dataSet.contains(versionKey));
+
+			final ItemEntry ruleKey = new ItemEntry(NotificationItemType.ITEM_TYPE_RULE.name(), PREFIX_RULE + index);
+			assertTrue(dataSet.contains(ruleKey));
 			index++;
 		}
 	}

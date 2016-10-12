@@ -271,12 +271,25 @@ public class EmailEngine implements IAuthorizedListener {
 	}
 
 	public ExtensionInfo createExtensionInfoData() {
-		final String id = customerProperties.getExtensionId();
+
+		final String id = generateExtensionId();
 		final String name = customerProperties.getExtensionName();
 		final String description = customerProperties.getExtensionDescription();
 		final String baseUrl = customerProperties.getExtensionBaseUrl();
 
 		return new ExtensionInfo(id, name, description, baseUrl);
+	}
+
+	public String generateExtensionId() {
+		final Class<? extends EmailEngine> engineClass = this.getClass();
+		final Package enginePackage = engineClass.getPackage();
+		final String name = enginePackage.getSpecificationTitle();
+		final String version = enginePackage.getSpecificationVersion();
+		if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(version)) {
+			return name + version;
+		} else {
+			return customerProperties.getExtensionId();
+		}
 	}
 
 	public OAuthEndpoint createRestletComponent() {

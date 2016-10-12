@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ import com.blackducksoftware.integration.email.batch.processor.converter.PolicyV
 import com.blackducksoftware.integration.email.batch.processor.converter.VulnerabilityConverter;
 import com.blackducksoftware.integration.email.model.batch.CategoryData;
 import com.blackducksoftware.integration.email.model.batch.ItemData;
+import com.blackducksoftware.integration.email.model.batch.ItemEntry;
 import com.blackducksoftware.integration.email.model.batch.ProjectData;
 import com.blackducksoftware.integration.hub.api.vulnerabilities.SeverityEnum;
 import com.blackducksoftware.integration.hub.api.vulnerabilities.VulnerabilityItem;
@@ -39,6 +41,7 @@ public class NotificationProcessor {
 	private final Map<Class<?>, IItemConverter> converterMap = new HashMap<>();
 	private final DataServicesFactory dataServicesFactory;
 
+	// TODO this class needs cleanup. Too complicated and inefficient.
 	public NotificationProcessor(final DataServicesFactory dataServicesFactory) {
 		this.dataServicesFactory = dataServicesFactory;
 		converterMap.put(PolicyViolationContentItem.class, new PolicyViolationConverter());
@@ -84,16 +87,16 @@ public class NotificationProcessor {
 			case REMOVE: {
 				if (tempMap.containsKey(key)) {
 					final NotificationEvent storedEvent = tempMap.get(key);
-					final Map<String, String> storedEventDataMap = storedEvent.getDataMap();
-					final Map<String, String> eventDataMap = event.getDataMap();
-					for (final String mapKey : eventDataMap.keySet()) {
-						storedEvent.getDataMap().remove(mapKey);
-					}
+					final Set<ItemEntry> eventDataMap = event.getDataSet();
+
 					if (!storedEvent.getVulnerabilityIdSet().isEmpty() && !event.getVulnerabilityIdSet().isEmpty()) {
 						storedEvent.getVulnerabilityIdSet().removeAll(event.getVulnerabilityIdSet());
 					}
-					if (storedEventDataMap.isEmpty()) {
-						tempMap.remove(key);
+					if (storedEvent.getVulnerabilityIdSet().isEmpty()) {
+						storedEvent.getDataSet().removeAll(eventDataMap);
+						if (storedEvent.getDataSet().isEmpty()) {
+							tempMap.remove(key);
+						}
 					}
 				}
 				break;
@@ -104,11 +107,9 @@ public class NotificationProcessor {
 					tempMap.put(key, event);
 				} else {
 					final NotificationEvent storedEvent = tempMap.get(key);
-					final Map<String, String> storedEventDataMap = storedEvent.getDataMap();
-					final Map<String, String> eventDataMap = event.getDataMap();
-					for (final Map.Entry<String, String> entry : eventDataMap.entrySet()) {
-						storedEventDataMap.put(entry.getKey(), entry.getValue());
-					}
+					final Set<ItemEntry> storedEventDataMap = storedEvent.getDataSet();
+					final Set<ItemEntry> eventDataMap = event.getDataSet();
+					storedEventDataMap.addAll(eventDataMap);
 					if (!event.getVulnerabilityIdSet().isEmpty()) {
 						storedEvent.getVulnerabilityIdSet().addAll(event.getVulnerabilityIdSet());
 					}
@@ -147,7 +148,7 @@ public class NotificationProcessor {
 			} else {
 				categoryData = categoryMap.get(categoryKey);
 			}
-			categoryData.getItemList().add(new ItemData(event.getDataMap()));
+			categoryData.getItemList().add(new ItemData(event.getDataSet()));
 		}
 
 		return categoryMap;
@@ -175,17 +176,32 @@ public class NotificationProcessor {
 
 	private List<NotificationEvent> createVulnerabilityEvents(final NotificationEvent originalEvent) {
 		final List<NotificationEvent> eventList = new LinkedList<>();
+		final Map<NotificationCategory, NotificationEvent> eventMap = new HashMap<>();
 		for (final String vulnerabilityId : originalEvent.getVulnerabilityIdSet()) {
 			final VulnerabilityItem vulnerability = getVulnerabilities(vulnerabilityId);
-			final Map<String, String> dataMap = new LinkedHashMap<>(2);
-			dataMap.put(originalEvent.getComponentName(), NotificationItemType.ITEM_TYPE_COMPONENT.name());
-			dataMap.put(originalEvent.getComponentVersion(), "");
 			final NotificationCategory eventCategory = getEventCategory(vulnerability.getSeverity());
-			final Set<String> vulnset = new HashSet<>();
-			vulnset.add(vulnerabilityId);
-			eventList.add(new NotificationEvent(originalEvent.getAction(), originalEvent.getProjectName(),
-					originalEvent.getProjectVersion(), originalEvent.getComponentName(),
-					originalEvent.getComponentVersion(), eventCategory, originalEvent.getDataMap(), vulnset));
+			if (eventMap.containsKey(eventCategory)) {
+				final NotificationEvent event = eventMap.get(eventCategory);
+				event.getVulnerabilityIdSet().add(vulnerabilityId);
+			} else {
+				final Set<String> vulnset = new HashSet<>();
+				vulnset.add(vulnerabilityId);
+				final LinkedHashSet<ItemEntry> newDataSet = new LinkedHashSet<>();
+				newDataSet.addAll(originalEvent.getDataSet());
+				final NotificationEvent event = new NotificationEvent(originalEvent.getAction(),
+						originalEvent.getProjectName(), originalEvent.getProjectVersion(),
+						originalEvent.getComponentName(), originalEvent.getComponentVersion(), eventCategory,
+						newDataSet, vulnset);
+				eventMap.put(eventCategory, event);
+				eventList.add(event);
+			}
+		}
+		for (final NotificationEvent event : eventList) {
+			final int size = event.getVulnerabilityIdSet().size();
+			if (size > 1) {
+				event.getDataSet()
+						.add(new ItemEntry(NotificationItemType.ITEM_TYPE_COUNT.name(), String.valueOf(size)));
+			}
 		}
 		return eventList;
 	}

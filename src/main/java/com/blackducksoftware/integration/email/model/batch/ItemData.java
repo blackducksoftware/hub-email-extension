@@ -1,15 +1,20 @@
 package com.blackducksoftware.integration.email.model.batch;
 
-import java.util.Map;
+import java.util.Set;
 
 public class ItemData {
-	private final Map<String, String> dataMap;
+	private final Set<ItemEntry> dataSet;
 
-	public Map<String, String> getDataMap() {
-		return dataMap;
+	public ItemData(final Set<ItemEntry> dataMap) {
+		this.dataSet = dataMap;
 	}
 
-	public ItemData(final Map<String, String> dataMap) {
-		this.dataMap = dataMap;
+	public Set<ItemEntry> getDataSet() {
+		return dataSet;
+	}
+
+	@Override
+	public String toString() {
+		return "ItemData [dataSet=" + dataSet + "]";
 	}
 }

@@ -127,21 +127,23 @@
                             </#if>
                             <h3 class="category">${categoryItem.itemList?size} ${categoryName}</h3>
                             <#list categoryItem.itemList as item>
-                                <#if item.dataMap?? && item.dataMap?size gt 0>
+                                <#if item.dataSet?? && item.dataSet?size gt 0>
                                    <div>
-                                   <#list item.dataMap?keys as itemKey>
-                                       <#assign itemType="${item.dataMap[itemKey]}">
+                                   <#list item.dataSet as itemEntry>
+                                       <#assign itemType="${itemEntry.key}">
                                        <#if itemType == "ITEM_TYPE_RULE">
-                                         <div class="item">Rule: ${itemKey}</div>
+                                         <div class="item">Rule: ${itemEntry.value}</div>
                                        <#elseif itemType == "ITEM_TYPE_COMPONENT">
-                                         <div class="item">Component: ${itemKey}</div>  
+                                         <div class="item">Component: ${itemEntry.value}</div>  
+                                       <#elseif itemType == "ITEM_TYPE_COUNT">
+                                         <div class="item">(${itemEntry.value})</div>
                                        <#else>
-                                         <div class="item">${item.dataMap[itemKey]}${itemKey}</div>
+                                         <div class="item">${itemEntry.key}${itemEntry.value}</div>
                                        </#if>
                                    </#list>
                                    </div>
                                 </#if>
-                                <@moreItems item.dataMap?size/>
+                                <@moreItems item.dataSet?size/>
                             </#list>
                         </#if>
                       </#list>

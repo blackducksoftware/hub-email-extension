@@ -7,8 +7,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.mail.MessagingException;
 
@@ -20,6 +22,7 @@ import com.blackducksoftware.integration.email.mock.TestEmailEngine;
 import com.blackducksoftware.integration.email.model.EmailTarget;
 import com.blackducksoftware.integration.email.model.batch.CategoryData;
 import com.blackducksoftware.integration.email.model.batch.ItemData;
+import com.blackducksoftware.integration.email.model.batch.ItemEntry;
 import com.blackducksoftware.integration.email.model.batch.ProjectData;
 import com.blackducksoftware.integration.email.notifier.AbstractDigestNotifier;
 
@@ -70,9 +73,9 @@ public class EmailMessagingServiceTest {
 		for (int index = 0; index < 5; index++) {
 			final List<ItemData> itemList = new ArrayList<>(15);
 			for (int itemIndex = 0; itemIndex < 15; itemIndex++) {
-				final Map<String, String> dataMap = new HashMap<>();
-				dataMap.put("KEY_" + itemIndex, "VALUE_" + itemIndex);
-				itemList.add(new ItemData(dataMap));
+				final Set<ItemEntry> dataSet = new HashSet<>();
+				dataSet.add(new ItemEntry("KEY_" + itemIndex, "VALUE_" + itemIndex));
+				itemList.add(new ItemData(dataSet));
 			}
 			final String projectName = "PROJECT_NAME";
 			final String projectVersion = "PROJECT_VERSION";
