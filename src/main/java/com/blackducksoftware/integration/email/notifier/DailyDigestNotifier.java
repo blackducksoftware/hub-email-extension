@@ -2,9 +2,10 @@ package com.blackducksoftware.integration.email.notifier;
 
 import org.joda.time.DateTime;
 
-import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.model.DateRange;
+import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
+import com.blackducksoftware.integration.hub.dataservices.DataServicesFactory;
 import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 
@@ -13,8 +14,9 @@ public class DailyDigestNotifier extends AbstractDigestNotifier {
 	public DailyDigestNotifier(final ExtensionProperties customerProperties,
 			final NotificationDataService notificationDataService,
 			final ExtensionConfigDataService extensionConfigDataService,
-			final EmailMessagingService emailMessagingService) {
-		super(customerProperties, notificationDataService, extensionConfigDataService, emailMessagingService);
+			final EmailMessagingService emailMessagingService, final DataServicesFactory dataservicesFactory) {
+		super(customerProperties, notificationDataService, extensionConfigDataService, emailMessagingService,
+				dataservicesFactory);
 	}
 
 	@Override

@@ -1,82 +1,159 @@
-<style>
-  a.indented {
-      margin-top: 0px;
-      margin-bottom: 0px;
-      margin-left: 10px;
-      margin-right: 0px;
-      padding: 0px;
-  }
-  p.indented {
-      margin-top: 0px;
-      margin-bottom: 0px;
-      margin-left: 10px;
-      margin-right: 0px;
-      padding: 0px;
-  }
-  p.bold {
-      padding-top: 5px;
-      font-weight: bold;
-  }
-  p.project {
-      font-size: 110%;
-      margin-top: 0px;
-      margin-bottom: 0px;
-      margin-left: 0px;
-      margin-right: 0px;
-  }
-</style>
-
-<#macro displayCount type size> 
-  <p class="bold indented">${size} ${type}</p>
-</#macro>
-<#macro moreItemsLink size projectVersionID>
-  <#if size gt 10>
-      <#if projectVersionID?? && projectVersionID?trim?length gt 0>
-        <a class="indented" href="${hub_server_url}/#versions/id:${projectVersionID}/view:bom">${size - 10} more</a>
-      <#else>
-        <p class="indented">${size - 10} more</p>
-      </#if>
-  </#if>
-</#macro>
-
-Dear ${hubUserName},
-<br />
-<br />
-The Black Duck Hub's ${emailCategory} Digest.
-<br/>
-<ul style="list-style-type: none;">
-  <#if projectsDigest?? && projectsDigest.projectList?? && projectsDigest.projectList?size gt 0>
-      <#list projectsDigest.projectList as projectDigest>
-          <li><p class="bold project">${projectDigest.projectData['projectName']} > ${projectDigest.projectData['projectVersionName']}</p>
-                <#if projectDigest.policyViolations?? && projectDigest.policyViolations?size gt 0>
-                    <@displayCount size=projectDigest.projectData['policyViolationCount'] type="Policy Violations"/>
-                    <#list projectDigest.policyViolations as policyViolation>
-                        <p class="indented">RULE: ${policyViolation['policyName']} COMPONENT: ${policyViolation['componentName']} ${policyViolation['componentVersion']}</p>
-                       <#if policyViolation?counter == 10><#break></#if>
-                    </#list>
-                    <@moreItemsLink projectDigest.policyViolations?size projectDigest.projectData['projectVersionID']/>
-                </#if>
-                <#if projectDigest.policyOverrides?? && projectDigest.policyOverrides?size gt 0>
-                    <@displayCount size=projectDigest.projectData['policyOverrideCount'] type="Policy Overrides"/>
-                    <#list projectDigest.policyOverrides as policyOverride>
-                       <p class="indented">RULE: ${policyOverride['policyName']} COMPONENT: ${policyOverride['componentName']} ${policyOverride['componentVersion']} By: ${policyOverride['firstName']} ${policyOverride['lastName']}</p>    
-                       <#if policyOverride?counter == 10><#break></#if>
-                    </#list>
-                    <@moreItemsLink projectDigest.policyOverrides?size projectDigest.projectData['projectVersionID']/>
-                </#if>
-                <#if projectDigest.vulnerabilities?? && projectDigest.vulnerabilities?size gt 0>
-                    <@displayCount size=projectDigest.vulnerabilities?size type="Vulnerabilities"/>
-                    <#list projectDigest.vulnerabilities as vulnerability>
-                       <p class="indented">COMPONENT: ${vulnerability['componentName']} ${vulnerability['componentVersion']} Total: ${vulnerability['vulnTotalCount']} High: ${vulnerability['vulnHighCount']} Medium: ${vulnerability['vulnMediumCount']} Low: ${vulnerability['vulnLowCount']}</p>
-                       <#if vulnerability?counter == 10><#break></#if>
-                    </#list>
-                    <@moreItemsLink projectDigest.vulnerabilities?size projectDigest.projectData['projectVersionID']/>
-                </#if>
-          </li>
-      </#list>
-  </#if>
-</ul>
-To manage these items and/or see more details, please log in to your <a href="${hub_server_url}">Black Duck Hub</a>
-<br />
-<br />
-<img src="cid:${logo_image}" />
+<html>
+    <head>
+        <style>
+          .header .footer {
+            display:inline-block;
+            width:100%;
+          }
+          .textlogoblack {
+            font-family: OpenSans-Bold;
+            font-size: 24px;
+            color: #4A4A4A;
+            letter-spacing: 0px;
+            text-align: left;
+            display:inline-block;
+            width:100%;
+          }
+          .textlogoblue {
+            font-family: OpenSans;
+            font-size: 24px;
+            color: #73B1F0;
+            letter-spacing: 0px;
+            text-align:left;
+            display:inline-block
+          }
+          .emailcategory {
+            font-family: OpenSans-Light;
+            font-size: 14px;
+            color: #445B68;
+            letter-spacing: 0px;
+            text-align:right;
+            float:right;
+            display:inline-block
+          }
+          .line {
+            border: 1px solid #979797;
+          }
+          .description {
+            font-family: OpenSans-Light;
+            font-size: 14px;
+            color: #445B68;
+            letter-spacing: 0px;
+          }
+          a {
+            font-family: OpenSans-Light;
+            font-size: 14px;
+            color: #225786;
+            letter-spacing: 0px;
+          }
+          .topic_block {
+            background: #DDDDDD;
+          }
+          .topic {
+            font-family: OpenSans-Semibold;
+            font-size: 18px;
+            color: #445B68;
+            letter-spacing: 0px;
+            padding-left:15px;
+          }
+          .category {
+            font-family: OpenSans-Semibold;
+            font-size: 14px;
+            color: #445B68;
+            letter-spacing: 0px;
+            padding-left:15px;
+          }
+          .item {
+            font-family: Menlo-Regular;
+            font-size: 14px;
+            color: #445B68;
+            letter-spacing: 0.05px;
+            padding-left:15px;
+            display:inline-block;
+          }
+          .poweredby {
+            font-family: OpenSans;
+            font-size: 12px;
+            color: #4A4A4A;
+            letter-spacing: 0px;
+            float:right;
+            display:inline-block;
+          }                   
+          .captured {
+            font-family: OpenSans-Light;
+            font-size: 14px;
+            color: #445B68;
+            letter-spacing: 0px;
+            display:inline-block;
+          }
+        </style>
+    </head>
+    <body style="margin:1cm">
+        <#macro displayCount type size> 
+          <p class="bold indented">${size} ${type}</p>
+        </#macro>
+        <#macro moreItems size>
+          <#if size gt 10>
+                <p>${size - 10} more</p>
+          </#if>
+        </#macro>
+        <div class="header">
+            <div class="textlogoblack">Black<div class="textlogoblue">Duck</div><div class="emailcategory">${emailCategory} DIGEST</div></div> 
+        </div>
+        <div class="line"></div>
+        <br/>
+        <div class="description">Black Duck captured the following new policy violations and vulnerabilities.</div>
+        <a href="${hub_server_url}">See more details...</a>
+        <br/>
+        <br/>
+          <#if topicsList?? && topicsList?size gt 0> 
+              <#list topicsList as topic>
+                  <div class="topic_block">
+                  <h2 class="topic">${topic.projectName} > ${topic.projectVersion}</h2>
+                  <#if topic.categoryList?? && topic.categoryList?size gt 0> 
+                      <#list topic.categoryList as categoryItem>
+                        <#if categoryItem.itemList?? && categoryItem.itemList?size gt 0>
+                            <#assign categoryType="${categoryItem.categoryKey}">
+                            <#if categoryType == "CATEGORY_POLICY_VIOLATION">
+                              <#assign categoryName="Policy Violations">
+                            <#elseif categoryType == "CATEGORY_HIGH_VULNERABILITY">
+                              <#assign categoryName="High Vulnerabilities">
+                            <#elseif categoryType == "CATEGORY_MEDIUM_VULNERABILITY">
+                              <#assign categoryName="Medium Vulnerabilities">
+                            <#elseif categoryType == "CATEGORY_LOW_VULNERABILITY">
+                              <#assign categoryName="Low Vulnerabilities">
+                            <#else>
+                              <#assign categoryName="${categoryItem.categoryKey}">
+                            </#if>
+                            <h3 class="category">${categoryItem.itemList?size} ${categoryName}</h3>
+                            <#list categoryItem.itemList as item>
+                                <#if item.dataSet?? && item.dataSet?size gt 0>
+                                   <div>
+                                   <#list item.dataSet as itemEntry>
+                                       <#assign itemType="${itemEntry.key}">
+                                       <#if itemType == "ITEM_TYPE_RULE">
+                                         <div class="item">Rule: ${itemEntry.value}</div>
+                                       <#elseif itemType == "ITEM_TYPE_COMPONENT">
+                                         <div class="item">Component: ${itemEntry.value}</div>  
+                                       <#elseif itemType == "ITEM_TYPE_COUNT">
+                                         <div class="item">(${itemEntry.value})</div>
+                                       <#else>
+                                         <div class="item">${itemEntry.key}${itemEntry.value}</div>
+                                       </#if>
+                                   </#list>
+                                   </div>
+                                </#if>
+                                <@moreItems item.dataSet?size/>
+                            </#list>
+                        </#if>
+                      </#list>
+                  </#if>
+                  </div>
+              </#list>
+          </#if>
+        <br />
+        <div class="footer">
+            <img src="cid:${logo_image}" /> <div class="inline poweredby">Powered by <div class="captured">Black</div>Duck</div>
+        </div>
+    </body>
+<html>

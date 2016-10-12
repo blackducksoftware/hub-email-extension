@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
+import org.apache.commons.lang3.StringUtils;
 import org.restlet.data.Protocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -169,12 +170,33 @@ public class EmailEngine implements IAuthorizedListener {
 
 	public Configuration createFreemarkerConfig() throws IOException {
 		final Configuration cfg = new Configuration(Configuration.VERSION_2_3_25);
-		cfg.setDirectoryForTemplateLoading(new File(customerProperties.getEmailTemplateDirectory()));
+		final File templateDirectory = findTemplateDirectory();
+		cfg.setDirectoryForTemplateLoading(templateDirectory);
 		cfg.setDefaultEncoding("UTF-8");
 		cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
 		cfg.setLogTemplateExceptions(false);
 
 		return cfg;
+	}
+
+	private File findTemplateDirectory() {
+		try {
+			File templateDir = null;
+			final String appHomeDir = System.getProperty("APP_HOME");
+			if (StringUtils.isNotBlank(appHomeDir)) {
+				templateDir = new File(appHomeDir, "templates");
+			}
+
+			final String templateDirProperty = customerProperties.getEmailTemplateDirectory();
+			if (StringUtils.isNotBlank(templateDirProperty)) {
+				templateDir = new File(templateDirProperty);
+			}
+
+			return templateDir;
+		} catch (final Exception e) {
+			logger.error("Error finding the template directory", e);
+			return null;
+		}
 	}
 
 	public DateFormat createNotificationDateFormat() {
@@ -234,11 +256,11 @@ public class EmailEngine implements IAuthorizedListener {
 
 	public NotifierManager createNotifierManager() {
 		final NotifierManager manager = new NotifierManager();
-
+		final DataServicesFactory dataServicesFactory = new DataServicesFactory(getRestConnection());
 		final DailyDigestNotifier dailyNotifier = new DailyDigestNotifier(customerProperties, notificationDataService,
-				extConfigDataService, emailMessagingService);
+				extConfigDataService, emailMessagingService, dataServicesFactory);
 		final WeeklyDigestNotifier weeklyNotifier = new WeeklyDigestNotifier(customerProperties,
-				notificationDataService, extConfigDataService, emailMessagingService);
+				notificationDataService, extConfigDataService, emailMessagingService, dataServicesFactory);
 		// final MonthlyDigestNotifier monthlyNotifier = new
 		// MonthlyDigestNotifier(customerProperties, notificationDataService,
 		// extConfigDataService, emailMessagingService);
@@ -249,12 +271,25 @@ public class EmailEngine implements IAuthorizedListener {
 	}
 
 	public ExtensionInfo createExtensionInfoData() {
-		final String id = customerProperties.getExtensionId();
+
+		final String id = generateExtensionId();
 		final String name = customerProperties.getExtensionName();
 		final String description = customerProperties.getExtensionDescription();
 		final String baseUrl = customerProperties.getExtensionBaseUrl();
 
 		return new ExtensionInfo(id, name, description, baseUrl);
+	}
+
+	public String generateExtensionId() {
+		final Class<? extends EmailEngine> engineClass = this.getClass();
+		final Package enginePackage = engineClass.getPackage();
+		final String name = enginePackage.getSpecificationTitle();
+		final String version = enginePackage.getSpecificationVersion();
+		if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(version)) {
+			return name + version;
+		} else {
+			return customerProperties.getExtensionId();
+		}
 	}
 
 	public OAuthEndpoint createRestletComponent() {
