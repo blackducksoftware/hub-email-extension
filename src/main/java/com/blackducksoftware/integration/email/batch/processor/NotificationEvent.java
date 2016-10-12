@@ -1,6 +1,7 @@
 package com.blackducksoftware.integration.email.batch.processor;
 
 import java.util.Map;
+import java.util.Set;
 
 public class NotificationEvent {
 	private final ProcessingAction action;
@@ -8,13 +9,14 @@ public class NotificationEvent {
 	private final String projectVersion;
 	private final String componentName;
 	private final String componentVersion;
-	private final String categoryType;
+	private final NotificationCategory categoryType;
 	private final Map<String, String> dataMap;
 	private final String eventKey;
+	private final Set<String> vulnerabilityIdSet;
 
 	public NotificationEvent(final ProcessingAction action, final String projectName, final String projectVersion,
-			final String componentName, final String componentVersion, final String categoryType,
-			final Map<String, String> dataMap) {
+			final String componentName, final String componentVersion, final NotificationCategory categoryType,
+			final Map<String, String> dataMap, final Set<String> vulnerabilityIdSet) {
 		this.action = action;
 		this.projectName = projectName;
 		this.projectVersion = projectVersion;
@@ -22,6 +24,7 @@ public class NotificationEvent {
 		this.componentVersion = componentVersion;
 		this.categoryType = categoryType;
 		this.dataMap = dataMap;
+		this.vulnerabilityIdSet = vulnerabilityIdSet;
 		this.eventKey = projectName + projectVersion + componentName + componentVersion;
 	}
 
@@ -45,12 +48,16 @@ public class NotificationEvent {
 		return componentVersion;
 	}
 
-	public String getCategoryType() {
+	public NotificationCategory getCategoryType() {
 		return categoryType;
 	}
 
 	public Map<String, String> getDataMap() {
 		return dataMap;
+	}
+
+	public Set<String> getVulnerabilityIdSet() {
+		return vulnerabilityIdSet;
 	}
 
 	public String getEventKey() {

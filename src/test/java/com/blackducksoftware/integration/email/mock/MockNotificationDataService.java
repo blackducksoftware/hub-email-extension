@@ -36,7 +36,7 @@ public class MockNotificationDataService extends NotificationDataService {
 		return createNotificationList();
 	}
 
-	private SortedSet<NotificationContentItem> createNotificationList() {
+	private SortedSet<NotificationContentItem> createNotificationList() throws URISyntaxException {
 		final SortedSet<NotificationContentItem> contentList = new TreeSet<>();
 		contentList.addAll(createPolicyViolations());
 		contentList.addAll(createPolicyOverrides());
@@ -45,7 +45,7 @@ public class MockNotificationDataService extends NotificationDataService {
 		return contentList;
 	}
 
-	private List<PolicyViolationContentItem> createPolicyViolations() {
+	private List<PolicyViolationContentItem> createPolicyViolations() throws URISyntaxException {
 		final List<PolicyViolationContentItem> itemList = new ArrayList<>();
 		for (int index = 0; index < 5; index++) {
 			final ProjectVersion projectVersion = new ProjectVersion();
@@ -53,16 +53,18 @@ public class MockNotificationDataService extends NotificationDataService {
 			final String componentVersion = "Version" + index;
 			final UUID componentId = UUID.randomUUID();
 			final UUID componentVersionId = UUID.randomUUID();
+			final String componentVersionUrl = "http://localhost/api/components/" + componentId + "/versions/"
+					+ componentVersionId;
 			final List<PolicyRule> policyRuleList = new ArrayList<>();
 			final PolicyViolationContentItem item = new PolicyViolationContentItem(new Date(), projectVersion,
-					componentName, componentVersion, componentId, componentVersionId, policyRuleList);
+					componentName, componentVersion, componentVersionUrl, policyRuleList);
 			itemList.add(item);
 		}
 		return itemList;
 
 	}
 
-	private List<PolicyOverrideContentItem> createPolicyOverrides() {
+	private List<PolicyOverrideContentItem> createPolicyOverrides() throws URISyntaxException {
 		final List<PolicyOverrideContentItem> itemList = new ArrayList<>();
 		for (int index = 0; index < 5; index++) {
 			final ProjectVersion projectVersion = new ProjectVersion();
@@ -70,18 +72,19 @@ public class MockNotificationDataService extends NotificationDataService {
 			final String componentVersion = "Version" + index;
 			final UUID componentId = UUID.randomUUID();
 			final UUID componentVersionId = UUID.randomUUID();
+			final String componentVersionUrl = "http://localhost/api/components/" + componentId + "/versions/"
+					+ componentVersionId;
 			final String firstName = "firstName";
 			final String lastName = "lastName";
 			final List<PolicyRule> policyRuleList = new ArrayList<>();
 			final PolicyOverrideContentItem item = new PolicyOverrideContentItem(new Date(), projectVersion,
-					componentName, componentVersion, componentId, componentVersionId, policyRuleList, firstName,
-					lastName);
+					componentName, componentVersion, componentVersionUrl, policyRuleList, firstName, lastName);
 			itemList.add(item);
 		}
 		return itemList;
 	}
 
-	private List<VulnerabilityContentItem> createVulnerabilities() {
+	private List<VulnerabilityContentItem> createVulnerabilities() throws URISyntaxException {
 		final List<VulnerabilityContentItem> itemList = new ArrayList<>();
 		for (int index = 0; index < 5; index++) {
 			final ProjectVersion projectVersion = new ProjectVersion();
@@ -89,9 +92,11 @@ public class MockNotificationDataService extends NotificationDataService {
 			final String componentVersion = "Version" + index;
 			final UUID componentId = UUID.randomUUID();
 			final UUID componentVersionId = UUID.randomUUID();
+			final String componentVersionUrl = "http://localhost/api/components/" + componentId + "/versions/"
+					+ componentVersionId;
 			final VulnerabilityContentItem item = new VulnerabilityContentItem(new Date(), projectVersion,
-					componentName, componentVersion, componentId, componentVersionId, createVulnSourceIds(),
-					createVulnSourceIds(), createVulnSourceIds());
+					componentName, componentVersion, componentVersionUrl, createVulnSourceIds(), createVulnSourceIds(),
+					createVulnSourceIds());
 			itemList.add(item);
 		}
 		return itemList;
@@ -106,7 +111,7 @@ public class MockNotificationDataService extends NotificationDataService {
 		return sourceIdList;
 	}
 
-	private List<PolicyViolationClearedContentItem> createPolicyViolationsCleared() {
+	private List<PolicyViolationClearedContentItem> createPolicyViolationsCleared() throws URISyntaxException {
 		final List<PolicyViolationClearedContentItem> itemList = new ArrayList<>();
 		for (int index = 0; index < 5; index++) {
 			final ProjectVersion projectVersion = new ProjectVersion();
@@ -114,9 +119,11 @@ public class MockNotificationDataService extends NotificationDataService {
 			final String componentVersion = "Version" + index;
 			final UUID componentId = UUID.randomUUID();
 			final UUID componentVersionId = UUID.randomUUID();
+			final String componentVersionUrl = "http://localhost/api/components/" + componentId + "/versions/"
+					+ componentVersionId;
 			final List<PolicyRule> policyRuleList = new ArrayList<>();
 			final PolicyViolationClearedContentItem item = new PolicyViolationClearedContentItem(new Date(),
-					projectVersion, componentName, componentVersion, componentId, componentVersionId, policyRuleList);
+					projectVersion, componentName, componentVersion, componentVersionUrl, policyRuleList);
 			itemList.add(item);
 		}
 		return itemList;

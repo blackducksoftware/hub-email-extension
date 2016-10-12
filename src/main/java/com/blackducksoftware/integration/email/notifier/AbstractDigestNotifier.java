@@ -89,7 +89,7 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 							model.put(KEY_END_DATE, String.valueOf(endDate));
 							model.put(KEY_USER_FIRST_NAME, userConfig.getUser().getFirstName());
 							model.put(KEY_USER_LAST_NAME, userConfig.getUser().getLastName());
-							model.put(KEY_NOTIFIER_CATEGORY, getCategory());
+							model.put(KEY_NOTIFIER_CATEGORY, getCategory().toUpperCase());
 							final String emailAddress = userConfig.getUser().getEmail();
 							final String templateName = getTemplateName(userConfig);
 							final EmailTarget emailTarget = new EmailTarget(emailAddress, templateName, model);

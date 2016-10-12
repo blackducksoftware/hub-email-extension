@@ -109,16 +109,37 @@
           <#if topicsList?? && topicsList?size gt 0> 
               <#list topicsList as topic>
                   <div class="topic_block">
-                  <h2 class="topic">${topic.projectKey}</h2>
+                  <h2 class="topic">${topic.projectName} > ${topic.projectVersion}</h2>
                   <#if topic.categoryList?? && topic.categoryList?size gt 0> 
                       <#list topic.categoryList as categoryItem>
                         <#if categoryItem.itemList?? && categoryItem.itemList?size gt 0>
-                            <h3 class="category">${categoryItem.itemList?size} ${categoryItem.categoryKey}</h3>
+                            <#assign categoryType="${categoryItem.categoryKey}">
+                            <#if categoryType == "CATEGORY_POLICY_VIOLATION">
+                              <#assign categoryName="Policy Violations">
+                            <#elseif categoryType == "CATEGORY_HIGH_VULNERABILITY">
+                              <#assign categoryName="High Vulnerabilities">
+                            <#elseif categoryType == "CATEGORY_MEDIUM_VULNERABILITY">
+                              <#assign categoryName="Medium Vulnerabilities">
+                            <#elseif categoryType == "CATEGORY_LOW_VULNERABILITY">
+                              <#assign categoryName="Low Vulnerabilities">
+                            <#else>
+                              <#assign categoryName="${categoryItem.categoryKey}">
+                            </#if>
+                            <h3 class="category">${categoryItem.itemList?size} ${categoryName}</h3>
                             <#list categoryItem.itemList as item>
                                 <#if item.dataMap?? && item.dataMap?size gt 0>
+                                   <div>
                                    <#list item.dataMap?keys as itemKey>
-                                       <div class="item">${item.dataMap[itemKey]} ${itemKey} </div>
+                                       <#assign itemType="${item.dataMap[itemKey]}">
+                                       <#if itemType == "ITEM_TYPE_RULE">
+                                         <div class="item">Rule: ${itemKey}</div>
+                                       <#elseif itemType == "ITEM_TYPE_COMPONENT">
+                                         <div class="item">Component: ${itemKey}</div>  
+                                       <#else>
+                                         <div class="item">${item.dataMap[itemKey]}${itemKey}</div>
+                                       </#if>
                                    </#list>
+                                   </div>
                                 </#if>
                                 <@moreItems item.dataMap?size/>
                             </#list>
