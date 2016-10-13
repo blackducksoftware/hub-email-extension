@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.EmailExtensionConstants;
+import com.blackducksoftware.integration.email.ExtensionLogger;
 import com.blackducksoftware.integration.email.batch.processor.NotificationProcessor;
 import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.model.EmailTarget;
@@ -31,6 +32,7 @@ import com.blackducksoftware.integration.hub.dataservices.notification.items.Not
 import com.blackducksoftware.integration.hub.exception.UnexpectedHubResponseException;
 
 public abstract class AbstractDigestNotifier extends AbstractNotifier {
+	private static final String KEY_HUB_SERVER_URL = "hub_server_url";
 	public static final String KEY_TOPICS_LIST = "topicsList";
 	public static final String KEY_START_DATE = "startDate";
 	public static final String KEY_END_DATE = "endDate";
@@ -45,16 +47,20 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 	private final Logger logger = LoggerFactory.getLogger(AbstractDigestNotifier.class);
 	private final String cronExpression;
 
+	private final NotificationDataService notificationDataService;
+	private final ExtensionConfigDataService extensionConfigDataService;
+
 	public AbstractDigestNotifier(final ExtensionProperties customerProperties,
-			final NotificationDataService notificationDataService,
-			final ExtensionConfigDataService extensionConfigDataService,
 			final EmailMessagingService emailMessagingService, final DataServicesFactory dataServicesFactory) {
-		super(customerProperties, notificationDataService, extensionConfigDataService, emailMessagingService,
-				dataServicesFactory);
+		super(customerProperties, emailMessagingService, dataServicesFactory);
 
 		final String quartzTriggerPropValue = getCustomerProperties().getNotifierVariableProperties()
 				.get(getNotifierPropertyKey() + ".cron.expression");
 		cronExpression = StringUtils.trimToNull(quartzTriggerPropValue);
+		final Logger logger = LoggerFactory.getLogger(NotificationDataService.class);
+		final ExtensionLogger extLogger = new ExtensionLogger(logger);
+		notificationDataService = dataServicesFactory.createNotificationDataService(extLogger);
+		extensionConfigDataService = dataServicesFactory.createExtensionConfigDataService(extLogger);
 	}
 
 	public abstract DateRange createDateRange();
@@ -65,7 +71,7 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 	public void run() {
 		try {
 			final ExtensionProperties globalConfig = createPropertiesFromGlobalConfig();
-			final List<UserConfigItem> userConfigList = getExtensionConfigDataService()
+			final List<UserConfigItem> userConfigList = extensionConfigDataService
 					.getUserConfigList(getHubExtensionUri());
 			final List<UserConfigItem> usersInCategory = createUserListInCategory(userConfigList);
 
@@ -73,7 +79,7 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 				final DateRange dateRange = createDateRange();
 				final Date startDate = dateRange.getStart();
 				final Date endDate = dateRange.getEnd();
-				final SortedSet<NotificationContentItem> notifications = getNotificationDataService()
+				final SortedSet<NotificationContentItem> notifications = notificationDataService
 						.getAllNotifications(startDate, endDate);
 				final NotificationProcessor processor = new NotificationProcessor(getDataServicesFactory());
 				final Collection<ProjectData> projectList = processor.process(notifications);
@@ -90,6 +96,7 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 							model.put(KEY_USER_FIRST_NAME, userConfig.getUser().getFirstName());
 							model.put(KEY_USER_LAST_NAME, userConfig.getUser().getLastName());
 							model.put(KEY_NOTIFIER_CATEGORY, getCategory().toUpperCase());
+							model.put(KEY_HUB_SERVER_URL, getDataServicesFactory().getRestConnection().getBaseUrl());
 							final String emailAddress = userConfig.getUser().getEmail();
 							final String templateName = getTemplateName(userConfig);
 							final EmailTarget emailTarget = new EmailTarget(emailAddress, templateName, model);
@@ -186,7 +193,7 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 	}
 
 	private ExtensionProperties createPropertiesFromGlobalConfig() throws UnexpectedHubResponseException {
-		final Map<String, ConfigurationItem> globalMap = getExtensionConfigDataService()
+		final Map<String, ConfigurationItem> globalMap = extensionConfigDataService
 				.getGlobalConfigMap(getHubExtensionUri());
 		final Properties globalProperties = new Properties();
 		for (final Map.Entry<String, ConfigurationItem> entry : globalMap.entrySet()) {

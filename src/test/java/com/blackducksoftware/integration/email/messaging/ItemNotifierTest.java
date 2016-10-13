@@ -28,7 +28,7 @@ public class ItemNotifierTest {
 		System.setProperty("ext.config.location", file.getCanonicalFile().getParent());
 		engine = new TestEmailEngine();
 		final DataServicesFactory dataservicesFactory = new DataServicesFactory(engine.getRestConnection());
-		notifier = new MockNotifier(engine.getCustomerProperties(), engine.getNotificationDataService(),
+		notifier = new MockNotifier(engine.getExtensionProperties(), engine.getNotificationDataService(),
 				engine.getExtConfigDataService(), engine.getEmailMessagingService(), dataservicesFactory, NOTIFIER_KEY);
 	}
 

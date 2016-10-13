@@ -17,8 +17,7 @@ public class MockNotifier extends AbstractNotifier {
 			final ExtensionConfigDataService extensionConfigDataService,
 			final EmailMessagingService emailMessagingService, final DataServicesFactory dataservicesFactory,
 			final String templateName) {
-		super(customerProperties, notificationService, extensionConfigDataService, emailMessagingService,
-				dataservicesFactory);
+		super(customerProperties, emailMessagingService, dataservicesFactory);
 		this.templateName = templateName;
 	}
 

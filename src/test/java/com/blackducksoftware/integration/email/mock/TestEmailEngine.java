@@ -80,7 +80,7 @@ public class TestEmailEngine extends EmailEngine {
 	public NotifierManager createNotifierManager() {
 		final NotifierManager manager = new NotifierManager();
 		final DataServicesFactory dataServicesFactory = new DataServicesFactory(getRestConnection());
-		final TestDigestNotifier digestNotifier = new TestDigestNotifier(getCustomerProperties(),
+		final TestDigestNotifier digestNotifier = new TestDigestNotifier(getExtensionProperties(),
 				getNotificationDataService(), getExtConfigDataService(), getEmailMessagingService(),
 				dataServicesFactory);
 		manager.attach(digestNotifier);

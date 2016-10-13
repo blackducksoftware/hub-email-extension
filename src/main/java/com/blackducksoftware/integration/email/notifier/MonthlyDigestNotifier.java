@@ -6,17 +6,12 @@ import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.dataservices.DataServicesFactory;
-import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
-import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 
 public class MonthlyDigestNotifier extends AbstractDigestNotifier {
 
 	public MonthlyDigestNotifier(final ExtensionProperties customerProperties,
-			final NotificationDataService notificationDataService,
-			final ExtensionConfigDataService extensionConfigDataService,
 			final EmailMessagingService emailMessagingService, final DataServicesFactory dataservicesFactory) {
-		super(customerProperties, notificationDataService, extensionConfigDataService, emailMessagingService,
-				dataservicesFactory);
+		super(customerProperties, emailMessagingService, dataservicesFactory);
 	}
 
 	@Override

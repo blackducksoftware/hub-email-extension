@@ -55,7 +55,7 @@ public class EmailEngine implements IAuthorizedListener {
 	private HubServerConfig hubServerConfig;
 	private RestConnection restConnection;
 	private final Properties appProperties;
-	private final ExtensionProperties customerProperties;
+	private final ExtensionProperties extensionProperties;
 	private NotificationDataService notificationDataService;
 	private NotifierManager notifierManager;
 	private final TokenManager tokenManager;
@@ -67,7 +67,7 @@ public class EmailEngine implements IAuthorizedListener {
 
 	public EmailEngine() throws IOException, EncryptionException, URISyntaxException, BDRestException {
 		appProperties = createAppProperties();
-		customerProperties = createCustomerProperties();
+		extensionProperties = createExtensionProperties();
 		configuration = createFreemarkerConfig();
 		extensionInfoData = createExtensionInfoData();
 		tokenManager = createTokenManager();
@@ -103,8 +103,8 @@ public class EmailEngine implements IAuthorizedListener {
 		return appProperties;
 	}
 
-	public ExtensionProperties getCustomerProperties() {
-		return customerProperties;
+	public ExtensionProperties getExtensionProperties() {
+		return extensionProperties;
 	}
 
 	public NotificationDataService getNotificationDataService() {
@@ -187,7 +187,7 @@ public class EmailEngine implements IAuthorizedListener {
 				templateDir = new File(appHomeDir, "templates");
 			}
 
-			final String templateDirProperty = customerProperties.getEmailTemplateDirectory();
+			final String templateDirProperty = extensionProperties.getEmailTemplateDirectory();
 			if (StringUtils.isNotBlank(templateDirProperty)) {
 				templateDir = new File(templateDirProperty);
 			}
@@ -214,7 +214,7 @@ public class EmailEngine implements IAuthorizedListener {
 		return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), threadFactory);
 	}
 
-	public ExtensionProperties createCustomerProperties() {
+	public ExtensionProperties createExtensionProperties() {
 		return new ExtensionProperties(appProperties);
 	}
 
@@ -223,11 +223,11 @@ public class EmailEngine implements IAuthorizedListener {
 	}
 
 	public EmailMessagingService createEmailMessagingService() {
-		return new EmailMessagingService(customerProperties, configuration, javaMailWrapper);
+		return new EmailMessagingService(extensionProperties, configuration, javaMailWrapper);
 	}
 
 	public HubServerConfig createHubConfig(final String hubUri) {
-		final HubServerBeanConfiguration serverBeanConfig = new HubServerBeanConfiguration(hubUri, customerProperties);
+		final HubServerBeanConfiguration serverBeanConfig = new HubServerBeanConfiguration(hubUri, extensionProperties);
 
 		return serverBeanConfig.build();
 	}
@@ -257,13 +257,12 @@ public class EmailEngine implements IAuthorizedListener {
 	public NotifierManager createNotifierManager() {
 		final NotifierManager manager = new NotifierManager();
 		final DataServicesFactory dataServicesFactory = new DataServicesFactory(getRestConnection());
-		final DailyDigestNotifier dailyNotifier = new DailyDigestNotifier(customerProperties, notificationDataService,
-				extConfigDataService, emailMessagingService, dataServicesFactory);
-		final WeeklyDigestNotifier weeklyNotifier = new WeeklyDigestNotifier(customerProperties,
+		final DailyDigestNotifier dailyNotifier = new DailyDigestNotifier(extensionProperties, emailMessagingService,
+				dataServicesFactory);
+		final WeeklyDigestNotifier weeklyNotifier = new WeeklyDigestNotifier(extensionProperties,
 				notificationDataService, extConfigDataService, emailMessagingService, dataServicesFactory);
 		// final MonthlyDigestNotifier monthlyNotifier = new
-		// MonthlyDigestNotifier(customerProperties, notificationDataService,
-		// extConfigDataService, emailMessagingService);
+		// MonthlyDigestNotifier(customerProperties, emailMessagingService);
 		manager.attach(dailyNotifier);
 		manager.attach(weeklyNotifier);
 		// manager.attach(monthlyNotifier);
@@ -273,9 +272,9 @@ public class EmailEngine implements IAuthorizedListener {
 	public ExtensionInfo createExtensionInfoData() {
 
 		final String id = generateExtensionId();
-		final String name = customerProperties.getExtensionName();
-		final String description = customerProperties.getExtensionDescription();
-		final String baseUrl = customerProperties.getExtensionBaseUrl();
+		final String name = extensionProperties.getExtensionName();
+		final String description = extensionProperties.getExtensionDescription();
+		final String baseUrl = extensionProperties.getExtensionBaseUrl();
 
 		return new ExtensionInfo(id, name, description, baseUrl);
 	}
@@ -288,7 +287,7 @@ public class EmailEngine implements IAuthorizedListener {
 		if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(version)) {
 			return name + version;
 		} else {
-			return customerProperties.getExtensionId();
+			return extensionProperties.getExtensionId();
 		}
 	}
 

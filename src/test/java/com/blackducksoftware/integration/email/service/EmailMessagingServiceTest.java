@@ -62,7 +62,7 @@ public class EmailMessagingServiceTest {
 		model.put(AbstractDigestNotifier.KEY_USER_FIRST_NAME, "Hub");
 		model.put(AbstractDigestNotifier.KEY_USER_LAST_NAME, "User");
 		model.put(AbstractDigestNotifier.KEY_TOPICS_LIST, projectDataList);
-		model.put("hubServerUrl", "http://hub-a.domain.com1/");
+		model.put("hub_server_url", "http://hub-a.domain.com1/");
 		model.put(AbstractDigestNotifier.KEY_NOTIFIER_CATEGORY, "Daily");
 
 		final EmailTarget target = new EmailTarget("testUser@a.domain.com1", "digest.ftl", model);
