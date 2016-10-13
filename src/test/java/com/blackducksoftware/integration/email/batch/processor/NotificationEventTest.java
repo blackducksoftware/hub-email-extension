@@ -19,10 +19,10 @@ public class NotificationEventTest {
 		final String projectVersion = "projectVersion";
 		final String componentName = "componentName";
 		final String componentVersion = "componentVersion";
-		final NotificationCategory categoryType = NotificationCategory.CATEGORY_POLICY_VIOLATION;
+		final NotificationCategoryEnum categoryType = NotificationCategoryEnum.POLICY_VIOLATION;
 		final Set<ItemEntry> dataSet = new HashSet<>();
-		dataSet.add(new ItemEntry(NotificationItemType.ITEM_TYPE_COMPONENT.name(), "item"));
-		dataSet.add(new ItemEntry(NotificationItemType.ITEM_TYPE_RULE.name(), "rule"));
+		dataSet.add(new ItemEntry(ItemTypeEnum.COMPONENT.name(), "item"));
+		dataSet.add(new ItemEntry(ItemTypeEnum.RULE.name(), "rule"));
 		final Set<String> vulnerabilityIdSet = new HashSet<>();
 		vulnerabilityIdSet.add("vuln_id1");
 		vulnerabilityIdSet.add("vuln_id2");

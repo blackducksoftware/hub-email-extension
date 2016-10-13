@@ -6,9 +6,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import com.blackducksoftware.integration.email.batch.processor.NotificationCategory;
+import com.blackducksoftware.integration.email.batch.processor.NotificationCategoryEnum;
 import com.blackducksoftware.integration.email.batch.processor.NotificationEvent;
-import com.blackducksoftware.integration.email.batch.processor.NotificationItemType;
+import com.blackducksoftware.integration.email.batch.processor.ItemTypeEnum;
 import com.blackducksoftware.integration.email.batch.processor.ProcessingAction;
 import com.blackducksoftware.integration.email.model.batch.ItemEntry;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
@@ -28,12 +28,12 @@ public class PolicyOverrideConverter implements IItemConverter {
 				final String componentName = policyOverrideContentItem.getComponentName();
 				final String componentVersion = policyOverrideContentItem.getComponentVersion();
 				final Set<ItemEntry> dataMap = new LinkedHashSet<>(4);
-				dataMap.add(new ItemEntry(NotificationItemType.ITEM_TYPE_RULE.name(), rule.getName()));
-				dataMap.add(new ItemEntry(NotificationItemType.ITEM_TYPE_COMPONENT.name(), componentName));
+				dataMap.add(new ItemEntry(ItemTypeEnum.RULE.name(), rule.getName()));
+				dataMap.add(new ItemEntry(ItemTypeEnum.COMPONENT.name(), componentName));
 				dataMap.add(new ItemEntry("", componentVersion));
 				itemList.add(new NotificationEvent(ProcessingAction.REMOVE, projectVersion.getProjectName(),
 						projectVersion.getProjectVersionName(), componentName, componentVersion,
-						NotificationCategory.CATEGORY_POLICY_VIOLATION, dataMap, Collections.emptySet()));
+						NotificationCategoryEnum.POLICY_VIOLATION, dataMap, Collections.emptySet()));
 			}
 		}
 		return itemList;

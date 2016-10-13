@@ -164,11 +164,11 @@ public class NotificationProcessorTest {
 			assertEquals(PROJECT_NAME, project.getProjectName());
 			assertEquals(PROJECT_VERSION_NAME, project.getProjectVersion());
 
-			for (final CategoryData category : project.getCategoryList()) {
-				assertEquals(NotificationCategory.CATEGORY_POLICY_VIOLATION.name(), category.getCategoryKey());
+			for (final CategoryData category : project.getCategoryMap().values()) {
+				assertEquals(NotificationCategoryEnum.POLICY_VIOLATION.name(), category.getCategoryKey());
 				for (final ItemData itemData : category.getItemList()) {
 					final Set<ItemEntry> dataSet = itemData.getDataSet();
-					final ItemEntry componentKey = new ItemEntry(NotificationItemType.ITEM_TYPE_COMPONENT.name(),
+					final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(),
 							COMPONENT);
 					assertTrue(dataSet.contains(componentKey));
 
@@ -176,7 +176,7 @@ public class NotificationProcessorTest {
 					assertTrue(dataSet.contains(versionKey));
 
 					for (int index = 1; index <= 2; index++) {
-						final ItemEntry ruleKey = new ItemEntry(NotificationItemType.ITEM_TYPE_RULE.name(),
+						final ItemEntry ruleKey = new ItemEntry(ItemTypeEnum.RULE.name(),
 								PREFIX_RULE + index);
 						assertTrue(dataSet.contains(ruleKey));
 					}
@@ -321,11 +321,11 @@ public class NotificationProcessorTest {
 		final Collection<ProjectData> projectList = processor.process(notifications);
 
 		for (final ProjectData projectData : projectList) {
-			assertEquals(3, projectData.getCategoryList().size());
-			for (final CategoryData category : projectData.getCategoryList()) {
+			assertEquals(3, projectData.getCategoryMap().size());
+			for (final CategoryData category : projectData.getCategoryMap().values()) {
 				for (final ItemData itemData : category.getItemList()) {
 					final Set<ItemEntry> dataSet = itemData.getDataSet();
-					final ItemEntry componentKey = new ItemEntry(NotificationItemType.ITEM_TYPE_COMPONENT.name(),
+					final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(),
 							COMPONENT);
 					assertTrue(dataSet.contains(componentKey));
 
@@ -352,11 +352,11 @@ public class NotificationProcessorTest {
 		final Collection<ProjectData> projectList = processor.process(notifications);
 
 		for (final ProjectData projectData : projectList) {
-			assertEquals(3, projectData.getCategoryList().size());
-			for (final CategoryData category : projectData.getCategoryList()) {
+			assertEquals(3, projectData.getCategoryMap().size());
+			for (final CategoryData category : projectData.getCategoryMap().values()) {
 				for (final ItemData itemData : category.getItemList()) {
 					final Set<ItemEntry> dataSet = itemData.getDataSet();
-					final ItemEntry componentKey = new ItemEntry(NotificationItemType.ITEM_TYPE_COMPONENT.name(),
+					final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(),
 							COMPONENT);
 					assertTrue(dataSet.contains(componentKey));
 
@@ -430,12 +430,12 @@ public class NotificationProcessorTest {
 		assertFalse(projectList.isEmpty());
 		final Map<String, Integer> categoryItemMap = new HashMap<>();
 		for (final ProjectData projectData : projectList) {
-			assertEquals(2, projectData.getCategoryList().size());
-			for (final CategoryData category : projectData.getCategoryList()) {
+			assertEquals(2, projectData.getCategoryMap().size());
+			for (final CategoryData category : projectData.getCategoryMap().values()) {
 				categoryItemMap.put(category.getCategoryKey(), category.getItemList().size());
 				for (final ItemData itemData : category.getItemList()) {
 					final Set<ItemEntry> dataSet = itemData.getDataSet();
-					final ItemEntry componentKey = new ItemEntry(NotificationItemType.ITEM_TYPE_COMPONENT.name(),
+					final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(),
 							COMPONENT);
 					assertTrue(dataSet.contains(componentKey));
 
@@ -444,8 +444,8 @@ public class NotificationProcessorTest {
 				}
 			}
 		}
-		assertEquals(1, categoryItemMap.get(NotificationCategory.CATEGORY_HIGH_VULNERABILITY.name()).intValue());
-		assertEquals(1, categoryItemMap.get(NotificationCategory.CATEGORY_MEDIUM_VULNERABILITY.name()).intValue());
+		assertEquals(1, categoryItemMap.get(NotificationCategoryEnum.HIGH_VULNERABILITY.name()).intValue());
+		assertEquals(1, categoryItemMap.get(NotificationCategoryEnum.MEDIUM_VULNERABILITY.name()).intValue());
 	}
 
 	@Test
@@ -499,12 +499,12 @@ public class NotificationProcessorTest {
 		assertFalse(projectList.isEmpty());
 		final Map<String, Integer> categoryItemMap = new HashMap<>();
 		for (final ProjectData projectData : projectList) {
-			assertEquals(2, projectData.getCategoryList().size());
-			for (final CategoryData category : projectData.getCategoryList()) {
+			assertEquals(2, projectData.getCategoryMap().size());
+			for (final CategoryData category : projectData.getCategoryMap().values()) {
 				categoryItemMap.put(category.getCategoryKey(), category.getItemList().size());
 				for (final ItemData itemData : category.getItemList()) {
 					final Set<ItemEntry> dataSet = itemData.getDataSet();
-					final ItemEntry componentKey = new ItemEntry(NotificationItemType.ITEM_TYPE_COMPONENT.name(),
+					final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(),
 							COMPONENT);
 					assertTrue(dataSet.contains(componentKey));
 
@@ -513,8 +513,8 @@ public class NotificationProcessorTest {
 				}
 			}
 		}
-		assertEquals(1, categoryItemMap.get(NotificationCategory.CATEGORY_HIGH_VULNERABILITY.name()).intValue());
-		assertEquals(1, categoryItemMap.get(NotificationCategory.CATEGORY_MEDIUM_VULNERABILITY.name()).intValue());
+		assertEquals(1, categoryItemMap.get(NotificationCategoryEnum.HIGH_VULNERABILITY.name()).intValue());
+		assertEquals(1, categoryItemMap.get(NotificationCategoryEnum.MEDIUM_VULNERABILITY.name()).intValue());
 	}
 
 	// @Test
@@ -570,12 +570,12 @@ public class NotificationProcessorTest {
 		assertFalse(projectList.isEmpty());
 		final Map<String, Integer> categoryItemMap = new HashMap<>();
 		for (final ProjectData projectData : projectList) {
-			assertEquals(3, projectData.getCategoryList().size());
-			for (final CategoryData category : projectData.getCategoryList()) {
+			assertEquals(3, projectData.getCategoryMap().size());
+			for (final CategoryData category : projectData.getCategoryMap().values()) {
 				categoryItemMap.put(category.getCategoryKey(), category.getItemList().size());
 				for (final ItemData itemData : category.getItemList()) {
 					final Set<ItemEntry> dataSet = itemData.getDataSet();
-					final ItemEntry componentKey = new ItemEntry(NotificationItemType.ITEM_TYPE_COMPONENT.name(),
+					final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(),
 							COMPONENT);
 					assertTrue(dataSet.contains(componentKey));
 
@@ -584,9 +584,9 @@ public class NotificationProcessorTest {
 				}
 			}
 		}
-		assertEquals(1, categoryItemMap.get(NotificationCategory.CATEGORY_POLICY_VIOLATION.name()).intValue());
-		assertEquals(1, categoryItemMap.get(NotificationCategory.CATEGORY_HIGH_VULNERABILITY.name()).intValue());
-		assertEquals(2, categoryItemMap.get(NotificationCategory.CATEGORY_MEDIUM_VULNERABILITY.name()).intValue());
+		assertEquals(1, categoryItemMap.get(NotificationCategoryEnum.POLICY_VIOLATION.name()).intValue());
+		assertEquals(1, categoryItemMap.get(NotificationCategoryEnum.HIGH_VULNERABILITY.name()).intValue());
+		assertEquals(2, categoryItemMap.get(NotificationCategoryEnum.MEDIUM_VULNERABILITY.name()).intValue());
 	}
 
 	public void testMultiProjectPolicy() throws Exception {
@@ -627,18 +627,18 @@ public class NotificationProcessorTest {
 		assertFalse(projectList.isEmpty());
 		final Map<String, Integer> categoryItemMap = new HashMap<>();
 		for (final ProjectData projectData : projectList) {
-			assertEquals(3, projectData.getCategoryList().size());
-			for (final CategoryData category : projectData.getCategoryList()) {
+			assertEquals(3, projectData.getCategoryMap().size());
+			for (final CategoryData category : projectData.getCategoryMap().values()) {
 				categoryItemMap.put(category.getCategoryKey(), category.getItemList().size());
 				for (final ItemData itemData : category.getItemList()) {
 					final Set<ItemEntry> dataSet = itemData.getDataSet();
-					final ItemEntry componentKey = new ItemEntry(NotificationItemType.ITEM_TYPE_COMPONENT.name(),
+					final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(),
 							COMPONENT);
 					assertTrue(dataSet.contains(componentKey));
 
 					final ItemEntry versionKey = new ItemEntry("", VERSION);
 					assertTrue(dataSet.contains(versionKey));
-					final ItemEntry componentKey2 = new ItemEntry(NotificationItemType.ITEM_TYPE_COMPONENT.name(),
+					final ItemEntry componentKey2 = new ItemEntry(ItemTypeEnum.COMPONENT.name(),
 							COMPONENT2);
 					assertTrue(dataSet.contains(componentKey2));
 
@@ -647,8 +647,8 @@ public class NotificationProcessorTest {
 				}
 			}
 		}
-		assertEquals(1, categoryItemMap.get(NotificationCategory.CATEGORY_POLICY_VIOLATION.name()).intValue());
-		assertEquals(1, categoryItemMap.get(NotificationCategory.CATEGORY_HIGH_VULNERABILITY.name()).intValue());
-		assertEquals(2, categoryItemMap.get(NotificationCategory.CATEGORY_MEDIUM_VULNERABILITY.name()).intValue());
+		assertEquals(1, categoryItemMap.get(NotificationCategoryEnum.POLICY_VIOLATION.name()).intValue());
+		assertEquals(1, categoryItemMap.get(NotificationCategoryEnum.HIGH_VULNERABILITY.name()).intValue());
+		assertEquals(2, categoryItemMap.get(NotificationCategoryEnum.MEDIUM_VULNERABILITY.name()).intValue());
 	}
 }

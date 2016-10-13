@@ -12,9 +12,9 @@ import java.util.UUID;
 
 import org.junit.Test;
 
-import com.blackducksoftware.integration.email.batch.processor.NotificationCategory;
+import com.blackducksoftware.integration.email.batch.processor.NotificationCategoryEnum;
 import com.blackducksoftware.integration.email.batch.processor.NotificationEvent;
-import com.blackducksoftware.integration.email.batch.processor.NotificationItemType;
+import com.blackducksoftware.integration.email.batch.processor.ItemTypeEnum;
 import com.blackducksoftware.integration.email.batch.processor.ProcessingAction;
 import com.blackducksoftware.integration.email.model.batch.ItemEntry;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
@@ -57,17 +57,17 @@ public class PolicyViolationClearedConverterTest {
 			assertEquals(ProcessingAction.REMOVE, event.getAction());
 			assertEquals(PROJECT_NAME, event.getProjectName());
 			assertEquals(PROJECT_VERSION_NAME, event.getProjectVersion());
-			assertEquals(NotificationCategory.CATEGORY_POLICY_VIOLATION, event.getCategoryType());
+			assertEquals(NotificationCategoryEnum.POLICY_VIOLATION, event.getCategoryType());
 			assertTrue(event.getVulnerabilityIdSet().isEmpty());
 			final Set<ItemEntry> dataSet = event.getDataSet();
-			final ItemEntry componentKey = new ItemEntry(NotificationItemType.ITEM_TYPE_COMPONENT.name(), COMPONENT);
+			final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(), COMPONENT);
 
 			assertTrue(dataSet.contains(componentKey));
 
 			final ItemEntry versionKey = new ItemEntry("", VERSION);
 			assertTrue(dataSet.contains(versionKey));
 
-			final ItemEntry ruleKey = new ItemEntry(NotificationItemType.ITEM_TYPE_RULE.name(), PREFIX_RULE + index);
+			final ItemEntry ruleKey = new ItemEntry(ItemTypeEnum.RULE.name(), PREFIX_RULE + index);
 			assertTrue(dataSet.contains(ruleKey));
 			index++;
 		}

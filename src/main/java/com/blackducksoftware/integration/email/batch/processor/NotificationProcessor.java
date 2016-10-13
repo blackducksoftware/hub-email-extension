@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,10 +21,11 @@ import com.blackducksoftware.integration.email.batch.processor.converter.PolicyO
 import com.blackducksoftware.integration.email.batch.processor.converter.PolicyViolationClearedConverter;
 import com.blackducksoftware.integration.email.batch.processor.converter.PolicyViolationConverter;
 import com.blackducksoftware.integration.email.batch.processor.converter.VulnerabilityConverter;
-import com.blackducksoftware.integration.email.model.batch.CategoryData;
+import com.blackducksoftware.integration.email.model.batch.CategoryDataBuilder;
 import com.blackducksoftware.integration.email.model.batch.ItemData;
 import com.blackducksoftware.integration.email.model.batch.ItemEntry;
 import com.blackducksoftware.integration.email.model.batch.ProjectData;
+import com.blackducksoftware.integration.email.model.batch.ProjectDataBuilder;
 import com.blackducksoftware.integration.hub.api.vulnerabilities.SeverityEnum;
 import com.blackducksoftware.integration.hub.api.vulnerabilities.VulnerabilityItem;
 import com.blackducksoftware.integration.hub.dataservices.DataServicesFactory;
@@ -73,8 +73,7 @@ public class NotificationProcessor {
 	private Collection<ProjectData> processEvents(final List<NotificationEvent> events) {
 		// TODO Streams work better?
 		final Map<String, NotificationEvent> eventMap = processNotificationEvents(events);
-		final Map<NotificationCategory, CategoryData> categoryMap = createCateoryDataMap(eventMap);
-		final Collection<ProjectData> projectMap = createProjectData(categoryMap);
+		final Collection<ProjectData> projectMap = createCateoryDataMap(eventMap);
 		return projectMap;
 	}
 
@@ -122,7 +121,7 @@ public class NotificationProcessor {
 		// create additional vulnerability events
 		for (final Map.Entry<String, NotificationEvent> entry : tempMap.entrySet()) {
 			final NotificationEvent event = entry.getValue();
-			if (event.getCategoryType() == NotificationCategory.CATEGORY_VULNERABILITY) {
+			if (event.getCategoryType() == NotificationCategoryEnum.VULNERABILITY) {
 				final List<NotificationEvent> vulnerabilityEvents = createVulnerabilityEvents(event);
 				for (final NotificationEvent vulnerability : vulnerabilityEvents) {
 					eventMap.put(vulnerability.getEventKey(), vulnerability);
@@ -134,52 +133,51 @@ public class NotificationProcessor {
 		return eventMap;
 	}
 
-	private Map<NotificationCategory, CategoryData> createCateoryDataMap(
-			final Map<String, NotificationEvent> eventMap) {
-		final Map<NotificationCategory, CategoryData> categoryMap = new TreeMap<>();
+	private Collection<ProjectData> createCateoryDataMap(final Map<String, NotificationEvent> eventMap) {
+		final Map<String, ProjectDataBuilder> projectDataMap = new LinkedHashMap<>();
 		for (final Map.Entry<String, NotificationEvent> entry : eventMap.entrySet()) {
 			final NotificationEvent event = entry.getValue();
-			CategoryData categoryData;
-			final NotificationCategory categoryKey = event.getCategoryType();
-			if (!categoryMap.containsKey(categoryKey)) {
-				categoryData = new CategoryData(event.getProjectName(), event.getProjectVersion(), categoryKey.name(),
-						new LinkedList<>());
-				categoryMap.put(categoryKey, categoryData);
+			final String projectKey = event.getProjectKey();
+			// get category map from the project or create the project data if
+			// it doesn't exist
+			Map<NotificationCategoryEnum, CategoryDataBuilder> categoryBuilderMap;
+			if (!projectDataMap.containsKey(projectKey)) {
+				final ProjectDataBuilder projectBuilder = new ProjectDataBuilder();
+				projectBuilder.setProjectName(event.getProjectName());
+				projectBuilder.setProjectVersion(event.getProjectVersion());
+				projectDataMap.put(projectKey, projectBuilder);
+				categoryBuilderMap = projectBuilder.getCategoryBuilderMap();
 			} else {
-				categoryData = categoryMap.get(categoryKey);
+				final ProjectDataBuilder projectBuilder = projectDataMap.get(projectKey);
+				categoryBuilderMap = projectBuilder.getCategoryBuilderMap();
 			}
-			categoryData.getItemList().add(new ItemData(event.getDataSet()));
-		}
-
-		return categoryMap;
-	}
-
-	private Collection<ProjectData> createProjectData(final Map<NotificationCategory, CategoryData> categoryMap) {
-		final Map<String, ProjectData> projectMap = new LinkedHashMap<>();
-		for (final CategoryData categoryData : categoryMap.values()) {
-			final String projectKey = categoryData.getProjectKey();
-			List<CategoryData> categoryList;
-			if (!projectMap.containsKey(projectKey)) {
-				categoryList = new LinkedList<>();
-				final ProjectData projectData = new ProjectData(categoryData.getProjectName(),
-						categoryData.getProjectVersion(), categoryList);
-				projectMap.put(projectData.getProjectKey(), projectData);
+			// get the category data object to be able to add items.
+			CategoryDataBuilder categoryData;
+			final NotificationCategoryEnum categoryKey = event.getCategoryType();
+			if (!categoryBuilderMap.containsKey(categoryKey)) {
+				categoryData = new CategoryDataBuilder();
+				categoryData.setCategoryKey(categoryKey.name());
+				categoryBuilderMap.put(categoryKey, categoryData);
 			} else {
-				final ProjectData projectData = projectMap.get(projectKey);
-				categoryList = projectData.getCategoryList();
+				categoryData = categoryBuilderMap.get(categoryKey);
 			}
-
-			categoryList.add(categoryData);
+			categoryData.incrementItemCount(event.getCategoryItemCount());
+			categoryData.addItem(new ItemData(event.getDataSet()));
 		}
-		return projectMap.values();
+		// build
+		final Collection<ProjectData> dataList = new LinkedList<>();
+		for (final ProjectDataBuilder builder : projectDataMap.values()) {
+			dataList.add(builder.build());
+		}
+		return dataList;
 	}
 
 	private List<NotificationEvent> createVulnerabilityEvents(final NotificationEvent originalEvent) {
 		final List<NotificationEvent> eventList = new LinkedList<>();
-		final Map<NotificationCategory, NotificationEvent> eventMap = new HashMap<>();
+		final Map<NotificationCategoryEnum, NotificationEvent> eventMap = new HashMap<>();
 		for (final String vulnerabilityId : originalEvent.getVulnerabilityIdSet()) {
 			final VulnerabilityItem vulnerability = getVulnerabilities(vulnerabilityId);
-			final NotificationCategory eventCategory = getEventCategory(vulnerability.getSeverity());
+			final NotificationCategoryEnum eventCategory = getEventCategory(vulnerability.getSeverity());
 			if (eventMap.containsKey(eventCategory)) {
 				final NotificationEvent event = eventMap.get(eventCategory);
 				event.getVulnerabilityIdSet().add(vulnerabilityId);
@@ -199,8 +197,7 @@ public class NotificationProcessor {
 		for (final NotificationEvent event : eventList) {
 			final int size = event.getVulnerabilityIdSet().size();
 			if (size > 1) {
-				event.getDataSet()
-						.add(new ItemEntry(NotificationItemType.ITEM_TYPE_COUNT.name(), String.valueOf(size)));
+				event.getDataSet().add(new ItemEntry(ItemTypeEnum.COUNT.name(), String.valueOf(size)));
 			}
 		}
 		return eventList;
@@ -215,21 +212,21 @@ public class NotificationProcessor {
 		}
 	}
 
-	private NotificationCategory getEventCategory(final String severityString) {
+	private NotificationCategoryEnum getEventCategory(final String severityString) {
 		final SeverityEnum severity = SeverityEnum.getSeverityEnum(severityString);
 
 		switch (severity) {
 		case HIGH: {
-			return NotificationCategory.CATEGORY_HIGH_VULNERABILITY;
+			return NotificationCategoryEnum.HIGH_VULNERABILITY;
 		}
 		case MEDIUM: {
-			return NotificationCategory.CATEGORY_MEDIUM_VULNERABILITY;
+			return NotificationCategoryEnum.MEDIUM_VULNERABILITY;
 		}
 		case LOW: {
-			return NotificationCategory.CATEGORY_LOW_VULNERABILITY;
+			return NotificationCategoryEnum.LOW_VULNERABILITY;
 		}
 		default: {
-			return NotificationCategory.CATEGORY_VULNERABILITY;
+			return NotificationCategoryEnum.VULNERABILITY;
 		}
 		}
 	}

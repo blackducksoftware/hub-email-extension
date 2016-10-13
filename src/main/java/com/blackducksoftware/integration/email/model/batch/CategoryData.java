@@ -3,31 +3,14 @@ package com.blackducksoftware.integration.email.model.batch;
 import java.util.List;
 
 public class CategoryData {
-	private final String projectName;
-	private final String projectVersion;
-	private final String projectKey;
 	private final String categoryKey;
 	private final List<ItemData> itemList;
+	private final int itemCount;
 
-	public CategoryData(final String projectName, final String projectVersion, final String categoryKey,
-			final List<ItemData> itemList) {
-		this.projectName = projectName;
-		this.projectVersion = projectVersion;
-		this.projectKey = projectName + projectVersion;
+	public CategoryData(final String categoryKey, final List<ItemData> itemList, final int itemCount) {
 		this.categoryKey = categoryKey;
 		this.itemList = itemList;
-	}
-
-	public String getProjectName() {
-		return projectName;
-	}
-
-	public String getProjectVersion() {
-		return projectVersion;
-	}
-
-	public String getProjectKey() {
-		return projectKey;
+		this.itemCount = itemCount;
 	}
 
 	public String getCategoryKey() {
@@ -36,5 +19,9 @@ public class CategoryData {
 
 	public List<ItemData> getItemList() {
 		return itemList;
+	}
+
+	public int getItemCount() {
+		return itemCount;
 	}
 }

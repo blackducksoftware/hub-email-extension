@@ -110,32 +110,32 @@
               <#list topicsList as topic>
                   <div class="topic_block">
                   <h2 class="topic">${topic.projectName} > ${topic.projectVersion}</h2>
-                  <#if topic.categoryList?? && topic.categoryList?size gt 0> 
-                      <#list topic.categoryList as categoryItem>
+                  <#if topic.categoryMap?? && topic.categoryMap?size gt 0> 
+                      <#list topic.categoryMap?values as categoryItem>
                         <#if categoryItem.itemList?? && categoryItem.itemList?size gt 0>
                             <#assign categoryType="${categoryItem.categoryKey}">
-                            <#if categoryType == "CATEGORY_POLICY_VIOLATION">
+                            <#if categoryType == "POLICY_VIOLATION">
                               <#assign categoryName="Policy Violations">
-                            <#elseif categoryType == "CATEGORY_HIGH_VULNERABILITY">
+                            <#elseif categoryType == "HIGH_VULNERABILITY">
                               <#assign categoryName="High Vulnerabilities">
-                            <#elseif categoryType == "CATEGORY_MEDIUM_VULNERABILITY">
+                            <#elseif categoryType == "MEDIUM_VULNERABILITY">
                               <#assign categoryName="Medium Vulnerabilities">
-                            <#elseif categoryType == "CATEGORY_LOW_VULNERABILITY">
+                            <#elseif categoryType == "LOW_VULNERABILITY">
                               <#assign categoryName="Low Vulnerabilities">
                             <#else>
                               <#assign categoryName="${categoryItem.categoryKey}">
                             </#if>
-                            <h3 class="category">${categoryItem.itemList?size} ${categoryName}</h3>
+                            <h3 class="category">${categoryItem.itemCount} ${categoryName}</h3>
                             <#list categoryItem.itemList as item>
                                 <#if item.dataSet?? && item.dataSet?size gt 0>
                                    <div>
                                    <#list item.dataSet as itemEntry>
                                        <#assign itemType="${itemEntry.key}">
-                                       <#if itemType == "ITEM_TYPE_RULE">
+                                       <#if itemType == "RULE">
                                          <div class="item">Rule: ${itemEntry.value}</div>
-                                       <#elseif itemType == "ITEM_TYPE_COMPONENT">
+                                       <#elseif itemType == "COMPONENT">
                                          <div class="item">Component: ${itemEntry.value}</div>  
-                                       <#elseif itemType == "ITEM_TYPE_COUNT">
+                                       <#elseif itemType == "COUNT">
                                          <div class="item">(${itemEntry.value})</div>
                                        <#else>
                                          <div class="item">${itemEntry.key}${itemEntry.value}</div>

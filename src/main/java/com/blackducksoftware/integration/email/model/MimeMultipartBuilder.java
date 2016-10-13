@@ -75,6 +75,8 @@ public class MimeMultipartBuilder {
 
 		for (final Map.Entry<String, String> entry : contentIdsToFilePaths.entrySet()) {
 			final MimeBodyPart embeddedImageBodyPart = new MimeBodyPart();
+			// TODO see if file exists if not then use the image folder and
+			// search for it there.
 			final DataSource fds = new FileDataSource(entry.getValue());
 			embeddedImageBodyPart.setDataHandler(new DataHandler(fds));
 			embeddedImageBodyPart.setHeader("Content-ID", entry.getKey());

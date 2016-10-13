@@ -18,6 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.blackducksoftware.integration.email.EmailEngine;
+import com.blackducksoftware.integration.email.batch.processor.NotificationCategoryEnum;
 import com.blackducksoftware.integration.email.mock.TestEmailEngine;
 import com.blackducksoftware.integration.email.model.EmailTarget;
 import com.blackducksoftware.integration.email.model.batch.CategoryData;
@@ -79,10 +80,9 @@ public class EmailMessagingServiceTest {
 			}
 			final String projectName = "PROJECT_NAME";
 			final String projectVersion = "PROJECT_VERSION";
-			final List<CategoryData> categoryMap = new ArrayList<>();
-			for (int catIndex = 0; catIndex < 5; catIndex++) {
-				final String category = "CATEGORY_" + catIndex;
-				categoryMap.add(new CategoryData(projectName, projectVersion, category, itemList));
+			final Map<NotificationCategoryEnum, CategoryData> categoryMap = new HashMap<>();
+			for (final NotificationCategoryEnum category : NotificationCategoryEnum.values()) {
+				categoryMap.put(category, new CategoryData(category.name(), itemList, 1));
 			}
 			filteredList.add(new ProjectData(projectName, projectVersion, categoryMap));
 		}
