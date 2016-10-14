@@ -126,7 +126,7 @@ public class MimeMultipartBuilder {
 			File imagesDir = null;
 			final String appHomeDir = System.getProperty("APP_HOME");
 			if (StringUtils.isNotBlank(appHomeDir)) {
-				imagesDir = new File(appHomeDir, "templates");
+				imagesDir = new File(appHomeDir, "images");
 			}
 
 			return imagesDir;
