@@ -1,94 +1,84 @@
 <html>
     <head>
-        <style>
-          .header .footer {
-            display:inline-block;
-            width:100%;
-          }
-          .textlogoblack {
+       <style>
+        .textlogoblack {
             font-family: OpenSans-Bold;
             font-size: 24px;
             color: #4A4A4A;
-            letter-spacing: 0px;
-            text-align: left;
-            display:inline-block;
-            width:100%;
-          }
-          .textlogoblue {
+        }
+        .textlogoblue {
             font-family: OpenSans;
             font-size: 24px;
             color: #73B1F0;
-            letter-spacing: 0px;
-            text-align:left;
-            display:inline-block
-          }
-          .emailcategory {
+        }
+        .emailcategory {
             font-family: OpenSans-Light;
             font-size: 14px;
             color: #445B68;
-            letter-spacing: 0px;
-            text-align:right;
-            float:right;
-            display:inline-block
-          }
-          .line {
+            float: right;
+        }
+        .line {
             border: 1px solid #979797;
-          }
-          .description {
+        }
+        .description {
             font-family: OpenSans-Light;
             font-size: 14px;
             color: #445B68;
-            letter-spacing: 0px;
-          }
-          a {
+        }
+        a {
             font-family: OpenSans-Light;
             font-size: 14px;
             color: #225786;
-            letter-spacing: 0px;
-          }
-          .topic_block {
+        }
+        .topic_spacer {
+          height: 20px;
+        }
+        .topic_block {
             background: #DDDDDD;
-          }
-          .topic {
+            margin:0px;
+            padding-left: 15px;
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+        .topic {
             font-family: OpenSans-Semibold;
             font-size: 18px;
             color: #445B68;
-            letter-spacing: 0px;
-            padding-left:15px;
-          }
-          .category {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .category {
             font-family: OpenSans-Semibold;
             font-size: 14px;
             color: #445B68;
-            letter-spacing: 0px;
-            padding-left:15px;
-          }
-          .item {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .item {
             font-family: Menlo-Regular;
             font-size: 14px;
             color: #445B68;
-            letter-spacing: 0.05px;
-            padding-left:15px;
-            display:inline-block;
-          }
-          .poweredby {
-            font-family: OpenSans;
-            font-size: 12px;
-            color: #4A4A4A;
-            letter-spacing: 0px;
-            float:right;
-            display:inline-block;
-          }                   
-          .captured {
+            padding-right: 15px;
+            display: inline-block;
+        }
+        .poweredBy {
+          font-family: OpenSans;
+          font-size: 12px;
+          color: #4A4A4A;
+        }
+        .footerBlack {
             font-family: OpenSans-Light;
             font-size: 14px;
             color: #445B68;
-            letter-spacing: 0px;
-            display:inline-block;
-          }
-        </style>
+        }
+        .footerDuck {
+            font-family: OpenSans;
+            font-size: 12px;
+            color: #4A4A4A;
+        }
+       </style>
     </head>
-    <body style="margin:1cm">
+    <body style="margin:1cm;width:620px;">
         <#macro displayCount type size> 
           <p class="bold indented">${size} ${type}</p>
         </#macro>
@@ -98,19 +88,22 @@
           </#if>
         </#macro>
         <div class="header">
-            <div class="textlogoblack">Black<div class="textlogoblue">Duck</div><div class="emailcategory">${emailCategory} DIGEST</div></div> 
-        </div>
+            <div class="logo">
+              <span class="textlogoblack">Black</span><span class="textlogoblue">Duck</span>
+            </div>
+            <div class="emailcategory">${emailCategory} DIGEST</div>
+        </div> 
         <div class="line"></div>
         <br/>
         <div class="description">Black Duck captured the following new policy violations and vulnerabilities.</div>
-        <a href="${hub_server_url}">See more details...</a>
+        <a href="${hub_server_url}">See more details in the Hub</a>
         <br/>
         <br/>
           <#if topicsList?? && topicsList?size gt 0> 
               <#list topicsList as topic>
                   <div class="topic_block">
-                  <h2 class="topic">${topic.projectName} > ${topic.projectVersion}</h2>
-                  <#if topic.categoryMap?? && topic.categoryMap?size gt 0> 
+                    <div class="topic">${topic.projectName} > ${topic.projectVersion}</div>
+                    <#if topic.categoryMap?? && topic.categoryMap?size gt 0> 
                       <#list topic.categoryMap?values as categoryItem>
                         <#if categoryItem.itemList?? && categoryItem.itemList?size gt 0>
                             <#assign categoryType="${categoryItem.categoryKey}">
@@ -125,7 +118,7 @@
                             <#else>
                               <#assign categoryName="${categoryItem.categoryKey}">
                             </#if>
-                            <h3 class="category">${categoryItem.itemCount} ${categoryName}</h3>
+                            <div class="category">${categoryItem.itemCount} ${categoryName}</div>
                             <#list categoryItem.itemList as item>
                                 <#if item.dataSet?? && item.dataSet?size gt 0>
                                    <div>
@@ -147,13 +140,16 @@
                             </#list>
                         </#if>
                       </#list>
-                  </#if>
+                    </#if>
                   </div>
+                  <div class="topic_spacer"></div>
               </#list>
           </#if>
-        <br />
         <div class="footer">
-            <img src="cid:${logo_image}" /> <div class="inline poweredby">Powered by <div class="captured">Black</div>Duck</div>
+            <img src="cid:${logo_image}" />
+            <div style="float:right;">
+              <span class="poweredBy">Powered by </span><span class="footerBlack">Black</span><span class="footerDuck">Duck</span>
+            </div>
         </div>
     </body>
 <html>

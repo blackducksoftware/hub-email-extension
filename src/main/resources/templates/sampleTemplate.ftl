@@ -1,72 +1,63 @@
 <html>
     <head>
         <style>
-          .header .footer {
-            display:inline-block;
-            width:100%;
-          }
-          .textlogoblack {
+        .textlogoblack {
             font-family: OpenSans-Bold;
             font-size: 24px;
             color: #4A4A4A;
-            letter-spacing: 0px;
-            text-align: left;
-            display:inline-block;
-            width:100%;
-          }
-          .textlogoblue {
+        }
+        .textlogoblue {
             font-family: OpenSans;
             font-size: 24px;
             color: #73B1F0;
-            letter-spacing: 0px;
-            text-align:left;
-            display:inline-block
-          }
-          .emailcategory {
+        }
+        .emailcategory {
             font-family: OpenSans-Light;
             font-size: 14px;
             color: #445B68;
-            letter-spacing: 0px;
-            text-align:right;
-            float:right;
-            display:inline-block
-          }
-          .line {
+            float: right;
+        }
+        .line {
             border: 1px solid #979797;
-          }
-          .description {
+        }
+        .description {
             font-family: OpenSans-Light;
             font-size: 14px;
             color: #445B68;
-            letter-spacing: 0px;
-          }
-          .poweredby {
+        }
+        .poweredBy {
+          font-family: OpenSans;
+          font-size: 12px;
+          color: #4A4A4A;
+        }
+        .footerBlack {
+            font-family: OpenSans-Light;
+            font-size: 14px;
+            color: #445B68;
+        }
+        .footerDuck {
             font-family: OpenSans;
             font-size: 12px;
             color: #4A4A4A;
-            letter-spacing: 0px;
-            float:right;
-            display:inline-block;
-          }                   
-          .captured {
-            font-family: OpenSans-Light;
-            font-size: 14px;
-            color: #445B68;
-            letter-spacing: 0px;
-            display:inline-block;
-          }
-        </style>
+        }
+       </style>
     </head>
-    <body style="margin:1cm">
+    <body style="margin:1cm;width:620px;">
         <div class="header">
-            <div class="textlogoblack">Black<div class="textlogoblue">Duck</div><div class="emailcategory">SAMPLE</div></div> 
-        </div>
+            <div class="logo">
+              <span class="textlogoblack">Black</span><span class="textlogoblue">Duck</span>
+            </div>
+            <div class="emailcategory">SAMPLE </div>
+        </div> 
         <div class="line"></div>
         <br/>
         <div class="description">Black Duck sample email for demonstration purposes only.</div>
         <br/>
         <div class="footer">
-            <img src="cid:${logo_image}" /> <div class="poweredby">Powered by <div class="captured">Black</div>Duck</div>
+            <img src="cid:${logo_image}" />
+            <div style="float:right;">
+              <span class="poweredBy">Powered by </span><span class="footerBlack">Black</span><span class="footerDuck">Duck</span>
+            </div>
         </div>
     </body>
 <html>
