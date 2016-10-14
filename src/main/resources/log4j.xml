@@ -25,7 +25,7 @@
 		<Root level="error">
 		  <AppenderRef ref="hubEmailLogger"/>
 		</Root>
-		<Logger name="com.blackducksoftware.integration" level="info">
+		<Logger name="com.blackducksoftware.integration" level="info" additivity="false">
 		  <AppenderRef ref="hubEmailLogger"/>
 		</Logger>
 	</Loggers>
