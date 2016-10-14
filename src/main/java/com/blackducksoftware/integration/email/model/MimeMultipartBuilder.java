@@ -1,5 +1,7 @@
 package com.blackducksoftware.integration.email.model;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -75,9 +77,24 @@ public class MimeMultipartBuilder {
 
 		for (final Map.Entry<String, String> entry : contentIdsToFilePaths.entrySet()) {
 			final MimeBodyPart embeddedImageBodyPart = new MimeBodyPart();
-			// TODO see if file exists if not then use the image folder and
-			// search for it there.
-			final DataSource fds = new FileDataSource(entry.getValue());
+			String imageFilePath = entry.getValue();
+			File imageFile = new File(imageFilePath);
+
+			if (!imageFile.exists()) {
+				final File imagesDir = findImagesDirectory();
+				if (imagesDir != null) {
+					imageFile = new File(imagesDir, imageFilePath);
+					if (imageFile.exists()) {
+						try {
+							imageFilePath = imageFile.getCanonicalPath();
+						} catch (final IOException e) {
+							// ignore let freemarker fail and log the exception
+							// up the chain when it cannot find the image file
+						}
+					}
+				}
+			}
+			final DataSource fds = new FileDataSource(imageFilePath);
 			embeddedImageBodyPart.setDataHandler(new DataHandler(fds));
 			embeddedImageBodyPart.setHeader("Content-ID", entry.getKey());
 			htmlContent.addBodyPart(embeddedImageBodyPart);
@@ -104,4 +121,17 @@ public class MimeMultipartBuilder {
 		}
 	}
 
+	private File findImagesDirectory() {
+		try {
+			File imagesDir = null;
+			final String appHomeDir = System.getProperty("APP_HOME");
+			if (StringUtils.isNotBlank(appHomeDir)) {
+				imagesDir = new File(appHomeDir, "templates");
+			}
+
+			return imagesDir;
+		} catch (final Exception e) {
+			return null;
+		}
+	}
 }
