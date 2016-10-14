@@ -49,14 +49,16 @@
             "singleValue": false,
             "description": "the user can specify any number of reasons that will trigger an email",
             "options": [
-                {"name": "policyViolation", "title": "Policy Violation" },
-                {"name": "policyViolationOverrideCancellation", "title": "Policy Violation Override Cancellation" },
-                {"name": "overridePolicyViolation", "title": "Override Policy Violation" },
-                {"name": "securityVulnerabilities", "title": "Security Vulnerabilities" }
+                {"name": "POLICY_VIOLATION", "title": "Policy Violation" },
+                {"name": "HIGH_VULNERABILITY", "title": "High Security Vulnerabilities" },
+                {"name": "MEDIUM_VULNERABILITY", "title": "Medium Security Vulnerabilities" },
+                {"name": "LOW_VULNERABILITY", "title": "Low Security Vulnerabilities" }
             ],
             "defaultValue": [
-                "policyViolation",
-                "securityVulnerabilities"
+                "POLICY_VIOLATION",
+                "HIGH_VULNERABILITY",
+                "MEDIUM_VULNERABILITY",
+                "LOW_VULNERABILITY"
             ]
        }
     ]

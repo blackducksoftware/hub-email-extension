@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -17,10 +18,12 @@ import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.EmailExtensionConstants;
 import com.blackducksoftware.integration.email.ExtensionLogger;
+import com.blackducksoftware.integration.email.batch.processor.NotificationCategoryEnum;
 import com.blackducksoftware.integration.email.batch.processor.NotificationProcessor;
 import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.model.EmailTarget;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
+import com.blackducksoftware.integration.email.model.batch.CategoryData;
 import com.blackducksoftware.integration.email.model.batch.ProjectData;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.api.extension.ConfigurationItem;
@@ -70,6 +73,7 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 	@Override
 	public void run() {
 		try {
+			logger.info("Starting iteration of {} digest email notifier", getName());
 			final ExtensionProperties globalConfig = createPropertiesFromGlobalConfig();
 			final List<UserConfigItem> userConfigList = extensionConfigDataService
 					.getUserConfigList(getHubExtensionUri());
@@ -89,18 +93,21 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 							// TODO need to simplify this more. too
 							// expensive
 							final Collection<ProjectData> projectsDigest = filterCategories(projectList, userConfig);
-							final Map<String, Object> model = new HashMap<>();
-							model.put(KEY_TOPICS_LIST, projectsDigest);
-							model.put(KEY_START_DATE, String.valueOf(startDate));
-							model.put(KEY_END_DATE, String.valueOf(endDate));
-							model.put(KEY_USER_FIRST_NAME, userConfig.getUser().getFirstName());
-							model.put(KEY_USER_LAST_NAME, userConfig.getUser().getLastName());
-							model.put(KEY_NOTIFIER_CATEGORY, getCategory().toUpperCase());
-							model.put(KEY_HUB_SERVER_URL, getDataServicesFactory().getRestConnection().getBaseUrl());
-							final String emailAddress = userConfig.getUser().getEmail();
-							final String templateName = getTemplateName(userConfig);
-							final EmailTarget emailTarget = new EmailTarget(emailAddress, templateName, model);
-							getEmailMessagingService().sendEmailMessage(emailTarget, globalConfig);
+							if (!projectsDigest.isEmpty()) {
+								final Map<String, Object> model = new HashMap<>();
+								model.put(KEY_TOPICS_LIST, projectsDigest);
+								model.put(KEY_START_DATE, String.valueOf(startDate));
+								model.put(KEY_END_DATE, String.valueOf(endDate));
+								model.put(KEY_USER_FIRST_NAME, userConfig.getUser().getFirstName());
+								model.put(KEY_USER_LAST_NAME, userConfig.getUser().getLastName());
+								model.put(KEY_NOTIFIER_CATEGORY, getCategory().toUpperCase());
+								model.put(KEY_HUB_SERVER_URL,
+										getDataServicesFactory().getRestConnection().getBaseUrl());
+								final String emailAddress = userConfig.getUser().getEmail();
+								final String templateName = getTemplateName(userConfig);
+								final EmailTarget emailTarget = new EmailTarget(emailAddress, templateName, model);
+								getEmailMessagingService().sendEmailMessage(emailTarget, globalConfig);
+							}
 						} catch (final Exception e) {
 							logger.error("Error sending email to user", e);
 						}
@@ -110,28 +117,33 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 		} catch (final Exception e) {
 			logger.error("Error sending the email", e);
 		}
+		logger.info("Finished iteration of {} digest email notifier", getName());
 	}
 
 	private Collection<ProjectData> filterCategories(final Collection<ProjectData> projectList,
 			final UserConfigItem userConfig) {
-		// final List<ProjectData> filteredList = new ArrayList<>();
-		// for (int index = 0; index < 5; index++) {
-		// final List<ItemData> itemList = new ArrayList<>(15);
-		// for (int itemIndex = 0; itemIndex < 15; itemIndex++) {
-		// final Map<String, String> dataMap = new HashMap<>();
-		// dataMap.put("KEY_" + itemIndex, "VALUE_" + itemIndex);
-		// itemList.add(new ItemData(dataMap));
-		// }
-		// final List<CategoryData> categoryMap = new ArrayList<>();
-		// for (int catIndex = 0; catIndex < 5; catIndex++) {
-		// final String category = "CATEGORY_" + catIndex;
-		// categoryMap.add(new CategoryData(category, itemList));
-		// }
-		// filteredList.add(new ProjectData("PROJECT_NAME>PROJECT_VERSION",
-		// categoryMap));
-		// }
+		final List<ProjectData> filteredList = new ArrayList<>(projectList.size());
+		final Set<NotificationCategoryEnum> triggerSet = getTriggerSet(userConfig);
 
-		return projectList;
+		if (!triggerSet.isEmpty()) {
+			for (final ProjectData projectData : projectList) {
+				final Map<NotificationCategoryEnum, CategoryData> categoryDataMap = new TreeMap<>();
+				final ProjectData newProject = new ProjectData(projectData.getProjectName(),
+						projectData.getProjectVersion(), categoryDataMap);
+				for (final Map.Entry<NotificationCategoryEnum, CategoryData> entry : projectData.getCategoryMap()
+						.entrySet()) {
+					if (triggerSet.contains(entry.getKey())) {
+						categoryDataMap.put(entry.getKey(), entry.getValue());
+					}
+				}
+
+				if (!categoryDataMap.isEmpty()) {
+					filteredList.add(newProject);
+				}
+			}
+		}
+
+		return filteredList;
 	}
 
 	private List<UserConfigItem> createUserListInCategory(final List<UserConfigItem> userConfigList) {
@@ -167,10 +179,16 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 		return getCategory().equals(emailFrequency);
 	}
 
-	private Set<String> getTriggerSet(final UserConfigItem userConfig) {
+	private Set<NotificationCategoryEnum> getTriggerSet(final UserConfigItem userConfig) {
 		final List<String> triggerList = getConfigValueList(userConfig, EmailExtensionConstants.CONFIG_KEY_TRIGGERS);
-		final Set<String> triggerSet = new HashSet<>();
-		triggerSet.addAll(triggerList);
+		final Set<NotificationCategoryEnum> triggerSet = new HashSet<>();
+		for (final String trigger : triggerList) {
+			try {
+				triggerSet.add(NotificationCategoryEnum.valueOf(trigger));
+			} catch (final Exception ex) {
+				logger.error("Could not parse trigger config {} {}", trigger, ex);
+			}
+		}
 		return triggerSet;
 	}
 
