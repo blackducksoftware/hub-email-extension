@@ -248,9 +248,7 @@ public class EmailEngine implements IAuthorizedListener {
 
 	public RestConnection initRestConnection(final String hubUri)
 			throws EncryptionException, URISyntaxException, BDRestException {
-		final RestConnection restConnection = new OAuthRestConnection(hubUri, tokenManager);
-		restConnection.setProxyProperties(hubServerConfig.getProxyInfo());
-		restConnection.setTimeout(hubServerConfig.getTimeout());
+		final RestConnection restConnection = new OAuthRestConnection(hubServerConfig, tokenManager);
 		return restConnection;
 	}
 

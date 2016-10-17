@@ -53,11 +53,12 @@ public class MockNotificationDataService extends NotificationDataService {
 			final String componentVersion = "Version" + index;
 			final UUID componentId = UUID.randomUUID();
 			final UUID componentVersionId = UUID.randomUUID();
+			final String componentUrl = "http://localhost/api/components/" + componentId;
 			final String componentVersionUrl = "http://localhost/api/components/" + componentId + "/versions/"
 					+ componentVersionId;
 			final List<PolicyRule> policyRuleList = new ArrayList<>();
 			final PolicyViolationContentItem item = new PolicyViolationContentItem(new Date(), projectVersion,
-					componentName, componentVersion, componentVersionUrl, policyRuleList);
+					componentName, componentVersion, componentUrl, componentVersionUrl, policyRuleList);
 			itemList.add(item);
 		}
 		return itemList;
@@ -72,13 +73,15 @@ public class MockNotificationDataService extends NotificationDataService {
 			final String componentVersion = "Version" + index;
 			final UUID componentId = UUID.randomUUID();
 			final UUID componentVersionId = UUID.randomUUID();
+			final String componentUrl = "http://localhost/api/components/" + componentId;
 			final String componentVersionUrl = "http://localhost/api/components/" + componentId + "/versions/"
 					+ componentVersionId;
 			final String firstName = "firstName";
 			final String lastName = "lastName";
 			final List<PolicyRule> policyRuleList = new ArrayList<>();
 			final PolicyOverrideContentItem item = new PolicyOverrideContentItem(new Date(), projectVersion,
-					componentName, componentVersion, componentVersionUrl, policyRuleList, firstName, lastName);
+					componentName, componentVersion, componentUrl, componentVersionUrl, policyRuleList, firstName,
+					lastName);
 			itemList.add(item);
 		}
 		return itemList;
@@ -119,11 +122,12 @@ public class MockNotificationDataService extends NotificationDataService {
 			final String componentVersion = "Version" + index;
 			final UUID componentId = UUID.randomUUID();
 			final UUID componentVersionId = UUID.randomUUID();
+			final String componentUrl = "http://localhost/api/components/" + componentId;
 			final String componentVersionUrl = "http://localhost/api/components/" + componentId + "/versions/"
 					+ componentVersionId;
 			final List<PolicyRule> policyRuleList = new ArrayList<>();
 			final PolicyViolationClearedContentItem item = new PolicyViolationClearedContentItem(new Date(),
-					projectVersion, componentName, componentVersion, componentVersionUrl, policyRuleList);
+					projectVersion, componentName, componentVersion, componentUrl, componentVersionUrl, policyRuleList);
 			itemList.add(item);
 		}
 		return itemList;

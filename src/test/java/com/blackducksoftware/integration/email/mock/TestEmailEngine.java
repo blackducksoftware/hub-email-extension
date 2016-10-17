@@ -21,7 +21,6 @@ import com.blackducksoftware.integration.hub.exception.BDRestException;
 import com.blackducksoftware.integration.hub.global.HubCredentials;
 import com.blackducksoftware.integration.hub.global.HubProxyInfo;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
-import com.blackducksoftware.integration.hub.rest.RestConnection;
 
 public class TestEmailEngine extends EmailEngine {
 
@@ -62,18 +61,6 @@ public class TestEmailEngine extends EmailEngine {
 	public NotificationDataService createNotificationDataService() {
 		return new MockNotificationDataService(getRestConnection(), getDataServicesFactory().getGson(),
 				getDataServicesFactory().getJsonParser(), new PolicyNotificationFilter(null));
-	}
-
-	@Override
-	public RestConnection createRestConnection(final String hubUri)
-			throws EncryptionException, URISyntaxException, BDRestException {
-		final RestConnection restConnection = new RestConnection(hubUri.toString());
-
-		// restConnection.setCookies(hubServerConfig.getGlobalCredentials().getUsername(),
-		// hubServerConfig.getGlobalCredentials().getDecryptedPassword());
-		restConnection.setProxyProperties(getHubServerConfig().getProxyInfo());
-		restConnection.setTimeout(getHubServerConfig().getTimeout());
-		return restConnection;
 	}
 
 	@Override

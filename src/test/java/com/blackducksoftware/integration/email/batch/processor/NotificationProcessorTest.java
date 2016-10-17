@@ -96,13 +96,14 @@ public class NotificationProcessorTest {
 		projectVersion.setProjectVersionName(projectVersionName);
 		final UUID componentId = UUID.randomUUID();
 		final UUID componentVersionId = UUID.randomUUID();
+		final String componentUrl = "http://localhost/api/components/" + componentId;
 		final String componentVersionUrl = "http://localhost/api/components/" + componentId + "/versions/"
 				+ componentVersionId;
 		final List<PolicyRule> policyRuleList = new ArrayList<>();
 		policyRuleList.add(new PolicyRule(null, "Rule 1", "description", true, true, null, "then", "you", "now", "me"));
 		policyRuleList.add(new PolicyRule(null, "Rule 2", "description", true, true, null, "then", "you", "now", "me"));
 		final PolicyOverrideContentItem item = new PolicyOverrideContentItem(createdTime, projectVersion, componentName,
-				componentVersion, componentVersionUrl, policyRuleList, FIRST_NAME, LAST_NAME);
+				componentVersion, componentUrl, componentVersionUrl, policyRuleList, FIRST_NAME, LAST_NAME);
 		return item;
 	}
 
@@ -114,13 +115,14 @@ public class NotificationProcessorTest {
 		projectVersion.setProjectVersionName(projectVersionName);
 		final UUID componentId = UUID.randomUUID();
 		final UUID componentVersionId = UUID.randomUUID();
+		final String componentUrl = "http://localhost/api/components/" + componentId;
 		final String componentVersionUrl = "http://localhost/api/components/" + componentId + "/versions/"
 				+ componentVersionId;
 		final List<PolicyRule> policyRuleList = new ArrayList<>();
 		policyRuleList.add(new PolicyRule(null, "Rule 1", "description", true, true, null, "then", "you", "now", "me"));
 		policyRuleList.add(new PolicyRule(null, "Rule 2", "description", true, true, null, "then", "you", "now", "me"));
 		final PolicyViolationClearedContentItem item = new PolicyViolationClearedContentItem(createdTime,
-				projectVersion, componentName, componentVersion, componentVersionUrl, policyRuleList);
+				projectVersion, componentName, componentVersion, componentUrl, componentVersionUrl, policyRuleList);
 		return item;
 	}
 
@@ -132,13 +134,14 @@ public class NotificationProcessorTest {
 		projectVersion.setProjectVersionName(projectVersionName);
 		final UUID componentId = UUID.randomUUID();
 		final UUID componentVersionId = UUID.randomUUID();
+		final String componentUrl = "http://localhost/api/components/" + componentId;
 		final String componentVersionUrl = "http://localhost/api/components/" + componentId + "/versions/"
 				+ componentVersionId;
 		final List<PolicyRule> policyRuleList = new ArrayList<>();
 		policyRuleList.add(new PolicyRule(null, "Rule 1", "description", true, true, null, "then", "you", "now", "me"));
 		policyRuleList.add(new PolicyRule(null, "Rule 2", "description", true, true, null, "then", "you", "now", "me"));
 		final PolicyViolationContentItem item = new PolicyViolationContentItem(createdTime, projectVersion,
-				componentName, componentVersion, componentVersionUrl, policyRuleList);
+				componentName, componentVersion, componentUrl, componentVersionUrl, policyRuleList);
 		return item;
 	}
 
@@ -168,16 +171,14 @@ public class NotificationProcessorTest {
 				assertEquals(NotificationCategoryEnum.POLICY_VIOLATION.name(), category.getCategoryKey());
 				for (final ItemData itemData : category.getItemList()) {
 					final Set<ItemEntry> dataSet = itemData.getDataSet();
-					final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(),
-							COMPONENT);
+					final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(), COMPONENT);
 					assertTrue(dataSet.contains(componentKey));
 
 					final ItemEntry versionKey = new ItemEntry("", VERSION);
 					assertTrue(dataSet.contains(versionKey));
 
 					for (int index = 1; index <= 2; index++) {
-						final ItemEntry ruleKey = new ItemEntry(ItemTypeEnum.RULE.name(),
-								PREFIX_RULE + index);
+						final ItemEntry ruleKey = new ItemEntry(ItemTypeEnum.RULE.name(), PREFIX_RULE + index);
 						assertTrue(dataSet.contains(ruleKey));
 					}
 				}
@@ -325,8 +326,7 @@ public class NotificationProcessorTest {
 			for (final CategoryData category : projectData.getCategoryMap().values()) {
 				for (final ItemData itemData : category.getItemList()) {
 					final Set<ItemEntry> dataSet = itemData.getDataSet();
-					final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(),
-							COMPONENT);
+					final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(), COMPONENT);
 					assertTrue(dataSet.contains(componentKey));
 
 					final ItemEntry versionKey = new ItemEntry("", VERSION);
@@ -356,8 +356,7 @@ public class NotificationProcessorTest {
 			for (final CategoryData category : projectData.getCategoryMap().values()) {
 				for (final ItemData itemData : category.getItemList()) {
 					final Set<ItemEntry> dataSet = itemData.getDataSet();
-					final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(),
-							COMPONENT);
+					final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(), COMPONENT);
 					assertTrue(dataSet.contains(componentKey));
 
 					final ItemEntry versionKey = new ItemEntry("", VERSION);
@@ -435,8 +434,7 @@ public class NotificationProcessorTest {
 				categoryItemMap.put(category.getCategoryKey(), category.getItemList().size());
 				for (final ItemData itemData : category.getItemList()) {
 					final Set<ItemEntry> dataSet = itemData.getDataSet();
-					final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(),
-							COMPONENT);
+					final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(), COMPONENT);
 					assertTrue(dataSet.contains(componentKey));
 
 					final ItemEntry versionKey = new ItemEntry("", VERSION);
@@ -504,8 +502,7 @@ public class NotificationProcessorTest {
 				categoryItemMap.put(category.getCategoryKey(), category.getItemList().size());
 				for (final ItemData itemData : category.getItemList()) {
 					final Set<ItemEntry> dataSet = itemData.getDataSet();
-					final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(),
-							COMPONENT);
+					final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(), COMPONENT);
 					assertTrue(dataSet.contains(componentKey));
 
 					final ItemEntry versionKey = new ItemEntry("", VERSION);
@@ -575,8 +572,7 @@ public class NotificationProcessorTest {
 				categoryItemMap.put(category.getCategoryKey(), category.getItemList().size());
 				for (final ItemData itemData : category.getItemList()) {
 					final Set<ItemEntry> dataSet = itemData.getDataSet();
-					final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(),
-							COMPONENT);
+					final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(), COMPONENT);
 					assertTrue(dataSet.contains(componentKey));
 
 					final ItemEntry versionKey = new ItemEntry("", VERSION);
@@ -632,14 +628,12 @@ public class NotificationProcessorTest {
 				categoryItemMap.put(category.getCategoryKey(), category.getItemList().size());
 				for (final ItemData itemData : category.getItemList()) {
 					final Set<ItemEntry> dataSet = itemData.getDataSet();
-					final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(),
-							COMPONENT);
+					final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(), COMPONENT);
 					assertTrue(dataSet.contains(componentKey));
 
 					final ItemEntry versionKey = new ItemEntry("", VERSION);
 					assertTrue(dataSet.contains(versionKey));
-					final ItemEntry componentKey2 = new ItemEntry(ItemTypeEnum.COMPONENT.name(),
-							COMPONENT2);
+					final ItemEntry componentKey2 = new ItemEntry(ItemTypeEnum.COMPONENT.name(), COMPONENT2);
 					assertTrue(dataSet.contains(componentKey2));
 
 					final ItemEntry versionKey2 = new ItemEntry("", VERSION2);

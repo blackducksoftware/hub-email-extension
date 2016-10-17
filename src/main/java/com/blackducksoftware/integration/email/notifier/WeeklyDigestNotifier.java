@@ -23,13 +23,14 @@ public class WeeklyDigestNotifier extends AbstractDigestNotifier {
 
 	@Override
 	public DateRange createDateRange(final ZoneId zone) {
-		final LocalDateTime end = LocalDateTime.now().minusDays(1).withHour(23).withMinute(59).withSecond(59)
-				.withNano(999);
-		final LocalDateTime start = LocalDateTime.now().minusDays(8).withHour(0).withMinute(0).withSecond(0)
-				.withNano(0);
+		final LocalDateTime currentTime = LocalDateTime.now();
 
-		final ZonedDateTime endZonedTime = ZonedDateTime.of(end, zone);
-		final ZonedDateTime startZonedTime = ZonedDateTime.of(start, zone);
+		final ZonedDateTime endZonedTime = ZonedDateTime.of(currentTime.getYear(), currentTime.getMonthValue(),
+				currentTime.getDayOfMonth(), 23, 59, 59, 999, zone).minusDays(1);
+
+		final ZonedDateTime startZonedTime = ZonedDateTime
+				.of(currentTime.getYear(), currentTime.getMonthValue(), currentTime.getDayOfMonth(), 0, 0, 0, 0, zone)
+				.minusDays(8);
 
 		return new DateRange(Date.from(startZonedTime.toInstant()), Date.from(endZonedTime.toInstant()));
 	}
