@@ -38,13 +38,39 @@
        {
             "name": "hub.email.template.variable.all.templates.subject.line",
             "optionType": "STRING",
-            "title": "Default Subject Line for All Templates",
+            "title": "Default Subject Line",
             "required": false,
             "singleValue": true,
             "description": "The default Subject line for all templates if none is specified",
             "options": [],
             "defaultValue": [
+                "BlackDuck Hub Digest Email"
+            ]
+       },
+       {
+            "name": "hub.email.notifier.variable.all.timezone",
+            "optionType": "STRING",
+            "title": "Default Timezone",
+            "required": false,
+            "singleValue": true,
+            "description": "The default Timezone to use when calculating date ranges to process notification data.  Please note if no Timezone is specified then UTC will be used by default.",
+            "options": [],
+            "defaultValue": [
                 ""
+            ]
+       },
+       {
+            "name": "hub.email.template.variable.all.templates.logo.image",
+            "optionType": "STRING",
+            "title": "Default Logo Image",
+            "required": true,
+            "singleValue": true,
+            "description": "The template for email rendering",
+            "options": [ 
+                {"name": "Ducky-80.png", "title": "BlackDuck Logo"}
+            ],
+            "defaultValue": [
+                "Ducky-80.png"
             ]
        }
     ]
