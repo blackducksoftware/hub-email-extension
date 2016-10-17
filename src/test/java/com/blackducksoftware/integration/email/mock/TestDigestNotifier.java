@@ -1,6 +1,7 @@
 package com.blackducksoftware.integration.email.mock;
 
 import java.io.File;
+import java.time.ZoneId;
 import java.util.Date;
 
 import org.apache.commons.io.FileUtils;
@@ -33,7 +34,7 @@ public class TestDigestNotifier extends AbstractDigestNotifier {
 	}
 
 	@Override
-	public DateRange createDateRange() {
+	public DateRange createDateRange(final ZoneId zoneId) {
 		try {
 			Date startDate = null;
 			final File lastRunFile = new File(lastRunPath);
@@ -45,7 +46,6 @@ public class TestDigestNotifier extends AbstractDigestNotifier {
 				final String lastRunValue = initialStartDate;
 				startDate = RestConnection.parseDateString(lastRunValue);
 			}
-
 			final Date endDate = new Date();
 			FileUtils.write(lastRunFile, RestConnection.formatDate(endDate), "UTF-8");
 			return new DateRange(startDate, endDate);

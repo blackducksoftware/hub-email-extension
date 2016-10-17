@@ -1,6 +1,9 @@
 package com.blackducksoftware.integration.email.notifier;
 
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Date;
 
 import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
@@ -15,18 +18,16 @@ public class MonthlyDigestNotifier extends AbstractDigestNotifier {
 	}
 
 	@Override
-	public DateRange createDateRange() {
-		DateTime end = new DateTime();
-		end = end.withHourOfDay(23);
-		end = end.withMinuteOfHour(59);
-		end = end.withSecondOfMinute(59);
-		end = end.withMillisOfSecond(999);
+	public DateRange createDateRange(final ZoneId zone) {
+		final LocalDateTime end = LocalDateTime.now().minusDays(1).withHour(23).withMinute(59).withSecond(59)
+				.withNano(999);
+		final LocalDateTime start = LocalDateTime.now().minusDays(1).minusMonths(1).withHour(0).withMinute(0)
+				.withSecond(0).withNano(0);
 
-		DateTime start = end.withTimeAtStartOfDay();
-		start = start.minusMonths(1);
+		final ZonedDateTime endZonedTime = ZonedDateTime.of(end, zone);
+		final ZonedDateTime startZonedTime = ZonedDateTime.of(start, zone);
 
-		return new DateRange(start.toDate(), end.toDate());
-
+		return new DateRange(Date.from(startZonedTime.toInstant()), Date.from(endZonedTime.toInstant()));
 	}
 
 	@Override

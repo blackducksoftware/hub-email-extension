@@ -1,5 +1,8 @@
 package com.blackducksoftware.integration.email.notifier;
 
+import java.time.DateTimeException;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -66,7 +69,7 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 		extensionConfigDataService = dataServicesFactory.createExtensionConfigDataService(extLogger);
 	}
 
-	public abstract DateRange createDateRange();
+	public abstract DateRange createDateRange(final ZoneId zone);
 
 	public abstract String getCategory();
 
@@ -79,21 +82,32 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 					.getUserConfigList(getHubExtensionUri());
 			final List<UserConfigItem> usersInCategory = createUserListInCategory(userConfigList);
 
-			if (!usersInCategory.isEmpty()) {
-				final DateRange dateRange = createDateRange();
+			if (usersInCategory.isEmpty()) {
+				logger.info("No Users opted into this email notification");
+			} else {
+				final ZoneId zoneId = getZoneId(globalConfig);
+				final DateRange dateRange = createDateRange(zoneId);
 				final Date startDate = dateRange.getStart();
 				final Date endDate = dateRange.getEnd();
+				logger.info("Getting notification data between start: {} end: {}", startDate, endDate);
 				final SortedSet<NotificationContentItem> notifications = notificationDataService
 						.getAllNotifications(startDate, endDate);
 				final NotificationProcessor processor = new NotificationProcessor(getDataServicesFactory());
 				final Collection<ProjectData> projectList = processor.process(notifications);
-				if (!projectList.isEmpty()) {
+				if (projectList.isEmpty()) {
+					logger.info("Project Aggregated Data list is empty no email to generate");
+				} else {
+					logger.info("Number of users opted into this email template {}", usersInCategory.size());
+					int filteredUsers = 0;
 					for (final UserConfigItem userConfig : usersInCategory) {
 						try {
-							// TODO need to simplify this more. too
-							// expensive
+							// TODO need to filter out on the user's project
+							// filter chain pattern make sense?
+
 							final Collection<ProjectData> projectsDigest = filterCategories(projectList, userConfig);
-							if (!projectsDigest.isEmpty()) {
+							if (projectsDigest.isEmpty()) {
+								filteredUsers++;
+							} else {
 								final Map<String, Object> model = new HashMap<>();
 								model.put(KEY_TOPICS_LIST, projectsDigest);
 								model.put(KEY_START_DATE, String.valueOf(startDate));
@@ -112,12 +126,35 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 							logger.error("Error sending email to user", e);
 						}
 					}
+					logger.info("Number of users filtered out of email template: {}", filteredUsers);
 				}
 			}
 		} catch (final Exception e) {
 			logger.error("Error sending the email", e);
 		}
 		logger.info("Finished iteration of {} digest email notifier", getName());
+	}
+
+	private ZoneId getZoneId(final ExtensionProperties globalConfig) {
+		final ZoneId defaultZoneId = ZoneId.ofOffset("UTC", ZoneOffset.UTC);
+
+		final String timezoneVarKey = "all.timezone";
+		final Map<String, String> notifierVariableMap = globalConfig.getNotifierVariableProperties();
+		if (!notifierVariableMap.containsKey(timezoneVarKey)) {
+			return defaultZoneId;
+		} else {
+			final String timezoneId = notifierVariableMap.get(timezoneVarKey);
+			if (StringUtils.isBlank(timezoneId)) {
+				return defaultZoneId;
+			} else {
+				try {
+					return ZoneId.of(timezoneId);
+				} catch (final DateTimeException ex) {
+					logger.error("Error parsing global config timezone. Using UTC timezone", ex);
+					return defaultZoneId;
+				}
+			}
+		}
 	}
 
 	private Collection<ProjectData> filterCategories(final Collection<ProjectData> projectList,
