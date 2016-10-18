@@ -5,8 +5,11 @@
             "title": "Opt In / Opt Out",
             "required": true,
             "singleValue": true,
-            "description": "whether or not emails should be triggered from published notifications",
-            "options": [],
+            "description": "Whether or not you would like to receive emails from published notifications",
+            "options": [
+                {"name": "true", "title": "Opt In" },
+                {"name": "false", "title": "Opt Out" }
+            ],
             "defaultValue": [
                 "false"
             ]
@@ -17,7 +20,7 @@
             "title": "Email Frequency",
             "required": false,
             "singleValue": true, 
-            "description": "how often the Hub should be checked for notifications that might trigger emails",
+            "description": "How often the Hub should be checked for notifications that might trigger emails",
             "options": [
                 {"name": "Daily", "title": "Daily" },
                 {"name": "Weekly", "title": "Weekly" }
@@ -32,7 +35,7 @@
             "title": "Template Name",
             "required": true,
             "singleValue": true,
-            "description": "the template for email rendering",
+            "description": "The template for email rendering",
             "options": [ 
                 {"name": "digest.ftl", "title": "Default Digest Template"},
                 {"name": "sampleTemplate.ftl", "title": "Sample Email Template"}
@@ -44,10 +47,10 @@
        {
             "name": "emailTriggers",
             "optionType": "ARRAY",
-            "title": "Reasons To Trigger Emails",
+            "title": "Email Notification Events",
             "required": false,
             "singleValue": false,
-            "description": "the user can specify any number of reasons that will trigger an email",
+            "description": "The user can specify any number of notification types that will appear in an email",
             "options": [
                 {"name": "POLICY_VIOLATION", "title": "Policy Violation" },
                 {"name": "HIGH_VULNERABILITY", "title": "High Security Vulnerabilities" },

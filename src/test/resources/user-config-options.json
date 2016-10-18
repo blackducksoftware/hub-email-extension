@@ -5,8 +5,11 @@
             "title": "Opt In / Opt Out",
             "required": true,
             "singleValue": true,
-            "description": "Whether or not emails should be triggered from published notifications",
-            "options": [],
+            "description": "Whether or not you would like to receive emails from published notifications",
+            "options": [
+                {"name": "true", "title": "Opt In" },
+                {"name": "false", "title": "Opt Out" }
+            ],
             "defaultValue": [
                 "false"
             ]
