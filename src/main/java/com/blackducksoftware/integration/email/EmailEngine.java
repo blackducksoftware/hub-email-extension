@@ -300,18 +300,22 @@ public class EmailEngine implements IAuthorizedListener {
 			if (Protocol.HTTP.getSchemeName().equals(url.getProtocol())) {
 				if (port > 0) {
 					endpoint.getServers().add(Protocol.HTTP, port);
+				} else {
+					endpoint.getServers().add(Protocol.HTTP);
 				}
 			} else if (Protocol.HTTPS.getSchemeName().equals(url.getProtocol())) {
-
+				Server server;
 				if (port > 0) {
-					final Server server = endpoint.getServers().add(Protocol.HTTPS, port);
-					final Series<Parameter> parameters = server.getContext().getParameters();
-					parameters.add("sslContextFactory", "org.restlet.engine.ssl.DefaultSslContextFactory");
-					parameters.add("keyStorePath", extensionProperties.getSSLKeyStorePath());
-					parameters.add("keyStorePassword", extensionProperties.getSSLKeyStorePassword());
-					parameters.add("keyPassword", extensionProperties.getSSLKeyPassword());
-					parameters.add("keyStoreType", extensionProperties.getSSLKeyStoreType());
+					server = endpoint.getServers().add(Protocol.HTTPS, port);
+				} else {
+					server = endpoint.getServers().add(Protocol.HTTPS);
 				}
+				final Series<Parameter> parameters = server.getContext().getParameters();
+				parameters.add("sslContextFactory", "org.restlet.engine.ssl.DefaultSslContextFactory");
+				parameters.add("keyStorePath", extensionProperties.getSSLKeyStorePath());
+				parameters.add("keyStorePassword", extensionProperties.getSSLKeyStorePassword());
+				parameters.add("keyPassword", extensionProperties.getSSLKeyPassword());
+				parameters.add("keyStoreType", extensionProperties.getSSLKeyStoreType());
 			} else {
 				logger.error("URL scheme {} not supported.  Not starting the email extension. ", url.getProtocol());
 			}
