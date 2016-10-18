@@ -15,7 +15,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import org.apache.commons.lang3.StringUtils;
+import org.restlet.Server;
+import org.restlet.data.Parameter;
 import org.restlet.data.Protocol;
+import org.restlet.util.Series;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -182,7 +185,7 @@ public class EmailEngine implements IAuthorizedListener {
 	private File findTemplateDirectory() {
 		try {
 			File templateDir = null;
-			final String appHomeDir = System.getProperty("APP_HOME");
+			final String appHomeDir = System.getProperty(EmailExtensionConstants.SYSTEM_PROPERTY_KEY_APP_HOME);
 			if (StringUtils.isNotBlank(appHomeDir)) {
 				templateDir = new File(appHomeDir, "templates");
 			}
@@ -280,13 +283,12 @@ public class EmailEngine implements IAuthorizedListener {
 	public String generateExtensionId() {
 		final Class<? extends EmailEngine> engineClass = this.getClass();
 		final Package enginePackage = engineClass.getPackage();
-		final String name = enginePackage.getSpecificationTitle();
-		final String version = enginePackage.getSpecificationVersion();
-		if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(version)) {
-			return name + version;
-		} else {
-			return extensionProperties.getExtensionId();
-		}
+
+		final String name = enginePackage.getName();
+		final String version = extensionProperties.getExtensionVersion();
+		final String id = name + ".email-extension." + version;
+		logger.info("Extension ID - {}", id);
+		return id;
 	}
 
 	public OAuthEndpoint createRestletComponent() {
@@ -295,8 +297,23 @@ public class EmailEngine implements IAuthorizedListener {
 		try {
 			final URL url = new URL(extensionInfoData.getBaseUrl());
 			final int port = url.getPort();
-			if (port > 0) {
-				endpoint.getServers().add(Protocol.HTTP, port);
+			if (Protocol.HTTP.getSchemeName().equals(url.getProtocol())) {
+				if (port > 0) {
+					endpoint.getServers().add(Protocol.HTTP, port);
+				}
+			} else if (Protocol.HTTPS.getSchemeName().equals(url.getProtocol())) {
+
+				if (port > 0) {
+					final Server server = endpoint.getServers().add(Protocol.HTTPS, port);
+					final Series<Parameter> parameters = server.getContext().getParameters();
+					parameters.add("sslContextFactory", "org.restlet.engine.ssl.DefaultSslContextFactory");
+					parameters.add("keyStorePath", extensionProperties.getSSLKeyStorePath());
+					parameters.add("keyStorePassword", extensionProperties.getSSLKeyStorePassword());
+					parameters.add("keyPassword", extensionProperties.getSSLKeyPassword());
+					parameters.add("keyStoreType", extensionProperties.getSSLKeyStoreType());
+				}
+			} else {
+				logger.error("URL scheme {} not supported.  Not starting the email extension. ", url.getProtocol());
 			}
 		} catch (final MalformedURLException e) {
 			logger.error("createRestletComponent error with base URL", e);

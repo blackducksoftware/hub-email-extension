@@ -40,7 +40,7 @@ public class ExtensionProperties {
 	public static final String EXTENSION_URL_KEY = "url";
 	public static final String EXTENSION_NAME_KEY = "name";
 	public static final String EXTENSION_DESCRIPTION_KEY = "description";
-	public static final String EXTENSION_ID_KEY = "id";
+	public static final String EXTENSION_VERSION_KEY = "version";
 
 	public static final String JAVAMAIL_CONFIG_PREFIX = "hub.email.javamail.config.";
 	public static final String TEMPLATE_VARIABLE_PREFIX = "hub.email.template.variable.";
@@ -50,6 +50,10 @@ public class ExtensionProperties {
 	public static final String NOTIFIER_LAST_RUN_PREFIX = "hub.email.service.notifier.lastrun.";
 	public static final String NOTIFIER_VARIABLE_PREFIX = "hub.email.notifier.variable.";
 	public static final String EXTENSION_PREFIX = "hub.extension.";
+	public static final String EXTENSION_SSL_KEYSTORE_PATH = "hub.extension.ssl.keyStorePath";
+	public static final String EXTENSION_SSL_KEYSTORE_PASSWORD = "hub.extension.ssl.keyStorePassword";
+	public static final String EXTENSION_SSL_KEY_PASSWORD = "hub.extension.ssl.keyPassword";
+	public static final String EXTENSION_SSL_KEYSTORE_TYPE = "hub.extension.ssl.keyStoreType";
 
 	private final List<String> javamailConfigKeys = new ArrayList<>();
 	private final Map<String, String> suppliedJavamailConfigProperties = new HashMap<>();
@@ -221,8 +225,8 @@ public class ExtensionProperties {
 		return notifierVariableProperties;
 	}
 
-	public String getExtensionId() {
-		return extensionProperties.get(EXTENSION_ID_KEY);
+	public String getExtensionVersion() {
+		return extensionProperties.get(EXTENSION_VERSION_KEY);
 	}
 
 	public String getExtensionName() {
@@ -239,5 +243,21 @@ public class ExtensionProperties {
 
 	public Properties getAppProperties() {
 		return appProperties;
+	}
+
+	public String getSSLKeyStorePath() {
+		return appProperties.getProperty(EXTENSION_SSL_KEYSTORE_PATH);
+	}
+
+	public String getSSLKeyStorePassword() {
+		return appProperties.getProperty(EXTENSION_SSL_KEYSTORE_PASSWORD);
+	}
+
+	public String getSSLKeyPassword() {
+		return appProperties.getProperty(EXTENSION_SSL_KEY_PASSWORD);
+	}
+
+	public String getSSLKeyStoreType() {
+		return appProperties.getProperty(EXTENSION_SSL_KEYSTORE_TYPE);
 	}
 }

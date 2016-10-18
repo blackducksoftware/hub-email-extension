@@ -17,6 +17,8 @@ import javax.mail.internet.MimeMultipart;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.blackducksoftware.integration.email.EmailExtensionConstants;
+
 public class MimeMultipartBuilder {
 	private String html;
 	private String text;
@@ -124,7 +126,7 @@ public class MimeMultipartBuilder {
 	private File findImagesDirectory() {
 		try {
 			File imagesDir = null;
-			final String appHomeDir = System.getProperty("APP_HOME");
+			final String appHomeDir = System.getProperty(EmailExtensionConstants.SYSTEM_PROPERTY_KEY_APP_HOME);
 			if (StringUtils.isNotBlank(appHomeDir)) {
 				imagesDir = new File(appHomeDir, "images");
 			}
