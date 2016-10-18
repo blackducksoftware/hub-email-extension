@@ -23,7 +23,7 @@ repositories {
 }
 
 dependencies {
-	compile 'com.blackducksoftware.integration:hub-common:1.4.12-SNAPSHOT'
+	compile 'com.blackducksoftware.integration:hub-common:1.4.12'
     
     // logging dependencies
 	compile 'org.slf4j:slf4j-api:1.7.21'
