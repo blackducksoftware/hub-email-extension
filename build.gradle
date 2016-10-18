@@ -39,16 +39,13 @@ dependencies {
 	compile 'javax.mail:mail:1.4.7'
 	compile 'org.freemarker:freemarker:2.3.25-incubating'
 	compile 'org.quartz-scheduler:quartz:2.2.1'
-	compile 'org.quartz-scheduler:quartz-jobs:2.2.1'
+	compile 'org.quartz-scheduler:quartz-jobs:2.2.1'	
 	
 	// hub-extension specific dependencies.
-	compile 'javax.inject:javax.inject:1'
     compile 'com.google.code.findbugs:jsr305:3.0.1'
     compile 'com.google.guava:guava:19.0'
-    compile 'org.springframework:spring-context:4.2.5.RELEASE'
     compile 'org.restlet.jse:org.restlet.ext.oauth:2.3.7'
     compile 'org.restlet.jse:org.restlet.ext.jackson:2.3.7'
-    compile 'com.fasterxml.jackson.core:jackson-annotations:2.4.0'
 	
 	testCompile 'junit:junit:4.12'
 	testCompile 'org.mockito:mockito-all:1.10.19'
