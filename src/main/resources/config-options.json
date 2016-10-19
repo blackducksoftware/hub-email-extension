@@ -77,10 +77,8 @@
             "title": "Default Logo Image",
             "required": true,
             "singleValue": true,
-            "description": "The template for email rendering",
-            "options": [ 
-                {"name": "Ducky-80.png", "title": "BlackDuck Logo"}
-            ],
+            "description": "Default logo image included with all email templates",
+            "options": [],
             "defaultValue": [
                 "Ducky-80.png"
             ]
