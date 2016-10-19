@@ -51,6 +51,24 @@ dependencies {
 	testCompile 'org.mockito:mockito-all:1.10.19'
 }
 
+task extPropsCopy(type:Copy) {
+    from 'src/main/resources/extension.properties'
+    into 'build/'
+}
+
+task modifyExtVersionProperty(dependsOn: extPropsCopy) {
+    doLast {
+        File extFile = file('build/extension.properties')
+        if(extFile.exists()) {
+            ant.propertyfile(file: extFile ) {
+              entry(key: "hub.extension.version", value: version)
+            }  
+        } else {
+            println "extension.properties file does not exist in build directory"
+        }
+    }
+} 
+
 jar { 
 	sourceSets {
 		main {
@@ -83,14 +101,16 @@ startScripts {
 distributions {
     main {
         contents {
-            from ('src/main/resources/images/') {into 'images/'}
+            from('src/main/resources/email_extension.sh') {into 'bin/'}
+            from('src/main/resources/images/') {into 'images/'}
             from('src/main/resources/templates/') {into 'templates/'}
-            from('src/main/resources/extension.properties') {into 'config/'}
+            
+            from('build/extension.properties') {into 'config/'}
             from('src/main/resources/log4j.xml') {into 'config/'}
             from('src/main/resources/config-options.json') {into 'config/'}
             from('src/main/resources/user-config-options.json') {into 'config/'}
             from('src/main/resources/quartz.properties') {into 'config/'}
-            from('src/main/resources/email_extension.sh') {into 'bin/'}
         }
     }
 }
+tasks.processResources.dependsOn modifyExtVersionProperty
