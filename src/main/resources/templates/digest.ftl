@@ -1,78 +1,9 @@
 <html>
     <head>
        <style>
-        .textlogoblack {
-            font-family: OpenSans-Bold;
-            font-size: 24px;
-            color: #4A4A4A;
-        }
-        .textlogoblue {
-            font-family: OpenSans;
-            font-size: 24px;
-            color: #73B1F0;
-        }
-        .emailcategory {
-            font-family: OpenSans-Light;
-            font-size: 14px;
-            color: #445B68;
-            float: right;
-        }
-        .line {
-            border: 1px solid #979797;
-        }
-        .description {
-            font-family: OpenSans-Light;
-            font-size: 14px;
-            color: #445B68;
-        }
-        a {
-            font-family: OpenSans-Light;
-            font-size: 14px;
-            color: #225786;
-        }
-        .topic_spacer {
-          height: 20px;
-        }
-        .topic_block {
-            background: #DDDDDD;
-            margin:0px;
-            padding-left: 15px;
-            padding-top: 20px;
-            padding-bottom: 20px;
-        }
-        .topic {
-            font-family: OpenSans-Semibold;
-            font-size: 18px;
-            color: #445B68;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .category {
-            font-family: OpenSans-Semibold;
-            font-size: 14px;
-            color: #445B68;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .item {
-            font-family: Menlo-Regular;
-            font-size: 14px;
-            color: #445B68;
-            padding-right: 15px;
-            display: inline-block;
-        }
-        .poweredBy {
-          font-family: OpenSans;
-          font-size: 12px;
-          color: #4A4A4A;
-        }
-        .footerBlack {
-            font-family: OpenSans-Light;
-            font-size: 14px;
-            color: #445B68;
-        }
+
         .footerDuck {
-            font-family: OpenSans;
+            font-family: Arial, FreeSans, Helvetica, sans-serif;
             font-size: 12px;
             color: #4A4A4A;
         }
@@ -87,22 +18,22 @@
                 <p>${size - 10} more</p>
           </#if>
         </#macro>
-        <div class="header">
-            <div class="logo">
-              <span class="textlogoblack">Black</span><span class="textlogoblue">Duck</span>
+        <div>
+            <div>
+              <span style="font-family: Arial, FreeSans, Helvetica, sans-serif;font-weight: bold;font-size: 24px;color: #4A4A4A;">Black</span><span style="font-family: Arial, FreeSans, Helvetica, sans-serif;font-size: 24px;color: #73B1F0;">Duck</span>
             </div>
-            <div class="emailcategory">${emailCategory} DIGEST</div>
+            <div style="font-family: Arial, FreeSans, Helvetica, sans-serif;font-weight: lighter;font-size: 14px;color: #445B68;float: right;">${emailCategory} DIGEST</div>
         </div> 
-        <div class="line"></div>
+        <div style="border: 1px solid #979797;"></div>
         <br/>
-        <div class="description">Black Duck captured the following new policy violations and vulnerabilities.</div>
-        <a href="${hub_server_url}">See more details in the Hub</a>
+        <div style="font-family: Arial, FreeSans, Helvetica, sans-serif;font-weight: lighter;font-size: 14px;color: #445B68;">Black Duck captured the following new policy violations and vulnerabilities.</div>
+        <a href="${hub_server_url}" style="font-family: Arial, FreeSans, Helvetica, sans-serif;font-weight: lighter;font-size: 14px;color: #225786;">See more details in the Hub</a>
         <br/>
         <br/>
           <#if topicsList?? && topicsList?size gt 0> 
               <#list topicsList as topic>
-                  <div class="topic_block">
-                    <div class="topic">${topic.projectName} > ${topic.projectVersion}</div>
+                  <div style="background: #DDDDDD;margin:0px;padding-left: 15px;padding-top: 20px;padding-bottom: 20px;">
+                    <div style="font-family: Arial, FreeSans, Helvetica, sans-serif;font-weight: bold;font-size: 18px;color: #445B68;margin-bottom: 10px;">${topic.projectName} > ${topic.projectVersion}</div>
                     <#if topic.categoryMap?? && topic.categoryMap?size gt 0> 
                       <#list topic.categoryMap?values as categoryItem>
                         <#if categoryItem.itemList?? && categoryItem.itemList?size gt 0>
@@ -118,21 +49,23 @@
                             <#else>
                               <#assign categoryName="${categoryItem.categoryKey}">
                             </#if>
-                            <div class="category">${categoryItem.itemCount} ${categoryName}</div>
+                            <div style="font-family: Arial, FreeSans, Helvetica, sans-serif;font-weight: bold;font-size: 14px;color: #445B68; margin-top: 10px; margin-bottom: 10px;">${categoryItem.itemCount} ${categoryName}</div>
                             <#list categoryItem.itemList as item>
                                 <#if item.dataSet?? && item.dataSet?size gt 0>
                                    <div>
                                    <#list item.dataSet as itemEntry>
                                        <#assign itemType="${itemEntry.key}">
+                                       <div style="font-family: monospace;font-size: 14px;color: #445B68;padding-right: 15px;display: inline-block;">
                                        <#if itemType == "RULE">
-                                         <div class="item">Rule: ${itemEntry.value}</div>
+                                         Rule: ${itemEntry.value}
                                        <#elseif itemType == "COMPONENT">
-                                         <div class="item">Component: ${itemEntry.value}</div>  
+                                         Component: ${itemEntry.value} 
                                        <#elseif itemType == "COUNT">
-                                         <div class="item">(${itemEntry.value})</div>
+                                         (${itemEntry.value})
                                        <#else>
-                                         <div class="item">${itemEntry.key}${itemEntry.value}</div>
+                                         ${itemEntry.key}${itemEntry.value}
                                        </#if>
+                                       </div>
                                    </#list>
                                    </div>
                                 </#if>
@@ -142,13 +75,13 @@
                       </#list>
                     </#if>
                   </div>
-                  <div class="topic_spacer"></div>
+                  <div style="height: 20px;"></div>
               </#list>
           </#if>
         <div class="footer">
-            <img src="cid:${logo_image}" />
+            <img src="cid:${logo_image}" height="20" width="20"/>
             <div style="float:right;">
-              <span class="poweredBy">Powered by </span><span class="footerBlack">Black</span><span class="footerDuck">Duck</span>
+              <span style="font-family: Arial, FreeSans, Helvetica, sans-serif;font-size: 12px;color: #4A4A4A;">Powered by </span><span style="font-family: Arial, FreeSans, Helvetica, sans-serif;font-weight: 600;font-size: 14px;color: #445B68;">Black</span><span style="font-family: Arial, FreeSans, Helvetica, sans-serif;font-size: 12px;color: #4A4A4A;">Duck</span>
             </div>
         </div>
     </body>
