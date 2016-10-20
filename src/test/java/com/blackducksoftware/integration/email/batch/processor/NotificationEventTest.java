@@ -20,6 +20,7 @@ public class NotificationEventTest {
 		final String componentName = "componentName";
 		final String componentVersion = "componentVersion";
 		final NotificationCategoryEnum categoryType = NotificationCategoryEnum.POLICY_VIOLATION;
+		final String eventKey = projectName + projectVersion + componentName + componentVersion + categoryType.name();
 		final Set<ItemEntry> dataSet = new HashSet<>();
 		dataSet.add(new ItemEntry(ItemTypeEnum.COMPONENT.name(), "item"));
 		dataSet.add(new ItemEntry(ItemTypeEnum.RULE.name(), "rule"));
@@ -28,13 +29,14 @@ public class NotificationEventTest {
 		vulnerabilityIdSet.add("vuln_id2");
 		vulnerabilityIdSet.add("vuln_id1");
 		final NotificationEvent event = new NotificationEvent(action, projectName, projectVersion, componentName,
-				componentVersion, categoryType, dataSet, vulnerabilityIdSet);
+				componentVersion, eventKey, categoryType, dataSet, vulnerabilityIdSet);
 
 		assertEquals(action, event.getAction());
 		assertEquals(projectName, event.getProjectName());
 		assertEquals(projectVersion, event.getProjectVersion());
 		assertEquals(componentName, event.getComponentName());
 		assertEquals(componentVersion, event.getComponentVersion());
+		assertEquals(eventKey, event.getEventKey());
 		assertEquals(categoryType, event.getCategoryType());
 		assertEquals(dataSet, event.getDataSet());
 		assertEquals(2, event.getVulnerabilityIdSet().size());

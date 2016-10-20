@@ -17,8 +17,9 @@ public class NotificationEvent {
 	private final Set<String> vulnerabilityIdSet;
 
 	public NotificationEvent(final ProcessingAction action, final String projectName, final String projectVersion,
-			final String componentName, final String componentVersion, final NotificationCategoryEnum categoryType,
-			final Set<ItemEntry> dataSet, final Set<String> vulnerabilityIdSet) {
+			final String componentName, final String componentVersion, final String eventKey,
+			final NotificationCategoryEnum categoryType, final Set<ItemEntry> dataSet,
+			final Set<String> vulnerabilityIdSet) {
 		this.action = action;
 		this.projectName = projectName;
 		this.projectVersion = projectVersion;
@@ -28,7 +29,7 @@ public class NotificationEvent {
 		this.dataSet = dataSet;
 		this.vulnerabilityIdSet = vulnerabilityIdSet;
 		this.projectKey = projectName + projectVersion;
-		this.eventKey = projectName + projectVersion + componentName + componentVersion + categoryType.name();
+		this.eventKey = eventKey;
 	}
 
 	public ProcessingAction getAction() {

@@ -25,20 +25,22 @@ public class SubProcessorCache {
 		}
 	}
 
+	public void removeEvent(final String eventKey) {
+		if (eventMap.containsKey(eventKey)) {
+			eventMap.remove(eventKey);
+		}
+	}
+
 	public void removeEvent(final NotificationEvent event) {
 		final String key = event.getEventKey();
 		if (eventMap.containsKey(key)) {
 			final NotificationEvent storedEvent = eventMap.get(key);
-			final Set<ItemEntry> eventDataMap = event.getDataSet();
 
 			if (!storedEvent.getVulnerabilityIdSet().isEmpty() && !event.getVulnerabilityIdSet().isEmpty()) {
 				storedEvent.getVulnerabilityIdSet().removeAll(event.getVulnerabilityIdSet());
 			}
 			if (storedEvent.getVulnerabilityIdSet().isEmpty()) {
-				storedEvent.getDataSet().removeAll(eventDataMap);
-				if (storedEvent.getDataSet().isEmpty()) {
-					eventMap.remove(key);
-				}
+				eventMap.remove(key);
 			}
 		}
 	}

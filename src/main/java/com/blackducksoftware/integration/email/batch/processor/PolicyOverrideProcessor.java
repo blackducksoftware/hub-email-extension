@@ -21,15 +21,19 @@ public class PolicyOverrideProcessor extends NotificationSubProcessor {
 		final PolicyOverrideContentItem policyOverrideContentItem = (PolicyOverrideContentItem) notification;
 		for (final PolicyRule rule : policyOverrideContentItem.getPolicyRuleList()) {
 			final ProjectVersion projectVersion = policyOverrideContentItem.getProjectVersion();
+			final String projectName = projectVersion.getProjectName();
+			final String projectVersionName = projectVersion.getProjectVersionName();
 			final String componentName = policyOverrideContentItem.getComponentName();
 			final String componentVersion = policyOverrideContentItem.getComponentVersion();
+			final String eventKey = generateEventKey(projectName, projectVersionName, componentName, componentVersion,
+					NotificationCategoryEnum.POLICY_VIOLATION.name());
 			final Set<ItemEntry> dataMap = new LinkedHashSet<>(4);
 			dataMap.add(new ItemEntry(ItemTypeEnum.RULE.name(), rule.getName()));
 			dataMap.add(new ItemEntry(ItemTypeEnum.COMPONENT.name(), componentName));
 			dataMap.add(new ItemEntry("", componentVersion));
-			final NotificationEvent event = new NotificationEvent(ProcessingAction.REMOVE,
-					projectVersion.getProjectName(), projectVersion.getProjectVersionName(), componentName,
-					componentVersion, NotificationCategoryEnum.POLICY_VIOLATION, dataMap, Collections.emptySet());
+			final NotificationEvent event = new NotificationEvent(ProcessingAction.REMOVE, projectName,
+					projectVersionName, componentName, componentVersion, eventKey,
+					NotificationCategoryEnum.POLICY_VIOLATION, dataMap, Collections.emptySet());
 			getCache().removeEvent(event);
 		}
 	}

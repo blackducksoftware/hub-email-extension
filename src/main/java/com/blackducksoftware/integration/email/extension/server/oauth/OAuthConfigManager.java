@@ -18,156 +18,164 @@ import org.slf4j.LoggerFactory;
 
 public class OAuthConfigManager {
 
-	public static final String OAUTH_CONFIG_FILE_NAME = "oauth.properties";
-	public static final String OAUTH_PROPERTY_CLIENT_ID = "client.id";
-	public static final String OAUTH_PROPERTY_USER_REFRESH_TOKEN = "user.refresh.token";
-	public static final String OAUTH_PROPERTY_CALLBACK_URL = "callback.url";
-	public static final String OAUTH_PROPERTY_HUB_URI = "hub.uri";
-	public static final String OAUTH_PROPERTY_EXTENSION_URI = "hub.extension.uri";
-	public static final String OAUTH_PROPERTY_AUTHORIZE_URI = "hub.authorize.uri";
-	public static final String OAUTH_PROPERTY_TOKEN_URI = "hub.token.uri";
+    public static final String OAUTH_CONFIG_FILE_NAME = "oauth.properties";
 
-	private static final String MSG_COULD_NOT_LOAD_PROPS = "Could not load properties file.  OAUTH client will need to be Authorized";
-	private static final String MSG_PROPERTY_FILE_LOCATION = "Property file location: {}";
+    public static final String OAUTH_PROPERTY_CLIENT_ID = "client.id";
 
-	public final Logger logger = LoggerFactory.getLogger(OAuthConfigManager.class);
+    public static final String OAUTH_PROPERTY_USER_REFRESH_TOKEN = "user.refresh.token";
 
-	public OAuthConfiguration load() {
-		final File propFile = getPropFile();
-		logger.info("Loading OAUTH configuration...");
-		try {
-			logger.info(MSG_PROPERTY_FILE_LOCATION, propFile.getCanonicalPath());
-		} catch (final IOException e) {
-			// ignore
-		}
+    public static final String OAUTH_PROPERTY_CALLBACK_URL = "callback.url";
 
-		if (propFile.exists()) {
-			final Properties props = new Properties();
-			try (FileInputStream fileInputStream = new FileInputStream(propFile)) {
-				props.load(fileInputStream);
-			} catch (final IOException e) {
-				logger.error(MSG_COULD_NOT_LOAD_PROPS, e);
-				return new OAuthConfiguration();
-			}
-			return createFromProperties(props);
-		} else {
-			logger.error(MSG_COULD_NOT_LOAD_PROPS);
-			return new OAuthConfiguration();
-		}
-	}
+    public static final String OAUTH_PROPERTY_HUB_URI = "hub.uri";
 
-	public void persist(final OAuthConfiguration config) {
-		final File propFile = getPropFile();
-		logger.info("Saving OAuth configuration...");
-		try {
-			logger.info(MSG_PROPERTY_FILE_LOCATION, propFile.getCanonicalFile());
-		} catch (final IOException e) {
-			// ignore
-		}
-		if (propFile != null && !propFile.exists()) {
-			final File parent = propFile.getParentFile();
-			if (parent != null && !parent.exists()) {
-				parent.mkdirs();
-			}
-		}
+    public static final String OAUTH_PROPERTY_EXTENSION_URI = "hub.extension.uri";
 
-		try (FileOutputStream outputStream = new FileOutputStream(propFile)) {
-			final Properties props = new Properties();
-			props.put(OAUTH_PROPERTY_CLIENT_ID, StringUtils.trimToEmpty(config.getClientId()));
-			props.put(OAUTH_PROPERTY_USER_REFRESH_TOKEN, StringUtils.trimToEmpty(config.getUserRefreshToken()));
-			props.put(OAUTH_PROPERTY_CALLBACK_URL, StringUtils.trimToEmpty(config.getCallbackUrl()));
-			props.put(OAUTH_PROPERTY_HUB_URI, StringUtils.trimToEmpty(config.getHubUri()));
-			props.put(OAUTH_PROPERTY_EXTENSION_URI, StringUtils.trimToEmpty(config.getExtensionUri()));
-			props.put(OAUTH_PROPERTY_AUTHORIZE_URI, StringUtils.trimToEmpty(config.getoAuthAuthorizeUri()));
-			props.put(OAUTH_PROPERTY_TOKEN_URI, StringUtils.trimToEmpty(config.getoAuthTokenUri()));
-			props.store(outputStream, "OAUTH Client configuration");
-		} catch (final IOException e) {
-			logger.error("Could not save OAUTH configuration", e);
-		}
-	}
+    public static final String OAUTH_PROPERTY_AUTHORIZE_URI = "hub.authorize.uri";
 
-	private File getPropFile() {
-		final String parentLocation = System.getProperty("ext.config.location");
+    public static final String OAUTH_PROPERTY_TOKEN_URI = "hub.token.uri";
 
-		if (StringUtils.isNotBlank(parentLocation)) {
-			return new File(parentLocation, OAUTH_CONFIG_FILE_NAME);
-		} else {
-			return new File(OAUTH_CONFIG_FILE_NAME);
-		}
-	}
+    private static final String MSG_COULD_NOT_LOAD_PROPS = "Could not load properties file.  OAUTH client will need to be Authorized";
 
-	private OAuthConfiguration createFromProperties(final Properties properties) {
-		final String clientId = properties.getProperty(OAUTH_PROPERTY_CLIENT_ID);
-		final String userRefreshToken = properties.getProperty(OAUTH_PROPERTY_USER_REFRESH_TOKEN);
-		final String callbackUrl = properties.getProperty(OAUTH_PROPERTY_CALLBACK_URL);
-		final String hubUri = properties.getProperty(OAUTH_PROPERTY_HUB_URI);
-		final String extensionUri = properties.getProperty(OAUTH_PROPERTY_EXTENSION_URI);
-		final String authorizeUri = properties.getProperty(OAUTH_PROPERTY_AUTHORIZE_URI);
-		final String tokenUri = properties.getProperty(OAUTH_PROPERTY_TOKEN_URI);
-		final OAuthConfiguration config = new OAuthConfiguration();
-		config.setClientId(clientId);
-		config.setCallbackUrl(callbackUrl);
-		config.setUserRefreshToken(userRefreshToken);
-		config.setAddresses(hubUri, extensionUri, authorizeUri, tokenUri);
+    private static final String MSG_PROPERTY_FILE_LOCATION = "Property file location: {}";
 
-		return config;
-	}
+    public final Logger logger = LoggerFactory.getLogger(OAuthConfigManager.class);
 
-	public String getOAuthAuthorizationUrl(final OAuthConfiguration config, final Optional<StateUrlProcessor> state) {
-		final Reference reference = new Reference(config.getoAuthAuthorizeUri());
+    public OAuthConfiguration load() {
+        final File propFile = getPropFile();
+        logger.info("Loading OAUTH configuration...");
+        try {
+            logger.info(MSG_PROPERTY_FILE_LOCATION, propFile.getCanonicalPath());
+        } catch (final IOException e) {
+            // ignore
+        }
 
-		final OAuthParameters parameters = new OAuthParameters();
-		parameters.responseType(ResponseType.code);
-		parameters.add(OAuthParameters.CLIENT_ID, config.getClientId());
-		parameters.redirectURI(config.getCallbackUrl());
-		parameters.scope(new String[] { "read" });
+        if (propFile.exists()) {
+            final Properties props = new Properties();
+            try (FileInputStream fileInputStream = new FileInputStream(propFile)) {
+                props.load(fileInputStream);
+            } catch (final IOException e) {
+                logger.error(MSG_COULD_NOT_LOAD_PROPS, e);
+                return new OAuthConfiguration();
+            }
+            return createFromProperties(props);
+        } else {
+            logger.error(MSG_COULD_NOT_LOAD_PROPS);
+            return new OAuthConfiguration();
+        }
+    }
 
-		if (state.isPresent()) {
-			final Optional<String> stateUrlValue = state.get().encode();
+    public void persist(final OAuthConfiguration config) {
+        final File propFile = getPropFile();
+        logger.info("Saving OAuth configuration...");
+        try {
+            logger.info(MSG_PROPERTY_FILE_LOCATION, propFile.getCanonicalFile());
+        } catch (final IOException e) {
+            // ignore
+        }
+        if (propFile != null && !propFile.exists()) {
+            final File parent = propFile.getParentFile();
+            if (parent != null && !parent.exists()) {
+                parent.mkdirs();
+            }
+        }
 
-			if (stateUrlValue.isPresent()) {
-				parameters.state(stateUrlValue.get());
-			}
-		}
+        try (FileOutputStream outputStream = new FileOutputStream(propFile)) {
+            final Properties props = new Properties();
+            props.put(OAUTH_PROPERTY_CLIENT_ID, StringUtils.trimToEmpty(config.getClientId()));
+            props.put(OAUTH_PROPERTY_USER_REFRESH_TOKEN, StringUtils.trimToEmpty(config.getUserRefreshToken()));
+            props.put(OAUTH_PROPERTY_CALLBACK_URL, StringUtils.trimToEmpty(config.getCallbackUrl()));
+            props.put(OAUTH_PROPERTY_HUB_URI, StringUtils.trimToEmpty(config.getHubUri()));
+            props.put(OAUTH_PROPERTY_EXTENSION_URI, StringUtils.trimToEmpty(config.getExtensionUri()));
+            props.put(OAUTH_PROPERTY_AUTHORIZE_URI, StringUtils.trimToEmpty(config.getoAuthAuthorizeUri()));
+            props.put(OAUTH_PROPERTY_TOKEN_URI, StringUtils.trimToEmpty(config.getoAuthTokenUri()));
+            props.store(outputStream, "OAUTH Client configuration");
+        } catch (final IOException e) {
+            logger.error("Could not save OAUTH configuration", e);
+        }
+    }
 
-		return parameters.toReference(reference.toString()).toString();
-	}
+    private File getPropFile() {
+        final String parentLocation = System.getProperty("ext.config.location");
 
-	public AccessTokenClientResource getTokenResource(final OAuthConfiguration config) {
-		final Reference reference = new Reference(config.getoAuthTokenUri());
+        if (StringUtils.isNotBlank(parentLocation)) {
+            return new File(parentLocation, OAUTH_CONFIG_FILE_NAME);
+        } else {
+            return new File(OAUTH_CONFIG_FILE_NAME);
+        }
+    }
 
-		final AccessTokenClientResource tokenResource = new AccessTokenClientResource(reference);
-		// Client ID here and not on OAuthParams so that it can auto-add to
-		// parameters internally. null auth so it does
-		// NPE trying to format challenge response
-		tokenResource.setClientCredentials(config.getClientId(), null);
-		tokenResource.setAuthenticationMethod(null);
+    private OAuthConfiguration createFromProperties(final Properties properties) {
+        final String clientId = properties.getProperty(OAUTH_PROPERTY_CLIENT_ID);
+        final String userRefreshToken = properties.getProperty(OAUTH_PROPERTY_USER_REFRESH_TOKEN);
+        final String callbackUrl = properties.getProperty(OAUTH_PROPERTY_CALLBACK_URL);
+        final String hubUri = properties.getProperty(OAUTH_PROPERTY_HUB_URI);
+        final String extensionUri = properties.getProperty(OAUTH_PROPERTY_EXTENSION_URI);
+        final String authorizeUri = properties.getProperty(OAUTH_PROPERTY_AUTHORIZE_URI);
+        final String tokenUri = properties.getProperty(OAUTH_PROPERTY_TOKEN_URI);
+        final OAuthConfiguration config = new OAuthConfiguration();
+        config.setClientId(clientId);
+        config.setCallbackUrl(callbackUrl);
+        config.setUserRefreshToken(userRefreshToken);
+        config.setAddresses(hubUri, extensionUri, authorizeUri, tokenUri);
 
-		return tokenResource;
-	}
+        return config;
+    }
 
-	public OAuthParameters getAccessTokenParameters(final OAuthConfiguration config, final String code) {
-		final OAuthParameters parameters = new OAuthParameters();
-		parameters.grantType(GrantType.authorization_code);
-		parameters.redirectURI(config.getCallbackUrl());
-		parameters.code(code);
+    public String getOAuthAuthorizationUrl(final OAuthConfiguration config, final Optional<StateUrlProcessor> state) {
+        final Reference reference = new Reference(config.getoAuthAuthorizeUri());
 
-		return parameters;
-	}
+        final OAuthParameters parameters = new OAuthParameters();
+        parameters.responseType(ResponseType.code);
+        parameters.add(OAuthParameters.CLIENT_ID, config.getClientId());
+        parameters.redirectURI(config.getCallbackUrl());
+        parameters.scope(new String[] { "read" });
 
-	public OAuthParameters getClientTokenParameters() {
-		final OAuthParameters parameters = new OAuthParameters();
-		parameters.grantType(GrantType.client_credentials);
-		parameters.scope(new String[] { "read", "write" });
+        if (state.isPresent()) {
+            final Optional<String> stateUrlValue = state.get().encode();
 
-		return parameters;
-	}
+            if (stateUrlValue.isPresent()) {
+                parameters.state(stateUrlValue.get());
+            }
+        }
 
-	public OAuthParameters getRefreshTokenParameters(final String refreshToken) {
-		final OAuthParameters parameters = new OAuthParameters();
-		parameters.grantType(GrantType.refresh_token);
-		parameters.refreshToken(refreshToken);
+        return parameters.toReference(reference.toString()).toString();
+    }
 
-		return parameters;
-	}
+    public AccessTokenClientResource getTokenResource(final OAuthConfiguration config) {
+        final Reference reference = new Reference(config.getoAuthTokenUri());
+
+        final AccessTokenClientResource tokenResource = new AccessTokenClientResource(reference);
+        // Client ID here and not on OAuthParams so that it can auto-add to
+        // parameters internally. null auth so it does
+        // NPE trying to format challenge response
+        tokenResource.setClientCredentials(config.getClientId(), null);
+        tokenResource.setAuthenticationMethod(null);
+
+        return tokenResource;
+    }
+
+    public OAuthParameters getAccessTokenParameters(final OAuthConfiguration config, final String code) {
+        final OAuthParameters parameters = new OAuthParameters();
+        parameters.grantType(GrantType.authorization_code);
+        parameters.redirectURI(config.getCallbackUrl());
+        parameters.code(code);
+
+        return parameters;
+    }
+
+    public OAuthParameters getClientTokenParameters() {
+        final OAuthParameters parameters = new OAuthParameters();
+        parameters.grantType(GrantType.client_credentials);
+        parameters.scope(new String[] { "read", "write" });
+
+        return parameters;
+    }
+
+    public OAuthParameters getRefreshTokenParameters(final String refreshToken) {
+        final OAuthParameters parameters = new OAuthParameters();
+        parameters.grantType(GrantType.refresh_token);
+        parameters.refreshToken(refreshToken);
+
+        return parameters;
+    }
 }
