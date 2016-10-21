@@ -1,62 +1,19 @@
 <html>
-    <head>
-        <style>
-        .textlogoblack {
-            font-family: OpenSans-Bold;
-            font-size: 24px;
-            color: #4A4A4A;
-        }
-        .textlogoblue {
-            font-family: OpenSans;
-            font-size: 24px;
-            color: #73B1F0;
-        }
-        .emailcategory {
-            font-family: OpenSans-Light;
-            font-size: 14px;
-            color: #445B68;
-            float: right;
-        }
-        .line {
-            border: 1px solid #979797;
-        }
-        .description {
-            font-family: OpenSans-Light;
-            font-size: 14px;
-            color: #445B68;
-        }
-        .poweredBy {
-          font-family: OpenSans;
-          font-size: 12px;
-          color: #4A4A4A;
-        }
-        .footerBlack {
-            font-family: OpenSans-Light;
-            font-size: 14px;
-            color: #445B68;
-        }
-        .footerDuck {
-            font-family: OpenSans;
-            font-size: 12px;
-            color: #4A4A4A;
-        }
-       </style>
-    </head>
     <body style="margin:1cm;width:620px;">
-        <div class="header">
-            <div class="logo">
-              <span class="textlogoblack">Black</span><span class="textlogoblue">Duck</span>
+        <div style="display:inline-block;width:100%;">
+            <div>
+              <span style="font-family: Arial, FreeSans, Helvetica, sans-serif;font-weight: bold;font-size: 24px;color: #4A4A4A;">Black</span><span style="font-family: Arial, FreeSans, Helvetica, sans-serif;font-size: 24px;color: #73B1F0;">Duck</span>
             </div>
-            <div class="emailcategory">SAMPLE </div>
-        </div> 
-        <div class="line"></div>
+            <div style="font-family: Arial, FreeSans, Helvetica, sans-serif;font-weight: lighter;font-size: 14px;color: #445B68;float: right;">${emailCategory} DIGEST</div>
+        </div>
+        <div style="border: 1px solid #979797;"></div>
         <br/>
-        <div class="description">Black Duck sample email for demonstration purposes only.</div>
+        <div style="font-family: Arial, FreeSans, Helvetica, sans-serif;font-weight: lighter;font-size: 14px;color: #445B68;">Black Duck sample email for demonstration purposes only.</div>
         <br/>
-        <div class="footer">
-            <img src="cid:${logo_image}" />
+        <div style="display:inline-block;width:100%;">
+            <img src="cid:${logo_image}" height="20" width="20"/>
             <div style="float:right;">
-              <span class="poweredBy">Powered by </span><span class="footerBlack">Black</span><span class="footerDuck">Duck</span>
+              <span style="font-family: Arial, FreeSans, Helvetica, sans-serif;font-size: 12px;color: #4A4A4A;">Powered by </span><span style="font-family: Arial, FreeSans, Helvetica, sans-serif;font-weight: 600;font-size: 14px;color: #445B68;">Black</span><span style="font-family: Arial, FreeSans, Helvetica, sans-serif;font-size: 12px;color: #4A4A4A;">Duck</span>
             </div>
         </div>
     </body>
