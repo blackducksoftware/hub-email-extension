@@ -1,82 +1,74 @@
 package com.blackducksoftware.integration.email.batch.processor;
 
+import java.net.URISyntaxException;
 import java.util.Set;
 
 import com.blackducksoftware.integration.email.model.batch.ItemEntry;
+import com.blackducksoftware.integration.hub.dataservices.notification.items.NotificationContentItem;
 
-public class NotificationEvent {
-	private final ProcessingAction action;
-	private final String projectName;
-	private final String projectVersion;
-	private final String componentName;
-	private final String componentVersion;
-	private final NotificationCategoryEnum categoryType;
-	private final Set<ItemEntry> dataSet;
-	private final String eventKey;
-	private final String projectKey;
-	private final Set<String> vulnerabilityIdSet;
+public abstract class NotificationEvent<T extends NotificationContentItem> {
+    private ProcessingAction action;
 
-	public NotificationEvent(final ProcessingAction action, final String projectName, final String projectVersion,
-			final String componentName, final String componentVersion, final String eventKey,
-			final NotificationCategoryEnum categoryType, final Set<ItemEntry> dataSet,
-			final Set<String> vulnerabilityIdSet) {
-		this.action = action;
-		this.projectName = projectName;
-		this.projectVersion = projectVersion;
-		this.componentName = componentName;
-		this.componentVersion = componentVersion;
-		this.categoryType = categoryType;
-		this.dataSet = dataSet;
-		this.vulnerabilityIdSet = vulnerabilityIdSet;
-		this.projectKey = projectName + projectVersion;
-		this.eventKey = eventKey;
-	}
+    private NotificationCategoryEnum categoryType;
 
-	public ProcessingAction getAction() {
-		return action;
-	}
+    private final T notificationContent;
 
-	public String getProjectName() {
-		return projectName;
-	}
+    private Set<ItemEntry> dataSet;
 
-	public String getProjectVersion() {
-		return projectVersion;
-	}
+    private String eventKey;
 
-	public String getComponentName() {
-		return componentName;
-	}
+    public NotificationEvent(final ProcessingAction action, final NotificationCategoryEnum categoryType, T notificationContent) {
+        this.action = action;
+        this.categoryType = categoryType;
+        this.notificationContent = notificationContent;
+    }
 
-	public String getComponentVersion() {
-		return componentVersion;
-	}
+    public void init() throws URISyntaxException {
+        dataSet = generateDataSet();
+        eventKey = generateEventKey();
+    }
 
-	public NotificationCategoryEnum getCategoryType() {
-		return categoryType;
-	}
+    public String hashString(final String origString) {
+        String hashString;
+        if (origString == null) {
+            hashString = "";
+        } else {
+            hashString = String.valueOf(origString.hashCode());
+        }
+        return hashString;
+    }
 
-	public Set<ItemEntry> getDataSet() {
-		return dataSet;
-	}
+    public abstract Set<ItemEntry> generateDataSet();
 
-	public Set<String> getVulnerabilityIdSet() {
-		return vulnerabilityIdSet;
-	}
+    public abstract String generateEventKey() throws URISyntaxException;
 
-	public String getEventKey() {
-		return eventKey;
-	}
+    public abstract int countCategoryItems();
 
-	public String getProjectKey() {
-		return projectKey;
-	}
+    public ProcessingAction getAction() {
+        return action;
+    }
 
-	public int getCategoryItemCount() {
-		if (vulnerabilityIdSet != null && vulnerabilityIdSet.isEmpty()) {
-			return 1;
-		} else {
-			return vulnerabilityIdSet.size();
-		}
-	}
+    public void setAction(ProcessingAction action) {
+        this.action = action;
+    }
+
+    public NotificationCategoryEnum getCategoryType() {
+        return categoryType;
+    }
+
+    public void setCategoryType(NotificationCategoryEnum categoryType) {
+        this.categoryType = categoryType;
+    }
+
+    public T getNotificationContent() {
+        return notificationContent;
+    }
+
+    public Set<ItemEntry> getDataSet() {
+        return dataSet;
+    }
+
+    public String getEventKey() {
+        return eventKey;
+    }
 }

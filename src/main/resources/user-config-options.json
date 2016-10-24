@@ -53,12 +53,16 @@
             "description": "The user can specify any number of notification types that will appear in an email",
             "options": [
                 {"name": "POLICY_VIOLATION", "title": "Policy Violation" },
+                {"name": "POLICY_VIOLATION_CLEARED", "title": "Policy Violation Cleared" },
+                {"name": "POLICY_VIOLATION_OVERRIDE", "title": "Policy Violation Override" },
                 {"name": "HIGH_VULNERABILITY", "title": "High Security Vulnerabilities" },
                 {"name": "MEDIUM_VULNERABILITY", "title": "Medium Security Vulnerabilities" },
                 {"name": "LOW_VULNERABILITY", "title": "Low Security Vulnerabilities" }
             ],
             "defaultValue": [
                 "POLICY_VIOLATION",
+                "POLICY_VIOLATION_CLEARED",
+                "POLICY_VIOLATION_OVERRIDE",
                 "HIGH_VULNERABILITY",
                 "MEDIUM_VULNERABILITY",
                 "LOW_VULNERABILITY"

@@ -1,40 +1,37 @@
 package com.blackducksoftware.integration.email.batch.processor;
 
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.net.URISyntaxException;
 
-import com.blackducksoftware.integration.email.model.batch.ItemEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
-import com.blackducksoftware.integration.hub.api.project.ProjectVersion;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.NotificationContentItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyOverrideContentItem;
 
-public class PolicyOverrideProcessor extends NotificationSubProcessor {
+public class PolicyOverrideProcessor extends NotificationSubProcessor<PolicyEvent> {
+    private final Logger logger = LoggerFactory.getLogger(PolicyViolationProcessor.class);
 
-	public PolicyOverrideProcessor(final SubProcessorCache cache) {
-		super(cache);
-	}
+    public PolicyOverrideProcessor(final SubProcessorCache<PolicyEvent> cache) {
+        super(cache);
+    }
 
-	@Override
-	public void process(final NotificationContentItem notification) {
-		final PolicyOverrideContentItem policyOverrideContentItem = (PolicyOverrideContentItem) notification;
-		for (final PolicyRule rule : policyOverrideContentItem.getPolicyRuleList()) {
-			final ProjectVersion projectVersion = policyOverrideContentItem.getProjectVersion();
-			final String projectName = projectVersion.getProjectName();
-			final String projectVersionName = projectVersion.getProjectVersionName();
-			final String componentName = policyOverrideContentItem.getComponentName();
-			final String componentVersion = policyOverrideContentItem.getComponentVersion();
-			final String eventKey = generateEventKey(projectName, projectVersionName, componentName, componentVersion,
-					NotificationCategoryEnum.POLICY_VIOLATION.name());
-			final Set<ItemEntry> dataMap = new LinkedHashSet<>(4);
-			dataMap.add(new ItemEntry(ItemTypeEnum.RULE.name(), rule.getName()));
-			dataMap.add(new ItemEntry(ItemTypeEnum.COMPONENT.name(), componentName));
-			dataMap.add(new ItemEntry("", componentVersion));
-			final NotificationEvent event = new NotificationEvent(ProcessingAction.REMOVE, projectName,
-					projectVersionName, componentName, componentVersion, eventKey,
-					NotificationCategoryEnum.POLICY_VIOLATION, dataMap, Collections.emptySet());
-			getCache().removeEvent(event);
-		}
-	}
+    @Override
+    public void process(final NotificationContentItem notification) {
+        final PolicyOverrideContentItem policyOverrideContentItem = (PolicyOverrideContentItem) notification;
+        for (final PolicyRule rule : policyOverrideContentItem.getPolicyRuleList()) {
+            try {
+                final PolicyEvent event = new PolicyEvent(ProcessingAction.REMOVE, NotificationCategoryEnum.POLICY_VIOLATION, policyOverrideContentItem, rule);
+                if (getCache().hasEvent(event.getEventKey())) {
+                    getCache().removeEvent(event);
+                } else {
+                    event.setAction(ProcessingAction.ADD);
+                    event.setCategoryType(NotificationCategoryEnum.POLICY_VIOLATION_OVERRIDE);
+                    getCache().addEvent(event);
+                }
+            } catch (URISyntaxException e) {
+                logger.error("Error processing policy violation override item {} ", policyOverrideContentItem, e);
+            }
+        }
+    }
 }
