@@ -21,13 +21,13 @@ import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import com.blackducksoftware.integration.email.model.batch.CategoryData;
 import com.blackducksoftware.integration.email.model.batch.ItemData;
 import com.blackducksoftware.integration.email.model.batch.ItemEntry;
 import com.blackducksoftware.integration.email.model.batch.ProjectData;
+import com.blackducksoftware.integration.hub.api.component.ComponentVersion;
+import com.blackducksoftware.integration.hub.api.component.ComponentVersionRestService;
 import com.blackducksoftware.integration.hub.api.notification.VulnerabilitySourceQualifiedId;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
 import com.blackducksoftware.integration.hub.api.project.ProjectVersion;
@@ -71,30 +71,41 @@ public class NotificationProcessorTest {
 
     private NotificationProcessor processor;
 
+    private DataServicesFactory dataServices;
+
     @Before
     public void initTest() throws Exception {
-        final DataServicesFactory dataServices = Mockito.mock(DataServicesFactory.class);
-        final VulnerabilityRestService vulnRestService = Mockito.mock(VulnerabilityRestService.class);
-        Mockito.when(vulnRestService.getVulnerability(Mockito.anyString())).thenAnswer(new Answer<VulnerabilityItem>() {
+        dataServices = Mockito.mock(DataServicesFactory.class);
 
-            @Override
-            public VulnerabilityItem answer(final InvocationOnMock invocation) throws Throwable {
-                final Object[] args = invocation.getArguments();
-                final String vulnId = (String) args[0];
-                SeverityEnum severity = SeverityEnum.UNKNOWN;
-                if (vulnId.startsWith("high")) {
-                    severity = SeverityEnum.HIGH;
-                } else if (vulnId.startsWith("medium")) {
-                    severity = SeverityEnum.MEDIUM;
-                } else if (vulnId.startsWith("low")) {
-                    severity = SeverityEnum.LOW;
-                }
-                return createVulnerability(vulnId, severity);
-            }
-
-        });
-        Mockito.when(dataServices.getVulnerabilityRestService()).thenReturn(vulnRestService);
         processor = new NotificationProcessor(dataServices);
+    }
+
+    public void initVulnerabilityTest(List<VulnerabilityItem> vulnerabilityList) throws Exception {
+        final VulnerabilityRestService vulnRestService = Mockito.mock(VulnerabilityRestService.class);
+        final ComponentVersion compVersion = Mockito.mock(ComponentVersion.class);
+        Mockito.when(compVersion.getLink(Mockito.anyString())).thenReturn("http://a.hub.server/components/component/version");
+        final ComponentVersionRestService compVerRestService = Mockito.mock(ComponentVersionRestService.class);
+        Mockito.when(compVerRestService.getItem(Mockito.anyString())).thenReturn(compVersion);
+        Mockito.when(vulnRestService.getComponentVersionVulnerabilities(Mockito.anyString())).thenReturn(vulnerabilityList);
+        Mockito.when(dataServices.getComponentVersionRestService()).thenReturn(compVerRestService);
+        Mockito.when(dataServices.getVulnerabilityRestService()).thenReturn(vulnRestService);
+    }
+
+    private List<VulnerabilityItem> createVulnerabiltyItemList(List<VulnerabilitySourceQualifiedId> vulnSourceList) {
+        List<VulnerabilityItem> vulnerabilityList = new ArrayList<>(vulnSourceList.size());
+        for (VulnerabilitySourceQualifiedId vulnSource : vulnSourceList) {
+            final String vulnId = vulnSource.getVulnerabilityId();
+            SeverityEnum severity = SeverityEnum.UNKNOWN;
+            if (vulnId.startsWith("high")) {
+                severity = SeverityEnum.HIGH;
+            } else if (vulnId.startsWith("medium")) {
+                severity = SeverityEnum.MEDIUM;
+            } else if (vulnId.startsWith("low")) {
+                severity = SeverityEnum.LOW;
+            }
+            vulnerabilityList.add(createVulnerability(vulnId, severity));
+        }
+        return vulnerabilityList;
     }
 
     private VulnerabilityItem createVulnerability(final String vulnId, final SeverityEnum severity) {
@@ -331,7 +342,8 @@ public class NotificationProcessorTest {
         vulnerabilities.add(new VulnerabilitySourceQualifiedId("vuln_source", "high_vuln_id"));
         vulnerabilities.add(new VulnerabilitySourceQualifiedId("vuln_source", "medium_vuln_id"));
         vulnerabilities.add(new VulnerabilitySourceQualifiedId("vuln_source", "low_vuln_id"));
-
+        List<VulnerabilityItem> vulnerabilityList = createVulnerabiltyItemList(vulnerabilities);
+        initVulnerabilityTest(vulnerabilityList);
         final DateTime dateTime = new DateTime();
         final VulnerabilityContentItem vulnerability = createVulnerability(dateTime.toDate(), PROJECT_NAME,
                 PROJECT_VERSION_NAME, COMPONENT, VERSION, vulnerabilities, Collections.emptyList(),
@@ -361,6 +373,8 @@ public class NotificationProcessorTest {
         vulnerabilities.add(new VulnerabilitySourceQualifiedId("vuln_source", "high_vuln_id"));
         vulnerabilities.add(new VulnerabilitySourceQualifiedId("vuln_source", "medium_vuln_id"));
         vulnerabilities.add(new VulnerabilitySourceQualifiedId("vuln_source", "low_vuln_id"));
+        List<VulnerabilityItem> vulnerabilityList = createVulnerabiltyItemList(vulnerabilities);
+        initVulnerabilityTest(vulnerabilityList);
 
         final DateTime dateTime = new DateTime();
         final VulnerabilityContentItem vulnerability = createVulnerability(dateTime.toDate(), PROJECT_NAME,
@@ -422,18 +436,24 @@ public class NotificationProcessorTest {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
         DateTime dateTime = new DateTime();
 
-        final List<VulnerabilitySourceQualifiedId> added = new LinkedList<>();
+        final List<VulnerabilitySourceQualifiedId> resultVulnList = new ArrayList<>(2);
+        resultVulnList.add(new VulnerabilitySourceQualifiedId("vuln_source", "high_vuln_id"));
+        resultVulnList.add(new VulnerabilitySourceQualifiedId("vuln_source", "medium_vuln_id"));
+        List<VulnerabilityItem> vulnerabilityList = createVulnerabiltyItemList(resultVulnList);
+        initVulnerabilityTest(vulnerabilityList);
+
+        final List<VulnerabilitySourceQualifiedId> added = new ArrayList<>(3);
         added.add(new VulnerabilitySourceQualifiedId("vuln_source", "high_vuln_id"));
         added.add(new VulnerabilitySourceQualifiedId("vuln_source", "medium_vuln_id"));
         added.add(new VulnerabilitySourceQualifiedId("vuln_source", "low_vuln_id"));
 
-        final List<VulnerabilitySourceQualifiedId> updated = new LinkedList<>();
+        final List<VulnerabilitySourceQualifiedId> updated = new ArrayList<>(4);
         updated.add(new VulnerabilitySourceQualifiedId("vuln_source", "high_vuln_id"));
         updated.add(new VulnerabilitySourceQualifiedId("vuln_source", "medium_vuln_id2"));
         updated.add(new VulnerabilitySourceQualifiedId("vuln_source", "low_vuln_id2"));
         updated.add(new VulnerabilitySourceQualifiedId("vuln_source", "low_vuln_id1"));
 
-        final List<VulnerabilitySourceQualifiedId> deleted = new LinkedList<>();
+        final List<VulnerabilitySourceQualifiedId> deleted = new ArrayList<>(3);
 
         deleted.add(new VulnerabilitySourceQualifiedId("vuln_source", "low_vuln_id"));
         deleted.add(new VulnerabilitySourceQualifiedId("vuln_source", "low_vuln_id2"));
@@ -468,6 +488,12 @@ public class NotificationProcessorTest {
     public void testComplexVulnerabilityMulti() throws Exception {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
         DateTime dateTime = new DateTime();
+
+        final List<VulnerabilitySourceQualifiedId> resultVulnList = new ArrayList<>(2);
+        resultVulnList.add(new VulnerabilitySourceQualifiedId("vuln_source", "high_vuln_id"));
+        resultVulnList.add(new VulnerabilitySourceQualifiedId("vuln_source", "medium_vuln_id"));
+        List<VulnerabilityItem> vulnerabilityList = createVulnerabiltyItemList(resultVulnList);
+        initVulnerabilityTest(vulnerabilityList);
 
         final List<VulnerabilitySourceQualifiedId> added1 = new LinkedList<>();
         added1.add(new VulnerabilitySourceQualifiedId("vuln_source", "high_vuln_id"));

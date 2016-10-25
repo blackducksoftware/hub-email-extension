@@ -21,7 +21,8 @@ public class PolicyOverrideProcessor extends NotificationSubProcessor<PolicyEven
         final PolicyOverrideContentItem policyOverrideContentItem = (PolicyOverrideContentItem) notification;
         for (final PolicyRule rule : policyOverrideContentItem.getPolicyRuleList()) {
             try {
-                final PolicyEvent event = new PolicyEvent(ProcessingAction.REMOVE, NotificationCategoryEnum.POLICY_VIOLATION, policyOverrideContentItem, rule);
+                final PolicyOverrideEvent event = new PolicyOverrideEvent(ProcessingAction.REMOVE, NotificationCategoryEnum.POLICY_VIOLATION,
+                        policyOverrideContentItem, rule);
                 if (getCache().hasEvent(event.getEventKey())) {
                     getCache().removeEvent(event);
                 } else {

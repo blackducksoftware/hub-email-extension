@@ -56,6 +56,8 @@
                                          Component: ${itemEntry.value} 
                                        <#elseif itemType == "COUNT">
                                          (${itemEntry.value})
+                                       <#elseif itemType == "PERSON">
+                                         By: ${itemEntry.value}
                                        <#else>
                                          ${itemEntry.key}${itemEntry.value}
                                        </#if>

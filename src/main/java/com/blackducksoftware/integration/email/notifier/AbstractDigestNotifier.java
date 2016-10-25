@@ -117,7 +117,7 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
                             UserItem userItem = userConfig.getUser();
                             logger.info("Processing hub user {}", userItem.getMeta().getHref());
                             // TODO use the data services factory to execute
-                            // this code in the for loop in a separate
+                            // this code in the for loop in a separate thread
                             // sending emails for each user can be done
                             // independently of one another at this point.
                             // TODO need to filter out on the user's project
