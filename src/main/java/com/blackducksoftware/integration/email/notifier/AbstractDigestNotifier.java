@@ -104,18 +104,18 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
                 final Date endDate = dateRange.getEnd();
                 logger.info("Getting notification data between start: {} end: {}", startDate, endDate);
                 logger.info("Number of users opted into this email template {}", usersInCategory.size());
-                final SortedSet<NotificationContentItem> notifications = notificationDataService
-                        .getAllNotifications(startDate, endDate);
-                final NotificationProcessor processor = new NotificationProcessor(getDataServicesFactory());
-                final Collection<ProjectData> projectList = processor.process(notifications);
-                if (projectList.isEmpty()) {
-                    logger.info("Project Aggregated Data list is empty no email to generate");
-                } else {
-                    int filteredUsers = 0;
-                    for (final UserConfigItem userConfig : usersInCategory) {
-                        try {
-                            UserItem userItem = userConfig.getUser();
-                            logger.info("Processing hub user {}", userItem.getMeta().getHref());
+                int filteredUsers = 0;
+                for (final UserConfigItem userConfig : usersInCategory) {
+                    try {
+                        UserItem userItem = userConfig.getUser();
+                        logger.info("Processing hub user {}", userItem.getMeta().getHref());
+                        final SortedSet<NotificationContentItem> notifications = notificationDataService.getUserNotifications(startDate, endDate,
+                                userItem);
+                        final NotificationProcessor processor = new NotificationProcessor(getDataServicesFactory());
+                        final Collection<ProjectData> projectList = processor.process(notifications);
+                        if (projectList.isEmpty()) {
+                            logger.info("Project Aggregated Data list is empty no email to generate");
+                        } else {
                             // TODO use the data services factory to execute
                             // this code in the for loop in a separate thread
                             // sending emails for each user can be done
@@ -141,17 +141,15 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
                                 final EmailTarget emailTarget = new EmailTarget(emailAddress, templateName, model);
                                 getEmailMessagingService().sendEmailMessage(emailTarget, globalConfig);
                             }
-
-                        } catch (final Exception e) {
-                            logger.error("Error sending email to user", e);
                         }
-                    }
-                    logger.info("Number of users filtered out of email template: {}", filteredUsers);
-                }
-            }
-        } catch (
 
-        final Exception e) {
+                    } catch (final Exception e) {
+                        logger.error("Error sending email to user", e);
+                    }
+                }
+                logger.info("Number of users filtered out of email template: {}", filteredUsers);
+            }
+        } catch (final Exception e) {
             logger.error("Error sending the email", e);
         }
         logger.info("Finished iteration of {} digest email notifier",
