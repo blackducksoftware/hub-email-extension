@@ -37,6 +37,8 @@ import com.blackducksoftware.integration.hub.dataservices.notification.items.Not
 
 public class NotificationCapacityTest {
 
+    private static final int NOTIFICATION_COUNT = 1000;
+
     private DataServicesFactory dataServices;
 
     private List<VulnerabilitySourceQualifiedId> vulnerabilitySourceList;
@@ -118,13 +120,13 @@ public class NotificationCapacityTest {
 
     private SortedSet<NotificationContentItem> createNotificationCancellationList(List<VulnerabilitySourceQualifiedId> vulnerabilitySourceList)
             throws Exception {
-        int policyCount = 1000000;
+        int policyCount = NOTIFICATION_COUNT;
         return createNotificationCancellationList(policyCount, vulnerabilitySourceList);
     }
 
     private SortedSet<NotificationContentItem> createVulnerabilityAddedList(List<VulnerabilitySourceQualifiedId> vulnerabilitySourceList)
             throws Exception {
-        int policyCount = 1000000;
+        int policyCount = NOTIFICATION_COUNT;
         int policyOverrideCount = policyCount / 2;
         int policyClearedCount = policyCount / 2;
         int vulnerabilityCount = policyCount;
@@ -168,7 +170,7 @@ public class NotificationCapacityTest {
 
     private SortedSet<NotificationContentItem> createComplexNotificationList(List<VulnerabilitySourceQualifiedId> vulnerabilitySourceList)
             throws Exception {
-        int policyCount = 1000000;
+        int policyCount = NOTIFICATION_COUNT;
         int policyOverrideCount = policyCount / 2;
         int policyClearedCount = policyCount / 2;
         int vulnerabilityCount = policyCount;
