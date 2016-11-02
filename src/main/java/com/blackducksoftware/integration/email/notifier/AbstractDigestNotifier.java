@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -29,14 +28,11 @@ import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.model.batch.CategoryData;
 import com.blackducksoftware.integration.email.model.batch.ProjectData;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.hub.api.extension.ConfigurationItem;
 import com.blackducksoftware.integration.hub.api.user.UserItem;
 import com.blackducksoftware.integration.hub.dataservices.DataServicesFactory;
-import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservices.extension.item.UserConfigItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.NotificationContentItem;
-import com.blackducksoftware.integration.hub.exception.UnexpectedHubResponseException;
 
 public abstract class AbstractDigestNotifier extends AbstractNotifier {
     private static final String KEY_HUB_SERVER_URL = "hub_server_url";
@@ -67,19 +63,16 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 
     private final NotificationDataService notificationDataService;
 
-    private final ExtensionConfigDataService extensionConfigDataService;
-
-    public AbstractDigestNotifier(final ExtensionProperties customerProperties,
+    public AbstractDigestNotifier(final ExtensionProperties extensionProperties,
             final EmailMessagingService emailMessagingService, final DataServicesFactory dataServicesFactory) {
-        super(customerProperties, emailMessagingService, dataServicesFactory);
+        super(extensionProperties, emailMessagingService, dataServicesFactory);
 
-        final String quartzTriggerPropValue = getCustomerProperties().getNotifierVariableProperties()
+        final String quartzTriggerPropValue = getExtensionProperties().getNotifierVariableProperties()
                 .get(getNotifierPropertyKey() + ".cron.expression");
         cronExpression = StringUtils.trimToNull(quartzTriggerPropValue);
         final Logger logger = LoggerFactory.getLogger(NotificationDataService.class);
         final ExtensionLogger extLogger = new ExtensionLogger(logger);
         notificationDataService = dataServicesFactory.createNotificationDataService(extLogger);
-        extensionConfigDataService = dataServicesFactory.createExtensionConfigDataService(extLogger);
     }
 
     public abstract DateRange createDateRange(final ZoneId zone);
@@ -91,7 +84,7 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
         try {
             logger.info("Starting iteration of {} digest email notifier", getName());
             final ExtensionProperties globalConfig = createPropertiesFromGlobalConfig();
-            final List<UserConfigItem> userConfigList = extensionConfigDataService
+            final List<UserConfigItem> userConfigList = getExtensionConfigDataService()
                     .getUserConfigList(getHubExtensionUri());
             final List<UserConfigItem> usersInCategory = createUserListInCategory(userConfigList);
 
@@ -274,16 +267,6 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
         } else {
             return new ArrayList<>();
         }
-    }
-
-    private ExtensionProperties createPropertiesFromGlobalConfig() throws UnexpectedHubResponseException {
-        final Map<String, ConfigurationItem> globalMap = extensionConfigDataService
-                .getGlobalConfigMap(getHubExtensionUri());
-        final Properties globalProperties = new Properties();
-        for (final Map.Entry<String, ConfigurationItem> entry : globalMap.entrySet()) {
-            globalProperties.put(entry.getKey(), entry.getValue().getValue().get(0));
-        }
-        return new ExtensionProperties(globalProperties);
     }
 
     @Override

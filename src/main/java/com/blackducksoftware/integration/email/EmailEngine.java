@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.extension.config.ExtensionConfigManager;
 import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
-import com.blackducksoftware.integration.email.extension.server.RestletApplication;
+import com.blackducksoftware.integration.email.extension.server.EmailExtensionApplication;
 import com.blackducksoftware.integration.email.extension.server.oauth.AccessType;
 import com.blackducksoftware.integration.email.extension.server.oauth.OAuthEndpoint;
 import com.blackducksoftware.integration.email.extension.server.oauth.OAuthRestConnection;
@@ -35,6 +35,7 @@ import com.blackducksoftware.integration.email.model.HubServerBeanConfiguration;
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.notifier.DailyDigestNotifier;
 import com.blackducksoftware.integration.email.notifier.NotifierManager;
+import com.blackducksoftware.integration.email.notifier.TestEmailNotifier;
 import com.blackducksoftware.integration.email.notifier.WeeklyDigestNotifier;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.exception.EncryptionException;
@@ -50,331 +51,351 @@ import freemarker.template.Configuration;
 import freemarker.template.TemplateExceptionHandler;
 
 public class EmailEngine implements IAuthorizedListener {
-	private final Logger logger = LoggerFactory.getLogger(EmailEngine.class);
+    private final Logger logger = LoggerFactory.getLogger(EmailEngine.class);
 
-	private final Configuration configuration;
-	private JavaMailWrapper javaMailWrapper;
-	private EmailMessagingService emailMessagingService;
-	private HubServerConfig hubServerConfig;
-	private RestConnection restConnection;
-	private final Properties appProperties;
-	private final ExtensionProperties extensionProperties;
-	private NotificationDataService notificationDataService;
-	private NotifierManager notifierManager;
-	private final TokenManager tokenManager;
-	private final OAuthEndpoint restletComponent;
-	private final ExtensionInfo extensionInfoData;
-	private final ExtensionConfigManager extConfigManager;
-	private ExtensionConfigDataService extConfigDataService;
-	private DataServicesFactory dataServicesFactory;
+    private final Configuration configuration;
 
-	public EmailEngine() throws IOException, EncryptionException, URISyntaxException, BDRestException {
-		appProperties = createAppProperties();
-		extensionProperties = createExtensionProperties();
-		configuration = createFreemarkerConfig();
-		extensionInfoData = createExtensionInfoData();
-		tokenManager = createTokenManager();
-		extConfigManager = createExtensionConfigManager();
-		restletComponent = createRestletComponent();
-	}
+    private JavaMailWrapper javaMailWrapper;
 
-	public Logger getLogger() {
-		return logger;
-	}
+    private EmailMessagingService emailMessagingService;
 
-	public Configuration getConfiguration() {
-		return configuration;
-	}
+    private HubServerConfig hubServerConfig;
 
-	public JavaMailWrapper getJavaMailWrapper() {
-		return javaMailWrapper;
-	}
+    private RestConnection restConnection;
 
-	public EmailMessagingService getEmailMessagingService() {
-		return emailMessagingService;
-	}
+    private final Properties appProperties;
 
-	public HubServerConfig getHubServerConfig() {
-		return hubServerConfig;
-	}
+    private final ExtensionProperties extensionProperties;
 
-	public RestConnection getRestConnection() {
-		return restConnection;
-	}
+    private NotificationDataService notificationDataService;
 
-	public Properties getAppProperties() {
-		return appProperties;
-	}
+    private NotifierManager notifierManager;
 
-	public ExtensionProperties getExtensionProperties() {
-		return extensionProperties;
-	}
+    private final TokenManager tokenManager;
 
-	public NotificationDataService getNotificationDataService() {
-		return notificationDataService;
-	}
+    private final OAuthEndpoint restletComponent;
 
-	public NotifierManager getNotifierManager() {
-		return notifierManager;
-	}
+    private final ExtensionInfo extensionInfoData;
 
-	public TokenManager getTokenManager() {
-		return tokenManager;
-	}
+    private final ExtensionConfigManager extConfigManager;
 
-	public OAuthEndpoint getRestletComponent() {
-		return restletComponent;
-	}
+    private ExtensionConfigDataService extConfigDataService;
 
-	public ExtensionInfo getExtensionInfoData() {
-		return extensionInfoData;
-	}
+    private DataServicesFactory dataServicesFactory;
 
-	public ExtensionConfigManager getExtConfigManager() {
-		return extConfigManager;
-	}
+    private EmailExtensionApplication emailExtensionApplication;
 
-	public ExtensionConfigDataService getExtConfigDataService() {
-		return extConfigDataService;
-	}
+    public EmailEngine() throws IOException, EncryptionException, URISyntaxException, BDRestException {
+        appProperties = createAppProperties();
+        extensionProperties = createExtensionProperties();
+        configuration = createFreemarkerConfig();
+        extensionInfoData = createExtensionInfoData();
+        tokenManager = createTokenManager();
+        extConfigManager = createExtensionConfigManager();
+        restletComponent = createRestletComponent();
+    }
 
-	public DataServicesFactory getDataServicesFactory() {
-		return dataServicesFactory;
-	}
+    public Logger getLogger() {
+        return logger;
+    }
 
-	public void start() {
-		try {
-			restletComponent.start();
-			tokenManager.refreshToken(AccessType.USER);
-		} catch (final Exception e) {
-			logger.error("Error Starting Email Engine", e);
-		}
-	}
+    public Configuration getConfiguration() {
+        return configuration;
+    }
 
-	public void shutDown() {
-		try {
-			notifierManager.stop();
-			restletComponent.stop();
-		} catch (final Exception e) {
-			logger.error("Error stopping Email Engine", e);
-		}
-	}
+    public JavaMailWrapper getJavaMailWrapper() {
+        return javaMailWrapper;
+    }
 
-	public Properties createAppProperties() throws IOException {
-		final Properties appProperties = new Properties();
-		final String configLocation = System.getProperty("ext.config.location");
-		final File customerPropertiesFile = new File(configLocation, "extension.properties");
-		try (FileInputStream fileInputStream = new FileInputStream(customerPropertiesFile)) {
-			appProperties.load(fileInputStream);
-		}
+    public EmailMessagingService getEmailMessagingService() {
+        return emailMessagingService;
+    }
 
-		return appProperties;
-	}
+    public HubServerConfig getHubServerConfig() {
+        return hubServerConfig;
+    }
 
-	public Configuration createFreemarkerConfig() throws IOException {
-		final Configuration cfg = new Configuration(Configuration.VERSION_2_3_25);
-		final File templateDirectory = findTemplateDirectory();
-		cfg.setDirectoryForTemplateLoading(templateDirectory);
-		cfg.setDefaultEncoding("UTF-8");
-		cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
-		cfg.setLogTemplateExceptions(false);
+    public RestConnection getRestConnection() {
+        return restConnection;
+    }
 
-		return cfg;
-	}
+    public Properties getAppProperties() {
+        return appProperties;
+    }
 
-	private File findTemplateDirectory() {
-		try {
-			File templateDir = null;
-			final String appHomeDir = System.getProperty(EmailExtensionConstants.SYSTEM_PROPERTY_KEY_APP_HOME);
-			if (StringUtils.isNotBlank(appHomeDir)) {
-				templateDir = new File(appHomeDir, "templates");
-			}
+    public ExtensionProperties getExtensionProperties() {
+        return extensionProperties;
+    }
 
-			final String templateDirProperty = extensionProperties.getEmailTemplateDirectory();
-			if (StringUtils.isNotBlank(templateDirProperty)) {
-				templateDir = new File(templateDirProperty);
-			}
+    public NotificationDataService getNotificationDataService() {
+        return notificationDataService;
+    }
 
-			return templateDir;
-		} catch (final Exception e) {
-			logger.error("Error finding the template directory", e);
-			return null;
-		}
-	}
+    public NotifierManager getNotifierManager() {
+        return notifierManager;
+    }
 
-	public DateFormat createNotificationDateFormat() {
-		final DateFormat dateFormat = new SimpleDateFormat(RestConnection.JSON_DATE_FORMAT);
-		dateFormat.setTimeZone(java.util.TimeZone.getTimeZone("Zulu"));
-		return dateFormat;
-	}
+    public TokenManager getTokenManager() {
+        return tokenManager;
+    }
 
-	public Date createApplicationStartDate() {
-		return new Date();
-	}
+    public OAuthEndpoint getRestletComponent() {
+        return restletComponent;
+    }
 
-	public ExecutorService createExecutorService() {
-		final ThreadFactory threadFactory = Executors.defaultThreadFactory();
-		return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), threadFactory);
-	}
+    public ExtensionInfo getExtensionInfoData() {
+        return extensionInfoData;
+    }
 
-	public ExtensionProperties createExtensionProperties() {
-		return new ExtensionProperties(appProperties);
-	}
+    public ExtensionConfigManager getExtConfigManager() {
+        return extConfigManager;
+    }
 
-	public JavaMailWrapper createJavaMailWrapper() {
-		return new JavaMailWrapper();
-	}
+    public ExtensionConfigDataService getExtConfigDataService() {
+        return extConfigDataService;
+    }
 
-	public EmailMessagingService createEmailMessagingService() {
-		return new EmailMessagingService(extensionProperties, configuration, javaMailWrapper);
-	}
+    public DataServicesFactory getDataServicesFactory() {
+        return dataServicesFactory;
+    }
 
-	public HubServerConfig createHubConfig(final String hubUri) {
-		final HubServerBeanConfiguration serverBeanConfig = new HubServerBeanConfiguration(hubUri, extensionProperties);
+    public void start() {
+        try {
+            restletComponent.start();
+            tokenManager.refreshToken(AccessType.USER);
+        } catch (final Exception e) {
+            logger.error("Error Starting Email Engine", e);
+        }
+    }
 
-		return serverBeanConfig.build();
-	}
+    public void shutDown() {
+        try {
+            notifierManager.stop();
+            restletComponent.stop();
+        } catch (final Exception e) {
+            logger.error("Error stopping Email Engine", e);
+        }
+    }
 
-	public RestConnection createRestConnection(final String hubUri)
-			throws EncryptionException, URISyntaxException, BDRestException {
-		final RestConnection restConnection = initRestConnection(hubUri);
-		return restConnection;
-	}
+    public Properties createAppProperties() throws IOException {
+        final Properties appProperties = new Properties();
+        final String configLocation = System.getProperty("ext.config.location");
+        final File customerPropertiesFile = new File(configLocation, "extension.properties");
+        try (FileInputStream fileInputStream = new FileInputStream(customerPropertiesFile)) {
+            appProperties.load(fileInputStream);
+        }
 
-	public NotificationDataService createNotificationDataService() {
-		final Logger notificationLogger = LoggerFactory.getLogger(NotificationDataService.class);
-		final ExtensionLogger serviceLogger = new ExtensionLogger(notificationLogger);
-		final NotificationDataService notificationDataService = dataServicesFactory
-				.createNotificationDataService(serviceLogger);
-		return notificationDataService;
-	}
+        return appProperties;
+    }
 
-	public RestConnection initRestConnection(final String hubUri)
-			throws EncryptionException, URISyntaxException, BDRestException {
-		final RestConnection restConnection = new OAuthRestConnection(hubServerConfig, tokenManager);
-		return restConnection;
-	}
+    public Configuration createFreemarkerConfig() throws IOException {
+        final Configuration cfg = new Configuration(Configuration.VERSION_2_3_25);
+        final File templateDirectory = findTemplateDirectory();
+        cfg.setDirectoryForTemplateLoading(templateDirectory);
+        cfg.setDefaultEncoding("UTF-8");
+        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
+        cfg.setLogTemplateExceptions(false);
 
-	public NotifierManager createNotifierManager() {
-		final NotifierManager manager = new NotifierManager();
-		final DataServicesFactory dataServicesFactory = new DataServicesFactory(getRestConnection());
-		final DailyDigestNotifier dailyNotifier = new DailyDigestNotifier(extensionProperties, emailMessagingService,
-				dataServicesFactory);
-		final WeeklyDigestNotifier weeklyNotifier = new WeeklyDigestNotifier(extensionProperties,
-				notificationDataService, extConfigDataService, emailMessagingService, dataServicesFactory);
-		// final MonthlyDigestNotifier monthlyNotifier = new
-		// MonthlyDigestNotifier(customerProperties, emailMessagingService);
-		manager.attach(dailyNotifier);
-		manager.attach(weeklyNotifier);
-		// manager.attach(monthlyNotifier);
-		return manager;
-	}
+        return cfg;
+    }
 
-	public ExtensionInfo createExtensionInfoData() {
+    private File findTemplateDirectory() {
+        try {
+            File templateDir = null;
+            final String appHomeDir = System.getProperty(EmailExtensionConstants.SYSTEM_PROPERTY_KEY_APP_HOME);
+            if (StringUtils.isNotBlank(appHomeDir)) {
+                templateDir = new File(appHomeDir, "templates");
+            }
 
-		final String id = generateExtensionId();
-		final String name = extensionProperties.getExtensionName();
-		final String description = extensionProperties.getExtensionDescription();
-		final String baseUrl = extensionProperties.getExtensionBaseUrl();
+            final String templateDirProperty = extensionProperties.getEmailTemplateDirectory();
+            if (StringUtils.isNotBlank(templateDirProperty)) {
+                templateDir = new File(templateDirProperty);
+            }
 
-		return new ExtensionInfo(id, name, description, baseUrl);
-	}
+            return templateDir;
+        } catch (final Exception e) {
+            logger.error("Error finding the template directory", e);
+            return null;
+        }
+    }
 
-	public String generateExtensionId() {
-		final Class<? extends EmailEngine> engineClass = this.getClass();
-		final Package enginePackage = engineClass.getPackage();
+    public DateFormat createNotificationDateFormat() {
+        final DateFormat dateFormat = new SimpleDateFormat(RestConnection.JSON_DATE_FORMAT);
+        dateFormat.setTimeZone(java.util.TimeZone.getTimeZone("Zulu"));
+        return dateFormat;
+    }
 
-		final String name = enginePackage.getName();
-		final String version = extensionProperties.getExtensionVersion();
-		final String id = name + ".email-extension." + version;
-		logger.info("Extension ID - {}", id);
-		return id;
-	}
+    public Date createApplicationStartDate() {
+        return new Date();
+    }
 
-	public OAuthEndpoint createRestletComponent() {
-		final RestletApplication application = new RestletApplication(tokenManager, extConfigManager);
-		final OAuthEndpoint endpoint = new OAuthEndpoint(application);
-		try {
-			final URL url = new URL(extensionInfoData.getBaseUrl());
-			final int port = url.getPort();
-			if (Protocol.HTTP.getSchemeName().equals(url.getProtocol())) {
-				if (port > 0) {
-					endpoint.getServers().add(Protocol.HTTP, port);
-				} else {
-					endpoint.getServers().add(Protocol.HTTP);
-				}
-			} else if (Protocol.HTTPS.getSchemeName().equals(url.getProtocol())) {
-				Server server;
-				if (port > 0) {
-					server = endpoint.getServers().add(Protocol.HTTPS, port);
-				} else {
-					server = endpoint.getServers().add(Protocol.HTTPS);
-				}
-				final Series<Parameter> parameters = server.getContext().getParameters();
-				parameters.add("sslContextFactory", "org.restlet.engine.ssl.DefaultSslContextFactory");
-				parameters.add("keyStorePath", extensionProperties.getSSLKeyStorePath());
-				parameters.add("keyStorePassword", extensionProperties.getSSLKeyStorePassword());
-				parameters.add("keyPassword", extensionProperties.getSSLKeyPassword());
-				parameters.add("keyStoreType", extensionProperties.getSSLKeyStoreType());
-			} else {
-				logger.error("URL scheme {} not supported.  Not starting the email extension. ", url.getProtocol());
-			}
-		} catch (final MalformedURLException e) {
-			logger.error("createRestletComponent error with base URL", e);
-		}
+    public ExecutorService createExecutorService() {
+        final ThreadFactory threadFactory = Executors.defaultThreadFactory();
+        return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), threadFactory);
+    }
 
-		return endpoint;
-	}
+    public ExtensionProperties createExtensionProperties() {
+        return new ExtensionProperties(appProperties);
+    }
 
-	public TokenManager createTokenManager() {
-		final TokenManager tokenManager = new TokenManager(extensionInfoData);
-		tokenManager.addAuthorizedListener(this);
-		return tokenManager;
-	}
+    public JavaMailWrapper createJavaMailWrapper() {
+        return new JavaMailWrapper();
+    }
 
-	public ExtensionConfigManager createExtensionConfigManager() {
-		// has to be separate from the dataservicesfactory otherwise we have a
-		// chicken and egg problem
-		final ExtensionConfigManager extConfigManager = new ExtensionConfigManager(extensionInfoData, new JsonParser());
-		return extConfigManager;
-	}
+    public EmailMessagingService createEmailMessagingService() {
+        return new EmailMessagingService(extensionProperties, configuration, javaMailWrapper);
+    }
 
-	public ExtensionConfigDataService createExtensionConfigDataService() {
-		final Logger extensionServiceLogger = LoggerFactory.getLogger(ExtensionConfigDataService.class);
-		final ExtensionLogger serviceLogger = new ExtensionLogger(extensionServiceLogger);
-		final ExtensionConfigDataService extConfigDataService = dataServicesFactory
-				.createExtensionConfigDataService(serviceLogger);
-		return extConfigDataService;
-	}
+    public HubServerConfig createHubConfig(final String hubUri) {
+        final HubServerBeanConfiguration serverBeanConfig = new HubServerBeanConfiguration(hubUri, extensionProperties);
 
-	public DataServicesFactory createDataServicesFactory() {
-		return new DataServicesFactory(restConnection);
-	}
+        return serverBeanConfig.build();
+    }
 
-	@Override
-	public void onAuthorized() {
-		try {
-			final String hubUri = createHubBaseUrl(tokenManager.getConfiguration().getHubUri());
-			hubServerConfig = createHubConfig(hubUri);
-			restConnection = createRestConnection(hubUri);
-			javaMailWrapper = createJavaMailWrapper();
-			dataServicesFactory = createDataServicesFactory();
-			emailMessagingService = createEmailMessagingService();
-			notificationDataService = createNotificationDataService();
-			extConfigDataService = createExtensionConfigDataService();
-			notifierManager = createNotifierManager();
-			notifierManager.updateHubExtensionUri(tokenManager.getConfiguration().getExtensionUri());
-			notifierManager.start();
-		} catch (final EncryptionException | URISyntaxException | BDRestException | MalformedURLException e) {
-			logger.error("Error completing extension initialization", e);
-		}
-	}
+    public RestConnection createRestConnection(final String hubUri)
+            throws EncryptionException, URISyntaxException, BDRestException {
+        final RestConnection restConnection = initRestConnection(hubUri);
+        return restConnection;
+    }
 
-	// TODO file a ticket against the hub to give me the root URL not with a
-	// path
-	private String createHubBaseUrl(final String hubUri) throws MalformedURLException {
-		final URL original = new URL(hubUri);
-		final URL baseUrl = new URL(original.getProtocol(), original.getHost(), original.getPort(), "");
-		return baseUrl.toString();
-	}
+    public NotificationDataService createNotificationDataService() {
+        final Logger notificationLogger = LoggerFactory.getLogger(NotificationDataService.class);
+        final ExtensionLogger serviceLogger = new ExtensionLogger(notificationLogger);
+        final NotificationDataService notificationDataService = dataServicesFactory
+                .createNotificationDataService(serviceLogger);
+        return notificationDataService;
+    }
+
+    public RestConnection initRestConnection(final String hubUri)
+            throws EncryptionException, URISyntaxException, BDRestException {
+        final RestConnection restConnection = new OAuthRestConnection(hubServerConfig, tokenManager);
+        return restConnection;
+    }
+
+    public NotifierManager createNotifierManager() {
+        final NotifierManager manager = new NotifierManager();
+        final DataServicesFactory dataServicesFactory = new DataServicesFactory(getRestConnection());
+        final DailyDigestNotifier dailyNotifier = new DailyDigestNotifier(extensionProperties, emailMessagingService,
+                dataServicesFactory);
+        final WeeklyDigestNotifier weeklyNotifier = new WeeklyDigestNotifier(extensionProperties,
+                notificationDataService, extConfigDataService, emailMessagingService, dataServicesFactory);
+
+        final TestEmailNotifier testNotifier = new TestEmailNotifier(extensionProperties, emailMessagingService, dataServicesFactory);
+        // final MonthlyDigestNotifier monthlyNotifier = new
+        // MonthlyDigestNotifier(customerProperties, emailMessagingService);
+        manager.attach(dailyNotifier);
+        manager.attach(weeklyNotifier);
+        // manager.attach(monthlyNotifier);
+        manager.attach(testNotifier);
+        emailExtensionApplication.getContext().getAttributes().put(EmailExtensionConstants.CONTEXT_ATTRIBUTE_KEY_TEST_NOTIFIER, testNotifier);
+        return manager;
+    }
+
+    public ExtensionInfo createExtensionInfoData() {
+
+        final String id = generateExtensionId();
+        final String name = extensionProperties.getExtensionName();
+        final String description = extensionProperties.getExtensionDescription();
+        final String baseUrl = extensionProperties.getExtensionBaseUrl();
+
+        return new ExtensionInfo(id, name, description, baseUrl);
+    }
+
+    public String generateExtensionId() {
+        final Class<? extends EmailEngine> engineClass = this.getClass();
+        final Package enginePackage = engineClass.getPackage();
+
+        final String name = enginePackage.getName();
+        final String version = extensionProperties.getExtensionVersion();
+        final String id = name + ".email-extension." + version;
+        logger.info("Extension ID - {}", id);
+        return id;
+    }
+
+    public OAuthEndpoint createRestletComponent() {
+        emailExtensionApplication = new EmailExtensionApplication(tokenManager, extConfigManager);
+        final OAuthEndpoint endpoint = new OAuthEndpoint(emailExtensionApplication);
+        try {
+            final URL url = new URL(extensionInfoData.getBaseUrl());
+            final int port = url.getPort();
+            if (Protocol.HTTP.getSchemeName().equals(url.getProtocol())) {
+                if (port > 0) {
+                    endpoint.getServers().add(Protocol.HTTP, port);
+                } else {
+                    endpoint.getServers().add(Protocol.HTTP);
+                }
+            } else if (Protocol.HTTPS.getSchemeName().equals(url.getProtocol())) {
+                Server server;
+                if (port > 0) {
+                    server = endpoint.getServers().add(Protocol.HTTPS, port);
+                } else {
+                    server = endpoint.getServers().add(Protocol.HTTPS);
+                }
+                final Series<Parameter> parameters = server.getContext().getParameters();
+                parameters.add("sslContextFactory", "org.restlet.engine.ssl.DefaultSslContextFactory");
+                parameters.add("keyStorePath", extensionProperties.getSSLKeyStorePath());
+                parameters.add("keyStorePassword", extensionProperties.getSSLKeyStorePassword());
+                parameters.add("keyPassword", extensionProperties.getSSLKeyPassword());
+                parameters.add("keyStoreType", extensionProperties.getSSLKeyStoreType());
+            } else {
+                logger.error("URL scheme {} not supported.  Not starting the email extension. ", url.getProtocol());
+            }
+        } catch (final MalformedURLException e) {
+            logger.error("createRestletComponent error with base URL", e);
+        }
+
+        return endpoint;
+    }
+
+    public TokenManager createTokenManager() {
+        final TokenManager tokenManager = new TokenManager(extensionInfoData);
+        tokenManager.addAuthorizedListener(this);
+        return tokenManager;
+    }
+
+    public ExtensionConfigManager createExtensionConfigManager() {
+        // has to be separate from the dataservicesfactory otherwise we have a
+        // chicken and egg problem
+        final ExtensionConfigManager extConfigManager = new ExtensionConfigManager(extensionInfoData, new JsonParser());
+        return extConfigManager;
+    }
+
+    public ExtensionConfigDataService createExtensionConfigDataService() {
+        final Logger extensionServiceLogger = LoggerFactory.getLogger(ExtensionConfigDataService.class);
+        final ExtensionLogger serviceLogger = new ExtensionLogger(extensionServiceLogger);
+        final ExtensionConfigDataService extConfigDataService = dataServicesFactory
+                .createExtensionConfigDataService(serviceLogger);
+        return extConfigDataService;
+    }
+
+    public DataServicesFactory createDataServicesFactory() {
+        return new DataServicesFactory(restConnection);
+    }
+
+    @Override
+    public void onAuthorized() {
+        try {
+            final String hubUri = createHubBaseUrl(tokenManager.getConfiguration().getHubUri());
+            hubServerConfig = createHubConfig(hubUri);
+            restConnection = createRestConnection(hubUri);
+            javaMailWrapper = createJavaMailWrapper();
+            dataServicesFactory = createDataServicesFactory();
+            emailMessagingService = createEmailMessagingService();
+            notificationDataService = createNotificationDataService();
+            extConfigDataService = createExtensionConfigDataService();
+            notifierManager = createNotifierManager();
+            notifierManager.updateHubExtensionUri(tokenManager.getConfiguration().getExtensionUri());
+            notifierManager.start();
+        } catch (final EncryptionException | URISyntaxException | BDRestException | MalformedURLException e) {
+            logger.error("Error completing extension initialization", e);
+        }
+    }
+
+    // TODO file a ticket against the hub to give me the root URL not with a
+    // path
+    private String createHubBaseUrl(final String hubUri) throws MalformedURLException {
+        final URL original = new URL(hubUri);
+        final URL baseUrl = new URL(original.getProtocol(), original.getHost(), original.getPort(), "");
+        return baseUrl.toString();
+    }
 }

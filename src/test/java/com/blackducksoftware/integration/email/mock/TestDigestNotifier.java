@@ -27,9 +27,9 @@ public class TestDigestNotifier extends AbstractDigestNotifier {
 			final ExtensionConfigDataService extensionConfigDataService,
 			final EmailMessagingService emailMessagingService, final DataServicesFactory dataservicesFactory) {
 		super(customerProperties, emailMessagingService, dataservicesFactory);
-		lastRunPath = getCustomerProperties().getNotifierVariableProperties()
+		lastRunPath = getExtensionProperties().getNotifierVariableProperties()
 				.get(getNotifierPropertyKey() + ".lastrun.file");
-		initialStartDate = getCustomerProperties().getNotifierVariableProperties()
+		initialStartDate = getExtensionProperties().getNotifierVariableProperties()
 				.get(getNotifierPropertyKey() + ".start.date");
 	}
 
