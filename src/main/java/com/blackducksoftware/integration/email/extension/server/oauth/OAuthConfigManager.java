@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Base64;
+import java.util.Base64.Decoder;
+import java.util.Base64.Encoder;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -15,6 +18,8 @@ import org.restlet.ext.oauth.OAuthParameters;
 import org.restlet.ext.oauth.ResponseType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.blackducksoftware.integration.exception.EncryptionException;
 
 public class OAuthConfigManager {
 
@@ -45,21 +50,20 @@ public class OAuthConfigManager {
         logger.info("Loading OAUTH configuration...");
         try {
             logger.info(MSG_PROPERTY_FILE_LOCATION, propFile.getCanonicalPath());
-        } catch (final IOException e) {
-            // ignore
-        }
-
-        if (propFile.exists()) {
-            final Properties props = new Properties();
-            try (FileInputStream fileInputStream = new FileInputStream(propFile)) {
-                props.load(fileInputStream);
-            } catch (final IOException e) {
-                logger.error(MSG_COULD_NOT_LOAD_PROPS, e);
+            if (propFile.exists()) {
+                final Properties props = new Properties();
+                try (FileInputStream fileInputStream = new FileInputStream(propFile)) {
+                    props.load(fileInputStream);
+                } catch (final IOException e) {
+                    logger.error(MSG_COULD_NOT_LOAD_PROPS, e);
+                    return new OAuthConfiguration();
+                }
+                return createFromProperties(props);
+            } else {
+                logger.error(MSG_COULD_NOT_LOAD_PROPS);
                 return new OAuthConfiguration();
             }
-            return createFromProperties(props);
-        } else {
-            logger.error(MSG_COULD_NOT_LOAD_PROPS);
+        } catch (final IOException | IllegalArgumentException | EncryptionException e) {
             return new OAuthConfiguration();
         }
     }
@@ -81,15 +85,15 @@ public class OAuthConfigManager {
 
         try (FileOutputStream outputStream = new FileOutputStream(propFile)) {
             final Properties props = new Properties();
-            props.put(OAUTH_PROPERTY_CLIENT_ID, StringUtils.trimToEmpty(config.getClientId()));
-            props.put(OAUTH_PROPERTY_USER_REFRESH_TOKEN, StringUtils.trimToEmpty(config.getUserRefreshToken()));
-            props.put(OAUTH_PROPERTY_CALLBACK_URL, StringUtils.trimToEmpty(config.getCallbackUrl()));
-            props.put(OAUTH_PROPERTY_HUB_URI, StringUtils.trimToEmpty(config.getHubUri()));
-            props.put(OAUTH_PROPERTY_EXTENSION_URI, StringUtils.trimToEmpty(config.getExtensionUri()));
-            props.put(OAUTH_PROPERTY_AUTHORIZE_URI, StringUtils.trimToEmpty(config.getoAuthAuthorizeUri()));
-            props.put(OAUTH_PROPERTY_TOKEN_URI, StringUtils.trimToEmpty(config.getoAuthTokenUri()));
+            props.put(OAUTH_PROPERTY_CLIENT_ID, encodePropertyValue(StringUtils.trimToEmpty(config.getClientId())));
+            props.put(OAUTH_PROPERTY_USER_REFRESH_TOKEN, encodePropertyValue(StringUtils.trimToEmpty(config.getUserRefreshToken())));
+            props.put(OAUTH_PROPERTY_CALLBACK_URL, encodePropertyValue(StringUtils.trimToEmpty(config.getCallbackUrl())));
+            props.put(OAUTH_PROPERTY_HUB_URI, encodePropertyValue(StringUtils.trimToEmpty(config.getHubUri())));
+            props.put(OAUTH_PROPERTY_EXTENSION_URI, encodePropertyValue(StringUtils.trimToEmpty(config.getExtensionUri())));
+            props.put(OAUTH_PROPERTY_AUTHORIZE_URI, encodePropertyValue(StringUtils.trimToEmpty(config.getoAuthAuthorizeUri())));
+            props.put(OAUTH_PROPERTY_TOKEN_URI, encodePropertyValue(StringUtils.trimToEmpty(config.getoAuthTokenUri())));
             props.store(outputStream, "OAUTH Client configuration");
-        } catch (final IOException e) {
+        } catch (final IOException | IllegalArgumentException | EncryptionException e) {
             logger.error("Could not save OAUTH configuration", e);
         }
     }
@@ -104,14 +108,14 @@ public class OAuthConfigManager {
         }
     }
 
-    private OAuthConfiguration createFromProperties(final Properties properties) {
-        final String clientId = properties.getProperty(OAUTH_PROPERTY_CLIENT_ID);
-        final String userRefreshToken = properties.getProperty(OAUTH_PROPERTY_USER_REFRESH_TOKEN);
-        final String callbackUrl = properties.getProperty(OAUTH_PROPERTY_CALLBACK_URL);
-        final String hubUri = properties.getProperty(OAUTH_PROPERTY_HUB_URI);
-        final String extensionUri = properties.getProperty(OAUTH_PROPERTY_EXTENSION_URI);
-        final String authorizeUri = properties.getProperty(OAUTH_PROPERTY_AUTHORIZE_URI);
-        final String tokenUri = properties.getProperty(OAUTH_PROPERTY_TOKEN_URI);
+    private OAuthConfiguration createFromProperties(final Properties properties) throws IllegalArgumentException, EncryptionException {
+        final String clientId = getPropertyValue(properties.getProperty(OAUTH_PROPERTY_CLIENT_ID));
+        final String userRefreshToken = getPropertyValue(properties.getProperty(OAUTH_PROPERTY_USER_REFRESH_TOKEN));
+        final String callbackUrl = getPropertyValue(properties.getProperty(OAUTH_PROPERTY_CALLBACK_URL));
+        final String hubUri = getPropertyValue(properties.getProperty(OAUTH_PROPERTY_HUB_URI));
+        final String extensionUri = getPropertyValue(properties.getProperty(OAUTH_PROPERTY_EXTENSION_URI));
+        final String authorizeUri = getPropertyValue(properties.getProperty(OAUTH_PROPERTY_AUTHORIZE_URI));
+        final String tokenUri = getPropertyValue(properties.getProperty(OAUTH_PROPERTY_TOKEN_URI));
         final OAuthConfiguration config = new OAuthConfiguration();
         config.setClientId(clientId);
         config.setCallbackUrl(callbackUrl);
@@ -119,6 +123,19 @@ public class OAuthConfigManager {
         config.setAddresses(hubUri, extensionUri, authorizeUri, tokenUri);
 
         return config;
+    }
+
+    private String getPropertyValue(String propertyValue) throws IllegalArgumentException, EncryptionException {
+        final Decoder decoder = Base64.getUrlDecoder();
+        final String value = new String(decoder.decode(propertyValue));
+        return value;
+    }
+
+    private String encodePropertyValue(String value) throws IllegalArgumentException, EncryptionException {
+        // simply obfuscate the values from clear text.
+        Encoder encoder = Base64.getUrlEncoder();
+        String encoded = encoder.encodeToString(value.getBytes());
+        return encoded;
     }
 
     public String getOAuthAuthorizationUrl(final OAuthConfiguration config, final Optional<StateUrlProcessor> state) {
