@@ -83,6 +83,7 @@ jar {
 				exclude 'user-config-options.json'
 				exclude 'quartz.properties'
 				exclude 'email_extension.sh'
+				exclude 'testform.html'
 			}
 		}
 	}
@@ -110,6 +111,7 @@ distributions {
             from('src/main/resources/config-options.json') {into 'config/'}
             from('src/main/resources/user-config-options.json') {into 'config/'}
             from('src/main/resources/quartz.properties') {into 'config/'}
+            from('src/main/resources/web/') {into 'web/'}
         }
     }
 }

@@ -12,8 +12,6 @@
 package com.blackducksoftware.integration.email.extension.server.resources;
 
 import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URL;
 
 import org.apache.commons.lang3.StringUtils;
 import org.restlet.data.Form;
@@ -30,6 +28,9 @@ import com.blackducksoftware.integration.email.notifier.TestEmailNotifier;
 
 public class EmailTestServerResource extends ExtensionServerResource {
 
+    private static final String TEST_FORM_HTML = "testform.html";
+    private static final String FORM_INPUT_EMAIL_ADDRESS = "emailAddress";
+
     @Post
     public void postFormData(final Representation entity) {
         TokenManager tokenManager = getTokenManager();
@@ -37,7 +38,7 @@ public class EmailTestServerResource extends ExtensionServerResource {
             getResponse().setStatus(Status.CLIENT_ERROR_UNAUTHORIZED);
         } else {
             Form form = new Form(entity);
-            final String emailAddress = form.getFirstValue("emailAddress");
+            final String emailAddress = form.getFirstValue(FORM_INPUT_EMAIL_ADDRESS);
             if (StringUtils.isNotBlank(emailAddress)) {
                 TestEmailNotifier testNotifier = (TestEmailNotifier) getContext().getAttributes()
                         .get(EmailExtensionConstants.CONTEXT_ATTRIBUTE_KEY_TEST_NOTIFIER);
@@ -56,14 +57,24 @@ public class EmailTestServerResource extends ExtensionServerResource {
             return null;
         } else {
             try {
-                URL formUrl = this.getClass().getClassLoader().getResource("TestForm.html");
-                File file = new File(formUrl.toURI());
+                File webDir = getWebDirectory();
+                File file = new File(webDir, TEST_FORM_HTML);
                 FileRepresentation htmlForm = new FileRepresentation(file, MediaType.TEXT_HTML);
                 return htmlForm;
-            } catch (URISyntaxException ex) {
+            } catch (Exception ex) {
                 getResponse().setStatus(Status.SERVER_ERROR_INTERNAL);
                 return null;
             }
         }
+    }
+
+    private File getWebDirectory() {
+        File webDir = null;
+        final String appHomeDir = System.getProperty(EmailExtensionConstants.SYSTEM_PROPERTY_KEY_APP_HOME);
+        if (StringUtils.isNotBlank(appHomeDir)) {
+            webDir = new File(appHomeDir, "web");
+        }
+
+        return webDir;
     }
 }
