@@ -14,10 +14,11 @@ package com.blackducksoftware.integration.email.notifier;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.mail.MessagingException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,10 +33,14 @@ import freemarker.template.TemplateException;
 public class TestEmailNotifier extends AbstractNotifier {
     private final Logger logger = LoggerFactory.getLogger(TestEmailNotifier.class);
 
-    public String emailAddress;
+    private String emailAddress;
 
-    public TestEmailNotifier(ExtensionProperties extensionProperties, EmailMessagingService emailMessagingService, DataServicesFactory dataServicesFactory) {
+    private final Pattern emailPattern;
+
+    public TestEmailNotifier(final ExtensionProperties extensionProperties, final EmailMessagingService emailMessagingService,
+            final DataServicesFactory dataServicesFactory) {
         super(extensionProperties, emailMessagingService, dataServicesFactory);
+        emailPattern = Pattern.compile("[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}$");
     }
 
     @Override
@@ -70,7 +75,8 @@ public class TestEmailNotifier extends AbstractNotifier {
     }
 
     private boolean isEmailAddressValid(String emailAddress) {
-        return StringUtils.isNotBlank(emailAddress);
+        Matcher matcher = emailPattern.matcher(emailAddress);
+        return matcher.matches();
     }
 
     public String getEmailAddress() {
