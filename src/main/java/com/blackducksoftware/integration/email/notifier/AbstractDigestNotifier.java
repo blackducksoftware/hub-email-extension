@@ -109,10 +109,6 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
                         if (projectList.isEmpty()) {
                             logger.info("Project Aggregated Data list is empty no email to generate");
                         } else {
-                            // TODO use the data services factory to execute
-                            // this code in the for loop in a separate thread
-                            // sending emails for each user can be done
-                            // independently of one another at this point.
                             // TODO need to filter out on the user's project
                             // filter chain pattern make sense?
                             Collection<ProjectData> projectsDigest = filterUserProjects(projectList, userConfig);
