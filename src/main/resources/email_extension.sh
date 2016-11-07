@@ -7,7 +7,7 @@ DIR=`dirname "$PROGRAM"`
 
 checkIsRunning() {
   if [ -f $DIR/$PID_FILE ]; then
-    local running_pid="$(ps aux | grep bin/java | grep hub-email-extension | grep -v grep | awk '{print $2}')"
+    local running_pid="$(pgrep -f hub-email-extension)"
     local saved_pid="$(<$DIR/$PID_FILE)"
     if [ ! -z $running_pid  ]; then 
         if [ "$saved_pid" -eq "$running_pid" ]; then
@@ -29,7 +29,7 @@ startExtension() {
   echo "Starting Hub Email Extension"
   $DIR/hub-email-extension & 
   sleep 1s
-  local pid="$(ps aux | grep bin/java | grep hub-email-extension | grep -v grep | awk '{print $2}')"
+  local pid="$(pgrep -f hub-email-extension)"
   echo "$pid" > $DIR/$PID_FILE  
   echo "Started extension with PID: $pid"
 }
