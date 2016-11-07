@@ -3,25 +3,32 @@ package com.blackducksoftware.integration.email.model.batch;
 import java.util.List;
 
 public class CategoryData {
-	private final String categoryKey;
-	private final List<ItemData> itemList;
-	private final int itemCount;
+    private final String categoryKey;
 
-	public CategoryData(final String categoryKey, final List<ItemData> itemList, final int itemCount) {
-		this.categoryKey = categoryKey;
-		this.itemList = itemList;
-		this.itemCount = itemCount;
-	}
+    private final List<ItemData> itemList;
 
-	public String getCategoryKey() {
-		return categoryKey;
-	}
+    private final int itemCount;
 
-	public List<ItemData> getItemList() {
-		return itemList;
-	}
+    public CategoryData(final String categoryKey, final List<ItemData> itemList, final int itemCount) {
+        this.categoryKey = categoryKey;
+        this.itemList = itemList;
+        this.itemCount = itemCount;
+    }
 
-	public int getItemCount() {
-		return itemCount;
-	}
+    public String getCategoryKey() {
+        return categoryKey;
+    }
+
+    public List<ItemData> getItemList() {
+        return itemList;
+    }
+
+    public int getItemCount() {
+        return itemCount;
+    }
+
+    @Override
+    public String toString() {
+        return "CategoryData [categoryKey=" + categoryKey + ", itemList=" + itemList + ", itemCount=" + itemCount + "]";
+    }
 }

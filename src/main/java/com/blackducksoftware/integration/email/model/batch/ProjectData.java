@@ -5,32 +5,41 @@ import java.util.Map;
 import com.blackducksoftware.integration.email.batch.processor.NotificationCategoryEnum;
 
 public class ProjectData {
-	private final String projectKey;
-	private final String projectName;
-	private final String projectVersion;
-	private final Map<NotificationCategoryEnum, CategoryData> categoryMap;
+    private final String projectKey;
 
-	public ProjectData(final String projectName, final String projectVersion,
-			final Map<NotificationCategoryEnum, CategoryData> categoryMap) {
-		this.projectName = projectName;
-		this.projectVersion = projectVersion;
-		this.categoryMap = categoryMap;
-		this.projectKey = projectName + projectVersion;
-	}
+    private final String projectName;
 
-	public String getProjectKey() {
-		return projectKey;
-	}
+    private final String projectVersion;
 
-	public String getProjectName() {
-		return projectName;
-	}
+    private final Map<NotificationCategoryEnum, CategoryData> categoryMap;
 
-	public String getProjectVersion() {
-		return projectVersion;
-	}
+    public ProjectData(final String projectName, final String projectVersion,
+            final Map<NotificationCategoryEnum, CategoryData> categoryMap) {
+        this.projectName = projectName;
+        this.projectVersion = projectVersion;
+        this.categoryMap = categoryMap;
+        this.projectKey = projectName + projectVersion;
+    }
 
-	public Map<NotificationCategoryEnum, CategoryData> getCategoryMap() {
-		return categoryMap;
-	}
+    public String getProjectKey() {
+        return projectKey;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public String getProjectVersion() {
+        return projectVersion;
+    }
+
+    public Map<NotificationCategoryEnum, CategoryData> getCategoryMap() {
+        return categoryMap;
+    }
+
+    @Override
+    public String toString() {
+        return "ProjectData [projectKey=" + projectKey + ", projectName=" + projectName + ", projectVersion=" + projectVersion + ", categoryMap=" + categoryMap
+                + "]";
+    }
 }

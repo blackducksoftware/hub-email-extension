@@ -41,6 +41,11 @@ public class PolicyEvent extends NotificationEvent<PolicyContentItem> {
     @Override
     public String generateEventKey() throws URISyntaxException {
         final StringBuilder keyBuilder = new StringBuilder();
+        keyBuilder.append(NotificationEventConstants.EVENT_KEY_ISSUE_TYPE_NAME);
+        keyBuilder.append(NotificationEventConstants.EVENT_KEY_NAME_VALUE_SEPARATOR);
+        keyBuilder.append(NotificationEventConstants.EVENT_KEY_ISSUE_TYPE_VALUE_POLICY);
+        keyBuilder.append(NotificationEventConstants.EVENT_KEY_NAME_VALUE_PAIR_SEPARATOR);
+
         keyBuilder.append(NotificationEventConstants.EVENT_KEY_HUB_PROJECT_VERSION_REL_URL_HASHED_NAME);
         keyBuilder.append(NotificationEventConstants.EVENT_KEY_NAME_VALUE_SEPARATOR);
         keyBuilder.append(hashString(getNotificationContent().getProjectVersion().getRelativeUrl()));

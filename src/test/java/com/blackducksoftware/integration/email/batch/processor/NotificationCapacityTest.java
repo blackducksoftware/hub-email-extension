@@ -17,12 +17,11 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.junit.Before;
+import org.joda.time.DateTime;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -34,6 +33,9 @@ import com.blackducksoftware.integration.hub.api.vulnerabilities.VulnerabilityIt
 import com.blackducksoftware.integration.hub.api.vulnerabilities.VulnerabilityRestService;
 import com.blackducksoftware.integration.hub.dataservices.DataServicesFactory;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.NotificationContentItem;
+import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyOverrideContentItem;
+import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyViolationClearedContentItem;
+import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyViolationContentItem;
 
 public class NotificationCapacityTest {
 
@@ -41,25 +43,7 @@ public class NotificationCapacityTest {
 
     private DataServicesFactory dataServices;
 
-    private List<VulnerabilitySourceQualifiedId> vulnerabilitySourceList;
-
     private ProcessorTestUtil testUtil = new ProcessorTestUtil();
-
-    @Before
-    public void initTest() throws Exception {
-        vulnerabilitySourceList = createVulnerbilityList();
-        // setup rest service mocks
-        List<VulnerabilityItem> vulnerabilityList = testUtil.createVulnerabiltyItemList(vulnerabilitySourceList);
-        dataServices = Mockito.mock(DataServicesFactory.class);
-        final VulnerabilityRestService vulnRestService = Mockito.mock(VulnerabilityRestService.class);
-        final ComponentVersion compVersion = Mockito.mock(ComponentVersion.class);
-        Mockito.when(compVersion.getLink(Mockito.anyString())).thenReturn(ProcessorTestUtil.COMPONENT_VERSION_URL);
-        final ComponentVersionRestService compVerRestService = Mockito.mock(ComponentVersionRestService.class);
-        Mockito.when(compVerRestService.getItem(Mockito.anyString())).thenReturn(compVersion);
-        Mockito.when(vulnRestService.getComponentVersionVulnerabilities(Mockito.anyString())).thenReturn(vulnerabilityList);
-        Mockito.when(dataServices.getComponentVersionRestService()).thenReturn(compVerRestService);
-        Mockito.when(dataServices.getVulnerabilityRestService()).thenReturn(vulnRestService);
-    }
 
     private List<VulnerabilitySourceQualifiedId> createVulnerbilityList() {
         int count = 100;
@@ -73,87 +57,121 @@ public class NotificationCapacityTest {
         return list;
     }
 
-    private SortedSet<NotificationContentItem> createNotificationCancellationList(int policyViolationCount,
-            List<VulnerabilitySourceQualifiedId> vulnerabilitySourceList)
+    private SortedSet<NotificationContentItem> createOverrideNotificationCancellationList(int policyViolationCount)
             throws Exception {
         int policyCount = policyViolationCount;
-        int policyOverrideCount = policyCount / 2;
-        int policyClearedCount = policyCount / 2;
-        int vulnerabilityCount = policyCount;
-        SortedSet<NotificationContentItem> notificationList = new TreeSet<>();
+        SortedSet<NotificationContentItem> notificationSet = new TreeSet<>();
+        DateTime dateTime = DateTime.now();
+        int secondOffset = 0;
+        for (int index = 0; index < policyCount; index++) {
+            String projectName = ProcessorTestUtil.PROJECT_NAME + index;
+            String projectVersion = ProcessorTestUtil.PROJECT_VERSION_NAME + index;
+            String componentName = ProcessorTestUtil.COMPONENT + index;
+            String componentVersion = ProcessorTestUtil.VERSION + index;
+            PolicyViolationContentItem item = testUtil.createPolicyViolation(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion,
+                    componentName,
+                    componentVersion);
+            notificationSet.add(item);
+            secondOffset++;
+        }
 
         for (int index = 0; index < policyCount; index++) {
             String projectName = ProcessorTestUtil.PROJECT_NAME + index;
             String projectVersion = ProcessorTestUtil.PROJECT_VERSION_NAME + index;
             String componentName = ProcessorTestUtil.COMPONENT + index;
             String componentVersion = ProcessorTestUtil.VERSION + index;
-            notificationList.add(testUtil.createPolicyViolation(new Date(), projectName, projectVersion, componentName, componentVersion));
+            PolicyOverrideContentItem item = testUtil.createPolicyOverride(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion,
+                    componentName,
+                    componentVersion);
+            notificationSet.add(item);
+            secondOffset++;
         }
 
-        for (int index = 0; index < policyOverrideCount; index++) {
-            String projectName = ProcessorTestUtil.PROJECT_NAME + index;
-            String projectVersion = ProcessorTestUtil.PROJECT_VERSION_NAME + index;
-            String componentName = ProcessorTestUtil.COMPONENT + index;
-            String componentVersion = ProcessorTestUtil.VERSION + index;
-            notificationList.add(testUtil.createPolicyOverride(new Date(), projectName, projectVersion, componentName, componentVersion));
-        }
-        int offset = policyOverrideCount;
-        for (int index = 0; index < policyClearedCount; index++) {
-            String projectName = ProcessorTestUtil.PROJECT_NAME + offset + index;
-            String projectVersion = ProcessorTestUtil.PROJECT_VERSION_NAME + offset + index;
-            String componentName = ProcessorTestUtil.COMPONENT + offset + index;
-            String componentVersion = ProcessorTestUtil.VERSION + offset + index;
-            notificationList.add(testUtil.createPolicyCleared(new Date(), projectName, projectVersion, componentName, componentVersion));
-        }
-
-        for (int index = 0; index < vulnerabilityCount; index++) {
-            String projectName = ProcessorTestUtil.PROJECT_NAME + index;
-            String projectVersion = ProcessorTestUtil.PROJECT_VERSION_NAME + index;
-            String componentName = ProcessorTestUtil.COMPONENT + index;
-            String componentVersion = ProcessorTestUtil.VERSION + index;
-            notificationList.add(testUtil.createVulnerability(new Date(), projectName, projectVersion,
-                    componentName, componentVersion, vulnerabilitySourceList, vulnerabilitySourceList, vulnerabilitySourceList));
-        }
-
-        return notificationList;
+        return notificationSet;
     }
 
-    private SortedSet<NotificationContentItem> createNotificationCancellationList(List<VulnerabilitySourceQualifiedId> vulnerabilitySourceList)
+    private SortedSet<NotificationContentItem> createClearedNotificationCancellationList(int policyViolationCount)
+            throws Exception {
+        int policyCount = policyViolationCount;
+        SortedSet<NotificationContentItem> notificationSet = new TreeSet<>();
+        DateTime dateTime = DateTime.now();
+        int secondOffset = 0;
+        for (int index = 0; index < policyCount; index++) {
+            String projectName = ProcessorTestUtil.PROJECT_NAME + index;
+            String projectVersion = ProcessorTestUtil.PROJECT_VERSION_NAME + index;
+            String componentName = ProcessorTestUtil.COMPONENT + index;
+            String componentVersion = ProcessorTestUtil.VERSION + index;
+            PolicyViolationContentItem item = testUtil.createPolicyViolation(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion,
+                    componentName,
+                    componentVersion);
+            notificationSet.add(item);
+            secondOffset++;
+        }
+
+        for (int index = 0; index < policyCount; index++) {
+            String projectName = ProcessorTestUtil.PROJECT_NAME + index;
+            String projectVersion = ProcessorTestUtil.PROJECT_VERSION_NAME + index;
+            String componentName = ProcessorTestUtil.COMPONENT + index;
+            String componentVersion = ProcessorTestUtil.VERSION + index;
+            PolicyViolationClearedContentItem item = testUtil.createPolicyCleared(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion,
+                    componentName, componentVersion);
+            notificationSet.add(item);
+            secondOffset++;
+        }
+
+        return notificationSet;
+    }
+
+    private SortedSet<NotificationContentItem> createOverrideNotificationCancellationList()
             throws Exception {
         int policyCount = NOTIFICATION_COUNT;
-        return createNotificationCancellationList(policyCount, vulnerabilitySourceList);
+        return createOverrideNotificationCancellationList(policyCount);
+    }
+
+    private SortedSet<NotificationContentItem> createClearedNotificationCancellationList()
+            throws Exception {
+        int policyCount = NOTIFICATION_COUNT;
+        return createClearedNotificationCancellationList(policyCount);
     }
 
     private SortedSet<NotificationContentItem> createVulnerabilityAddedList(List<VulnerabilitySourceQualifiedId> vulnerabilitySourceList)
             throws Exception {
         int policyCount = NOTIFICATION_COUNT;
-        int policyOverrideCount = policyCount / 2;
-        int policyClearedCount = policyCount / 2;
+        int half = policyCount / 2;
         int vulnerabilityCount = policyCount;
-        SortedSet<NotificationContentItem> notificationList = new TreeSet<>();
-
+        SortedSet<NotificationContentItem> notificationSet = new TreeSet<>();
+        DateTime dateTime = DateTime.now();
+        int secondOffset = 0;
         for (int index = 0; index < policyCount; index++) {
             String projectName = ProcessorTestUtil.PROJECT_NAME + index;
             String projectVersion = ProcessorTestUtil.PROJECT_VERSION_NAME + index;
             String componentName = ProcessorTestUtil.COMPONENT + index;
             String componentVersion = ProcessorTestUtil.VERSION + index;
-            notificationList.add(testUtil.createPolicyViolation(new Date(), projectName, projectVersion, componentName, componentVersion));
+            notificationSet
+                    .add(testUtil.createPolicyViolation(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion, componentName,
+                            componentVersion));
+            secondOffset++;
         }
 
-        for (int index = 0; index < policyOverrideCount; index++) {
+        for (int index = 0; index < half; index++) {
             String projectName = ProcessorTestUtil.PROJECT_NAME + index;
             String projectVersion = ProcessorTestUtil.PROJECT_VERSION_NAME + index;
             String componentName = ProcessorTestUtil.COMPONENT + index;
             String componentVersion = ProcessorTestUtil.VERSION + index;
-            notificationList.add(testUtil.createPolicyOverride(new Date(), projectName, projectVersion, componentName, componentVersion));
+            notificationSet
+                    .add(testUtil.createPolicyOverride(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion, componentName,
+                            componentVersion));
+            secondOffset++;
         }
-        int offset = policyOverrideCount;
-        for (int index = 0; index < policyClearedCount; index++) {
-            String projectName = ProcessorTestUtil.PROJECT_NAME + offset + index;
-            String projectVersion = ProcessorTestUtil.PROJECT_VERSION_NAME + offset + index;
-            String componentName = ProcessorTestUtil.COMPONENT + offset + index;
-            String componentVersion = ProcessorTestUtil.VERSION + offset + index;
-            notificationList.add(testUtil.createPolicyCleared(new Date(), projectName, projectVersion, componentName, componentVersion));
+        for (int index = half - 1; index < policyCount; index++) {
+            String projectName = ProcessorTestUtil.PROJECT_NAME + index;
+            String projectVersion = ProcessorTestUtil.PROJECT_VERSION_NAME + index;
+            String componentName = ProcessorTestUtil.COMPONENT + index;
+            String componentVersion = ProcessorTestUtil.VERSION + index;
+            notificationSet
+                    .add(testUtil.createPolicyCleared(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion, componentName,
+                            componentVersion));
+            secondOffset++;
         }
 
         for (int index = 0; index < vulnerabilityCount; index++) {
@@ -161,21 +179,22 @@ public class NotificationCapacityTest {
             String projectVersion = ProcessorTestUtil.PROJECT_VERSION_NAME + index;
             String componentName = ProcessorTestUtil.COMPONENT + index;
             String componentVersion = ProcessorTestUtil.VERSION + index;
-            notificationList.add(testUtil.createVulnerability(new Date(), projectName, projectVersion,
+            notificationSet.add(testUtil.createVulnerability(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion,
                     componentName, componentVersion, vulnerabilitySourceList, vulnerabilitySourceList, Collections.emptyList()));
+            secondOffset++;
         }
 
-        return notificationList;
+        return notificationSet;
     }
 
     private SortedSet<NotificationContentItem> createComplexNotificationList(List<VulnerabilitySourceQualifiedId> vulnerabilitySourceList)
             throws Exception {
         int policyCount = NOTIFICATION_COUNT;
-        int policyOverrideCount = policyCount / 2;
-        int policyClearedCount = policyCount / 2;
+        int half = policyCount / 2;
         int vulnerabilityCount = policyCount;
-        SortedSet<NotificationContentItem> notificationList = new TreeSet<>();
-
+        SortedSet<NotificationContentItem> notificationSet = new TreeSet<>();
+        DateTime dateTime = DateTime.now();
+        int secondOffset = 0;
         for (int index = 0; index < policyCount; index++) {
             String projectName = ProcessorTestUtil.PROJECT_NAME;
             String projectVersion = ProcessorTestUtil.PROJECT_VERSION_NAME;
@@ -188,10 +207,13 @@ public class NotificationCapacityTest {
                 componentName = ProcessorTestUtil.COMPONENT + index;
                 componentVersion = ProcessorTestUtil.VERSION + index;
             }
-            notificationList.add(testUtil.createPolicyViolation(new Date(), projectName, projectVersion, componentName, componentVersion));
+            notificationSet
+                    .add(testUtil.createPolicyViolation(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion, componentName,
+                            componentVersion));
+            secondOffset++;
         }
 
-        for (int index = 0; index < policyOverrideCount; index++) {
+        for (int index = 0; index < half; index++) {
             String projectName = ProcessorTestUtil.PROJECT_NAME + index;
             String projectVersion = ProcessorTestUtil.PROJECT_VERSION_NAME + index;
             String componentName = ProcessorTestUtil.COMPONENT + index;
@@ -202,22 +224,27 @@ public class NotificationCapacityTest {
                 componentName = ProcessorTestUtil.COMPONENT + index;
                 componentVersion = ProcessorTestUtil.VERSION + index;
             }
-            notificationList.add(testUtil.createPolicyOverride(new Date(), projectName, projectVersion, componentName, componentVersion));
+            notificationSet
+                    .add(testUtil.createPolicyOverride(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion, componentName,
+                            componentVersion));
+            secondOffset++;
         }
-        int offset = policyOverrideCount;
-        for (int index = 0; index < policyClearedCount; index++) {
+        for (int index = half - 1; index < policyCount; index++) {
             String projectName = ProcessorTestUtil.PROJECT_NAME;
             String projectVersion = ProcessorTestUtil.PROJECT_VERSION_NAME;
             String componentName = ProcessorTestUtil.COMPONENT;
             String componentVersion = ProcessorTestUtil.VERSION;
             if (index % 7 == 0) {
-                projectName = ProcessorTestUtil.PROJECT_NAME + offset + index;
-                projectVersion = ProcessorTestUtil.PROJECT_VERSION_NAME + offset + index;
-                componentName = ProcessorTestUtil.COMPONENT + offset + index;
-                componentVersion = ProcessorTestUtil.VERSION + offset + index;
+                projectName = ProcessorTestUtil.PROJECT_NAME + index;
+                projectVersion = ProcessorTestUtil.PROJECT_VERSION_NAME + index;
+                componentName = ProcessorTestUtil.COMPONENT + index;
+                componentVersion = ProcessorTestUtil.VERSION + index;
             }
 
-            notificationList.add(testUtil.createPolicyCleared(new Date(), projectName, projectVersion, componentName, componentVersion));
+            notificationSet
+                    .add(testUtil.createPolicyCleared(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion, componentName,
+                            componentVersion));
+            secondOffset++;
         }
 
         for (int index = 0; index < vulnerabilityCount; index++) {
@@ -242,17 +269,19 @@ public class NotificationCapacityTest {
                 deletedList = vulnerabilitySourceList;
             }
 
-            notificationList.add(testUtil.createVulnerability(new Date(), projectName, projectVersion,
+            notificationSet.add(testUtil.createVulnerability(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion,
                     componentName, componentVersion, addedList, updatedList, deletedList));
+            secondOffset++;
         }
 
-        return notificationList;
+        return notificationSet;
     }
 
     @Test
-    public void testProcessorEventCancellation() throws Exception {
-        System.out.println("Start of Processor event cancellation");
-        SortedSet<NotificationContentItem> notificationSet = createNotificationCancellationList(vulnerabilitySourceList);
+    public void testProcessorEventCancellationviaOverride() throws Exception {
+        System.out.println("Start of Processor event cancellation via override");
+
+        SortedSet<NotificationContentItem> notificationSet = createOverrideNotificationCancellationList();
         NotificationProcessor processor = new NotificationProcessor(dataServices);
         long startTime = System.currentTimeMillis();
         Collection<ProjectData> projectData = processor.process(notificationSet);
@@ -261,12 +290,43 @@ public class NotificationCapacityTest {
         System.out.println("Start Time (ms) = " + startTime);
         System.out.println("End Time (ms)   = " + endTime);
         System.out.println("Diff (ms)       = " + diff);
+        System.out.println("ProjectData     = " + projectData);
+        assertTrue(projectData.isEmpty());
+    }
+
+    @Test
+    public void testProcessorEventCancellationviaCleared() throws Exception {
+        System.out.println("Start of Processor event cancellation via cleared");
+
+        SortedSet<NotificationContentItem> notificationSet = createClearedNotificationCancellationList();
+        NotificationProcessor processor = new NotificationProcessor(dataServices);
+        long startTime = System.currentTimeMillis();
+        Collection<ProjectData> projectData = processor.process(notificationSet);
+        long endTime = System.currentTimeMillis();
+        long diff = endTime - startTime;
+        System.out.println("Start Time (ms) = " + startTime);
+        System.out.println("End Time (ms)   = " + endTime);
+        System.out.println("Diff (ms)       = " + diff);
+        System.out.println("ProjectData     = " + projectData);
         assertTrue(projectData.isEmpty());
     }
 
     @Test
     public void testProcessorVulnerabilities() throws Exception {
         System.out.println("Start of Processor policy cancellation; vulnerabilities added.");
+        List<VulnerabilitySourceQualifiedId> vulnerabilitySourceList = createVulnerbilityList();
+        // setup rest service mocks
+        List<VulnerabilityItem> vulnerabilityList = testUtil.createVulnerabiltyItemList(vulnerabilitySourceList);
+        dataServices = Mockito.mock(DataServicesFactory.class);
+        final VulnerabilityRestService vulnRestService = Mockito.mock(VulnerabilityRestService.class);
+        final ComponentVersion compVersion = Mockito.mock(ComponentVersion.class);
+        Mockito.when(compVersion.getLink(Mockito.anyString())).thenReturn(ProcessorTestUtil.COMPONENT_VERSION_URL);
+        final ComponentVersionRestService compVerRestService = Mockito.mock(ComponentVersionRestService.class);
+        Mockito.when(compVerRestService.getItem(Mockito.anyString())).thenReturn(compVersion);
+        Mockito.when(vulnRestService.getComponentVersionVulnerabilities(Mockito.anyString())).thenReturn(vulnerabilityList);
+        Mockito.when(dataServices.getComponentVersionRestService()).thenReturn(compVerRestService);
+        Mockito.when(dataServices.getVulnerabilityRestService()).thenReturn(vulnRestService);
+
         SortedSet<NotificationContentItem> notificationSet = createVulnerabilityAddedList(vulnerabilitySourceList);
         NotificationProcessor processor = new NotificationProcessor(dataServices);
         long startTime = System.currentTimeMillis();
@@ -276,12 +336,26 @@ public class NotificationCapacityTest {
         System.out.println("Start Time (ms) = " + startTime);
         System.out.println("End Time (ms)   = " + endTime);
         System.out.println("Diff (ms)       = " + diff);
+        System.out.println("ProjectData     = " + projectData);
         assertFalse(projectData.isEmpty());
     }
 
     @Test
     public void testProcessorComplexNotificationSet() throws Exception {
-        System.out.println("Start of Processor policy cancellation; vulnerabilities added.");
+        System.out.println("Start of Complex notification list.");
+        List<VulnerabilitySourceQualifiedId> vulnerabilitySourceList = createVulnerbilityList();
+        // setup rest service mocks
+        List<VulnerabilityItem> vulnerabilityList = testUtil.createVulnerabiltyItemList(vulnerabilitySourceList);
+        dataServices = Mockito.mock(DataServicesFactory.class);
+        final VulnerabilityRestService vulnRestService = Mockito.mock(VulnerabilityRestService.class);
+        final ComponentVersion compVersion = Mockito.mock(ComponentVersion.class);
+        Mockito.when(compVersion.getLink(Mockito.anyString())).thenReturn(ProcessorTestUtil.COMPONENT_VERSION_URL);
+        final ComponentVersionRestService compVerRestService = Mockito.mock(ComponentVersionRestService.class);
+        Mockito.when(compVerRestService.getItem(Mockito.anyString())).thenReturn(compVersion);
+        Mockito.when(vulnRestService.getComponentVersionVulnerabilities(Mockito.anyString())).thenReturn(vulnerabilityList);
+        Mockito.when(dataServices.getComponentVersionRestService()).thenReturn(compVerRestService);
+        Mockito.when(dataServices.getVulnerabilityRestService()).thenReturn(vulnRestService);
+
         SortedSet<NotificationContentItem> notificationSet = createComplexNotificationList(vulnerabilitySourceList);
         NotificationProcessor processor = new NotificationProcessor(dataServices);
         long startTime = System.currentTimeMillis();
@@ -291,6 +365,7 @@ public class NotificationCapacityTest {
         System.out.println("Start Time (ms) = " + startTime);
         System.out.println("End Time (ms)   = " + endTime);
         System.out.println("Diff (ms)       = " + diff);
+        System.out.println("ProjectData     = " + projectData);
         assertFalse(projectData.isEmpty());
     }
 }
