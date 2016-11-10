@@ -36,7 +36,6 @@ import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.notifier.DailyDigestNotifier;
 import com.blackducksoftware.integration.email.notifier.NotifierManager;
 import com.blackducksoftware.integration.email.notifier.TestEmailNotifier;
-import com.blackducksoftware.integration.email.notifier.WeeklyDigestNotifier;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.exception.EncryptionException;
 import com.blackducksoftware.integration.hub.dataservices.DataServicesFactory;
@@ -277,15 +276,9 @@ public class EmailEngine implements IAuthorizedListener {
         final DataServicesFactory dataServicesFactory = new DataServicesFactory(getRestConnection());
         final DailyDigestNotifier dailyNotifier = new DailyDigestNotifier(extensionProperties, emailMessagingService,
                 dataServicesFactory);
-        final WeeklyDigestNotifier weeklyNotifier = new WeeklyDigestNotifier(extensionProperties,
-                notificationDataService, extConfigDataService, emailMessagingService, dataServicesFactory);
 
         final TestEmailNotifier testNotifier = new TestEmailNotifier(extensionProperties, emailMessagingService, dataServicesFactory);
-        // final MonthlyDigestNotifier monthlyNotifier = new
-        // MonthlyDigestNotifier(customerProperties, emailMessagingService);
         manager.attach(dailyNotifier);
-        manager.attach(weeklyNotifier);
-        // manager.attach(monthlyNotifier);
         manager.attach(testNotifier);
         emailExtensionApplication.getContext().getAttributes().put(EmailExtensionConstants.CONTEXT_ATTRIBUTE_KEY_TEST_NOTIFIER, testNotifier);
         return manager;
