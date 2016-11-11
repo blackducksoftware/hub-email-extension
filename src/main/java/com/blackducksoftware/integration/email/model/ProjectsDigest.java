@@ -5,19 +5,20 @@ import java.util.Map;
 
 public class ProjectsDigest {
 
-	private final Map<String, String> totalsMap;
-	private final List<ProjectDigest> projectList;
+    private final Map<String, String> totalsMap;
 
-	public ProjectsDigest(final Map<String, String> totalsMap, final List<ProjectDigest> projectList) {
-		this.totalsMap = totalsMap;
-		this.projectList = projectList;
-	}
+    private final List<ProjectDigest> projectList;
 
-	public Map<String, String> getTotalsMap() {
-		return totalsMap;
-	}
+    public ProjectsDigest(final Map<String, String> totalsMap, final List<ProjectDigest> projectList) {
+        this.totalsMap = totalsMap;
+        this.projectList = projectList;
+    }
 
-	public List<ProjectDigest> getProjectList() {
-		return projectList;
-	}
+    public Map<String, String> getTotalsMap() {
+        return totalsMap;
+    }
+
+    public List<ProjectDigest> getProjectList() {
+        return projectList;
+    }
 }

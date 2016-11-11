@@ -14,34 +14,34 @@ import com.blackducksoftware.integration.hub.dataservices.notification.Notificat
 
 public class WeeklyDigestNotifier extends AbstractDigestNotifier {
 
-	public WeeklyDigestNotifier(final ExtensionProperties customerProperties,
-			final NotificationDataService notificationDataService,
-			final ExtensionConfigDataService extensionConfigDataService,
-			final EmailMessagingService emailMessagingService, final DataServicesFactory dataservicesFactory) {
-		super(customerProperties, emailMessagingService, dataservicesFactory);
-	}
+    public WeeklyDigestNotifier(final ExtensionProperties customerProperties,
+            final NotificationDataService notificationDataService,
+            final ExtensionConfigDataService extensionConfigDataService,
+            final EmailMessagingService emailMessagingService, final DataServicesFactory dataservicesFactory) {
+        super(customerProperties, emailMessagingService, dataservicesFactory);
+    }
 
-	@Override
-	public DateRange createDateRange(final ZoneId zone) {
-		final LocalDateTime currentTime = LocalDateTime.now();
+    @Override
+    public DateRange createDateRange(final ZoneId zone) {
+        final LocalDateTime currentTime = LocalDateTime.now();
 
-		final ZonedDateTime endZonedTime = ZonedDateTime.of(currentTime.getYear(), currentTime.getMonthValue(),
-				currentTime.getDayOfMonth(), 23, 59, 59, 999, zone).minusDays(1);
+        final ZonedDateTime endZonedTime = ZonedDateTime.of(currentTime.getYear(), currentTime.getMonthValue(),
+                currentTime.getDayOfMonth(), 23, 59, 59, 999, zone).minusDays(1);
 
-		final ZonedDateTime startZonedTime = ZonedDateTime
-				.of(currentTime.getYear(), currentTime.getMonthValue(), currentTime.getDayOfMonth(), 0, 0, 0, 0, zone)
-				.minusDays(8);
+        final ZonedDateTime startZonedTime = ZonedDateTime
+                .of(currentTime.getYear(), currentTime.getMonthValue(), currentTime.getDayOfMonth(), 0, 0, 0, 0, zone)
+                .minusDays(8);
 
-		return new DateRange(Date.from(startZonedTime.toInstant()), Date.from(endZonedTime.toInstant()));
-	}
+        return new DateRange(Date.from(startZonedTime.toInstant()), Date.from(endZonedTime.toInstant()));
+    }
 
-	@Override
-	public String getNotifierPropertyKey() {
-		return "weeklyDigest";
-	}
+    @Override
+    public String getNotifierPropertyKey() {
+        return "weeklyDigest";
+    }
 
-	@Override
-	public String getCategory() {
-		return "Weekly";
-	}
+    @Override
+    public String getCategory() {
+        return "Weekly";
+    }
 }

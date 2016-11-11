@@ -20,120 +20,123 @@ import org.apache.commons.lang3.StringUtils;
 import com.blackducksoftware.integration.email.EmailExtensionConstants;
 
 public class MimeMultipartBuilder {
-	private String html;
-	private String text;
-	private final Map<String, String> contentIdsToFilePaths = new HashMap<>();
-	private final List<String> attachmentFilePaths = new ArrayList<>();
+    private String html;
 
-	public MimeMultipart build() throws MessagingException {
-		final MimeMultipart email = new MimeMultipart("mixed");
+    private String text;
 
-		final MimeBodyPart emailBodyPart = buildEmailBodyPart();
-		email.addBodyPart(emailBodyPart);
-		addAttachmentBodyParts(email);
+    private final Map<String, String> contentIdsToFilePaths = new HashMap<>();
 
-		return email;
-	}
+    private final List<String> attachmentFilePaths = new ArrayList<>();
 
-	public void addHtmlContent(final String html) {
-		this.html = html;
-	}
+    public MimeMultipart build() throws MessagingException {
+        final MimeMultipart email = new MimeMultipart("mixed");
 
-	public void addTextContent(final String text) {
-		this.text = text;
-	}
+        final MimeBodyPart emailBodyPart = buildEmailBodyPart();
+        email.addBodyPart(emailBodyPart);
+        addAttachmentBodyParts(email);
 
-	public void addEmbeddedImages(final Map<String, String> contentIdsToFilePaths) {
-		this.contentIdsToFilePaths.putAll(contentIdsToFilePaths);
-	}
+        return email;
+    }
 
-	public void addAttachments(final List<String> attachmentFilePaths) {
-		this.attachmentFilePaths.addAll(attachmentFilePaths);
-	}
+    public void addHtmlContent(final String html) {
+        this.html = html;
+    }
 
-	private MimeBodyPart buildEmailBodyPart() throws MessagingException {
-		final MimeMultipart emailContent = new MimeMultipart("alternative");
+    public void addTextContent(final String text) {
+        this.text = text;
+    }
 
-		// add from low fidelity to high fidelity
-		if (StringUtils.isNotBlank(text)) {
-			final MimeBodyPart textBodyPart = buildTextBodyPart();
-			emailContent.addBodyPart(textBodyPart);
-		}
+    public void addEmbeddedImages(final Map<String, String> contentIdsToFilePaths) {
+        this.contentIdsToFilePaths.putAll(contentIdsToFilePaths);
+    }
 
-		if (StringUtils.isNotBlank(html)) {
-			final MimeBodyPart htmlBodyPart = buildHtmlBodyPart();
-			emailContent.addBodyPart(htmlBodyPart);
-		}
+    public void addAttachments(final List<String> attachmentFilePaths) {
+        this.attachmentFilePaths.addAll(attachmentFilePaths);
+    }
 
-		final MimeBodyPart emailBodyPart = new MimeBodyPart();
-		emailBodyPart.setContent(emailContent);
-		return emailBodyPart;
-	}
+    private MimeBodyPart buildEmailBodyPart() throws MessagingException {
+        final MimeMultipart emailContent = new MimeMultipart("alternative");
 
-	private MimeBodyPart buildHtmlBodyPart() throws MessagingException {
-		final MimeMultipart htmlContent = new MimeMultipart("related");
+        // add from low fidelity to high fidelity
+        if (StringUtils.isNotBlank(text)) {
+            final MimeBodyPart textBodyPart = buildTextBodyPart();
+            emailContent.addBodyPart(textBodyPart);
+        }
 
-		final MimeBodyPart htmlPart = new MimeBodyPart();
-		htmlPart.setContent(html, "text/html; charset=utf-8");
-		htmlContent.addBodyPart(htmlPart);
+        if (StringUtils.isNotBlank(html)) {
+            final MimeBodyPart htmlBodyPart = buildHtmlBodyPart();
+            emailContent.addBodyPart(htmlBodyPart);
+        }
 
-		for (final Map.Entry<String, String> entry : contentIdsToFilePaths.entrySet()) {
-			final MimeBodyPart embeddedImageBodyPart = new MimeBodyPart();
-			String imageFilePath = entry.getValue();
-			File imageFile = new File(imageFilePath);
+        final MimeBodyPart emailBodyPart = new MimeBodyPart();
+        emailBodyPart.setContent(emailContent);
+        return emailBodyPart;
+    }
 
-			if (!imageFile.exists()) {
-				final File imagesDir = findImagesDirectory();
-				if (imagesDir != null) {
-					imageFile = new File(imagesDir, imageFilePath);
-					if (imageFile.exists()) {
-						try {
-							imageFilePath = imageFile.getCanonicalPath();
-						} catch (final IOException e) {
-							// ignore let freemarker fail and log the exception
-							// up the chain when it cannot find the image file
-						}
-					}
-				}
-			}
-			final DataSource fds = new FileDataSource(imageFilePath);
-			embeddedImageBodyPart.setDataHandler(new DataHandler(fds));
-			embeddedImageBodyPart.setHeader("Content-ID", entry.getKey());
-			htmlContent.addBodyPart(embeddedImageBodyPart);
-		}
+    private MimeBodyPart buildHtmlBodyPart() throws MessagingException {
+        final MimeMultipart htmlContent = new MimeMultipart("related");
 
-		final MimeBodyPart htmlBodyPart = new MimeBodyPart();
-		htmlBodyPart.setContent(htmlContent);
-		return htmlBodyPart;
-	}
+        final MimeBodyPart htmlPart = new MimeBodyPart();
+        htmlPart.setContent(html, "text/html; charset=utf-8");
+        htmlContent.addBodyPart(htmlPart);
 
-	private MimeBodyPart buildTextBodyPart() throws MessagingException {
-		final MimeBodyPart textPart = new MimeBodyPart();
-		textPart.setText(text, "utf-8");
-		return textPart;
-	}
+        for (final Map.Entry<String, String> entry : contentIdsToFilePaths.entrySet()) {
+            final MimeBodyPart embeddedImageBodyPart = new MimeBodyPart();
+            String imageFilePath = entry.getValue();
+            File imageFile = new File(imageFilePath);
 
-	private void addAttachmentBodyParts(final MimeMultipart email) throws MessagingException {
-		for (final String filePath : attachmentFilePaths) {
-			final MimeBodyPart attachmentBodyPart = new MimeBodyPart();
-			final DataSource source = new FileDataSource(filePath);
-			attachmentBodyPart.setDataHandler(new DataHandler(source));
-			attachmentBodyPart.setFileName(FilenameUtils.getName(filePath));
-			email.addBodyPart(attachmentBodyPart);
-		}
-	}
+            if (!imageFile.exists()) {
+                final File imagesDir = findImagesDirectory();
+                if (imagesDir != null) {
+                    imageFile = new File(imagesDir, imageFilePath);
+                    if (imageFile.exists()) {
+                        try {
+                            imageFilePath = imageFile.getCanonicalPath();
+                        } catch (final IOException e) {
+                            // ignore let freemarker fail and log the exception
+                            // up the chain when it cannot find the image file
+                        }
+                    }
+                }
+            }
+            final DataSource fds = new FileDataSource(imageFilePath);
+            embeddedImageBodyPart.setDataHandler(new DataHandler(fds));
+            embeddedImageBodyPart.setHeader("Content-ID", entry.getKey());
+            htmlContent.addBodyPart(embeddedImageBodyPart);
+        }
 
-	private File findImagesDirectory() {
-		try {
-			File imagesDir = null;
-			final String appHomeDir = System.getProperty(EmailExtensionConstants.SYSTEM_PROPERTY_KEY_APP_HOME);
-			if (StringUtils.isNotBlank(appHomeDir)) {
-				imagesDir = new File(appHomeDir, "images");
-			}
+        final MimeBodyPart htmlBodyPart = new MimeBodyPart();
+        htmlBodyPart.setContent(htmlContent);
+        return htmlBodyPart;
+    }
 
-			return imagesDir;
-		} catch (final Exception e) {
-			return null;
-		}
-	}
+    private MimeBodyPart buildTextBodyPart() throws MessagingException {
+        final MimeBodyPart textPart = new MimeBodyPart();
+        textPart.setText(text, "utf-8");
+        return textPart;
+    }
+
+    private void addAttachmentBodyParts(final MimeMultipart email) throws MessagingException {
+        for (final String filePath : attachmentFilePaths) {
+            final MimeBodyPart attachmentBodyPart = new MimeBodyPart();
+            final DataSource source = new FileDataSource(filePath);
+            attachmentBodyPart.setDataHandler(new DataHandler(source));
+            attachmentBodyPart.setFileName(FilenameUtils.getName(filePath));
+            email.addBodyPart(attachmentBodyPart);
+        }
+    }
+
+    private File findImagesDirectory() {
+        try {
+            File imagesDir = null;
+            final String appHomeDir = System.getProperty(EmailExtensionConstants.SYSTEM_PROPERTY_KEY_APP_HOME);
+            if (StringUtils.isNotBlank(appHomeDir)) {
+                imagesDir = new File(appHomeDir, "images");
+            }
+
+            return imagesDir;
+        } catch (final Exception e) {
+            return null;
+        }
+    }
 }

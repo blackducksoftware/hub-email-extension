@@ -31,62 +31,62 @@ import freemarker.template.TemplateException;
 
 public class EmailMessagingServiceTest {
 
-	private EmailEngine engine;
+    private EmailEngine engine;
 
-	@Before
-	public void init() throws Exception {
-		final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		final URL propFileUrl = classLoader.getResource("extension.properties");
-		final File file = new File(propFileUrl.toURI());
-		System.setProperty("ext.config.location", file.getCanonicalFile().getParent());
-		engine = new TestEmailEngine();
-		engine.start();
-	}
+    @Before
+    public void init() throws Exception {
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        final URL propFileUrl = classLoader.getResource("extension.properties");
+        final File file = new File(propFileUrl.toURI());
+        System.setProperty("ext.config.location", file.getCanonicalFile().getParent());
+        engine = new TestEmailEngine();
+        engine.start();
+    }
 
-	@Test
-	public void testSendingEmail() throws IOException, MessagingException, TemplateException {
-		final Map<String, Object> model = new HashMap<>();
-		model.put("title", "A Glorious Day");
-		model.put("message", "this should have html and plain text parts");
-		model.put("items", Arrays.asList("apple", "orange", "pear", "banana"));
-		final EmailTarget target = new EmailTarget("testUser@a.domain.com1", "sampleTemplate.ftl", model);
-		engine.getEmailMessagingService().sendEmailMessage(target);
-	}
+    @Test
+    public void testSendingEmail() throws IOException, MessagingException, TemplateException {
+        final Map<String, Object> model = new HashMap<>();
+        model.put("title", "A Glorious Day");
+        model.put("message", "this should have html and plain text parts");
+        model.put("items", Arrays.asList("apple", "orange", "pear", "banana"));
+        final EmailTarget target = new EmailTarget("testUser@a.domain.com1", "sampleTemplate.ftl", model);
+        engine.getEmailMessagingService().sendEmailMessage(target);
+    }
 
-	@Test
-	public void testDigest() throws Exception {
-		final List<ProjectData> projectDataList = createProjectData();
-		final Map<String, Object> model = new HashMap<>();
-		model.put(AbstractDigestNotifier.KEY_START_DATE, String.valueOf(new Date()));
-		model.put(AbstractDigestNotifier.KEY_END_DATE, String.valueOf(new Date()));
-		model.put(AbstractDigestNotifier.KEY_USER_FIRST_NAME, "Hub");
-		model.put(AbstractDigestNotifier.KEY_USER_LAST_NAME, "User");
-		model.put(AbstractDigestNotifier.KEY_TOPICS_LIST, projectDataList);
-		model.put("hub_server_url", "http://hub-a.domain.com1/");
-		model.put(AbstractDigestNotifier.KEY_NOTIFIER_CATEGORY, "Daily");
+    @Test
+    public void testDigest() throws Exception {
+        final List<ProjectData> projectDataList = createProjectData();
+        final Map<String, Object> model = new HashMap<>();
+        model.put(AbstractDigestNotifier.KEY_START_DATE, String.valueOf(new Date()));
+        model.put(AbstractDigestNotifier.KEY_END_DATE, String.valueOf(new Date()));
+        model.put(AbstractDigestNotifier.KEY_USER_FIRST_NAME, "Hub");
+        model.put(AbstractDigestNotifier.KEY_USER_LAST_NAME, "User");
+        model.put(AbstractDigestNotifier.KEY_TOPICS_LIST, projectDataList);
+        model.put("hub_server_url", "http://hub-a.domain.com1/");
+        model.put(AbstractDigestNotifier.KEY_NOTIFIER_CATEGORY, "Daily");
 
-		final EmailTarget target = new EmailTarget("testUser@a.domain.com1", "digest.ftl", model);
-		engine.getEmailMessagingService().sendEmailMessage(target);
-	}
+        final EmailTarget target = new EmailTarget("testUser@a.domain.com1", "digest.ftl", model);
+        engine.getEmailMessagingService().sendEmailMessage(target);
+    }
 
-	private List<ProjectData> createProjectData() {
-		final List<ProjectData> filteredList = new ArrayList<>();
-		for (int index = 0; index < 5; index++) {
-			final List<ItemData> itemList = new ArrayList<>(15);
-			for (int itemIndex = 0; itemIndex < 15; itemIndex++) {
-				final Set<ItemEntry> dataSet = new HashSet<>();
-				dataSet.add(new ItemEntry("KEY_" + itemIndex, "VALUE_" + itemIndex));
-				itemList.add(new ItemData(dataSet));
-			}
-			final String projectName = "PROJECT_NAME";
-			final String projectVersion = "PROJECT_VERSION";
-			final Map<NotificationCategoryEnum, CategoryData> categoryMap = new HashMap<>();
-			for (final NotificationCategoryEnum category : NotificationCategoryEnum.values()) {
-				categoryMap.put(category, new CategoryData(category.name(), itemList, 1));
-			}
-			filteredList.add(new ProjectData(projectName, projectVersion, categoryMap));
-		}
+    private List<ProjectData> createProjectData() {
+        final List<ProjectData> filteredList = new ArrayList<>();
+        for (int index = 0; index < 5; index++) {
+            final List<ItemData> itemList = new ArrayList<>(15);
+            for (int itemIndex = 0; itemIndex < 15; itemIndex++) {
+                final Set<ItemEntry> dataSet = new HashSet<>();
+                dataSet.add(new ItemEntry("KEY_" + itemIndex, "VALUE_" + itemIndex));
+                itemList.add(new ItemData(dataSet));
+            }
+            final String projectName = "PROJECT_NAME";
+            final String projectVersion = "PROJECT_VERSION";
+            final Map<NotificationCategoryEnum, CategoryData> categoryMap = new HashMap<>();
+            for (final NotificationCategoryEnum category : NotificationCategoryEnum.values()) {
+                categoryMap.put(category, new CategoryData(category.name(), itemList, 1));
+            }
+            filteredList.add(new ProjectData(projectName, projectVersion, categoryMap));
+        }
 
-		return filteredList;
-	}
+        return filteredList;
+    }
 }

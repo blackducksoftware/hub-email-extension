@@ -14,66 +14,68 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 public class ExtensionConfigManager {
-	private final Logger logger = LoggerFactory.getLogger(ExtensionConfigManager.class);
+    private final Logger logger = LoggerFactory.getLogger(ExtensionConfigManager.class);
 
-	public static final String CONTEXT_ATTRIBUTE_KEY = "blackduck-extension-config-manager";
-	private static final String CONFIG_LOCATION_PATH = "ext.config.location";
+    public static final String CONTEXT_ATTRIBUTE_KEY = "blackduck-extension-config-manager";
 
-	private final ExtensionInfo extensionInfo;
-	private final JsonParser parser;
+    private static final String CONFIG_LOCATION_PATH = "ext.config.location";
 
-	public ExtensionConfigManager(final ExtensionInfo extensionInfo, final JsonParser parser) {
-		this.extensionInfo = extensionInfo;
-		this.parser = parser;
-	}
+    private final ExtensionInfo extensionInfo;
 
-	public ExtensionInfo getExtensionInfo() {
-		return extensionInfo;
-	}
+    private final JsonParser parser;
 
-	public String loadGlobalConfigJSON() {
-		final String configLocation = System.getProperty(CONFIG_LOCATION_PATH);
-		final File globalConfig = new File(configLocation, "config-options.json");
-		logger.info("Reading extension global configuration descriptor file {}", globalConfig);
-		if (!globalConfig.exists()) {
-			return "";
-		} else {
-			try (FileReader reader = new FileReader(globalConfig)) {
-				final String jsonString = createJSonString(reader);
-				jsonString.replaceAll("null", ""); // remove any null strings
-				logger.debug("global config descriptor: {}", jsonString);
-				return jsonString;
-			} catch (final IOException e) {
-				logger.error("Error reading global config file config-options.json");
-				return "";
-			}
-		}
-	}
+    public ExtensionConfigManager(final ExtensionInfo extensionInfo, final JsonParser parser) {
+        this.extensionInfo = extensionInfo;
+        this.parser = parser;
+    }
 
-	public String loadUserConfigJSON() {
-		final String configLocation = System.getProperty(CONFIG_LOCATION_PATH);
-		final File userConfig = new File(configLocation, "user-config-options.json");
-		logger.info("Reading extension user configuration descriptor file {}", userConfig);
-		if (!userConfig.exists()) {
-			return "";
-		} else {
-			try (FileReader reader = new FileReader(userConfig)) {
-				final String jsonString = createJSonString(reader);
-				logger.debug("user config descriptor: {}", jsonString);
-				return jsonString;
-			} catch (final IOException e) {
-				logger.error("Error reading global config file config-options.json");
-				return "";
-			}
-		}
-	}
+    public ExtensionInfo getExtensionInfo() {
+        return extensionInfo;
+    }
 
-	public String createJSonString(final Reader reader) {
-		final JsonElement element = parser.parse(reader);
-		final JsonArray array = element.getAsJsonArray();
-		final JsonObject object = new JsonObject();
-		object.addProperty("totalCount", array.size());
-		object.add("items", array);
-		return object.toString();
-	}
+    public String loadGlobalConfigJSON() {
+        final String configLocation = System.getProperty(CONFIG_LOCATION_PATH);
+        final File globalConfig = new File(configLocation, "config-options.json");
+        logger.info("Reading extension global configuration descriptor file {}", globalConfig);
+        if (!globalConfig.exists()) {
+            return "";
+        } else {
+            try (FileReader reader = new FileReader(globalConfig)) {
+                final String jsonString = createJSonString(reader);
+                jsonString.replaceAll("null", ""); // remove any null strings
+                logger.debug("global config descriptor: {}", jsonString);
+                return jsonString;
+            } catch (final IOException e) {
+                logger.error("Error reading global config file config-options.json");
+                return "";
+            }
+        }
+    }
+
+    public String loadUserConfigJSON() {
+        final String configLocation = System.getProperty(CONFIG_LOCATION_PATH);
+        final File userConfig = new File(configLocation, "user-config-options.json");
+        logger.info("Reading extension user configuration descriptor file {}", userConfig);
+        if (!userConfig.exists()) {
+            return "";
+        } else {
+            try (FileReader reader = new FileReader(userConfig)) {
+                final String jsonString = createJSonString(reader);
+                logger.debug("user config descriptor: {}", jsonString);
+                return jsonString;
+            } catch (final IOException e) {
+                logger.error("Error reading global config file config-options.json");
+                return "";
+            }
+        }
+    }
+
+    public String createJSonString(final Reader reader) {
+        final JsonElement element = parser.parse(reader);
+        final JsonArray array = element.getAsJsonArray();
+        final JsonObject object = new JsonObject();
+        object.addProperty("totalCount", array.size());
+        object.add("items", array);
+        return object.toString();
+    }
 }

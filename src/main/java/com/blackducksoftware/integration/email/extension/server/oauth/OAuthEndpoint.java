@@ -8,16 +8,16 @@ import org.restlet.engine.security.AuthenticatorHelper;
 
 public class OAuthEndpoint extends Component {
 
-	public OAuthEndpoint(final AbstractOAuthApplication application) {
+    public OAuthEndpoint(final AbstractOAuthApplication application) {
 
-		getDefaultHost().attachDefault(application);
+        getDefaultHost().attachDefault(application);
 
-		getClients().add(Protocol.FILE);
-		getClients().add(Protocol.HTTP);
-		getClients().add(Protocol.HTTPS);
-		// Prevent warnings about unsupported authentication
-		Engine.getInstance().getRegisteredAuthenticators()
-				.add(new AuthenticatorHelper(ChallengeScheme.HTTP_OAUTH_BEARER, true, false) {
-				});
-	}
+        getClients().add(Protocol.FILE);
+        getClients().add(Protocol.HTTP);
+        getClients().add(Protocol.HTTPS);
+        // Prevent warnings about unsupported authentication
+        Engine.getInstance().getRegisteredAuthenticators()
+                .add(new AuthenticatorHelper(ChallengeScheme.HTTP_OAUTH_BEARER, true, false) {
+                });
+    }
 }

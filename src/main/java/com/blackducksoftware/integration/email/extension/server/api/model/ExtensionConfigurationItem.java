@@ -3,56 +3,59 @@ package com.blackducksoftware.integration.email.extension.server.api.model;
 import org.json.JSONObject;
 
 public class ExtensionConfigurationItem {
-	private String extensionUrl;
-	private String hubBaseUrl;
-	private String oAuthAuthorizeUrl;
-	private String oAuthTokenUrl;
+    private String extensionUrl;
 
-	public ExtensionConfigurationItem() {
-	}
+    private String hubBaseUrl;
 
-	public ExtensionConfigurationItem(final JSONObject json) {
-		this(json.getString("extensionUrl"), json.getString("hubBaseUrl"), json.getString("oAuthAuthorizeUrl"),
-				json.getString("oAuthTokenUrl"));
-	}
+    private String oAuthAuthorizeUrl;
 
-	public ExtensionConfigurationItem(final String extensionUrl, final String hubBaseUrl,
-			final String oAuthAuthorizeUrl, final String oAuthTokenUrl) {
-		this.extensionUrl = extensionUrl;
-		this.hubBaseUrl = hubBaseUrl;
-		this.oAuthAuthorizeUrl = oAuthAuthorizeUrl;
-		this.oAuthTokenUrl = oAuthTokenUrl;
-	}
+    private String oAuthTokenUrl;
 
-	public String getExtensionUrl() {
-		return extensionUrl;
-	}
+    public ExtensionConfigurationItem() {
+    }
 
-	public void setExtensionUrl(final String extensionUrl) {
-		this.extensionUrl = extensionUrl;
-	}
+    public ExtensionConfigurationItem(final JSONObject json) {
+        this(json.getString("extensionUrl"), json.getString("hubBaseUrl"), json.getString("oAuthAuthorizeUrl"),
+                json.getString("oAuthTokenUrl"));
+    }
 
-	public String getHubBaseUrl() {
-		return hubBaseUrl;
-	}
+    public ExtensionConfigurationItem(final String extensionUrl, final String hubBaseUrl,
+            final String oAuthAuthorizeUrl, final String oAuthTokenUrl) {
+        this.extensionUrl = extensionUrl;
+        this.hubBaseUrl = hubBaseUrl;
+        this.oAuthAuthorizeUrl = oAuthAuthorizeUrl;
+        this.oAuthTokenUrl = oAuthTokenUrl;
+    }
 
-	public void setHubBaseUrl(final String hubBaseUrl) {
-		this.hubBaseUrl = hubBaseUrl;
-	}
+    public String getExtensionUrl() {
+        return extensionUrl;
+    }
 
-	public String getoAuthAuthorizeUrl() {
-		return oAuthAuthorizeUrl;
-	}
+    public void setExtensionUrl(final String extensionUrl) {
+        this.extensionUrl = extensionUrl;
+    }
 
-	public void setoAuthAuthorizeUrl(final String oAuthAuthorizeUrl) {
-		this.oAuthAuthorizeUrl = oAuthAuthorizeUrl;
-	}
+    public String getHubBaseUrl() {
+        return hubBaseUrl;
+    }
 
-	public String getoAuthTokenUrl() {
-		return oAuthTokenUrl;
-	}
+    public void setHubBaseUrl(final String hubBaseUrl) {
+        this.hubBaseUrl = hubBaseUrl;
+    }
 
-	public void setoAuthTokenUrl(final String oAuthTokenUrl) {
-		this.oAuthTokenUrl = oAuthTokenUrl;
-	}
+    public String getoAuthAuthorizeUrl() {
+        return oAuthAuthorizeUrl;
+    }
+
+    public void setoAuthAuthorizeUrl(final String oAuthAuthorizeUrl) {
+        this.oAuthAuthorizeUrl = oAuthAuthorizeUrl;
+    }
+
+    public String getoAuthTokenUrl() {
+        return oAuthTokenUrl;
+    }
+
+    public void setoAuthTokenUrl(final String oAuthTokenUrl) {
+        this.oAuthTokenUrl = oAuthTokenUrl;
+    }
 }

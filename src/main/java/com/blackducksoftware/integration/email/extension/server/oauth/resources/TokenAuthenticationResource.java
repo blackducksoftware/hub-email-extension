@@ -13,26 +13,26 @@ import com.blackducksoftware.integration.email.extension.server.oauth.TokenManag
 
 public class TokenAuthenticationResource extends OAuthServerResource {
 
-	private final Logger logger = LoggerFactory.getLogger(TokenAuthenticationResource.class);
+    private final Logger logger = LoggerFactory.getLogger(TokenAuthenticationResource.class);
 
-	@Get
-	public void authenticate() {
-		// Use state if provided
-		final String next = getRequest().getResourceRef().getQueryAsForm(true).getFirstValue("next");
-		final StateUrlProcessor state = new StateUrlProcessor(getQueryValue("state"));
+    @Get
+    public void authenticate() {
+        // Use state if provided
+        final String next = getRequest().getResourceRef().getQueryAsForm(true).getFirstValue("next");
+        final StateUrlProcessor state = new StateUrlProcessor(getQueryValue("state"));
 
-		if (state.getReturnUrl().isPresent() && next != null) {
-			state.setReturnUrl(next);
-		} else if (getRequest().getReferrerRef() != null) {
-			state.setReturnUrl(getRequest().getReferrerRef().toString());
-		}
-		final TokenManager tokenManager = getTokenManager();
-		if (tokenManager != null) {
-			logger.info("Authenticate method called to obtain authorization url");
-			final Reference authUrl = new Reference(tokenManager.getOAuthAuthorizationUrl(Optional.of(state)));
-			getResponse().redirectSeeOther(authUrl);
-		} else {
-			getResponse().setStatus(Status.SERVER_ERROR_INTERNAL);
-		}
-	}
+        if (state.getReturnUrl().isPresent() && next != null) {
+            state.setReturnUrl(next);
+        } else if (getRequest().getReferrerRef() != null) {
+            state.setReturnUrl(getRequest().getReferrerRef().toString());
+        }
+        final TokenManager tokenManager = getTokenManager();
+        if (tokenManager != null) {
+            logger.info("Authenticate method called to obtain authorization url");
+            final Reference authUrl = new Reference(tokenManager.getOAuthAuthorizationUrl(Optional.of(state)));
+            getResponse().redirectSeeOther(authUrl);
+        } else {
+            getResponse().setStatus(Status.SERVER_ERROR_INTERNAL);
+        }
+    }
 }

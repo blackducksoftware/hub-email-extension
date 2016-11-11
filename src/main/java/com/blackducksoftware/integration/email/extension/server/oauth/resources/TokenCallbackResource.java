@@ -11,30 +11,30 @@ import com.blackducksoftware.integration.email.extension.server.oauth.TokenManag
 
 public class TokenCallbackResource extends OAuthServerResource {
 
-	@Get
-	public void accept() {
-		final TokenManager tokenManager = getTokenManager();
-		if (tokenManager != null) {
-			final String authorizationCode = getQuery().getFirstValue("code");
-			final String urlState = getQuery().getFirstValue("state");
+    @Get
+    public void accept() {
+        final TokenManager tokenManager = getTokenManager();
+        if (tokenManager != null) {
+            final String authorizationCode = getQuery().getFirstValue("code");
+            final String urlState = getQuery().getFirstValue("state");
 
-			final StateUrlProcessor state = new StateUrlProcessor(urlState);
-			final Reference redirectTo;
+            final StateUrlProcessor state = new StateUrlProcessor(urlState);
+            final Reference redirectTo;
 
-			if (state.getReturnUrl().isPresent()) {
-				redirectTo = new Reference(state.getReturnUrl().get());
-			} else {
-				redirectTo = new Reference(tokenManager.getLocalAddress());
-			}
+            if (state.getReturnUrl().isPresent()) {
+                redirectTo = new Reference(state.getReturnUrl().get());
+            } else {
+                redirectTo = new Reference(tokenManager.getLocalAddress());
+            }
 
-			try {
-				tokenManager.exchangeForToken(authorizationCode);
-				getResponse().redirectSeeOther(redirectTo);
-			} catch (final IOException e) {
-				getResponse().setStatus(Status.SERVER_ERROR_INTERNAL, e);
-			}
-		} else {
-			getResponse().setStatus(Status.SERVER_ERROR_INTERNAL, "No token manager available");
-		}
-	}
+            try {
+                tokenManager.exchangeForToken(authorizationCode);
+                getResponse().redirectSeeOther(redirectTo);
+            } catch (final IOException e) {
+                getResponse().setStatus(Status.SERVER_ERROR_INTERNAL, e);
+            }
+        } else {
+            getResponse().setStatus(Status.SERVER_ERROR_INTERNAL, "No token manager available");
+        }
+    }
 }

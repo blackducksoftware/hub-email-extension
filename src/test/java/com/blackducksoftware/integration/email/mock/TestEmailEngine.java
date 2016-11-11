@@ -24,58 +24,58 @@ import com.blackducksoftware.integration.hub.global.HubServerConfig;
 
 public class TestEmailEngine extends EmailEngine {
 
-	private final Logger logger = LoggerFactory.getLogger(TestEmailEngine.class);
+    private final Logger logger = LoggerFactory.getLogger(TestEmailEngine.class);
 
-	public TestEmailEngine() throws IOException, EncryptionException, URISyntaxException, BDRestException {
-		super();
-	}
+    public TestEmailEngine() throws IOException, EncryptionException, URISyntaxException, BDRestException {
+        super();
+    }
 
-	@Override
-	public TokenManager createTokenManager() {
-		final TokenManager tokenManager = super.createTokenManager();
-		tokenManager.setAddresses("http://localhost:8080", "http://localhost:8100", "", "");
-		return tokenManager;
-	}
+    @Override
+    public TokenManager createTokenManager() {
+        final TokenManager tokenManager = super.createTokenManager();
+        tokenManager.setAddresses("http://localhost:8080", "http://localhost:8100", "", "");
+        return tokenManager;
+    }
 
-	@Override
-	public HubServerConfig createHubConfig(final String hubUri) {
-		HubServerConfig serverConfig = null;
-		try {
-			HubCredentials credentials;
-			credentials = new HubCredentials("user", "password");
+    @Override
+    public HubServerConfig createHubConfig(final String hubUri) {
+        HubServerConfig serverConfig = null;
+        try {
+            HubCredentials credentials;
+            credentials = new HubCredentials("user", "password");
 
-			final HubProxyInfo proxyInfo = new HubProxyInfoBuilder().buildResults().getConstructedObject();
-			serverConfig = new HubServerConfig(new URL("http://localhost"), 120, credentials, proxyInfo);
-		} catch (final EncryptionException | MalformedURLException e) {
-			logger.error("Error creating hub server config", e);
-		}
-		return serverConfig;
-	}
+            final HubProxyInfo proxyInfo = new HubProxyInfoBuilder().buildResults().getConstructedObject();
+            serverConfig = new HubServerConfig(new URL("http://localhost"), 120, credentials, proxyInfo);
+        } catch (final EncryptionException | MalformedURLException e) {
+            logger.error("Error creating hub server config", e);
+        }
+        return serverConfig;
+    }
 
-	@Override
-	public JavaMailWrapper createJavaMailWrapper() {
-		return new MockMailWrapper(false);
-	}
+    @Override
+    public JavaMailWrapper createJavaMailWrapper() {
+        return new MockMailWrapper(false);
+    }
 
-	@Override
-	public NotificationDataService createNotificationDataService() {
-		return new MockNotificationDataService(getRestConnection(), getDataServicesFactory().getGson(),
-				getDataServicesFactory().getJsonParser(), new PolicyNotificationFilter(null));
-	}
+    @Override
+    public NotificationDataService createNotificationDataService() {
+        return new MockNotificationDataService(getRestConnection(), getDataServicesFactory().getGson(),
+                getDataServicesFactory().getJsonParser(), new PolicyNotificationFilter(null));
+    }
 
-	@Override
-	public NotifierManager createNotifierManager() {
-		final NotifierManager manager = new NotifierManager();
-		final DataServicesFactory dataServicesFactory = new DataServicesFactory(getRestConnection());
-		final TestDigestNotifier digestNotifier = new TestDigestNotifier(getExtensionProperties(),
-				getNotificationDataService(), getExtConfigDataService(), getEmailMessagingService(),
-				dataServicesFactory);
-		manager.attach(digestNotifier);
-		return manager;
-	}
+    @Override
+    public NotifierManager createNotifierManager() {
+        final NotifierManager manager = new NotifierManager();
+        final DataServicesFactory dataServicesFactory = new DataServicesFactory(getRestConnection());
+        final TestDigestNotifier digestNotifier = new TestDigestNotifier(getExtensionProperties(),
+                getNotificationDataService(), getExtConfigDataService(), getEmailMessagingService(),
+                dataServicesFactory);
+        manager.attach(digestNotifier);
+        return manager;
+    }
 
-	@Override
-	public void start() {
-		onAuthorized(); // finish initialization
-	}
+    @Override
+    public void start() {
+        onAuthorized(); // finish initialization
+    }
 }

@@ -29,6 +29,7 @@ import com.blackducksoftware.integration.email.notifier.TestEmailNotifier;
 public class EmailTestServerResource extends ExtensionServerResource {
 
     private static final String TEST_FORM_HTML = "testform.html";
+
     private static final String FORM_INPUT_EMAIL_ADDRESS = "emailAddress";
 
     @Post

@@ -2,33 +2,35 @@ package com.blackducksoftware.integration.email.extension.server.api.model;
 
 public class ExtensionDescriptor {
 
-	private final String name;
-	private final String description;
-	private final String extensionId;
+    private final String name;
 
-	private final ResourceMetadata _meta;
+    private final String description;
 
-	public ExtensionDescriptor(final String name, final String description, final String extensionId,
-			final ResourceMetadata meta) {
-		this.name = name;
-		this.description = description;
-		this.extensionId = extensionId;
-		this._meta = meta;
-	}
+    private final String extensionId;
 
-	public String getName() {
-		return name;
-	}
+    private final ResourceMetadata _meta;
 
-	public String getDescription() {
-		return description;
-	}
+    public ExtensionDescriptor(final String name, final String description, final String extensionId,
+            final ResourceMetadata meta) {
+        this.name = name;
+        this.description = description;
+        this.extensionId = extensionId;
+        this._meta = meta;
+    }
 
-	public String getExtensionId() {
-		return extensionId;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public ResourceMetadata get_meta() {
-		return _meta;
-	}
+    public String getDescription() {
+        return description;
+    }
+
+    public String getExtensionId() {
+        return extensionId;
+    }
+
+    public ResourceMetadata get_meta() {
+        return _meta;
+    }
 }

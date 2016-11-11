@@ -11,29 +11,29 @@ import com.blackducksoftware.integration.email.extension.server.oauth.resources.
 
 public abstract class AbstractOAuthApplication extends Application {
 
-	private final TokenManager tokenManager;
+    private final TokenManager tokenManager;
 
-	public AbstractOAuthApplication(final TokenManager tokenManager) {
-		super();
-		this.tokenManager = tokenManager;
-	}
+    public AbstractOAuthApplication(final TokenManager tokenManager) {
+        super();
+        this.tokenManager = tokenManager;
+    }
 
-	@Override
-	public Restlet createInboundRoot() {
-		getContext().getAttributes().put(TokenManager.CONTEXT_ATTRIBUTE_KEY, tokenManager);
-		additionalContextConfig();
-		final Router router = new Router(getContext());
+    @Override
+    public Restlet createInboundRoot() {
+        getContext().getAttributes().put(TokenManager.CONTEXT_ATTRIBUTE_KEY, tokenManager);
+        additionalContextConfig();
+        final Router router = new Router(getContext());
 
-		router.attach(OAuthServerConstants.REGISTRATION, ClientIdRegistrationResource.class);
-		router.attach(OAuthServerConstants.EXTENSION_CONFIG, OAuthConfigurationResource.class);
-		router.attach(OAuthServerConstants.CALLBACK, TokenCallbackResource.class);
-		router.attach(OAuthServerConstants.AUTH_GRANT, TokenAuthenticationResource.class);
-		additionalRouterConfig(router);
-		return router;
-	}
+        router.attach(OAuthServerConstants.REGISTRATION, ClientIdRegistrationResource.class);
+        router.attach(OAuthServerConstants.EXTENSION_CONFIG, OAuthConfigurationResource.class);
+        router.attach(OAuthServerConstants.CALLBACK, TokenCallbackResource.class);
+        router.attach(OAuthServerConstants.AUTH_GRANT, TokenAuthenticationResource.class);
+        additionalRouterConfig(router);
+        return router;
+    }
 
-	public abstract void additionalContextConfig();
+    public abstract void additionalContextConfig();
 
-	public abstract void additionalRouterConfig(final Router router);
+    public abstract void additionalRouterConfig(final Router router);
 
 }

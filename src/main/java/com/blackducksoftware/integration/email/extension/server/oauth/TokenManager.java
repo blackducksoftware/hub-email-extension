@@ -28,176 +28,182 @@ import com.google.gson.JsonPrimitive;
 
 public class TokenManager {
 
-	private final Logger logger = LoggerFactory.getLogger(TokenManager.class);
+    private final Logger logger = LoggerFactory.getLogger(TokenManager.class);
 
-	public final static String CONTEXT_ATTRIBUTE_KEY = "blackduck-oauth-token-manager";
-	public static final String EXTENSIONS_URL_IDENTIFIER = "externalextensions";
+    public final static String CONTEXT_ATTRIBUTE_KEY = "blackduck-oauth-token-manager";
 
-	private final OAuthConfiguration configuration;
-	// Internal storage for tokens - done in-memory as a simple example
-	private Token userToken = null;
-	private Token clientToken = null;
-	private final ExtensionInfo extensionInfo;
-	private final List<IAuthorizedListener> authorizedListeners;
-	private final OAuthConfigManager configManager;
+    public static final String EXTENSIONS_URL_IDENTIFIER = "externalextensions";
 
-	public TokenManager(final ExtensionInfo extensionInfo) {
-		configManager = new OAuthConfigManager();
-		configuration = configManager.load();
-		this.extensionInfo = extensionInfo;
-		authorizedListeners = new ArrayList<>();
-	}
+    private final OAuthConfiguration configuration;
 
-	public OAuthConfiguration getConfiguration() {
-		return configuration;
-	}
+    // Internal storage for tokens - done in-memory as a simple example
+    private Token userToken = null;
 
-	public OAuthConfigManager getConfigManager() {
-		return configManager;
-	}
+    private Token clientToken = null;
 
-	public boolean authenticationRequired() {
-		return userToken == null;
-	}
+    private final ExtensionInfo extensionInfo;
 
-	public String getLocalAddress() {
-		return extensionInfo.getBaseUrl();
-	}
+    private final List<IAuthorizedListener> authorizedListeners;
 
-	public void updateCallbackUrl(final String callbackUrl) {
-		configuration.setCallbackUrl(callbackUrl);
-	}
+    private final OAuthConfigManager configManager;
 
-	public void updateClientId(final String clientId) {
-		configuration.setClientId(clientId);
-	}
+    public TokenManager(final ExtensionInfo extensionInfo) {
+        configManager = new OAuthConfigManager();
+        configuration = configManager.load();
+        this.extensionInfo = extensionInfo;
+        authorizedListeners = new ArrayList<>();
+    }
 
-	public void setAddresses(final String hubUri, final String extensionUri, final String oAuthAuthorizeUri,
-			final String oAuthTokenUri) {
-		logger.info("Received hub addresses hubUri: {}, extensionUri: {}, oAuthAuthorizeUri: {}, oAuthTokenUri: {}",
-				hubUri, extensionUri, oAuthAuthorizeUri, oAuthTokenUri);
-		configuration.setAddresses(hubUri, extensionUri, oAuthAuthorizeUri, oAuthTokenUri);
-	}
+    public OAuthConfiguration getConfiguration() {
+        return configuration;
+    }
 
-	public String getOAuthAuthorizationUrl(final Optional<StateUrlProcessor> state) {
-		return configManager.getOAuthAuthorizationUrl(configuration, state);
-	}
+    public OAuthConfigManager getConfigManager() {
+        return configManager;
+    }
 
-	public boolean addAuthorizedListener(final IAuthorizedListener listener) {
-		return authorizedListeners.add(listener);
-	}
+    public boolean authenticationRequired() {
+        return userToken == null;
+    }
 
-	public boolean removeAuthorizedListener(final IAuthorizedListener listener) {
-		return authorizedListeners.remove(listener);
-	}
+    public String getLocalAddress() {
+        return extensionInfo.getBaseUrl();
+    }
 
-	public void notifyAuthorizedListeners() {
-		for (final IAuthorizedListener listener : authorizedListeners) {
-			listener.onAuthorized();
-		}
-	}
+    public void updateCallbackUrl(final String callbackUrl) {
+        configuration.setCallbackUrl(callbackUrl);
+    }
 
-	public void exchangeForToken(final String authorizationCode) throws IOException {
-		final AccessTokenClientResource tokenResource = configManager.getTokenResource(configuration);
-		try {
-			userToken = tokenResource
-					.requestToken(configManager.getAccessTokenParameters(configuration, authorizationCode));
-			completeAuthorization();
-		} catch (JSONException | OAuthException | URISyntaxException e) {
-			throw new IOException(e);
-		}
-	}
+    public void updateClientId(final String clientId) {
+        configuration.setClientId(clientId);
+    }
 
-	public void refreshToken(final AccessType accessType) throws IOException {
-		if (AccessType.USER.equals(accessType)) {
-			refreshUserAccessToken();
-		} else if (AccessType.CLIENT.equals(accessType)) {
-			refreshClientAccessToken();
-		}
-	}
+    public void setAddresses(final String hubUri, final String extensionUri, final String oAuthAuthorizeUri,
+            final String oAuthTokenUri) {
+        logger.info("Received hub addresses hubUri: {}, extensionUri: {}, oAuthAuthorizeUri: {}, oAuthTokenUri: {}",
+                hubUri, extensionUri, oAuthAuthorizeUri, oAuthTokenUri);
+        configuration.setAddresses(hubUri, extensionUri, oAuthAuthorizeUri, oAuthTokenUri);
+    }
 
-	public TokenClientResource createClientResource(final String reference, final AccessType accessType)
-			throws IOException, URISyntaxException {
-		final Token token = getToken(accessType);
-		return new TokenClientResource(new URI(reference), token);
-	}
+    public String getOAuthAuthorizationUrl(final Optional<StateUrlProcessor> state) {
+        return configManager.getOAuthAuthorizationUrl(configuration, state);
+    }
 
-	public void completeAuthorization() throws IOException, URISyntaxException {
-		// Update authorization status
-		// this is hub specific as far as I can tell to send status for
-		// the authorization.
-		final String hubExtensionUri = getConfiguration().getExtensionUri();
-		final TokenClientResource resource = createClientResource(hubExtensionUri, AccessType.CLIENT);
-		try {
-			updateAuthorized(resource);
-		} catch (final ResourceException e) {
-			if (Status.CLIENT_ERROR_UNAUTHORIZED.equals(e.getStatus())) {
-				// Try one more time, after refreshing tokens
-				refreshToken(AccessType.CLIENT);
-				updateAuthorized(resource);
-			} else {
-				throw e;
-			}
-		}
-		configuration.setUserRefreshToken(userToken.getRefreshToken());
-		configManager.persist(configuration);
-		notifyAuthorizedListeners();
-	}
+    public boolean addAuthorizedListener(final IAuthorizedListener listener) {
+        return authorizedListeners.add(listener);
+    }
 
-	private Token getToken(final AccessType accessType) throws IOException {
-		Token result = null;
+    public boolean removeAuthorizedListener(final IAuthorizedListener listener) {
+        return authorizedListeners.remove(listener);
+    }
 
-		if (AccessType.USER.equals(accessType)) {
-			if (userToken == null) {
-				throw new IllegalStateException("User token not populated");
-			} else {
-				result = userToken;
-			}
-		} else if (AccessType.CLIENT.equals(accessType)) {
-			if (clientToken == null) {
-				refreshClientAccessToken();
-			}
-			result = clientToken;
-		}
+    public void notifyAuthorizedListeners() {
+        for (final IAuthorizedListener listener : authorizedListeners) {
+            listener.onAuthorized();
+        }
+    }
 
-		return result;
-	}
+    public void exchangeForToken(final String authorizationCode) throws IOException {
+        final AccessTokenClientResource tokenResource = configManager.getTokenResource(configuration);
+        try {
+            userToken = tokenResource
+                    .requestToken(configManager.getAccessTokenParameters(configuration, authorizationCode));
+            completeAuthorization();
+        } catch (JSONException | OAuthException | URISyntaxException e) {
+            throw new IOException(e);
+        }
+    }
 
-	private void refreshUserAccessToken() throws IOException {
-		if (StringUtils.isNotBlank(configuration.getUserRefreshToken())) {
-			final AccessTokenClientResource tokenResource = configManager.getTokenResource(configuration);
-			try {
-				userToken = tokenResource
-						.requestToken(configManager.getRefreshTokenParameters(configuration.getUserRefreshToken()));
-				completeAuthorization();
-			} catch (JSONException | OAuthException | URISyntaxException e) {
-				throw new IOException(e);
-			}
-		} else {
-			throw new IllegalStateException("No token present to refresh");
-		}
-	}
+    public void refreshToken(final AccessType accessType) throws IOException {
+        if (AccessType.USER.equals(accessType)) {
+            refreshUserAccessToken();
+        } else if (AccessType.CLIENT.equals(accessType)) {
+            refreshClientAccessToken();
+        }
+    }
 
-	private void refreshClientAccessToken() throws IOException {
-		final AccessTokenClientResource tokenResource = configManager.getTokenResource(configuration);
-		try {
-			clientToken = tokenResource.requestToken(configManager.getClientTokenParameters());
-		} catch (JSONException | OAuthException e) {
-			throw new IOException(e);
-		}
-	}
+    public TokenClientResource createClientResource(final String reference, final AccessType accessType)
+            throws IOException, URISyntaxException {
+        final Token token = getToken(accessType);
+        return new TokenClientResource(new URI(reference), token);
+    }
 
-	private void updateAuthorized(final ClientResource resource) throws IOException {
-		final Representation rep = resource.get();
-		final JsonParser parser = new JsonParser();
-		try {
-			logger.info("Updating hub of authentication status");
-			final JsonElement json = parser.parse(rep.getText());
-			json.getAsJsonObject().add("authenticated", new JsonPrimitive(true));
+    public void completeAuthorization() throws IOException, URISyntaxException {
+        // Update authorization status
+        // this is hub specific as far as I can tell to send status for
+        // the authorization.
+        final String hubExtensionUri = getConfiguration().getExtensionUri();
+        final TokenClientResource resource = createClientResource(hubExtensionUri, AccessType.CLIENT);
+        try {
+            updateAuthorized(resource);
+        } catch (final ResourceException e) {
+            if (Status.CLIENT_ERROR_UNAUTHORIZED.equals(e.getStatus())) {
+                // Try one more time, after refreshing tokens
+                refreshToken(AccessType.CLIENT);
+                updateAuthorized(resource);
+            } else {
+                throw e;
+            }
+        }
+        configuration.setUserRefreshToken(userToken.getRefreshToken());
+        configManager.persist(configuration);
+        notifyAuthorizedListeners();
+    }
 
-			resource.put(new JsonRepresentation(json.toString()));
-		} catch (final IOException e) {
-			throw e;
-		}
-	}
+    private Token getToken(final AccessType accessType) throws IOException {
+        Token result = null;
+
+        if (AccessType.USER.equals(accessType)) {
+            if (userToken == null) {
+                throw new IllegalStateException("User token not populated");
+            } else {
+                result = userToken;
+            }
+        } else if (AccessType.CLIENT.equals(accessType)) {
+            if (clientToken == null) {
+                refreshClientAccessToken();
+            }
+            result = clientToken;
+        }
+
+        return result;
+    }
+
+    private void refreshUserAccessToken() throws IOException {
+        if (StringUtils.isNotBlank(configuration.getUserRefreshToken())) {
+            final AccessTokenClientResource tokenResource = configManager.getTokenResource(configuration);
+            try {
+                userToken = tokenResource
+                        .requestToken(configManager.getRefreshTokenParameters(configuration.getUserRefreshToken()));
+                completeAuthorization();
+            } catch (JSONException | OAuthException | URISyntaxException e) {
+                throw new IOException(e);
+            }
+        } else {
+            throw new IllegalStateException("No token present to refresh");
+        }
+    }
+
+    private void refreshClientAccessToken() throws IOException {
+        final AccessTokenClientResource tokenResource = configManager.getTokenResource(configuration);
+        try {
+            clientToken = tokenResource.requestToken(configManager.getClientTokenParameters());
+        } catch (JSONException | OAuthException e) {
+            throw new IOException(e);
+        }
+    }
+
+    private void updateAuthorized(final ClientResource resource) throws IOException {
+        final Representation rep = resource.get();
+        final JsonParser parser = new JsonParser();
+        try {
+            logger.info("Updating hub of authentication status");
+            final JsonElement json = parser.parse(rep.getText());
+            json.getAsJsonObject().add("authenticated", new JsonPrimitive(true));
+
+            resource.put(new JsonRepresentation(json.toString()));
+        } catch (final IOException e) {
+            throw e;
+        }
+    }
 }

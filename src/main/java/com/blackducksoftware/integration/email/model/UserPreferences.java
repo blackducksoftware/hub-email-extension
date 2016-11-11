@@ -8,36 +8,37 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 
 public class UserPreferences {
-	private final Set<String> globalOptedOutEmailAddresses = new HashSet<>();
-	private final Map<String, Set<String>> emailAddressToOptedOutTemplates = new HashMap<>();
+    private final Set<String> globalOptedOutEmailAddresses = new HashSet<>();
 
-	public UserPreferences(final ExtensionProperties customerProperties) {
-		final Map<String, String> optOutProperties = customerProperties.getOptOutProperties();
-		for (final String templateName : optOutProperties.keySet()) {
-			final String emailAddressesValue = optOutProperties.get(templateName);
-			final String[] emailAddresses = emailAddressesValue.split(",");
-			for (String emailAddress : emailAddresses) {
-				emailAddress = StringUtils.trimToEmpty(emailAddress);
-				if (templateName.contains("all.templates")) {
-					globalOptedOutEmailAddresses.add(emailAddress);
-				} else {
-					if (!emailAddressToOptedOutTemplates.containsKey(emailAddress)) {
-						emailAddressToOptedOutTemplates.put(emailAddress, new HashSet<String>());
-					}
-					emailAddressToOptedOutTemplates.get(emailAddress).add(templateName);
-				}
-			}
-		}
-	}
+    private final Map<String, Set<String>> emailAddressToOptedOutTemplates = new HashMap<>();
 
-	public boolean isOptedOut(final String emailAddress, final String templateName) {
-		if (globalOptedOutEmailAddresses.contains(emailAddress)) {
-			return true;
-		} else if (emailAddressToOptedOutTemplates.containsKey(emailAddress)) {
-			return emailAddressToOptedOutTemplates.get(emailAddress).contains(templateName);
-		}
+    public UserPreferences(final ExtensionProperties customerProperties) {
+        final Map<String, String> optOutProperties = customerProperties.getOptOutProperties();
+        for (final String templateName : optOutProperties.keySet()) {
+            final String emailAddressesValue = optOutProperties.get(templateName);
+            final String[] emailAddresses = emailAddressesValue.split(",");
+            for (String emailAddress : emailAddresses) {
+                emailAddress = StringUtils.trimToEmpty(emailAddress);
+                if (templateName.contains("all.templates")) {
+                    globalOptedOutEmailAddresses.add(emailAddress);
+                } else {
+                    if (!emailAddressToOptedOutTemplates.containsKey(emailAddress)) {
+                        emailAddressToOptedOutTemplates.put(emailAddress, new HashSet<String>());
+                    }
+                    emailAddressToOptedOutTemplates.get(emailAddress).add(templateName);
+                }
+            }
+        }
+    }
 
-		return false;
-	}
+    public boolean isOptedOut(final String emailAddress, final String templateName) {
+        if (globalOptedOutEmailAddresses.contains(emailAddress)) {
+            return true;
+        } else if (emailAddressToOptedOutTemplates.containsKey(emailAddress)) {
+            return emailAddressToOptedOutTemplates.get(emailAddress).contains(templateName);
+        }
+
+        return false;
+    }
 
 }

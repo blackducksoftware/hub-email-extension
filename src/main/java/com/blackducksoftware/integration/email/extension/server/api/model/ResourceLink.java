@@ -2,19 +2,20 @@ package com.blackducksoftware.integration.email.extension.server.api.model;
 
 public class ResourceLink {
 
-	private final String rel;
-	private final String href;
+    private final String rel;
 
-	public ResourceLink(final String rel, final String href) {
-		this.rel = rel;
-		this.href = href;
-	}
+    private final String href;
 
-	public String getRel() {
-		return rel;
-	}
+    public ResourceLink(final String rel, final String href) {
+        this.rel = rel;
+        this.href = href;
+    }
 
-	public String getHref() {
-		return href;
-	}
+    public String getRel() {
+        return rel;
+    }
+
+    public String getHref() {
+        return href;
+    }
 }

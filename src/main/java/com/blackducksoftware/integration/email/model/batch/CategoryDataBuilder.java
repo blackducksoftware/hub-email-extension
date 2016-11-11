@@ -4,52 +4,54 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class CategoryDataBuilder {
-	private String categoryKey;
-	private final List<ItemData> itemList;
-	private int itemCount;
+    private String categoryKey;
 
-	public CategoryDataBuilder() {
-		this.itemList = new LinkedList<>();
-		this.itemCount = 0;
-	}
+    private final List<ItemData> itemList;
 
-	public void addItem(final ItemData item) {
-		itemList.add(item);
-	}
+    private int itemCount;
 
-	public void removeItem(final ItemData item) {
-		itemList.remove(item);
-	}
+    public CategoryDataBuilder() {
+        this.itemList = new LinkedList<>();
+        this.itemCount = 0;
+    }
 
-	public void incrementItemCount(final int itemCount) {
-		this.itemCount += itemCount;
-	}
+    public void addItem(final ItemData item) {
+        itemList.add(item);
+    }
 
-	public void decrementItemCount(final int itemCount) {
-		this.itemCount -= itemCount;
-	}
+    public void removeItem(final ItemData item) {
+        itemList.remove(item);
+    }
 
-	public String getCategoryKey() {
-		return categoryKey;
-	}
+    public void incrementItemCount(final int itemCount) {
+        this.itemCount += itemCount;
+    }
 
-	public void setCategoryKey(final String categoryKey) {
-		this.categoryKey = categoryKey;
-	}
+    public void decrementItemCount(final int itemCount) {
+        this.itemCount -= itemCount;
+    }
 
-	public int getItemCount() {
-		return itemCount;
-	}
+    public String getCategoryKey() {
+        return categoryKey;
+    }
 
-	public void setItemCount(final int itemCount) {
-		this.itemCount = itemCount;
-	}
+    public void setCategoryKey(final String categoryKey) {
+        this.categoryKey = categoryKey;
+    }
 
-	public List<ItemData> getItemList() {
-		return itemList;
-	}
+    public int getItemCount() {
+        return itemCount;
+    }
 
-	public CategoryData build() {
-		return new CategoryData(categoryKey, itemList, itemCount);
-	}
+    public void setItemCount(final int itemCount) {
+        this.itemCount = itemCount;
+    }
+
+    public List<ItemData> getItemList() {
+        return itemList;
+    }
+
+    public CategoryData build() {
+        return new CategoryData(categoryKey, itemList, itemCount);
+    }
 }

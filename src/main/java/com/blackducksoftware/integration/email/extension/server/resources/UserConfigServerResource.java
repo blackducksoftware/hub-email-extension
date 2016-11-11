@@ -7,15 +7,15 @@ import com.blackducksoftware.integration.email.extension.config.ExtensionConfigM
 
 public class UserConfigServerResource extends ExtensionServerResource {
 
-	@Get("json")
-	public String represent() {
-		final ExtensionConfigManager extConfigManager = getExtensionConfigManager();
-		if (extConfigManager != null) {
-			final String jsonConfig = extConfigManager.loadUserConfigJSON();
-			return jsonConfig;
-		} else {
-			getResponse().setStatus(Status.SERVER_ERROR_INTERNAL);
-			return "";
-		}
-	}
+    @Get("json")
+    public String represent() {
+        final ExtensionConfigManager extConfigManager = getExtensionConfigManager();
+        if (extConfigManager != null) {
+            final String jsonConfig = extConfigManager.loadUserConfigJSON();
+            return jsonConfig;
+        } else {
+            getResponse().setStatus(Status.SERVER_ERROR_INTERNAL);
+            return "";
+        }
+    }
 }

@@ -5,7 +5,7 @@ import com.blackducksoftware.integration.email.extension.server.oauth.resources.
 
 public class ExtensionServerResource extends OAuthServerResource {
 
-	public ExtensionConfigManager getExtensionConfigManager() {
-		return (ExtensionConfigManager) getContext().getAttributes().get(ExtensionConfigManager.CONTEXT_ATTRIBUTE_KEY);
-	}
+    public ExtensionConfigManager getExtensionConfigManager() {
+        return (ExtensionConfigManager) getContext().getAttributes().get(ExtensionConfigManager.CONTEXT_ATTRIBUTE_KEY);
+    }
 }

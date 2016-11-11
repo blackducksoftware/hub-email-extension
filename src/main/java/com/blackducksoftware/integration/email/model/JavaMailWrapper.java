@@ -6,29 +6,29 @@ import javax.mail.Session;
 import javax.mail.Transport;
 
 public class JavaMailWrapper {
-	public void sendMessage(final ExtensionProperties customerProperties, final Session session, final Message message)
-			throws MessagingException {
-		if (customerProperties.isAuth()) {
-			sendAuthenticated(customerProperties, message, session);
-		} else {
-			Transport.send(message);
-		}
-	}
+    public void sendMessage(final ExtensionProperties customerProperties, final Session session, final Message message)
+            throws MessagingException {
+        if (customerProperties.isAuth()) {
+            sendAuthenticated(customerProperties, message, session);
+        } else {
+            Transport.send(message);
+        }
+    }
 
-	private void sendAuthenticated(final ExtensionProperties customerProperties, final Message message,
-			final Session session) throws MessagingException {
-		final String host = customerProperties.getHost();
-		final int port = customerProperties.getPort();
-		final String username = customerProperties.getUsername();
-		final String password = customerProperties.getPassword();
+    private void sendAuthenticated(final ExtensionProperties customerProperties, final Message message,
+            final Session session) throws MessagingException {
+        final String host = customerProperties.getHost();
+        final int port = customerProperties.getPort();
+        final String username = customerProperties.getUsername();
+        final String password = customerProperties.getPassword();
 
-		final Transport transport = session.getTransport("smtp");
-		try {
-			transport.connect(host, port, username, password);
-			transport.sendMessage(message, message.getAllRecipients());
-		} finally {
-			transport.close();
-		}
-	}
+        final Transport transport = session.getTransport("smtp");
+        try {
+            transport.connect(host, port, username, password);
+            transport.sendMessage(message, message.getAllRecipients());
+        } finally {
+            transport.close();
+        }
+    }
 
 }

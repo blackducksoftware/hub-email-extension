@@ -8,40 +8,43 @@ import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionCon
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 
 public class MockNotifier extends AbstractNotifier {
-	public static final String CRON_EXPRESSION = "0 0/1 * 1/1 * ? *";
-	public final static long NOTIFIER_INTERVAL = 5000;
-	private final String templateName;
-	private boolean ran = false;
+    public static final String CRON_EXPRESSION = "0 0/1 * 1/1 * ? *";
 
-	public MockNotifier(final ExtensionProperties customerProperties, final NotificationDataService notificationService,
-			final ExtensionConfigDataService extensionConfigDataService,
-			final EmailMessagingService emailMessagingService, final DataServicesFactory dataservicesFactory,
-			final String templateName) {
-		super(customerProperties, emailMessagingService, dataservicesFactory);
-		this.templateName = templateName;
-	}
+    public final static long NOTIFIER_INTERVAL = 5000;
 
-	@Override
-	public String getTemplateName() {
-		return templateName;
-	}
+    private final String templateName;
 
-	@Override
-	public String getNotifierPropertyKey() {
-		return templateName;
-	}
+    private boolean ran = false;
 
-	@Override
-	public void run() {
-		ran = true;
-	}
+    public MockNotifier(final ExtensionProperties customerProperties, final NotificationDataService notificationService,
+            final ExtensionConfigDataService extensionConfigDataService,
+            final EmailMessagingService emailMessagingService, final DataServicesFactory dataservicesFactory,
+            final String templateName) {
+        super(customerProperties, emailMessagingService, dataservicesFactory);
+        this.templateName = templateName;
+    }
 
-	public boolean hasRun() {
-		return ran;
-	}
+    @Override
+    public String getTemplateName() {
+        return templateName;
+    }
 
-	@Override
-	public String getCronExpression() {
-		return CRON_EXPRESSION;
-	}
+    @Override
+    public String getNotifierPropertyKey() {
+        return templateName;
+    }
+
+    @Override
+    public void run() {
+        ran = true;
+    }
+
+    public boolean hasRun() {
+        return ran;
+    }
+
+    @Override
+    public String getCronExpression() {
+        return CRON_EXPRESSION;
+    }
 }

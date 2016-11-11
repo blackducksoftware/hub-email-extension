@@ -4,19 +4,20 @@ import java.util.Date;
 
 public class DateRange {
 
-	private final Date start;
-	private final Date end;
+    private final Date start;
 
-	public DateRange(final Date start, final Date end) {
-		this.start = start;
-		this.end = end;
-	}
+    private final Date end;
 
-	public Date getStart() {
-		return start;
-	}
+    public DateRange(final Date start, final Date end) {
+        this.start = start;
+        this.end = end;
+    }
 
-	public Date getEnd() {
-		return end;
-	}
+    public Date getStart() {
+        return start;
+    }
+
+    public Date getEnd() {
+        return end;
+    }
 }

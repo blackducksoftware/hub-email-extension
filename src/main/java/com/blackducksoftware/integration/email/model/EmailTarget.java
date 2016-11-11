@@ -3,25 +3,27 @@ package com.blackducksoftware.integration.email.model;
 import java.util.Map;
 
 public class EmailTarget {
-	private final String emailAddress;
-	private final String templateName;
-	private final Map<String, Object> model;
+    private final String emailAddress;
 
-	public EmailTarget(final String emailAddress, final String templateName, final Map<String, Object> model) {
-		this.emailAddress = emailAddress;
-		this.templateName = templateName;
-		this.model = model;
-	}
+    private final String templateName;
 
-	public String getEmailAddress() {
-		return emailAddress;
-	}
+    private final Map<String, Object> model;
 
-	public String getTemplateName() {
-		return templateName;
-	}
+    public EmailTarget(final String emailAddress, final String templateName, final Map<String, Object> model) {
+        this.emailAddress = emailAddress;
+        this.templateName = templateName;
+        this.model = model;
+    }
 
-	public Map<String, Object> getModel() {
-		return model;
-	}
+    public String getEmailAddress() {
+        return emailAddress;
+    }
+
+    public String getTemplateName() {
+        return templateName;
+    }
+
+    public Map<String, Object> getModel() {
+        return model;
+    }
 }

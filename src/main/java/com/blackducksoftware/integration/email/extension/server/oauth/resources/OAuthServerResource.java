@@ -6,7 +6,7 @@ import com.blackducksoftware.integration.email.extension.server.oauth.TokenManag
 
 public class OAuthServerResource extends ServerResource {
 
-	public TokenManager getTokenManager() {
-		return (TokenManager) getContext().getAttributes().get(TokenManager.CONTEXT_ATTRIBUTE_KEY);
-	}
+    public TokenManager getTokenManager() {
+        return (TokenManager) getContext().getAttributes().get(TokenManager.CONTEXT_ATTRIBUTE_KEY);
+    }
 }

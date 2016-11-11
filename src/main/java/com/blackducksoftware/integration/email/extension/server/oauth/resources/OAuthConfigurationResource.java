@@ -9,16 +9,16 @@ import com.blackducksoftware.integration.email.extension.server.oauth.TokenManag
 
 public class OAuthConfigurationResource extends OAuthServerResource {
 
-	@Post
-	public void configure(final JsonRepresentation request) {
-		final ExtensionConfigurationItem item = new ExtensionConfigurationItem(request.getJsonObject());
-		final TokenManager tokenManager = getTokenManager();
+    @Post
+    public void configure(final JsonRepresentation request) {
+        final ExtensionConfigurationItem item = new ExtensionConfigurationItem(request.getJsonObject());
+        final TokenManager tokenManager = getTokenManager();
 
-		if (tokenManager != null) {
-			tokenManager.setAddresses(item.getHubBaseUrl(), item.getExtensionUrl(), item.getoAuthAuthorizeUrl(),
-					item.getoAuthTokenUrl());
-		} else {
-			getResponse().setStatus(Status.SERVER_ERROR_INTERNAL);
-		}
-	}
+        if (tokenManager != null) {
+            tokenManager.setAddresses(item.getHubBaseUrl(), item.getExtensionUrl(), item.getoAuthAuthorizeUrl(),
+                    item.getoAuthTokenUrl());
+        } else {
+            getResponse().setStatus(Status.SERVER_ERROR_INTERNAL);
+        }
+    }
 }
