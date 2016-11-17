@@ -11,7 +11,7 @@
                 {"name": "false", "title": "Opt Out" }
             ],
             "defaultValue": [
-                "false"
+                "true"
             ]
         },
         {
