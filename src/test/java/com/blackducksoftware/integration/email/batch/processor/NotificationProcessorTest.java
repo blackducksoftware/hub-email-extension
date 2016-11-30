@@ -38,7 +38,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.joda.time.DateTime;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -47,40 +46,36 @@ import com.blackducksoftware.integration.email.model.batch.ItemData;
 import com.blackducksoftware.integration.email.model.batch.ItemEntry;
 import com.blackducksoftware.integration.email.model.batch.ProjectData;
 import com.blackducksoftware.integration.hub.api.component.version.ComponentVersion;
-import com.blackducksoftware.integration.hub.api.component.version.ComponentVersionRestService;
 import com.blackducksoftware.integration.hub.api.notification.VulnerabilitySourceQualifiedId;
-import com.blackducksoftware.integration.hub.api.vulnerabilities.VulnerabilityItem;
-import com.blackducksoftware.integration.hub.api.vulnerabilities.VulnerabilityRestService;
-import com.blackducksoftware.integration.hub.dataservices.DataServicesFactory;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.NotificationContentItem;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyOverrideContentItem;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyViolationClearedContentItem;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyViolationContentItem;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.VulnerabilityContentItem;
+import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityItem;
+import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityRequestService;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.NotificationContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyOverrideContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationClearedContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.VulnerabilityContentItem;
+import com.blackducksoftware.integration.hub.service.HubRequestService;
 
 public class NotificationProcessorTest {
 
-    private NotificationProcessor processor;
+    private final ProcessorTestUtil testUtil = new ProcessorTestUtil();
 
-    private DataServicesFactory dataServices;
-
-    private ProcessorTestUtil testUtil = new ProcessorTestUtil();
-
-    @Before
-    public void initTest() throws Exception {
-        dataServices = Mockito.mock(DataServicesFactory.class);
-        processor = new NotificationProcessor(dataServices);
+    public NotificationProcessor createMockedNotificationProcessor() {
+        final VulnerabilityRequestService vulnerabilityRequestService = Mockito.mock(VulnerabilityRequestService.class);
+        final HubRequestService hubRequestService = Mockito.mock(HubRequestService.class);
+        final NotificationProcessor processor = new NotificationProcessor(hubRequestService, vulnerabilityRequestService);
+        return processor;
     }
 
-    public void initVulnerabilityTest(List<VulnerabilityItem> vulnerabilityList) throws Exception {
-        final VulnerabilityRestService vulnRestService = Mockito.mock(VulnerabilityRestService.class);
+    public NotificationProcessor createMockedNotificationProcessor(List<VulnerabilityItem> vulnerabilityList) throws Exception {
         final ComponentVersion compVersion = Mockito.mock(ComponentVersion.class);
         Mockito.when(compVersion.getLink(Mockito.anyString())).thenReturn(ProcessorTestUtil.COMPONENT_VERSION_URL);
-        final ComponentVersionRestService compVerRestService = Mockito.mock(ComponentVersionRestService.class);
-        Mockito.when(compVerRestService.getItem(Mockito.anyString())).thenReturn(compVersion);
-        Mockito.when(vulnRestService.getComponentVersionVulnerabilities(Mockito.anyString())).thenReturn(vulnerabilityList);
-        Mockito.when(dataServices.getComponentVersionRestService()).thenReturn(compVerRestService);
-        Mockito.when(dataServices.getVulnerabilityRestService()).thenReturn(vulnRestService);
+        final VulnerabilityRequestService vulnerabilityRequestService = Mockito.mock(VulnerabilityRequestService.class);
+        final HubRequestService hubRequestService = Mockito.mock(HubRequestService.class);
+        Mockito.when(hubRequestService.getItem(Mockito.anyString(), Mockito.eq(ComponentVersion.class))).thenReturn(compVersion);
+        Mockito.when(vulnerabilityRequestService.getComponentVersionVulnerabilities(Mockito.anyString())).thenReturn(vulnerabilityList);
+        final NotificationProcessor processor = new NotificationProcessor(hubRequestService, vulnerabilityRequestService);
+        return processor;
     }
 
     private void assertPolicyDataValid(final Collection<ProjectData> projectList, NotificationCategoryEnum categoryType) {
@@ -90,9 +85,9 @@ public class NotificationProcessorTest {
 
             for (final CategoryData category : project.getCategoryMap().values()) {
                 assertEquals(categoryType.name(), category.getCategoryKey());
-                int count = category.getItemList().size();
+                final int count = category.getItemList().size();
                 for (int index = 0; index < count; index++) {
-                    ItemData itemData = category.getItemList().get(index);
+                    final ItemData itemData = category.getItemList().get(index);
                     final Set<ItemEntry> dataSet = itemData.getDataSet();
                     final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(), ProcessorTestUtil.COMPONENT);
                     assertTrue(dataSet.contains(componentKey));
@@ -113,7 +108,7 @@ public class NotificationProcessorTest {
         notifications.add(
                 testUtil.createPolicyViolation(new Date(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT,
                         ProcessorTestUtil.VERSION));
-        final Collection<ProjectData> projectList = processor.process(notifications);
+        final Collection<ProjectData> projectList = createMockedNotificationProcessor().process(notifications);
 
         assertPolicyDataValid(projectList, NotificationCategoryEnum.POLICY_VIOLATION);
     }
@@ -124,7 +119,7 @@ public class NotificationProcessorTest {
         notifications.add(
                 testUtil.createPolicyOverride(new Date(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT,
                         ProcessorTestUtil.VERSION));
-        final Collection<ProjectData> projectList = processor.process(notifications);
+        final Collection<ProjectData> projectList = createMockedNotificationProcessor().process(notifications);
         assertFalse(projectList.isEmpty());
         assertPolicyDataValid(projectList, NotificationCategoryEnum.POLICY_VIOLATION_OVERRIDE);
     }
@@ -135,7 +130,7 @@ public class NotificationProcessorTest {
         notifications.add(
                 testUtil.createPolicyCleared(new Date(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT,
                         ProcessorTestUtil.VERSION));
-        final Collection<ProjectData> projectList = processor.process(notifications);
+        final Collection<ProjectData> projectList = createMockedNotificationProcessor().process(notifications);
         assertFalse(projectList.isEmpty());
         assertPolicyDataValid(projectList, NotificationCategoryEnum.POLICY_VIOLATION_CLEARED);
     }
@@ -151,7 +146,7 @@ public class NotificationProcessorTest {
         final PolicyOverrideContentItem policyOverride = testUtil.createPolicyOverride(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, ProcessorTestUtil.VERSION);
         notifications.add(policyOverride);
-        final Collection<ProjectData> projectList = processor.process(notifications);
+        final Collection<ProjectData> projectList = createMockedNotificationProcessor().process(notifications);
         assertTrue(projectList.isEmpty());
     }
 
@@ -166,7 +161,7 @@ public class NotificationProcessorTest {
         final PolicyViolationClearedContentItem policyCleared = testUtil.createPolicyCleared(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, ProcessorTestUtil.VERSION);
         notifications.add(policyCleared);
-        final Collection<ProjectData> projectList = processor.process(notifications);
+        final Collection<ProjectData> projectList = createMockedNotificationProcessor().process(notifications);
         assertTrue(projectList.isEmpty());
     }
 
@@ -186,7 +181,7 @@ public class NotificationProcessorTest {
                 ProcessorTestUtil.COMPONENT,
                 ProcessorTestUtil.VERSION);
         notifications.add(policyViolation);
-        final Collection<ProjectData> projectList = processor.process(notifications);
+        final Collection<ProjectData> projectList = createMockedNotificationProcessor().process(notifications);
         assertPolicyDataValid(projectList, NotificationCategoryEnum.POLICY_VIOLATION);
     }
 
@@ -206,7 +201,7 @@ public class NotificationProcessorTest {
                 ProcessorTestUtil.COMPONENT,
                 ProcessorTestUtil.VERSION);
         notifications.add(policyViolation);
-        final Collection<ProjectData> projectList = processor.process(notifications);
+        final Collection<ProjectData> projectList = createMockedNotificationProcessor().process(notifications);
         assertPolicyDataValid(projectList, NotificationCategoryEnum.POLICY_VIOLATION);
     }
 
@@ -235,7 +230,7 @@ public class NotificationProcessorTest {
         final PolicyViolationClearedContentItem policyCleared = testUtil.createPolicyCleared(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, ProcessorTestUtil.VERSION);
         notifications.add(policyCleared);
-        final Collection<ProjectData> projectList = processor.process(notifications);
+        final Collection<ProjectData> projectList = createMockedNotificationProcessor().process(notifications);
         assertPolicyDataValid(projectList, NotificationCategoryEnum.POLICY_VIOLATION);
     }
 
@@ -246,14 +241,13 @@ public class NotificationProcessorTest {
         vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
         vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
         vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID));
-        List<VulnerabilityItem> vulnerabilityList = testUtil.createVulnerabiltyItemList(vulnerabilities);
-        initVulnerabilityTest(vulnerabilityList);
+        final List<VulnerabilityItem> vulnerabilityList = testUtil.createVulnerabiltyItemList(vulnerabilities);
         final DateTime dateTime = new DateTime();
         final VulnerabilityContentItem vulnerability = testUtil.createVulnerability(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, ProcessorTestUtil.VERSION, vulnerabilities, Collections.emptyList(),
                 Collections.emptyList());
         notifications.add(vulnerability);
-        final Collection<ProjectData> projectList = processor.process(notifications);
+        final Collection<ProjectData> projectList = createMockedNotificationProcessor(vulnerabilityList).process(notifications);
 
         for (final ProjectData projectData : projectList) {
             assertEquals(3, projectData.getCategoryMap().size());
@@ -277,15 +271,14 @@ public class NotificationProcessorTest {
         vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
         vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
         vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID));
-        List<VulnerabilityItem> vulnerabilityList = testUtil.createVulnerabiltyItemList(vulnerabilities);
-        initVulnerabilityTest(vulnerabilityList);
+        final List<VulnerabilityItem> vulnerabilityList = testUtil.createVulnerabiltyItemList(vulnerabilities);
 
         final DateTime dateTime = new DateTime();
         final VulnerabilityContentItem vulnerability = testUtil.createVulnerability(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, ProcessorTestUtil.VERSION, Collections.emptyList(), vulnerabilities,
                 Collections.emptyList());
         notifications.add(vulnerability);
-        final Collection<ProjectData> projectList = processor.process(notifications);
+        final Collection<ProjectData> projectList = createMockedNotificationProcessor(vulnerabilityList).process(notifications);
 
         for (final ProjectData projectData : projectList) {
             assertEquals(3, projectData.getCategoryMap().size());
@@ -316,7 +309,7 @@ public class NotificationProcessorTest {
                 Collections.emptyList(),
                 vulnerabilities);
         notifications.add(vulnerability);
-        final Collection<ProjectData> projectList = processor.process(notifications);
+        final Collection<ProjectData> projectList = createMockedNotificationProcessor().process(notifications);
         assertTrue(projectList.isEmpty());
     }
 
@@ -333,7 +326,7 @@ public class NotificationProcessorTest {
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, ProcessorTestUtil.VERSION, vulnerabilities, Collections.emptyList(),
                 vulnerabilities);
         notifications.add(vulnerability);
-        final Collection<ProjectData> projectList = processor.process(notifications);
+        final Collection<ProjectData> projectList = createMockedNotificationProcessor().process(notifications);
         assertTrue(projectList.isEmpty());
     }
 
@@ -345,8 +338,7 @@ public class NotificationProcessorTest {
         final List<VulnerabilitySourceQualifiedId> resultVulnList = new ArrayList<>(2);
         resultVulnList.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
         resultVulnList.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
-        List<VulnerabilityItem> vulnerabilityList = testUtil.createVulnerabiltyItemList(resultVulnList);
-        initVulnerabilityTest(vulnerabilityList);
+        final List<VulnerabilityItem> vulnerabilityList = testUtil.createVulnerabiltyItemList(resultVulnList);
 
         final List<VulnerabilitySourceQualifiedId> added = new ArrayList<>(3);
         added.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
@@ -369,7 +361,7 @@ public class NotificationProcessorTest {
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, ProcessorTestUtil.VERSION, added, updated, deleted);
         notifications.add(vulnerability);
 
-        final Collection<ProjectData> projectList = processor.process(notifications);
+        final Collection<ProjectData> projectList = createMockedNotificationProcessor(vulnerabilityList).process(notifications);
         assertFalse(projectList.isEmpty());
         final Map<String, Integer> categoryItemMap = new HashMap<>();
         for (final ProjectData projectData : projectList) {
@@ -398,8 +390,7 @@ public class NotificationProcessorTest {
         final List<VulnerabilitySourceQualifiedId> resultVulnList = new ArrayList<>(2);
         resultVulnList.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
         resultVulnList.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
-        List<VulnerabilityItem> vulnerabilityList = testUtil.createVulnerabiltyItemList(resultVulnList);
-        initVulnerabilityTest(vulnerabilityList);
+        final List<VulnerabilityItem> vulnerabilityList = testUtil.createVulnerabiltyItemList(resultVulnList);
 
         final List<VulnerabilitySourceQualifiedId> added1 = new LinkedList<>();
         added1.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
@@ -443,7 +434,7 @@ public class NotificationProcessorTest {
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, ProcessorTestUtil.VERSION, added2, updated2, deleted2);
         notifications.add(vulnerability2);
 
-        final Collection<ProjectData> projectList = processor.process(notifications);
+        final Collection<ProjectData> projectList = createMockedNotificationProcessor(vulnerabilityList).process(notifications);
         assertFalse(projectList.isEmpty());
         final Map<String, Integer> categoryItemMap = new HashMap<>();
         for (final ProjectData projectData : projectList) {
@@ -516,7 +507,7 @@ public class NotificationProcessorTest {
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, ProcessorTestUtil.VERSION, added, updated, deleted);
         notifications.add(vulnerability);
 
-        final Collection<ProjectData> projectList = processor.process(notifications);
+        final Collection<ProjectData> projectList = createMockedNotificationProcessor().process(notifications);
         assertFalse(projectList.isEmpty());
         final Map<String, Integer> categoryItemMap = new HashMap<>();
         for (final ProjectData projectData : projectList) {
@@ -577,7 +568,7 @@ public class NotificationProcessorTest {
                 ProcessorTestUtil.VERSION2);
         notifications.add(policyCleared);
 
-        final Collection<ProjectData> projectList = processor.process(notifications);
+        final Collection<ProjectData> projectList = createMockedNotificationProcessor().process(notifications);
         assertFalse(projectList.isEmpty());
         final Map<String, Integer> categoryItemMap = new HashMap<>();
         for (final ProjectData projectData : projectList) {

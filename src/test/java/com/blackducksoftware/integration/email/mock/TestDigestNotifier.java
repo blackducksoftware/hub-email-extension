@@ -33,10 +33,11 @@ import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.notifier.AbstractDigestNotifier;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.hub.dataservices.DataServicesFactory;
-import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
-import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
+import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityRequestService;
+import com.blackducksoftware.integration.hub.dataservice.extension.ExtensionConfigDataService;
+import com.blackducksoftware.integration.hub.dataservice.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
+import com.blackducksoftware.integration.hub.service.HubRequestService;
 
 public class TestDigestNotifier extends AbstractDigestNotifier {
     private final Logger logger = LoggerFactory.getLogger(TestDigestNotifier.class);
@@ -45,11 +46,11 @@ public class TestDigestNotifier extends AbstractDigestNotifier {
 
     private final String initialStartDate;
 
-    public TestDigestNotifier(final ExtensionProperties customerProperties,
-            final NotificationDataService notificationDataService,
-            final ExtensionConfigDataService extensionConfigDataService,
-            final EmailMessagingService emailMessagingService, final DataServicesFactory dataservicesFactory) {
-        super(customerProperties, emailMessagingService, dataservicesFactory);
+    public TestDigestNotifier(final ExtensionProperties extensionProperties,
+            final EmailMessagingService emailMessagingService, HubRequestService hubRequestService, VulnerabilityRequestService vulnerabilityRequestService,
+            ExtensionConfigDataService extensionConfigDataService,
+            NotificationDataService notificationDataService) {
+        super(extensionProperties, emailMessagingService, hubRequestService, vulnerabilityRequestService, extensionConfigDataService, notificationDataService);
         lastRunPath = getExtensionProperties().getNotifierVariableProperties()
                 .get(getNotifierPropertyKey() + ".lastrun.file");
         initialStartDate = getExtensionProperties().getNotifierVariableProperties()

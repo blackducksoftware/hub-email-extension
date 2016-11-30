@@ -38,23 +38,24 @@ import com.blackducksoftware.integration.email.model.batch.CategoryDataBuilder;
 import com.blackducksoftware.integration.email.model.batch.ItemData;
 import com.blackducksoftware.integration.email.model.batch.ProjectData;
 import com.blackducksoftware.integration.email.model.batch.ProjectDataBuilder;
-import com.blackducksoftware.integration.hub.dataservices.DataServicesFactory;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.NotificationContentItem;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyOverrideContentItem;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyViolationClearedContentItem;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyViolationContentItem;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.VulnerabilityContentItem;
+import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityRequestService;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.NotificationContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyOverrideContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationClearedContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.VulnerabilityContentItem;
+import com.blackducksoftware.integration.hub.service.HubRequestService;
 
 public class NotificationProcessor {
     private final Logger logger = LoggerFactory.getLogger(NotificationProcessor.class);
 
     private final Map<Class<?>, NotificationSubProcessor<?>> processorMap = new HashMap<>();
 
-    private List<SubProcessorCache<?>> cacheList = new ArrayList<>();
+    private final List<SubProcessorCache<?>> cacheList = new ArrayList<>();
 
-    public NotificationProcessor(final DataServicesFactory dataServicesFactory) {
-        final SubProcessorCache<PolicyEvent> policyCache = new SubProcessorCache<PolicyEvent>();
-        final VulnerabilityCache vulnerabilityCache = new VulnerabilityCache(dataServicesFactory);
+    public NotificationProcessor(HubRequestService hubRequestService, VulnerabilityRequestService vulnerabilityRequestService) {
+        final SubProcessorCache<PolicyEvent> policyCache = new SubProcessorCache<>();
+        final VulnerabilityCache vulnerabilityCache = new VulnerabilityCache(hubRequestService, vulnerabilityRequestService);
         cacheList.add(policyCache);
         cacheList.add(vulnerabilityCache);
         processorMap.put(PolicyViolationContentItem.class, new PolicyViolationProcessor(policyCache));

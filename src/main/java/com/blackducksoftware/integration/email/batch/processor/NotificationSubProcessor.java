@@ -23,7 +23,7 @@ package com.blackducksoftware.integration.email.batch.processor;
 
 import java.util.Collection;
 
-import com.blackducksoftware.integration.hub.dataservices.notification.items.NotificationContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.NotificationContentItem;
 
 public abstract class NotificationSubProcessor<T extends NotificationEvent<?>> {
 

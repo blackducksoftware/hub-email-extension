@@ -27,8 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.NotificationContentItem;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyViolationContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.NotificationContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationContentItem;
 
 public class PolicyViolationProcessor extends NotificationSubProcessor<PolicyEvent> {
     private final Logger logger = LoggerFactory.getLogger(PolicyViolationProcessor.class);
@@ -43,9 +43,10 @@ public class PolicyViolationProcessor extends NotificationSubProcessor<PolicyEve
             final PolicyViolationContentItem policyViolationContentItem = (PolicyViolationContentItem) notification;
             for (final PolicyRule rule : policyViolationContentItem.getPolicyRuleList()) {
                 try {
-                    PolicyEvent event = new PolicyEvent(ProcessingAction.ADD, NotificationCategoryEnum.POLICY_VIOLATION, policyViolationContentItem, rule);
+                    final PolicyEvent event = new PolicyEvent(ProcessingAction.ADD, NotificationCategoryEnum.POLICY_VIOLATION, policyViolationContentItem,
+                            rule);
                     getCache().addEvent(event);
-                } catch (URISyntaxException e) {
+                } catch (final URISyntaxException e) {
                     logger.error("Error processing policy violation item {} ", policyViolationContentItem, e);
                 }
             }

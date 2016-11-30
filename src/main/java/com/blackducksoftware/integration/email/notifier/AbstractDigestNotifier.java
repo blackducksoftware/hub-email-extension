@@ -40,7 +40,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.EmailExtensionConstants;
-import com.blackducksoftware.integration.email.ExtensionLogger;
 import com.blackducksoftware.integration.email.batch.processor.NotificationCategoryEnum;
 import com.blackducksoftware.integration.email.batch.processor.NotificationProcessor;
 import com.blackducksoftware.integration.email.model.DateRange;
@@ -50,10 +49,12 @@ import com.blackducksoftware.integration.email.model.batch.CategoryData;
 import com.blackducksoftware.integration.email.model.batch.ProjectData;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.api.user.UserItem;
-import com.blackducksoftware.integration.hub.dataservices.DataServicesFactory;
-import com.blackducksoftware.integration.hub.dataservices.extension.item.UserConfigItem;
-import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.NotificationContentItem;
+import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityRequestService;
+import com.blackducksoftware.integration.hub.dataservice.extension.ExtensionConfigDataService;
+import com.blackducksoftware.integration.hub.dataservice.extension.item.UserConfigItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.NotificationDataService;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.NotificationContentItem;
+import com.blackducksoftware.integration.hub.service.HubRequestService;
 
 public abstract class AbstractDigestNotifier extends AbstractNotifier {
     private static final String KEY_HUB_SERVER_URL = "hub_server_url";
@@ -82,18 +83,24 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 
     private final String cronExpression;
 
+    private final HubRequestService hubRequestService;
+
     private final NotificationDataService notificationDataService;
 
+    private final VulnerabilityRequestService vulnerabilityRequestService;
+
     public AbstractDigestNotifier(final ExtensionProperties extensionProperties,
-            final EmailMessagingService emailMessagingService, final DataServicesFactory dataServicesFactory) {
-        super(extensionProperties, emailMessagingService, dataServicesFactory);
+            final EmailMessagingService emailMessagingService, HubRequestService hubRequestService, VulnerabilityRequestService vulnerabilityRequestService,
+            ExtensionConfigDataService extensionConfigDataService,
+            NotificationDataService notificationDataService) {
+        super(extensionProperties, emailMessagingService, extensionConfigDataService);
 
         final String quartzTriggerPropValue = getExtensionProperties().getNotifierVariableProperties()
                 .get(getNotifierPropertyKey() + ".cron.expression");
         cronExpression = StringUtils.trimToNull(quartzTriggerPropValue);
-        final Logger logger = LoggerFactory.getLogger(NotificationDataService.class);
-        final ExtensionLogger extLogger = new ExtensionLogger(logger);
-        notificationDataService = dataServicesFactory.createNotificationDataService(extLogger);
+        this.hubRequestService = hubRequestService;
+        this.notificationDataService = notificationDataService;
+        this.vulnerabilityRequestService = vulnerabilityRequestService;
     }
 
     public abstract DateRange createDateRange(final ZoneId zone);
@@ -121,11 +128,11 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
                 int filteredUsers = 0;
                 for (final UserConfigItem userConfig : usersInCategory) {
                     try {
-                        UserItem userItem = userConfig.getUser();
+                        final UserItem userItem = userConfig.getUser();
                         logger.info("Processing hub user {}", userItem.getMeta().getHref());
                         final SortedSet<NotificationContentItem> notifications = notificationDataService.getUserNotifications(startDate, endDate,
                                 userItem);
-                        final NotificationProcessor processor = new NotificationProcessor(getDataServicesFactory());
+                        final NotificationProcessor processor = new NotificationProcessor(hubRequestService, vulnerabilityRequestService);
                         final Collection<ProjectData> projectList = processor.process(notifications);
                         if (projectList.isEmpty()) {
                             logger.info("Project Aggregated Data list is empty no email to generate");
@@ -145,7 +152,7 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
                                 model.put(KEY_USER_LAST_NAME, userConfig.getUser().getLastName());
                                 model.put(KEY_NOTIFIER_CATEGORY, getCategory().toUpperCase());
                                 model.put(KEY_HUB_SERVER_URL,
-                                        getDataServicesFactory().getRestConnection().getBaseUrl());
+                                        hubRequestService.getRestConnection().getBaseUrl());
                                 final String emailAddress = userConfig.getUser().getEmail();
                                 final String templateName = getTemplateName(userConfig);
                                 final EmailTarget emailTarget = new EmailTarget(emailAddress, templateName, model);

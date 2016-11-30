@@ -25,7 +25,7 @@ import java.net.URISyntaxException;
 import java.util.Set;
 
 import com.blackducksoftware.integration.email.model.batch.ItemEntry;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.NotificationContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.NotificationContentItem;
 
 public abstract class NotificationEvent<T extends NotificationContentItem> {
     private ProcessingAction action;

@@ -38,13 +38,12 @@ import com.blackducksoftware.integration.hub.api.notification.VulnerabilitySourc
 import com.blackducksoftware.integration.hub.api.policy.PolicyExpressions;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
 import com.blackducksoftware.integration.hub.api.project.ProjectVersion;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyOverrideContentItem;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyViolationContentItem;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.VulnerabilityContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyOverrideContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.VulnerabilityContentItem;
 import com.blackducksoftware.integration.hub.meta.MetaInformation;
 
 public class NotificationEventTest {
-
     private static final String POLICY_RULE_URL = "http://a.hub.server/policy/url";
 
     private static final String COMPONENT_VERSION = "componentVersion";
@@ -69,7 +68,6 @@ public class NotificationEventTest {
 
     @Test
     public void testVulnerabilityConstructor() throws Exception {
-
         final ProcessingAction action = ProcessingAction.ADD;
 
         final String projectName = PROJECT_NAME;
@@ -89,10 +87,10 @@ public class NotificationEventTest {
         vulnerabilityIdSet.add(VULN_ID1);
         vulnerabilityIdSet.add(VULN_ID2);
         vulnerabilityIdSet.add(VULN_ID1);
-        List<VulnerabilitySourceQualifiedId> vulnList = new ArrayList<>();
+        final List<VulnerabilitySourceQualifiedId> vulnList = new ArrayList<>();
         vulnerabilityIdSet.forEach(s -> vulnList.add(new VulnerabilitySourceQualifiedId(SOURCE, s)));
 
-        VulnerabilityContentItem vulnerabilityContentItem = new VulnerabilityContentItem(new Date(), projectVersion, componentName, componentVersion,
+        final VulnerabilityContentItem vulnerabilityContentItem = new VulnerabilityContentItem(new Date(), projectVersion, componentName, componentVersion,
                 componentNameVersionUrl, vulnList, vulnList, vulnList);
 
         final VulnerabilityEvent event = new VulnerabilityEvent(action, categoryType, vulnerabilityContentItem, vulnerabilityIdSet);
@@ -124,12 +122,12 @@ public class NotificationEventTest {
         final Set<ItemEntry> dataSet = new HashSet<>();
         dataSet.add(new ItemEntry(ItemTypeEnum.COMPONENT.name(), "item"));
         dataSet.add(new ItemEntry(ItemTypeEnum.RULE.name(), "rule"));
-        MetaInformation meta = new MetaInformation(Collections.emptyList(), POLICY_RULE_URL, Collections.emptyList());
-        List<PolicyRule> ruleList = new ArrayList<>(1);
+        final MetaInformation meta = new MetaInformation(Collections.emptyList(), POLICY_RULE_URL, Collections.emptyList());
+        final List<PolicyRule> ruleList = new ArrayList<>(1);
         ruleList.add(new PolicyRule(meta, "", "description", Boolean.TRUE, Boolean.TRUE, new PolicyExpressions("expression", Collections.emptyList()),
                 "", "", "", "a user"));
 
-        PolicyViolationContentItem notificationContent = new PolicyViolationContentItem(new Date(), projectVersion, componentName, componentVersion,
+        final PolicyViolationContentItem notificationContent = new PolicyViolationContentItem(new Date(), projectVersion, componentName, componentVersion,
                 componentUrl,
                 componentNameVersionUrl, ruleList);
         final PolicyEvent event = new PolicyEvent(action, categoryType, notificationContent, ruleList.get(0));
@@ -161,12 +159,12 @@ public class NotificationEventTest {
         final Set<ItemEntry> dataSet = new HashSet<>();
         dataSet.add(new ItemEntry(ItemTypeEnum.COMPONENT.name(), "item"));
         dataSet.add(new ItemEntry(ItemTypeEnum.RULE.name(), "rule"));
-        MetaInformation meta = new MetaInformation(Collections.emptyList(), POLICY_RULE_URL, Collections.emptyList());
-        List<PolicyRule> ruleList = new ArrayList<>(1);
+        final MetaInformation meta = new MetaInformation(Collections.emptyList(), POLICY_RULE_URL, Collections.emptyList());
+        final List<PolicyRule> ruleList = new ArrayList<>(1);
         ruleList.add(new PolicyRule(meta, "", "description", Boolean.TRUE, Boolean.TRUE, new PolicyExpressions("expression", Collections.emptyList()),
                 "", "", "", "a user"));
 
-        PolicyOverrideContentItem notificationContent = new PolicyOverrideContentItem(new Date(), projectVersion, componentName, componentVersion,
+        final PolicyOverrideContentItem notificationContent = new PolicyOverrideContentItem(new Date(), projectVersion, componentName, componentVersion,
                 componentUrl,
                 componentNameVersionUrl, ruleList, "firstName", "lastName");
         final PolicyEvent event = new PolicyEvent(action, categoryType, notificationContent, ruleList.get(0));
