@@ -59,12 +59,14 @@ import com.blackducksoftware.integration.email.notifier.NotifierManager;
 import com.blackducksoftware.integration.email.notifier.TestEmailNotifier;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.exception.EncryptionException;
-import com.blackducksoftware.integration.hub.dataservices.DataServicesFactory;
-import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
-import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
+import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityRequestService;
+import com.blackducksoftware.integration.hub.dataservice.extension.ExtensionConfigDataService;
+import com.blackducksoftware.integration.hub.dataservice.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.exception.BDRestException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
+import com.blackducksoftware.integration.hub.service.HubRequestService;
+import com.blackducksoftware.integration.hub.service.HubServicesFactory;
 import com.google.gson.JsonParser;
 
 import freemarker.template.Configuration;
@@ -101,7 +103,7 @@ public class EmailEngine implements IAuthorizedListener {
 
     private ExtensionConfigDataService extConfigDataService;
 
-    private DataServicesFactory dataServicesFactory;
+    private HubServicesFactory hubServicesFactory;
 
     private EmailExtensionApplication emailExtensionApplication;
 
@@ -173,10 +175,6 @@ public class EmailEngine implements IAuthorizedListener {
 
     public ExtensionConfigDataService getExtConfigDataService() {
         return extConfigDataService;
-    }
-
-    public DataServicesFactory getDataServicesFactory() {
-        return dataServicesFactory;
     }
 
     public void start() {
@@ -281,7 +279,7 @@ public class EmailEngine implements IAuthorizedListener {
     public NotificationDataService createNotificationDataService() {
         final Logger notificationLogger = LoggerFactory.getLogger(NotificationDataService.class);
         final ExtensionLogger serviceLogger = new ExtensionLogger(notificationLogger);
-        final NotificationDataService notificationDataService = dataServicesFactory
+        final NotificationDataService notificationDataService = hubServicesFactory
                 .createNotificationDataService(serviceLogger);
         return notificationDataService;
     }
@@ -294,11 +292,15 @@ public class EmailEngine implements IAuthorizedListener {
 
     public NotifierManager createNotifierManager() {
         final NotifierManager manager = new NotifierManager();
-        final DataServicesFactory dataServicesFactory = new DataServicesFactory(getRestConnection());
-        final DailyDigestNotifier dailyNotifier = new DailyDigestNotifier(extensionProperties, emailMessagingService,
-                dataServicesFactory);
 
-        final TestEmailNotifier testNotifier = new TestEmailNotifier(extensionProperties, emailMessagingService, dataServicesFactory);
+        final HubRequestService hubRequestService = hubServicesFactory.createHubRequestService();
+
+        final VulnerabilityRequestService vulnerabilityRequestService = hubServicesFactory.createVulnerabilityRequestService();
+
+        final DailyDigestNotifier dailyNotifier = new DailyDigestNotifier(extensionProperties, emailMessagingService, hubRequestService,
+                vulnerabilityRequestService, extConfigDataService, notificationDataService);
+
+        final TestEmailNotifier testNotifier = new TestEmailNotifier(extensionProperties, emailMessagingService, extConfigDataService);
         manager.attach(dailyNotifier);
         manager.attach(testNotifier);
         emailExtensionApplication.getContext().getAttributes().put(EmailExtensionConstants.CONTEXT_ATTRIBUTE_KEY_TEST_NOTIFIER, testNotifier);
@@ -306,7 +308,6 @@ public class EmailEngine implements IAuthorizedListener {
     }
 
     public ExtensionInfo createExtensionInfoData() {
-
         final String id = generateExtensionId();
         final String name = extensionProperties.getExtensionName();
         final String description = extensionProperties.getExtensionDescription();
@@ -377,13 +378,9 @@ public class EmailEngine implements IAuthorizedListener {
     public ExtensionConfigDataService createExtensionConfigDataService() {
         final Logger extensionServiceLogger = LoggerFactory.getLogger(ExtensionConfigDataService.class);
         final ExtensionLogger serviceLogger = new ExtensionLogger(extensionServiceLogger);
-        final ExtensionConfigDataService extConfigDataService = dataServicesFactory
+        final ExtensionConfigDataService extConfigDataService = hubServicesFactory
                 .createExtensionConfigDataService(serviceLogger);
         return extConfigDataService;
-    }
-
-    public DataServicesFactory createDataServicesFactory() {
-        return new DataServicesFactory(restConnection);
     }
 
     @Override
@@ -393,7 +390,7 @@ public class EmailEngine implements IAuthorizedListener {
             hubServerConfig = createHubConfig(hubUri);
             restConnection = createRestConnection(hubUri);
             javaMailWrapper = createJavaMailWrapper();
-            dataServicesFactory = createDataServicesFactory();
+            hubServicesFactory = new HubServicesFactory(restConnection);
             emailMessagingService = createEmailMessagingService();
             notificationDataService = createNotificationDataService();
             extConfigDataService = createExtensionConfigDataService();

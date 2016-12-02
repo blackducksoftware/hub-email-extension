@@ -30,12 +30,12 @@ import java.util.List;
 import com.blackducksoftware.integration.hub.api.notification.VulnerabilitySourceQualifiedId;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
 import com.blackducksoftware.integration.hub.api.project.ProjectVersion;
-import com.blackducksoftware.integration.hub.api.vulnerabilities.SeverityEnum;
-import com.blackducksoftware.integration.hub.api.vulnerabilities.VulnerabilityItem;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyOverrideContentItem;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyViolationClearedContentItem;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyViolationContentItem;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.VulnerabilityContentItem;
+import com.blackducksoftware.integration.hub.api.vulnerability.SeverityEnum;
+import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyOverrideContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationClearedContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.VulnerabilityContentItem;
 import com.blackducksoftware.integration.hub.meta.MetaInformation;
 
 public class ProcessorTestUtil {
@@ -114,8 +114,8 @@ public class ProcessorTestUtil {
     public static final String COMPONENT_VERSION_ID = "component_version_id";
 
     public List<VulnerabilityItem> createVulnerabiltyItemList(List<VulnerabilitySourceQualifiedId> vulnSourceList) {
-        List<VulnerabilityItem> vulnerabilityList = new ArrayList<>(vulnSourceList.size());
-        for (VulnerabilitySourceQualifiedId vulnSource : vulnSourceList) {
+        final List<VulnerabilityItem> vulnerabilityList = new ArrayList<>(vulnSourceList.size());
+        for (final VulnerabilitySourceQualifiedId vulnSource : vulnSourceList) {
             final String vulnId = vulnSource.getVulnerabilityId();
             SeverityEnum severity = SeverityEnum.UNKNOWN;
             if (vulnId.startsWith(HIGH_VULN_PREFIX)) {

@@ -26,7 +26,7 @@ import java.util.Set;
 
 import com.blackducksoftware.integration.email.model.batch.ItemEntry;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyOverrideContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyOverrideContentItem;
 
 public class PolicyOverrideEvent extends PolicyEvent {
 
@@ -38,9 +38,9 @@ public class PolicyOverrideEvent extends PolicyEvent {
 
     @Override
     public Set<ItemEntry> generateDataSet() {
-        PolicyOverrideContentItem policyOverride = (PolicyOverrideContentItem) getNotificationContent();
-        Set<ItemEntry> dataSet = super.generateDataSet();
-        String person = String.join(" ", policyOverride.getFirstName(), policyOverride.getLastName());
+        final PolicyOverrideContentItem policyOverride = (PolicyOverrideContentItem) getNotificationContent();
+        final Set<ItemEntry> dataSet = super.generateDataSet();
+        final String person = String.join(" ", policyOverride.getFirstName(), policyOverride.getLastName());
         dataSet.add(new ItemEntry(ItemTypeEnum.PERSON.name(), person));
         return dataSet;
     }

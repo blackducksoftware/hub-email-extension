@@ -27,8 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.NotificationContentItem;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyViolationClearedContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.NotificationContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationClearedContentItem;
 
 public class PolicyViolationClearedProcessor extends NotificationSubProcessor<PolicyEvent> {
     private final Logger logger = LoggerFactory.getLogger(PolicyViolationProcessor.class);
@@ -51,7 +51,7 @@ public class PolicyViolationClearedProcessor extends NotificationSubProcessor<Po
                         event.setCategoryType(NotificationCategoryEnum.POLICY_VIOLATION_CLEARED);
                         getCache().addEvent(event);
                     }
-                } catch (URISyntaxException e) {
+                } catch (final URISyntaxException e) {
                     logger.error("Error processing policy violation cleared item {} ", policyViolationCleared, e);
                 }
             }

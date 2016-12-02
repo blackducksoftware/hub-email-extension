@@ -34,7 +34,6 @@ import org.junit.Test;
 import com.blackducksoftware.integration.email.EmailEngine;
 import com.blackducksoftware.integration.email.mock.MockNotifier;
 import com.blackducksoftware.integration.email.mock.TestEmailEngine;
-import com.blackducksoftware.integration.hub.dataservices.DataServicesFactory;
 
 public class ItemNotifierTest {
     private final static String NOTIFIER_KEY = "notifier.key";
@@ -51,10 +50,7 @@ public class ItemNotifierTest {
         System.setProperty("ext.config.location", file.getCanonicalFile().getParent());
         engine = new TestEmailEngine();
         engine.start();
-        final DataServicesFactory dataservicesFactory = new DataServicesFactory(engine.getRestConnection());
-        notifier = new MockNotifier(engine.getExtensionProperties(), engine.getNotificationDataService(),
-                engine.getExtConfigDataService(), engine.getEmailMessagingService(), dataservicesFactory, NOTIFIER_KEY);
-
+        notifier = new MockNotifier(engine.getExtensionProperties(), engine.getEmailMessagingService(), engine.getExtConfigDataService(), NOTIFIER_KEY);
     }
 
     @After

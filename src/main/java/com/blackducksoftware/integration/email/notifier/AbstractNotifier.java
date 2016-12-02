@@ -25,37 +25,26 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TimerTask;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.blackducksoftware.integration.email.ExtensionLogger;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.api.extension.ConfigurationItem;
-import com.blackducksoftware.integration.hub.dataservices.DataServicesFactory;
-import com.blackducksoftware.integration.hub.dataservices.extension.ExtensionConfigDataService;
+import com.blackducksoftware.integration.hub.dataservice.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.exception.UnexpectedHubResponseException;
 
 public abstract class AbstractNotifier extends TimerTask {
-    private final Logger logger = LoggerFactory.getLogger(AbstractNotifier.class);
-
     private final ExtensionProperties extensionProperties;
 
     private final EmailMessagingService emailMessagingService;
-
-    private final DataServicesFactory dataServicesFactory;
 
     private String hubExtensionUri;
 
     private final ExtensionConfigDataService extensionConfigDataService;
 
     public AbstractNotifier(final ExtensionProperties extensionProperties,
-            final EmailMessagingService emailMessagingService, final DataServicesFactory dataServicesFactory) {
+            final EmailMessagingService emailMessagingService, ExtensionConfigDataService extensionConfigDataService) {
         this.extensionProperties = extensionProperties;
         this.emailMessagingService = emailMessagingService;
-        this.dataServicesFactory = dataServicesFactory;
-        final ExtensionLogger extLogger = new ExtensionLogger(logger);
-        extensionConfigDataService = dataServicesFactory.createExtensionConfigDataService(extLogger);
+        this.extensionConfigDataService = extensionConfigDataService;
     }
 
     public ExtensionProperties createPropertiesFromGlobalConfig() throws UnexpectedHubResponseException {
@@ -84,10 +73,6 @@ public abstract class AbstractNotifier extends TimerTask {
 
     public EmailMessagingService getEmailMessagingService() {
         return emailMessagingService;
-    }
-
-    public DataServicesFactory getDataServicesFactory() {
-        return dataServicesFactory;
     }
 
     public String getName() {

@@ -27,8 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.NotificationContentItem;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyOverrideContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.NotificationContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyOverrideContentItem;
 
 public class PolicyOverrideProcessor extends NotificationSubProcessor<PolicyEvent> {
     private final Logger logger = LoggerFactory.getLogger(PolicyViolationProcessor.class);
@@ -51,7 +51,7 @@ public class PolicyOverrideProcessor extends NotificationSubProcessor<PolicyEven
                     event.setCategoryType(NotificationCategoryEnum.POLICY_VIOLATION_OVERRIDE);
                     getCache().addEvent(event);
                 }
-            } catch (URISyntaxException e) {
+            } catch (final URISyntaxException e) {
                 logger.error("Error processing policy violation override item {} ", policyOverrideContentItem, e);
             }
         }

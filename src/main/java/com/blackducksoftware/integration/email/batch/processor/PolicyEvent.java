@@ -27,7 +27,7 @@ import java.util.Set;
 
 import com.blackducksoftware.integration.email.model.batch.ItemEntry;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
-import com.blackducksoftware.integration.hub.dataservices.notification.items.PolicyContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyContentItem;
 
 public class PolicyEvent extends NotificationEvent<PolicyContentItem> {
     private final PolicyRule policyRule;
