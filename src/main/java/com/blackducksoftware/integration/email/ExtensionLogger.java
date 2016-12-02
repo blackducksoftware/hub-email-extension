@@ -100,4 +100,8 @@ public class ExtensionLogger extends IntLogger {
         }
     }
 
+    @Override
+    public void alwaysLog(String txt) {
+        info(txt);
+    }
 }

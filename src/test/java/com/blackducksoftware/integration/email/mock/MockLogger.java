@@ -112,4 +112,9 @@ public class MockLogger extends IntLogger {
     public LogLevel getLogLevel() {
         return logLevel;
     }
+
+    @Override
+    public void alwaysLog(String txt) {
+        System.out.println(txt);
+    }
 }
