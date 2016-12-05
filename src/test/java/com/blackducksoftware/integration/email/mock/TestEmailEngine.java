@@ -21,9 +21,9 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.email.mock;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.slf4j.Logger;
@@ -37,7 +37,6 @@ import com.blackducksoftware.integration.exception.EncryptionException;
 import com.blackducksoftware.integration.hub.builder.HubProxyInfoBuilder;
 import com.blackducksoftware.integration.hub.dataservice.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyNotificationFilter;
-import com.blackducksoftware.integration.hub.exception.BDRestException;
 import com.blackducksoftware.integration.hub.global.HubCredentials;
 import com.blackducksoftware.integration.hub.global.HubProxyInfo;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
@@ -48,7 +47,7 @@ public class TestEmailEngine extends EmailEngine {
 
     private final Logger logger = LoggerFactory.getLogger(TestEmailEngine.class);
 
-    public TestEmailEngine() throws IOException, EncryptionException, URISyntaxException, BDRestException {
+    public TestEmailEngine() throws FileNotFoundException, IOException {
         super();
     }
 

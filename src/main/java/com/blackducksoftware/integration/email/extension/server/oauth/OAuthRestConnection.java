@@ -28,6 +28,7 @@ import java.net.URISyntaxException;
 import org.restlet.Context;
 import org.restlet.resource.ClientResource;
 
+import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 
@@ -47,12 +48,15 @@ public class OAuthRestConnection extends RestConnection {
     }
 
     @Override
-    public ClientResource createClientResource(final Context context, final String providedUrl)
-            throws URISyntaxException {
+    public ClientResource createClientResource(final Context context, final String providedUrl) throws HubIntegrationException {
         try {
             return tokenManager.createClientResource(providedUrl, AccessType.USER);
-        } catch (final IOException ex) {
-            return new ClientResource(context, new URI(providedUrl));
+        } catch (final IOException | URISyntaxException ex) {
+            try {
+                return new ClientResource(context, new URI(providedUrl));
+            } catch (final URISyntaxException uriEx) {
+                throw new HubIntegrationException(uriEx);
+            }
         }
     }
 }

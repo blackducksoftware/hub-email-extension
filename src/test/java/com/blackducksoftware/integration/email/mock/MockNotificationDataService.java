@@ -21,7 +21,6 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.email.mock;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -44,7 +43,6 @@ import com.blackducksoftware.integration.hub.dataservice.notification.item.Polic
 import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationClearedContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.VulnerabilityContentItem;
-import com.blackducksoftware.integration.hub.exception.BDRestException;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.service.HubRequestService;
 import com.blackducksoftware.integration.log.IntLogger;
@@ -59,9 +57,12 @@ public class MockNotificationDataService extends NotificationDataService {
     }
 
     @Override
-    public SortedSet<NotificationContentItem> getAllNotifications(final Date startDate, final Date endDate)
-            throws IOException, URISyntaxException, BDRestException {
-        return createNotificationList();
+    public SortedSet<NotificationContentItem> getAllNotifications(final Date startDate, final Date endDate) {
+        try {
+            return createNotificationList();
+        } catch (final URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private SortedSet<NotificationContentItem> createNotificationList() throws URISyntaxException {

@@ -29,7 +29,7 @@ import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.api.extension.ConfigurationItem;
 import com.blackducksoftware.integration.hub.dataservice.extension.ExtensionConfigDataService;
-import com.blackducksoftware.integration.hub.exception.UnexpectedHubResponseException;
+import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 
 public abstract class AbstractNotifier extends TimerTask {
     private final ExtensionProperties extensionProperties;
@@ -47,7 +47,7 @@ public abstract class AbstractNotifier extends TimerTask {
         this.extensionConfigDataService = extensionConfigDataService;
     }
 
-    public ExtensionProperties createPropertiesFromGlobalConfig() throws UnexpectedHubResponseException {
+    public ExtensionProperties createPropertiesFromGlobalConfig() throws HubIntegrationException {
         final Map<String, ConfigurationItem> globalMap = extensionConfigDataService
                 .getGlobalConfigMap(getHubExtensionUri());
         final Properties globalProperties = new Properties();

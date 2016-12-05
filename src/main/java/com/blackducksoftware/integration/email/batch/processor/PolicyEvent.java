@@ -58,22 +58,22 @@ public class PolicyEvent extends NotificationEvent<PolicyContentItem> {
 
         keyBuilder.append(NotificationEventConstants.EVENT_KEY_HUB_PROJECT_VERSION_REL_URL_HASHED_NAME);
         keyBuilder.append(NotificationEventConstants.EVENT_KEY_NAME_VALUE_SEPARATOR);
-        keyBuilder.append(hashString(getNotificationContent().getProjectVersion().getRelativeUrl()));
+        keyBuilder.append(hashString(getNotificationContent().getProjectVersion().getUrl()));
         keyBuilder.append(NotificationEventConstants.EVENT_KEY_NAME_VALUE_PAIR_SEPARATOR);
 
         keyBuilder.append(NotificationEventConstants.EVENT_KEY_HUB_COMPONENT_REL_URL_HASHED_NAME);
         keyBuilder.append(NotificationEventConstants.EVENT_KEY_NAME_VALUE_SEPARATOR);
-        keyBuilder.append(hashString(getNotificationContent().getComponentRelativeUrl()));
+        keyBuilder.append(hashString(getNotificationContent().getComponentUrl()));
         keyBuilder.append(NotificationEventConstants.EVENT_KEY_NAME_VALUE_PAIR_SEPARATOR);
 
         keyBuilder.append(NotificationEventConstants.EVENT_KEY_HUB_COMPONENT_VERSION_REL_URL_HASHED_NAME);
         keyBuilder.append(NotificationEventConstants.EVENT_KEY_NAME_VALUE_SEPARATOR);
-        keyBuilder.append(hashString(getNotificationContent().getComponentVersionRelativeUrl()));
+        keyBuilder.append(hashString(getNotificationContent().getComponentVersionUrl()));
         keyBuilder.append(NotificationEventConstants.EVENT_KEY_NAME_VALUE_PAIR_SEPARATOR);
 
         keyBuilder.append(NotificationEventConstants.EVENT_KEY_HUB_POLICY_RULE_REL_URL_HASHED_NAME);
         keyBuilder.append(NotificationEventConstants.EVENT_KEY_NAME_VALUE_SEPARATOR);
-        keyBuilder.append(hashString(getPolicyRule().getMeta().getRelativeHref()));
+        keyBuilder.append(hashString(getPolicyRule().getMeta().getHref()));
         final String key = keyBuilder.toString();
         return key;
     }

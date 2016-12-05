@@ -36,7 +36,7 @@ import com.blackducksoftware.integration.email.model.EmailTarget;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.dataservice.extension.ExtensionConfigDataService;
-import com.blackducksoftware.integration.hub.exception.UnexpectedHubResponseException;
+import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 
 import freemarker.template.TemplateException;
 
@@ -74,12 +74,13 @@ public class TestEmailNotifier extends AbstractNotifier {
             if (isEmailAddressValid(emailAddress) == false) {
                 logger.info("Test email address {} is invalid.", emailAddress);
             } else {
-                final ExtensionProperties globalConfig = createPropertiesFromGlobalConfig();
+                ExtensionProperties globalConfig;
+                globalConfig = createPropertiesFromGlobalConfig();
                 final Map<String, Object> model = new HashMap<>();
                 final EmailTarget emailTarget = new EmailTarget(emailAddress, getTemplateName(), model);
                 getEmailMessagingService().sendEmailMessage(emailTarget, globalConfig);
             }
-        } catch (UnexpectedHubResponseException | MessagingException | IOException | TemplateException ex) {
+        } catch (HubIntegrationException | MessagingException | IOException | TemplateException ex) {
             logger.error("Error occurred sending test email.", ex);
         }
     }

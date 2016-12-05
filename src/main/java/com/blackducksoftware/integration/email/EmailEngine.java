@@ -23,9 +23,9 @@ package com.blackducksoftware.integration.email;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -58,11 +58,9 @@ import com.blackducksoftware.integration.email.notifier.DailyDigestNotifier;
 import com.blackducksoftware.integration.email.notifier.NotifierManager;
 import com.blackducksoftware.integration.email.notifier.TestEmailNotifier;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.exception.EncryptionException;
 import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityRequestService;
 import com.blackducksoftware.integration.hub.dataservice.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservice.notification.NotificationDataService;
-import com.blackducksoftware.integration.hub.exception.BDRestException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.service.HubRequestService;
@@ -107,7 +105,7 @@ public class EmailEngine implements IAuthorizedListener {
 
     private EmailExtensionApplication emailExtensionApplication;
 
-    public EmailEngine() throws IOException, EncryptionException, URISyntaxException, BDRestException {
+    public EmailEngine() throws FileNotFoundException, IOException {
         appProperties = createAppProperties();
         extensionProperties = createExtensionProperties();
         configuration = createFreemarkerConfig();
@@ -195,7 +193,7 @@ public class EmailEngine implements IAuthorizedListener {
         }
     }
 
-    public Properties createAppProperties() throws IOException {
+    public Properties createAppProperties() throws FileNotFoundException, IOException {
         final Properties appProperties = new Properties();
         final String configLocation = System.getProperty("ext.config.location");
         final File customerPropertiesFile = new File(configLocation, "extension.properties");
@@ -270,8 +268,7 @@ public class EmailEngine implements IAuthorizedListener {
         return serverBeanConfig.build();
     }
 
-    public RestConnection createRestConnection(final String hubUri)
-            throws EncryptionException, URISyntaxException, BDRestException {
+    public RestConnection createRestConnection(final String hubUri) {
         final RestConnection restConnection = initRestConnection(hubUri);
         return restConnection;
     }
@@ -284,8 +281,7 @@ public class EmailEngine implements IAuthorizedListener {
         return notificationDataService;
     }
 
-    public RestConnection initRestConnection(final String hubUri)
-            throws EncryptionException, URISyntaxException, BDRestException {
+    public RestConnection initRestConnection(final String hubUri) {
         final RestConnection restConnection = new OAuthRestConnection(hubServerConfig, tokenManager);
         return restConnection;
     }
@@ -386,7 +382,8 @@ public class EmailEngine implements IAuthorizedListener {
     @Override
     public void onAuthorized() {
         try {
-            final String hubUri = createHubBaseUrl(tokenManager.getConfiguration().getHubUri());
+            String hubUri;
+            hubUri = createHubBaseUrl(tokenManager.getConfiguration().getHubUri());
             hubServerConfig = createHubConfig(hubUri);
             restConnection = createRestConnection(hubUri);
             javaMailWrapper = createJavaMailWrapper();
@@ -397,7 +394,7 @@ public class EmailEngine implements IAuthorizedListener {
             notifierManager = createNotifierManager();
             notifierManager.updateHubExtensionUri(tokenManager.getConfiguration().getExtensionUri());
             notifierManager.start();
-        } catch (final EncryptionException | URISyntaxException | BDRestException | MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             logger.error("Error completing extension initialization", e);
         }
     }
