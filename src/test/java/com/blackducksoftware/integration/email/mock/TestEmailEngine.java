@@ -37,9 +37,11 @@ import com.blackducksoftware.integration.exception.EncryptionException;
 import com.blackducksoftware.integration.hub.builder.HubProxyInfoBuilder;
 import com.blackducksoftware.integration.hub.dataservice.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyNotificationFilter;
+import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 import com.blackducksoftware.integration.hub.global.HubCredentials;
 import com.blackducksoftware.integration.hub.global.HubProxyInfo;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
+import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
 import com.blackducksoftware.integration.log.Slf4jIntLogger;
 
@@ -49,6 +51,11 @@ public class TestEmailEngine extends EmailEngine {
 
     public TestEmailEngine() throws FileNotFoundException, IOException {
         super();
+    }
+
+    @Override
+    public RestConnection createRestConnection(String hubUri) {
+        return new MockRestConnection();
     }
 
     @Override
@@ -80,20 +87,31 @@ public class TestEmailEngine extends EmailEngine {
 
     @Override
     public NotificationDataService createNotificationDataService() {
-        final HubServicesFactory hubServicesFactory = new HubServicesFactory(getRestConnection());
-        return new MockNotificationDataService(new Slf4jIntLogger(logger), getRestConnection(), hubServicesFactory.createNotificationRequestService(),
-                hubServicesFactory.createProjectVersionRequestService(), hubServicesFactory.createPolicyRequestService(),
-                hubServicesFactory.createVersionBomPolicyRequestService(), hubServicesFactory.createHubRequestService(), new PolicyNotificationFilter(null));
+        HubServicesFactory hubServicesFactory;
+        try {
+            hubServicesFactory = new HubServicesFactory(getRestConnection());
+
+            return new MockNotificationDataService(new Slf4jIntLogger(logger), getRestConnection(), hubServicesFactory.createNotificationRequestService(),
+                    hubServicesFactory.createProjectVersionRequestService(), hubServicesFactory.createPolicyRequestService(),
+                    hubServicesFactory.createVersionBomPolicyRequestService(), hubServicesFactory.createHubRequestService(),
+                    new PolicyNotificationFilter(null));
+        } catch (final HubIntegrationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public NotifierManager createNotifierManager() {
         final NotifierManager manager = new NotifierManager();
-        final HubServicesFactory hubServicesFactory = new HubServicesFactory(getRestConnection());
-        final TestDigestNotifier digestNotifier = new TestDigestNotifier(getExtensionProperties(), getEmailMessagingService(),
-                hubServicesFactory.createHubRequestService(), hubServicesFactory.createVulnerabilityRequestService(), getExtConfigDataService(),
-                hubServicesFactory.createNotificationDataService(new Slf4jIntLogger(logger)));
-        manager.attach(digestNotifier);
+        try {
+            final HubServicesFactory hubServicesFactory = new HubServicesFactory(getRestConnection());
+            final TestDigestNotifier digestNotifier = new TestDigestNotifier(getExtensionProperties(), getEmailMessagingService(),
+                    hubServicesFactory.createHubRequestService(), hubServicesFactory.createVulnerabilityRequestService(), getExtConfigDataService(),
+                    hubServicesFactory.createNotificationDataService(new Slf4jIntLogger(logger)));
+            manager.attach(digestNotifier);
+        } catch (final HubIntegrationException e) {
+
+        }
         return manager;
     }
 

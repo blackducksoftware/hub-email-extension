@@ -56,11 +56,13 @@ import com.blackducksoftware.integration.email.model.HubServerBeanConfiguration;
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.notifier.DailyDigestNotifier;
 import com.blackducksoftware.integration.email.notifier.NotifierManager;
+import com.blackducksoftware.integration.email.notifier.RealTimeNotifier;
 import com.blackducksoftware.integration.email.notifier.TestEmailNotifier;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityRequestService;
 import com.blackducksoftware.integration.hub.dataservice.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservice.notification.NotificationDataService;
+import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.service.HubRequestService;
@@ -297,7 +299,10 @@ public class EmailEngine implements IAuthorizedListener {
                 vulnerabilityRequestService, extConfigDataService, notificationDataService);
 
         final TestEmailNotifier testNotifier = new TestEmailNotifier(extensionProperties, emailMessagingService, extConfigDataService);
+        final RealTimeNotifier realTimeNotifier = new RealTimeNotifier(extensionProperties, emailMessagingService, hubRequestService,
+                vulnerabilityRequestService, extConfigDataService, notificationDataService);
         manager.attach(dailyNotifier);
+        manager.attach(realTimeNotifier);
         manager.attach(testNotifier);
         emailExtensionApplication.getContext().getAttributes().put(EmailExtensionConstants.CONTEXT_ATTRIBUTE_KEY_TEST_NOTIFIER, testNotifier);
         return manager;
@@ -394,7 +399,7 @@ public class EmailEngine implements IAuthorizedListener {
             notifierManager = createNotifierManager();
             notifierManager.updateHubExtensionUri(tokenManager.getConfiguration().getExtensionUri());
             notifierManager.start();
-        } catch (final MalformedURLException e) {
+        } catch (final MalformedURLException | HubIntegrationException e) {
             logger.error("Error completing extension initialization", e);
         }
     }

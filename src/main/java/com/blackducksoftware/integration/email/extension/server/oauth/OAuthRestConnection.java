@@ -59,4 +59,13 @@ public class OAuthRestConnection extends RestConnection {
             }
         }
     }
+
+    @Override
+    public void connect() throws HubIntegrationException {
+        try {
+            tokenManager.refreshToken(AccessType.USER);
+        } catch (final IOException e) {
+            throw new HubIntegrationException("Error connecting to the Hub server.", e);
+        }
+    }
 }
