@@ -56,6 +56,8 @@ import com.blackducksoftware.integration.log.IntLogger;
 public class NotificationCapacityTest {
     private static final int NOTIFICATION_COUNT = 1000;
 
+    private static final int VULNERABILITY_COUNT = 100;
+
     private final ProcessorTestUtil testUtil = new ProcessorTestUtil();
 
     private MetaService metaService;
@@ -97,7 +99,7 @@ public class NotificationCapacityTest {
     }
 
     private List<VulnerabilitySourceQualifiedId> createVulnerbilityList() {
-        final int count = 100;
+        final int count = VULNERABILITY_COUNT;
         final List<VulnerabilitySourceQualifiedId> list = new ArrayList<>(count);
         for (int index = 0; index < count; index++) {
             list.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE + index, ProcessorTestUtil.HIGH_VULN_ID + index));

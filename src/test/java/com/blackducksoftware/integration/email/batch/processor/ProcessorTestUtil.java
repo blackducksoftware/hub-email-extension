@@ -25,10 +25,11 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.mockito.Mockito;
-
+import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.api.notification.VulnerabilitySourceQualifiedId;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
 import com.blackducksoftware.integration.hub.api.project.ProjectVersion;
@@ -39,6 +40,7 @@ import com.blackducksoftware.integration.hub.dataservice.notification.item.Polic
 import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.VulnerabilityContentItem;
 import com.blackducksoftware.integration.hub.meta.MetaAllowEnum;
+import com.blackducksoftware.integration.util.ObjectFactory;
 
 public class ProcessorTestUtil {
     public static final String DESCRIPTION = "description";
@@ -117,7 +119,7 @@ public class ProcessorTestUtil {
 
     public static final List<MetaAllowEnum> ALLOW_LIST = Collections.emptyList();
 
-    public List<VulnerabilityItem> createVulnerabiltyItemList(List<VulnerabilitySourceQualifiedId> vulnSourceList) {
+    public List<VulnerabilityItem> createVulnerabiltyItemList(List<VulnerabilitySourceQualifiedId> vulnSourceList) throws IntegrationException {
         final List<VulnerabilityItem> vulnerabilityList = new ArrayList<>(vulnSourceList.size());
         for (final VulnerabilitySourceQualifiedId vulnSource : vulnSourceList) {
             final String vulnId = vulnSource.getVulnerabilityId();
@@ -134,40 +136,40 @@ public class ProcessorTestUtil {
         return vulnerabilityList;
     }
 
-    public VulnerabilityItem createVulnerability(final String vulnId, final SeverityEnum severity) {
-        final VulnerabilityItem item = Mockito.mock(VulnerabilityItem.class);
-        Mockito.when(item.getVulnerabilityName()).thenReturn(vulnId);
-        Mockito.when(item.getDescription()).thenReturn("A vulnerability");
-        Mockito.when(item.getVulnerabilityPublishedDate()).thenReturn("today");
-        Mockito.when(item.getVulnerabilityUpdatedDate()).thenReturn("a minute ago");
-        Mockito.when(item.getBaseScore()).thenReturn(10.0);
-        Mockito.when(item.getImpactSubscore()).thenReturn(5.0);
-        Mockito.when(item.getExploitabilitySubscore()).thenReturn(1.0);
-        Mockito.when(item.getSource()).thenReturn("");
-        Mockito.when(item.getSeverity()).thenReturn(severity.name());
-        Mockito.when(item.getAccessVector()).thenReturn("");
-        Mockito.when(item.getAccessComplexity()).thenReturn("");
-        Mockito.when(item.getAuthentication()).thenReturn("");
-        Mockito.when(item.getConfidentialityImpact()).thenReturn("");
-        Mockito.when(item.getIntegrityImpact()).thenReturn("");
-        Mockito.when(item.getAvailabilityImpact()).thenReturn("");
-        Mockito.when(item.getCweId()).thenReturn(vulnId);
-        return item;
+    public VulnerabilityItem createVulnerability(final String vulnId, final SeverityEnum severity) throws IntegrationException {
+        final Map<String, Object> fieldMap = new HashMap<>();
+        fieldMap.put("vulnerabilityName", vulnId);
+        fieldMap.put("description", "A vulnerability");
+        fieldMap.put("vulnerabilityPublishedDate", "today");
+        fieldMap.put("vulnerabilityUpdatedDate", "a minute ago");
+        fieldMap.put("baseScore", 10.0);
+        fieldMap.put("impactSubscore", 5.0);
+        fieldMap.put("exploitabilitySubscore", 1.0);
+        fieldMap.put("source", "");
+        fieldMap.put("severity", severity.name());
+        fieldMap.put("accessVector", "");
+        fieldMap.put("accessComplexity", "");
+        fieldMap.put("authentication", "");
+        fieldMap.put("confidentialityImpact", "");
+        fieldMap.put("integrityImpact", "");
+        fieldMap.put("availabilityImpact", "");
+        fieldMap.put("cweId", vulnId);
+        return ObjectFactory.INSTANCE.createPopulatedInstance(VulnerabilityItem.class, fieldMap);
     }
 
-    public PolicyRule createPolicyRule(String name, String description, String createdBy, String updatedBy, String href) {
-        final PolicyRule rule = Mockito.mock(PolicyRule.class);
-        Mockito.when(rule.getName()).thenReturn(name);
-        Mockito.when(rule.getDescription()).thenReturn(description);
-        Mockito.when(rule.getEnabled()).thenReturn(true);
-        Mockito.when(rule.getOverridable()).thenReturn(true);
-        Mockito.when(rule.getExpression()).thenReturn(null);
-        Mockito.when(rule.getCreatedAt()).thenReturn(new Date());
-        Mockito.when(rule.getCreatedBy()).thenReturn(createdBy);
-        Mockito.when(rule.getUpdatedAt()).thenReturn(new Date());
-        Mockito.when(rule.getUpdatedBy()).thenReturn(updatedBy);
-        Mockito.when(rule.getJson()).thenReturn(createPolicyRuleJSon(href));
-        return rule;
+    public PolicyRule createPolicyRule(String name, String description, String createdBy, String updatedBy, String href) throws IntegrationException {
+        final Map<String, Object> fieldMap = new HashMap<>();
+        fieldMap.put("name", name);
+        fieldMap.put("description", description);
+        fieldMap.put("enabled", true);
+        fieldMap.put("overridable", true);
+        fieldMap.put("expression", null);
+        fieldMap.put("createdAt", new Date());
+        fieldMap.put("createdBy", createdBy);
+        fieldMap.put("updatedAt", new Date());
+        fieldMap.put("updatedBy", updatedBy);
+        fieldMap.put("json", createPolicyRuleJSon(href));
+        return ObjectFactory.INSTANCE.createPopulatedInstance(PolicyRule.class, fieldMap);
     }
 
     public String createPolicyRuleJSon(String href) {
@@ -176,7 +178,7 @@ public class ProcessorTestUtil {
 
     public PolicyOverrideContentItem createPolicyOverride(final Date createdTime, final String projectName,
             final String projectVersionName, final String componentName, final String componentVersion)
-            throws URISyntaxException {
+            throws URISyntaxException, IntegrationException {
         final String projectVersionUrl = PROJECT_VERSION_URL_PREFIX + projectName + PROJECT_VERSION_URL_SEGMENT + projectVersionName;
         final ProjectVersion projectVersion = new ProjectVersion();
         projectVersion.setProjectName(projectName);
@@ -195,7 +197,7 @@ public class ProcessorTestUtil {
 
     public PolicyViolationClearedContentItem createPolicyCleared(final Date createdTime, final String projectName,
             final String projectVersionName, final String componentName, final String componentVersion)
-            throws URISyntaxException {
+            throws URISyntaxException, IntegrationException {
         final String projectVersionUrl = PROJECT_VERSION_URL_PREFIX + projectName + PROJECT_VERSION_URL_SEGMENT + projectVersionName;
         final ProjectVersion projectVersion = new ProjectVersion();
         projectVersion.setProjectName(projectName);
@@ -214,7 +216,7 @@ public class ProcessorTestUtil {
 
     public PolicyViolationContentItem createPolicyViolation(final Date createdTime, final String projectName,
             final String projectVersionName, final String componentName, final String componentVersion)
-            throws URISyntaxException {
+            throws URISyntaxException, IntegrationException {
         final String projectVersionUrl = PROJECT_VERSION_URL_PREFIX + projectName + PROJECT_VERSION_URL_SEGMENT + projectVersionName;
         final ProjectVersion projectVersion = new ProjectVersion();
         projectVersion.setProjectName(projectName);
