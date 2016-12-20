@@ -50,7 +50,7 @@ public class ItemNotifierTest {
         System.setProperty("ext.config.location", file.getCanonicalFile().getParent());
         engine = new TestEmailEngine();
         engine.start();
-        notifier = new MockNotifier(engine.getExtensionProperties(), engine.getEmailMessagingService(), engine.getExtConfigDataService(), NOTIFIER_KEY);
+        notifier = new MockNotifier(engine.getExtensionProperties(), engine.getEmailMessagingService(), engine.getHubServicesFactory(), NOTIFIER_KEY);
     }
 
     @After

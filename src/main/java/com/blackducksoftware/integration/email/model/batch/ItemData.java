@@ -23,6 +23,11 @@ package com.blackducksoftware.integration.email.model.batch;
 
 import java.util.Set;
 
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import com.blackducksoftware.integration.hub.notification.processor.ItemEntry;
+
 public class ItemData {
     private final Set<ItemEntry> dataSet;
 
@@ -36,6 +41,6 @@ public class ItemData {
 
     @Override
     public String toString() {
-        return "ItemData [dataSet=" + dataSet + "]";
+        return ReflectionToStringBuilder.toString(this, ToStringStyle.JSON_STYLE);
     }
 }

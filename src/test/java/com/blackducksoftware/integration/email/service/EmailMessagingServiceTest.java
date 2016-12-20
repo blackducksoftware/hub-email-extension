@@ -39,14 +39,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.blackducksoftware.integration.email.EmailEngine;
-import com.blackducksoftware.integration.email.batch.processor.NotificationCategoryEnum;
 import com.blackducksoftware.integration.email.mock.TestEmailEngine;
 import com.blackducksoftware.integration.email.model.EmailTarget;
 import com.blackducksoftware.integration.email.model.batch.CategoryData;
 import com.blackducksoftware.integration.email.model.batch.ItemData;
-import com.blackducksoftware.integration.email.model.batch.ItemEntry;
 import com.blackducksoftware.integration.email.model.batch.ProjectData;
 import com.blackducksoftware.integration.email.notifier.AbstractDigestNotifier;
+import com.blackducksoftware.integration.hub.notification.processor.ItemEntry;
+import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
 
 import freemarker.template.TemplateException;
 

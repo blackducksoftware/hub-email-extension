@@ -24,21 +24,17 @@ import org.slf4j.LoggerFactory;
 import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityRequestService;
-import com.blackducksoftware.integration.hub.dataservice.extension.ExtensionConfigDataService;
-import com.blackducksoftware.integration.hub.dataservice.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.service.HubRequestService;
+import com.blackducksoftware.integration.hub.service.HubServicesFactory;
 
 public class RealTimeNotifier extends AbstractDigestNotifier {
     private final Logger logger = LoggerFactory.getLogger(RealTimeNotifier.class);
 
     private final String lastRunPath;
 
-    public RealTimeNotifier(ExtensionProperties extensionProperties, EmailMessagingService emailMessagingService, HubRequestService hubRequestService,
-            VulnerabilityRequestService vulnerabilityRequestService, ExtensionConfigDataService extensionConfigDataService,
-            NotificationDataService notificationDataService) {
-        super(extensionProperties, emailMessagingService, hubRequestService, vulnerabilityRequestService, extensionConfigDataService, notificationDataService);
+    public RealTimeNotifier(ExtensionProperties extensionProperties, EmailMessagingService emailMessagingService, HubServicesFactory hubServicesFactory) {
+        super(extensionProperties, emailMessagingService, hubServicesFactory);
         lastRunPath = getExtensionProperties().getNotifierVariableProperties()
                 .get(getNotifierPropertyKey() + ".lastrun.file");
     }

@@ -21,81 +21,48 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.email.batch.processor;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.SortedSet;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.model.batch.CategoryDataBuilder;
 import com.blackducksoftware.integration.email.model.batch.ItemData;
 import com.blackducksoftware.integration.email.model.batch.ProjectData;
 import com.blackducksoftware.integration.email.model.batch.ProjectDataBuilder;
+import com.blackducksoftware.integration.hub.api.item.MetaService;
 import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityRequestService;
-import com.blackducksoftware.integration.hub.dataservice.notification.item.NotificationContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyOverrideContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationClearedContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.VulnerabilityContentItem;
+import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.hub.notification.processor.MapProcessorCache;
+import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
+import com.blackducksoftware.integration.hub.notification.processor.NotificationProcessor;
+import com.blackducksoftware.integration.hub.notification.processor.event.NotificationEvent;
+import com.blackducksoftware.integration.hub.notification.processor.event.PolicyEvent;
 import com.blackducksoftware.integration.hub.service.HubRequestService;
 
-public class NotificationProcessor {
-    private final Logger logger = LoggerFactory.getLogger(NotificationProcessor.class);
+public class EmailProcessor extends NotificationProcessor<Collection<ProjectData>> {
 
-    private final Map<Class<?>, NotificationSubProcessor<?>> processorMap = new HashMap<>();
-
-    private final List<SubProcessorCache<?>> cacheList = new ArrayList<>();
-
-    public NotificationProcessor(HubRequestService hubRequestService, VulnerabilityRequestService vulnerabilityRequestService) {
-        final SubProcessorCache<PolicyEvent> policyCache = new SubProcessorCache<>();
-        final VulnerabilityCache vulnerabilityCache = new VulnerabilityCache(hubRequestService, vulnerabilityRequestService);
-        cacheList.add(policyCache);
-        cacheList.add(vulnerabilityCache);
-        processorMap.put(PolicyViolationContentItem.class, new PolicyViolationProcessor(policyCache));
-        processorMap.put(PolicyViolationClearedContentItem.class, new PolicyViolationClearedProcessor(policyCache));
-        processorMap.put(PolicyOverrideContentItem.class, new PolicyOverrideProcessor(policyCache));
-        processorMap.put(VulnerabilityContentItem.class,
-                new VulnerabilityProcessor(vulnerabilityCache));
-
+    public EmailProcessor(HubRequestService hubRequestService, VulnerabilityRequestService vulnerabilityRequestService, MetaService metaService) {
+        final MapProcessorCache<PolicyEvent> policyCache = new MapProcessorCache<>();
+        final VulnerabilityCache vulnerabilityCache = new VulnerabilityCache(hubRequestService, vulnerabilityRequestService, metaService);
+        getCacheList().add(policyCache);
+        getCacheList().add(vulnerabilityCache);
+        getProcessorMap().put(PolicyViolationContentItem.class, new PolicyViolationProcessor(policyCache, metaService));
+        getProcessorMap().put(PolicyViolationClearedContentItem.class, new PolicyViolationClearedProcessor(policyCache, metaService));
+        getProcessorMap().put(PolicyOverrideContentItem.class, new PolicyOverrideProcessor(policyCache, metaService));
+        getProcessorMap().put(VulnerabilityContentItem.class,
+                new VulnerabilityProcessor(vulnerabilityCache, metaService));
     }
 
-    public Collection<ProjectData> process(final SortedSet<NotificationContentItem> notifications) {
-        createEvents(notifications);
-        final Collection<ProjectData> projectDataList = processEvents();
-        return projectDataList;
-    }
-
-    private void createEvents(final SortedSet<NotificationContentItem> notifications) {
-        for (final NotificationContentItem item : notifications) {
-            final Class<?> key = item.getClass();
-            if (!processorMap.containsKey(key)) {
-                logger.error("Could not find converter for notification: {}", item);
-            } else {
-                final NotificationSubProcessor<?> processor = processorMap.get(key);
-                processor.process(item);
-            }
-        }
-    }
-
-    private Collection<ProjectData> processEvents() {
-        final Collection<NotificationEvent<?>> eventMap = processNotificationEvents();
-        final Collection<ProjectData> projectMap = createCateoryDataMap(eventMap);
+    @Override
+    public Collection<ProjectData> processEvents(Collection<NotificationEvent<?>> eventList) throws HubIntegrationException {
+        final Collection<ProjectData> projectMap = createCateoryDataMap(eventList);
         return projectMap;
-    }
-
-    private Collection<NotificationEvent<?>> processNotificationEvents() {
-        final Collection<NotificationEvent<?>> eventList = new LinkedList<>();
-        for (final SubProcessorCache<?> processor : cacheList) {
-            eventList.addAll(processor.getEvents());
-        }
-        return eventList;
     }
 
     private Collection<ProjectData> createCateoryDataMap(final Collection<NotificationEvent<?>> eventMap) {
@@ -127,6 +94,7 @@ public class NotificationProcessor {
                 categoryData = categoryBuilderMap.get(categoryKey);
             }
             categoryData.incrementItemCount(event.countCategoryItems());
+            categoryData.addItem(new ItemData(new LinkedHashSet<>(event.getDataSet())));
             categoryData.addItem(new ItemData(new LinkedHashSet<>(event.getDataSet())));
         }
         // build

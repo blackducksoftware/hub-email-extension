@@ -29,6 +29,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
 
+import com.blackducksoftware.integration.hub.api.item.MetaService;
 import com.blackducksoftware.integration.hub.api.notification.NotificationRequestService;
 import com.blackducksoftware.integration.hub.api.notification.VulnerabilitySourceQualifiedId;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRequestService;
@@ -38,7 +39,6 @@ import com.blackducksoftware.integration.hub.api.project.version.ProjectVersionR
 import com.blackducksoftware.integration.hub.api.version.VersionBomPolicyRequestService;
 import com.blackducksoftware.integration.hub.dataservice.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.NotificationContentItem;
-import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyNotificationFilter;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyOverrideContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationClearedContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationContentItem;
@@ -51,9 +51,9 @@ public class MockNotificationDataService extends NotificationDataService {
     public MockNotificationDataService(IntLogger logger, RestConnection restConnection, NotificationRequestService notificationRequestService,
             ProjectVersionRequestService projectVersionRequestService, PolicyRequestService policyRequestService,
             VersionBomPolicyRequestService versionBomPolicyRequestService,
-            HubRequestService hubRequestService, PolicyNotificationFilter policyNotificationFilter) {
+            HubRequestService hubRequestService, MetaService metaService) {
         super(logger, restConnection, notificationRequestService, projectVersionRequestService, policyRequestService, versionBomPolicyRequestService,
-                hubRequestService, policyNotificationFilter);
+                hubRequestService, metaService);
     }
 
     @Override

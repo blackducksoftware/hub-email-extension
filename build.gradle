@@ -7,7 +7,7 @@ tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
 tasks.withType(GroovyCompile) { options.encoding = 'UTF-8' }
 
 group = 'com.blackducksoftware.integration'
-version = '1.0.1-SNAPSHOT'
+version = '1.0.2-SNAPSHOT'
 description = ''
 mainClassName = 'com.blackducksoftware.integration.email.Application'
 applicationDefaultJvmArgs = [
@@ -26,8 +26,26 @@ repositories {
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
 }
 
+buildscript {
+    repositories {
+    	mavenLocal()
+        mavenCentral()
+        maven { url "http://jcenter.bintray.com" }
+    }
+    dependencies {
+        classpath group: 'com.blackducksoftware.integration', name: 'hub-gradle-plugin', version: '3.2.0-SNAPSHOT'
+    }
+}
+apply plugin: 'com.blackducksoftware.hub'
+deployHubOutput {
+    hubUrl = 'http://int-hub01.dc1.lan:8080'
+    hubUsername = 'sysadmin'
+    hubPassword = 'blackduck'
+    hubProjectName = 'hub email/ extension/'
+}
+
 dependencies {
-    compile 'com.blackducksoftware.integration:hub-common:4.0.0'
+    compile 'com.blackducksoftware.integration:hub-common:5.2.1-SNAPSHOT'
 
     // logging dependencies
     compile 'org.slf4j:slf4j-api:1.7.21'

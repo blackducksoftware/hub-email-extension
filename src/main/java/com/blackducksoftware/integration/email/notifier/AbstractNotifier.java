@@ -25,26 +25,36 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TimerTask;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.api.extension.ConfigurationItem;
 import com.blackducksoftware.integration.hub.dataservice.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.hub.service.HubServicesFactory;
+import com.blackducksoftware.integration.log.Slf4jIntLogger;
 
 public abstract class AbstractNotifier extends TimerTask {
+    private final Logger logger = LoggerFactory.getLogger(AbstractNotifier.class);
+
     private final ExtensionProperties extensionProperties;
 
     private final EmailMessagingService emailMessagingService;
 
     private String hubExtensionUri;
 
+    private final HubServicesFactory hubServicesFactory;
+
     private final ExtensionConfigDataService extensionConfigDataService;
 
     public AbstractNotifier(final ExtensionProperties extensionProperties,
-            final EmailMessagingService emailMessagingService, ExtensionConfigDataService extensionConfigDataService) {
+            final EmailMessagingService emailMessagingService, HubServicesFactory hubServicesFactory) {
         this.extensionProperties = extensionProperties;
         this.emailMessagingService = emailMessagingService;
-        this.extensionConfigDataService = extensionConfigDataService;
+        this.hubServicesFactory = hubServicesFactory;
+        extensionConfigDataService = hubServicesFactory.createExtensionConfigDataService(new Slf4jIntLogger(logger));
     }
 
     public ExtensionProperties createPropertiesFromGlobalConfig() throws HubIntegrationException {
@@ -89,5 +99,9 @@ public abstract class AbstractNotifier extends TimerTask {
 
     public ExtensionConfigDataService getExtensionConfigDataService() {
         return extensionConfigDataService;
+    }
+
+    public HubServicesFactory getHubServicesFactory() {
+        return hubServicesFactory;
     }
 }

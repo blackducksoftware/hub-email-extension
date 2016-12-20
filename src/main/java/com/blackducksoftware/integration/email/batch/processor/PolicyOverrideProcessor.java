@@ -21,38 +21,36 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.email.batch.processor;
 
-import java.net.URISyntaxException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.blackducksoftware.integration.hub.api.item.MetaService;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.NotificationContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyOverrideContentItem;
+import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.hub.notification.processor.MapProcessorCache;
+import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
+import com.blackducksoftware.integration.hub.notification.processor.NotificationSubProcessor;
+import com.blackducksoftware.integration.hub.notification.processor.ProcessingActionEnum;
+import com.blackducksoftware.integration.hub.notification.processor.event.PolicyEvent;
+import com.blackducksoftware.integration.hub.notification.processor.event.PolicyOverrideEvent;
 
 public class PolicyOverrideProcessor extends NotificationSubProcessor<PolicyEvent> {
-    private final Logger logger = LoggerFactory.getLogger(PolicyViolationProcessor.class);
 
-    public PolicyOverrideProcessor(final SubProcessorCache<PolicyEvent> cache) {
-        super(cache);
+    public PolicyOverrideProcessor(final MapProcessorCache<PolicyEvent> cache, final MetaService metaService) {
+        super(cache, metaService);
     }
 
     @Override
-    public void process(final NotificationContentItem notification) {
+    public void process(final NotificationContentItem notification) throws HubIntegrationException {
         final PolicyOverrideContentItem policyOverrideContentItem = (PolicyOverrideContentItem) notification;
         for (final PolicyRule rule : policyOverrideContentItem.getPolicyRuleList()) {
-            try {
-                final PolicyOverrideEvent event = new PolicyOverrideEvent(ProcessingAction.REMOVE, NotificationCategoryEnum.POLICY_VIOLATION,
-                        policyOverrideContentItem, rule);
-                if (getCache().hasEvent(event.getEventKey())) {
-                    getCache().removeEvent(event);
-                } else {
-                    event.setAction(ProcessingAction.ADD);
-                    event.setCategoryType(NotificationCategoryEnum.POLICY_VIOLATION_OVERRIDE);
-                    getCache().addEvent(event);
-                }
-            } catch (final URISyntaxException e) {
-                logger.error("Error processing policy violation override item {} ", policyOverrideContentItem, e);
+            final PolicyOverrideEvent event = new PolicyOverrideEvent(ProcessingActionEnum.REMOVE, NotificationCategoryEnum.POLICY_VIOLATION,
+                    policyOverrideContentItem, rule, getMetaService().getHref(rule));
+            if (getCache().hasEvent(event.getEventKey())) {
+                getCache().removeEvent(event);
+            } else {
+                event.setAction(ProcessingActionEnum.ADD);
+                event.setCategoryType(NotificationCategoryEnum.POLICY_VIOLATION_OVERRIDE);
+                getCache().addEvent(event);
             }
         }
     }

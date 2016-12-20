@@ -21,14 +21,10 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.email.model;
 
-import java.util.Set;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.builder.ValidationResults;
 import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
-import com.blackducksoftware.integration.hub.global.GlobalFieldKey;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 
 public class HubServerBeanConfiguration {
@@ -44,43 +40,31 @@ public class HubServerBeanConfiguration {
     }
 
     public HubServerConfig build() {
-        final HubServerConfigBuilder configBuilder = new HubServerConfigBuilder();
-        configBuilder.setHubUrl(hubUri);
-        // using oauth the username and password aren't used but need to be set
-        // for the builder
-        configBuilder.setUsername("auser");
-        configBuilder.setPassword("apassword");
-        configBuilder.setTimeout(emailConfig.getHubServerTimeout());
-        configBuilder.setProxyHost(emailConfig.getHubProxyHost());
-        configBuilder.setProxyPort(emailConfig.getHubProxyPort());
-        configBuilder.setIgnoredProxyHosts(emailConfig.getHubProxyNoHost());
-        configBuilder.setProxyUsername(emailConfig.getHubProxyUser());
-        configBuilder.setProxyPassword(emailConfig.getHubProxyPassword());
+        try {
+            final HubServerConfigBuilder configBuilder = new HubServerConfigBuilder();
+            configBuilder.setHubUrl(hubUri);
+            // using oauth the username and password aren't used but need to be set
+            // for the builder
+            configBuilder.setUsername("auser");
+            configBuilder.setPassword("apassword");
+            configBuilder.setTimeout(emailConfig.getHubServerTimeout());
+            configBuilder.setProxyHost(emailConfig.getHubProxyHost());
+            configBuilder.setProxyPort(emailConfig.getHubProxyPort());
+            configBuilder.setIgnoredProxyHosts(emailConfig.getHubProxyNoHost());
+            configBuilder.setProxyUsername(emailConfig.getHubProxyUser());
+            configBuilder.setProxyPassword(emailConfig.getHubProxyPassword());
 
-        // output the configuration details
-        logger.info("Hub Server URL          = " + configBuilder.getHubUrl());
-        logger.info("Hub Timeout             = " + configBuilder.getTimeout());
-        logger.info("Hub Proxy Host          = " + configBuilder.getProxyHost());
-        logger.info("Hub Proxy Port          = " + configBuilder.getProxyPort());
-        logger.info("Hub Ignored Proxy Hosts = " + configBuilder.getIgnoredProxyHosts());
-        logger.info("Hub Proxy User          = " + configBuilder.getProxyUsername());
+            // output the configuration details
+            logger.info("Hub Server URL          = " + configBuilder.getHubUrl());
+            logger.info("Hub Timeout             = " + configBuilder.getTimeout());
+            logger.info("Hub Proxy Host          = " + configBuilder.getProxyHost());
+            logger.info("Hub Proxy Port          = " + configBuilder.getProxyPort());
+            logger.info("Hub Ignored Proxy Hosts = " + configBuilder.getIgnoredProxyHosts());
+            logger.info("Hub Proxy User          = " + configBuilder.getProxyUsername());
 
-        final ValidationResults<GlobalFieldKey, HubServerConfig> results = configBuilder.buildResults();
-
-        if (results.hasErrors()) {
-            logger.error("##### Properties file contains errors.####");
-            final Set<GlobalFieldKey> keys = results.getResultMap().keySet();
-            for (final GlobalFieldKey fieldKey : keys) {
-                logger.error(results.getResultString(fieldKey));
-            }
-        } else {
-            if (results.hasWarnings()) {
-                final Set<GlobalFieldKey> keys = results.getResultMap().keySet();
-                for (final GlobalFieldKey fieldKey : keys) {
-                    logger.warn(results.getResultString(fieldKey));
-                }
-            }
-            return results.getConstructedObject();
+            return configBuilder.build();
+        } catch (final IllegalStateException ex) {
+            logger.error("Error with the hub configuration", ex);
         }
 
         return null;

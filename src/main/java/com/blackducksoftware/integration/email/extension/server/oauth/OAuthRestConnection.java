@@ -22,24 +22,24 @@
 package com.blackducksoftware.integration.email.extension.server.oauth;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import org.restlet.Context;
-import org.restlet.resource.ClientResource;
+import java.net.URL;
 
 import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
-import com.blackducksoftware.integration.hub.global.HubServerConfig;
+import com.blackducksoftware.integration.hub.global.HubProxyInfo;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
+import com.blackducksoftware.integration.log.IntLogger;
 
 public class OAuthRestConnection extends RestConnection {
 
     private final TokenManager tokenManager;
 
-    public OAuthRestConnection(final HubServerConfig hubServerConfig, final TokenManager tokenManager) {
-        setBaseUrl(hubServerConfig.getHubUrl().toString());
-        setProxyProperties(hubServerConfig.getProxyInfo());
-        setTimeout(hubServerConfig.getTimeout());
+    public OAuthRestConnection(URL baseUrl, HubProxyInfo proxyInfo, TokenManager tokenManager) {
+        super(baseUrl);
+        this.tokenManager = tokenManager;
+    }
+
+    public OAuthRestConnection(IntLogger logger, URL baseUrl, HubProxyInfo proxyInfo, TokenManager tokenManager) {
+        super(logger, baseUrl, proxyInfo);
         this.tokenManager = tokenManager;
     }
 
@@ -48,20 +48,12 @@ public class OAuthRestConnection extends RestConnection {
     }
 
     @Override
-    public ClientResource createClientResource(final Context context, final String providedUrl) throws HubIntegrationException {
-        try {
-            return tokenManager.createClientResource(providedUrl, AccessType.USER);
-        } catch (final IOException | URISyntaxException ex) {
-            try {
-                return new ClientResource(context, new URI(providedUrl));
-            } catch (final URISyntaxException uriEx) {
-                throw new HubIntegrationException(uriEx);
-            }
-        }
+    public void addBuilderAuthentication() throws HubIntegrationException {
+
     }
 
     @Override
-    public void connect() throws HubIntegrationException {
+    public void clientAuthenticate() throws HubIntegrationException {
         try {
             tokenManager.refreshToken(AccessType.USER);
         } catch (final IOException e) {

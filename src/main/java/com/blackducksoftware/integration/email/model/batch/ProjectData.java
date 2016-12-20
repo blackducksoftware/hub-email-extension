@@ -23,7 +23,7 @@ package com.blackducksoftware.integration.email.model.batch;
 
 import java.util.Map;
 
-import com.blackducksoftware.integration.email.batch.processor.NotificationCategoryEnum;
+import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
 
 public class ProjectData {
     private final String projectKey;

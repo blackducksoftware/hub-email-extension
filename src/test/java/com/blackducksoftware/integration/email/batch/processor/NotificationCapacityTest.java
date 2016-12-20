@@ -32,11 +32,14 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.joda.time.DateTime;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.blackducksoftware.integration.email.mock.MockRestConnection;
 import com.blackducksoftware.integration.email.model.batch.ProjectData;
 import com.blackducksoftware.integration.hub.api.component.version.ComponentVersion;
+import com.blackducksoftware.integration.hub.api.item.MetaService;
 import com.blackducksoftware.integration.hub.api.notification.VulnerabilitySourceQualifiedId;
 import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityItem;
 import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityRequestService;
@@ -44,12 +47,54 @@ import com.blackducksoftware.integration.hub.dataservice.notification.item.Notif
 import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyOverrideContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationClearedContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationContentItem;
+import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.service.HubRequestService;
+import com.blackducksoftware.integration.hub.service.HubServicesFactory;
+import com.blackducksoftware.integration.log.IntBufferedLogger;
+import com.blackducksoftware.integration.log.IntLogger;
 
 public class NotificationCapacityTest {
     private static final int NOTIFICATION_COUNT = 1000;
 
     private final ProcessorTestUtil testUtil = new ProcessorTestUtil();
+
+    private MetaService metaService;
+
+    @Before
+    public void init() throws Exception {
+        final RestConnection restConnection = new MockRestConnection(null);
+        final HubServicesFactory factory = new HubServicesFactory(restConnection);
+        final IntLogger logger = new IntBufferedLogger();
+        metaService = factory.createMetaService(logger);
+    }
+
+    private EmailProcessor createNotificationProcessor() {
+        final VulnerabilityRequestService vulnerabilityRequestService = Mockito.mock(VulnerabilityRequestService.class);
+        final HubRequestService hubRequestService = Mockito.mock(HubRequestService.class);
+        final EmailProcessor processor = new EmailProcessor(hubRequestService, vulnerabilityRequestService, metaService);
+        return processor;
+    }
+
+    private EmailProcessor createNotificationProcessor(List<VulnerabilityItem> vulnerabilityList) throws Exception {
+        final ComponentVersion compVersion = Mockito.mock(ComponentVersion.class);
+        Mockito.when(compVersion.getJson()).thenReturn(createComponentJson());
+        final VulnerabilityRequestService vulnerabilityRequestService = Mockito.mock(VulnerabilityRequestService.class);
+        final HubRequestService hubRequestService = Mockito.mock(HubRequestService.class);
+        Mockito.when(hubRequestService.getItem(Mockito.anyString(), Mockito.eq(ComponentVersion.class))).thenReturn(compVersion);
+        Mockito.when(vulnerabilityRequestService.getComponentVersionVulnerabilities(Mockito.anyString())).thenReturn(vulnerabilityList);
+        final EmailProcessor processor = new EmailProcessor(hubRequestService, vulnerabilityRequestService, metaService);
+        return processor;
+    }
+
+    private String createComponentJson() {
+        return "{ \"_meta\": { \"href\": \"" + ProcessorTestUtil.COMPONENT_VERSION_URL + "\","
+                + "\"links\": [ {"
+                + "\"rel\": \"vulnerabilities\","
+                + "\"href\": \"" + ProcessorTestUtil.COMPONENT_VERSION_URL + "\"},{"
+                + "\"rel\":\"vulnerable-components\","
+                + "\"href\": \"" + ProcessorTestUtil.COMPONENT_VERSION_URL + "\""
+                + "}]}}";
+    }
 
     private List<VulnerabilitySourceQualifiedId> createVulnerbilityList() {
         final int count = 100;
@@ -289,9 +334,8 @@ public class NotificationCapacityTest {
         System.out.println("Start of Processor event cancellation via override");
 
         final SortedSet<NotificationContentItem> notificationSet = createOverrideNotificationCancellationList();
-        final VulnerabilityRequestService vulnerabilityRequestService = Mockito.mock(VulnerabilityRequestService.class);
-        final HubRequestService hubRequestService = Mockito.mock(HubRequestService.class);
-        final NotificationProcessor processor = new NotificationProcessor(hubRequestService, vulnerabilityRequestService);
+
+        final EmailProcessor processor = createNotificationProcessor();
         final long startTime = System.currentTimeMillis();
         final Collection<ProjectData> projectData = processor.process(notificationSet);
         final long endTime = System.currentTimeMillis();
@@ -308,9 +352,7 @@ public class NotificationCapacityTest {
         System.out.println("Start of Processor event cancellation via cleared");
 
         final SortedSet<NotificationContentItem> notificationSet = createClearedNotificationCancellationList();
-        final VulnerabilityRequestService vulnerabilityRequestService = Mockito.mock(VulnerabilityRequestService.class);
-        final HubRequestService hubRequestService = Mockito.mock(HubRequestService.class);
-        final NotificationProcessor processor = new NotificationProcessor(hubRequestService, vulnerabilityRequestService);
+        final EmailProcessor processor = createNotificationProcessor();
         final long startTime = System.currentTimeMillis();
         final Collection<ProjectData> projectData = processor.process(notificationSet);
         final long endTime = System.currentTimeMillis();
@@ -328,15 +370,9 @@ public class NotificationCapacityTest {
         final List<VulnerabilitySourceQualifiedId> vulnerabilitySourceList = createVulnerbilityList();
         // setup rest service mocks
         final List<VulnerabilityItem> vulnerabilityList = testUtil.createVulnerabiltyItemList(vulnerabilitySourceList);
-        final VulnerabilityRequestService vulnerabilityRequestService = Mockito.mock(VulnerabilityRequestService.class);
-        final HubRequestService hubRequestService = Mockito.mock(HubRequestService.class);
-        final ComponentVersion compVersion = Mockito.mock(ComponentVersion.class);
-        Mockito.when(compVersion.getLink(Mockito.anyString())).thenReturn(ProcessorTestUtil.COMPONENT_VERSION_URL);
-        Mockito.when(hubRequestService.getItem(Mockito.anyString(), Mockito.eq(ComponentVersion.class))).thenReturn(compVersion);
-        Mockito.when(vulnerabilityRequestService.getComponentVersionVulnerabilities(Mockito.anyString())).thenReturn(vulnerabilityList);
 
         final SortedSet<NotificationContentItem> notificationSet = createVulnerabilityAddedList(vulnerabilitySourceList);
-        final NotificationProcessor processor = new NotificationProcessor(hubRequestService, vulnerabilityRequestService);
+        final EmailProcessor processor = createNotificationProcessor(vulnerabilityList);
         final long startTime = System.currentTimeMillis();
         final Collection<ProjectData> projectData = processor.process(notificationSet);
         final long endTime = System.currentTimeMillis();
@@ -354,15 +390,9 @@ public class NotificationCapacityTest {
         final List<VulnerabilitySourceQualifiedId> vulnerabilitySourceList = createVulnerbilityList();
         // setup rest service mocks
         final List<VulnerabilityItem> vulnerabilityList = testUtil.createVulnerabiltyItemList(vulnerabilitySourceList);
-        final ComponentVersion compVersion = Mockito.mock(ComponentVersion.class);
-        Mockito.when(compVersion.getLink(Mockito.anyString())).thenReturn(ProcessorTestUtil.COMPONENT_VERSION_URL);
-        final VulnerabilityRequestService vulnerabilityRequestService = Mockito.mock(VulnerabilityRequestService.class);
-        final HubRequestService hubRequestService = Mockito.mock(HubRequestService.class);
-        Mockito.when(hubRequestService.getItem(Mockito.anyString(), Mockito.eq(ComponentVersion.class))).thenReturn(compVersion);
-        Mockito.when(vulnerabilityRequestService.getComponentVersionVulnerabilities(Mockito.anyString())).thenReturn(vulnerabilityList);
 
         final SortedSet<NotificationContentItem> notificationSet = createComplexNotificationList(vulnerabilitySourceList);
-        final NotificationProcessor processor = new NotificationProcessor(hubRequestService, vulnerabilityRequestService);
+        final EmailProcessor processor = createNotificationProcessor(vulnerabilityList);
         final long startTime = System.currentTimeMillis();
         final Collection<ProjectData> projectData = processor.process(notificationSet);
         final long endTime = System.currentTimeMillis();

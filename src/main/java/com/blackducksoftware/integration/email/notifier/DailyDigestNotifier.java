@@ -29,16 +29,12 @@ import java.util.Date;
 import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityRequestService;
-import com.blackducksoftware.integration.hub.dataservice.extension.ExtensionConfigDataService;
-import com.blackducksoftware.integration.hub.dataservice.notification.NotificationDataService;
-import com.blackducksoftware.integration.hub.service.HubRequestService;
+import com.blackducksoftware.integration.hub.service.HubServicesFactory;
 
 public class DailyDigestNotifier extends AbstractDigestNotifier {
     public DailyDigestNotifier(final ExtensionProperties customerProperties,
-            final EmailMessagingService emailMessagingService, HubRequestService hubRequestService, VulnerabilityRequestService vulnerabilityRequestService,
-            ExtensionConfigDataService extensionConfigDataService, NotificationDataService notificationDataService) {
-        super(customerProperties, emailMessagingService, hubRequestService, vulnerabilityRequestService, extensionConfigDataService, notificationDataService);
+            final EmailMessagingService emailMessagingService, HubServicesFactory hubServicesFactory) {
+        super(customerProperties, emailMessagingService, hubServicesFactory);
     }
 
     @Override

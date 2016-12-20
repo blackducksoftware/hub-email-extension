@@ -36,13 +36,13 @@ import com.blackducksoftware.integration.email.notifier.NotifierManager;
 import com.blackducksoftware.integration.exception.EncryptionException;
 import com.blackducksoftware.integration.hub.builder.HubProxyInfoBuilder;
 import com.blackducksoftware.integration.hub.dataservice.notification.NotificationDataService;
-import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyNotificationFilter;
 import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 import com.blackducksoftware.integration.hub.global.HubCredentials;
 import com.blackducksoftware.integration.hub.global.HubProxyInfo;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
+import com.blackducksoftware.integration.log.IntLogger;
 import com.blackducksoftware.integration.log.Slf4jIntLogger;
 
 public class TestEmailEngine extends EmailEngine {
@@ -55,7 +55,11 @@ public class TestEmailEngine extends EmailEngine {
 
     @Override
     public RestConnection createRestConnection(String hubUri) {
-        return new MockRestConnection();
+        try {
+            return new MockRestConnection(new URL(hubUri));
+        } catch (final MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -72,7 +76,7 @@ public class TestEmailEngine extends EmailEngine {
             HubCredentials credentials;
             credentials = new HubCredentials("user", "password");
 
-            final HubProxyInfo proxyInfo = new HubProxyInfoBuilder().buildResults().getConstructedObject();
+            final HubProxyInfo proxyInfo = new HubProxyInfoBuilder().build();
             serverConfig = new HubServerConfig(new URL("http://localhost"), 120, credentials, proxyInfo);
         } catch (final EncryptionException | MalformedURLException e) {
             logger.error("Error creating hub server config", e);
@@ -90,11 +94,11 @@ public class TestEmailEngine extends EmailEngine {
         HubServicesFactory hubServicesFactory;
         try {
             hubServicesFactory = new HubServicesFactory(getRestConnection());
-
-            return new MockNotificationDataService(new Slf4jIntLogger(logger), getRestConnection(), hubServicesFactory.createNotificationRequestService(),
-                    hubServicesFactory.createProjectVersionRequestService(), hubServicesFactory.createPolicyRequestService(),
+            final IntLogger hubLogger = new Slf4jIntLogger(logger);
+            return new MockNotificationDataService(hubLogger, getRestConnection(), hubServicesFactory.createNotificationRequestService(hubLogger),
+                    hubServicesFactory.createProjectVersionRequestService(hubLogger), hubServicesFactory.createPolicyRequestService(),
                     hubServicesFactory.createVersionBomPolicyRequestService(), hubServicesFactory.createHubRequestService(),
-                    new PolicyNotificationFilter(null));
+                    hubServicesFactory.createMetaService(hubLogger));
         } catch (final HubIntegrationException e) {
             throw new RuntimeException(e);
         }
@@ -105,9 +109,7 @@ public class TestEmailEngine extends EmailEngine {
         final NotifierManager manager = new NotifierManager();
         try {
             final HubServicesFactory hubServicesFactory = new HubServicesFactory(getRestConnection());
-            final TestDigestNotifier digestNotifier = new TestDigestNotifier(getExtensionProperties(), getEmailMessagingService(),
-                    hubServicesFactory.createHubRequestService(), hubServicesFactory.createVulnerabilityRequestService(), getExtConfigDataService(),
-                    hubServicesFactory.createNotificationDataService(new Slf4jIntLogger(logger)));
+            final TestDigestNotifier digestNotifier = new TestDigestNotifier(getExtensionProperties(), getEmailMessagingService(), getHubServicesFactory());
             manager.attach(digestNotifier);
         } catch (final HubIntegrationException e) {
 

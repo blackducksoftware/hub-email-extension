@@ -21,29 +21,30 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.email.mock;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import org.restlet.Context;
-import org.restlet.resource.ClientResource;
+import java.net.URL;
 
 import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.hub.global.HubProxyInfo;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
+import com.blackducksoftware.integration.log.IntLogger;
 
 public class MockRestConnection extends RestConnection {
 
+    public MockRestConnection(URL baseUrl) {
+        super(baseUrl);
+    }
+
+    public MockRestConnection(IntLogger logger, URL baseUrl, HubProxyInfo hubProxyInfo) {
+        super(logger, baseUrl, hubProxyInfo);
+    }
+
     @Override
-    public void connect() throws HubIntegrationException {
+    public void addBuilderAuthentication() throws HubIntegrationException {
 
     }
 
     @Override
-    public ClientResource createClientResource(Context context, String providedUrl) throws HubIntegrationException {
-        try {
-            return new ClientResource(context, new URI(providedUrl));
-        } catch (final URISyntaxException e) {
-            throw new HubIntegrationException(e);
-        }
-    }
+    public void clientAuthenticate() throws HubIntegrationException {
 
+    }
 }

@@ -21,34 +21,32 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.email.batch.processor;
 
-import java.net.URISyntaxException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.blackducksoftware.integration.hub.api.item.MetaService;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.NotificationContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationContentItem;
+import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.hub.notification.processor.MapProcessorCache;
+import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
+import com.blackducksoftware.integration.hub.notification.processor.NotificationSubProcessor;
+import com.blackducksoftware.integration.hub.notification.processor.ProcessingActionEnum;
+import com.blackducksoftware.integration.hub.notification.processor.event.PolicyEvent;
 
 public class PolicyViolationProcessor extends NotificationSubProcessor<PolicyEvent> {
-    private final Logger logger = LoggerFactory.getLogger(PolicyViolationProcessor.class);
 
-    public PolicyViolationProcessor(final SubProcessorCache<PolicyEvent> cache) {
-        super(cache);
+    public PolicyViolationProcessor(final MapProcessorCache<PolicyEvent> cache, final MetaService metaService) {
+        super(cache, metaService);
     }
 
     @Override
-    public void process(final NotificationContentItem notification) {
+    public void process(final NotificationContentItem notification) throws HubIntegrationException {
         if (notification instanceof PolicyViolationContentItem) {
             final PolicyViolationContentItem policyViolationContentItem = (PolicyViolationContentItem) notification;
             for (final PolicyRule rule : policyViolationContentItem.getPolicyRuleList()) {
-                try {
-                    final PolicyEvent event = new PolicyEvent(ProcessingAction.ADD, NotificationCategoryEnum.POLICY_VIOLATION, policyViolationContentItem,
-                            rule);
-                    getCache().addEvent(event);
-                } catch (final URISyntaxException e) {
-                    logger.error("Error processing policy violation item {} ", policyViolationContentItem, e);
-                }
+                final PolicyEvent event = new PolicyEvent(ProcessingActionEnum.ADD, NotificationCategoryEnum.POLICY_VIOLATION, policyViolationContentItem,
+                        rule, getMetaService().getHref(rule));
+                getCache().addEvent(event);
+
             }
         }
     }

@@ -59,13 +59,11 @@ import com.blackducksoftware.integration.email.notifier.NotifierManager;
 import com.blackducksoftware.integration.email.notifier.RealTimeNotifier;
 import com.blackducksoftware.integration.email.notifier.TestEmailNotifier;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityRequestService;
 import com.blackducksoftware.integration.hub.dataservice.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservice.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
-import com.blackducksoftware.integration.hub.service.HubRequestService;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
 import com.google.gson.JsonParser;
 
@@ -177,6 +175,10 @@ public class EmailEngine implements IAuthorizedListener {
         return extConfigDataService;
     }
 
+    public HubServicesFactory getHubServicesFactory() {
+        return hubServicesFactory;
+    }
+
     public void start() {
         try {
             restletComponent.start();
@@ -284,23 +286,16 @@ public class EmailEngine implements IAuthorizedListener {
     }
 
     public RestConnection initRestConnection(final String hubUri) {
-        final RestConnection restConnection = new OAuthRestConnection(hubServerConfig, tokenManager);
+        final RestConnection restConnection = new OAuthRestConnection(hubServerConfig.getHubUrl(), hubServerConfig.getProxyInfo(), tokenManager);
         return restConnection;
     }
 
     public NotifierManager createNotifierManager() {
         final NotifierManager manager = new NotifierManager();
 
-        final HubRequestService hubRequestService = hubServicesFactory.createHubRequestService();
-
-        final VulnerabilityRequestService vulnerabilityRequestService = hubServicesFactory.createVulnerabilityRequestService();
-
-        final DailyDigestNotifier dailyNotifier = new DailyDigestNotifier(extensionProperties, emailMessagingService, hubRequestService,
-                vulnerabilityRequestService, extConfigDataService, notificationDataService);
-
-        final TestEmailNotifier testNotifier = new TestEmailNotifier(extensionProperties, emailMessagingService, extConfigDataService);
-        final RealTimeNotifier realTimeNotifier = new RealTimeNotifier(extensionProperties, emailMessagingService, hubRequestService,
-                vulnerabilityRequestService, extConfigDataService, notificationDataService);
+        final DailyDigestNotifier dailyNotifier = new DailyDigestNotifier(extensionProperties, emailMessagingService, hubServicesFactory);
+        final TestEmailNotifier testNotifier = new TestEmailNotifier(extensionProperties, emailMessagingService, hubServicesFactory);
+        final RealTimeNotifier realTimeNotifier = new RealTimeNotifier(extensionProperties, emailMessagingService, hubServicesFactory);
         manager.attach(dailyNotifier);
         manager.attach(realTimeNotifier);
         manager.attach(testNotifier);
