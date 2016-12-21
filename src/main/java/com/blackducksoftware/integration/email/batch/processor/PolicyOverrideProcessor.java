@@ -29,7 +29,6 @@ import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 import com.blackducksoftware.integration.hub.notification.processor.MapProcessorCache;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationSubProcessor;
-import com.blackducksoftware.integration.hub.notification.processor.ProcessingActionEnum;
 import com.blackducksoftware.integration.hub.notification.processor.event.PolicyEvent;
 import com.blackducksoftware.integration.hub.notification.processor.event.PolicyOverrideEvent;
 
@@ -43,12 +42,11 @@ public class PolicyOverrideProcessor extends NotificationSubProcessor<PolicyEven
     public void process(final NotificationContentItem notification) throws HubIntegrationException {
         final PolicyOverrideContentItem policyOverrideContentItem = (PolicyOverrideContentItem) notification;
         for (final PolicyRule rule : policyOverrideContentItem.getPolicyRuleList()) {
-            final PolicyOverrideEvent event = new PolicyOverrideEvent(ProcessingActionEnum.REMOVE, NotificationCategoryEnum.POLICY_VIOLATION,
+            final PolicyOverrideEvent event = new PolicyOverrideEvent(NotificationCategoryEnum.POLICY_VIOLATION,
                     policyOverrideContentItem, rule, getMetaService().getHref(rule));
             if (getCache().hasEvent(event.getEventKey())) {
                 getCache().removeEvent(event);
             } else {
-                event.setAction(ProcessingActionEnum.ADD);
                 event.setCategoryType(NotificationCategoryEnum.POLICY_VIOLATION_OVERRIDE);
                 getCache().addEvent(event);
             }

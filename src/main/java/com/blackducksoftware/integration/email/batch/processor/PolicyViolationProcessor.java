@@ -29,7 +29,6 @@ import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 import com.blackducksoftware.integration.hub.notification.processor.MapProcessorCache;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationSubProcessor;
-import com.blackducksoftware.integration.hub.notification.processor.ProcessingActionEnum;
 import com.blackducksoftware.integration.hub.notification.processor.event.PolicyEvent;
 
 public class PolicyViolationProcessor extends NotificationSubProcessor<PolicyEvent> {
@@ -43,7 +42,7 @@ public class PolicyViolationProcessor extends NotificationSubProcessor<PolicyEve
         if (notification instanceof PolicyViolationContentItem) {
             final PolicyViolationContentItem policyViolationContentItem = (PolicyViolationContentItem) notification;
             for (final PolicyRule rule : policyViolationContentItem.getPolicyRuleList()) {
-                final PolicyEvent event = new PolicyEvent(ProcessingActionEnum.ADD, NotificationCategoryEnum.POLICY_VIOLATION, policyViolationContentItem,
+                final PolicyEvent event = new PolicyEvent(NotificationCategoryEnum.POLICY_VIOLATION, policyViolationContentItem,
                         rule, getMetaService().getHref(rule));
                 getCache().addEvent(event);
 
