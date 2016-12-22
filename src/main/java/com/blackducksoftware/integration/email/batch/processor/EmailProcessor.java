@@ -42,13 +42,12 @@ import com.blackducksoftware.integration.hub.notification.processor.MapProcessor
 import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationProcessor;
 import com.blackducksoftware.integration.hub.notification.processor.event.NotificationEvent;
-import com.blackducksoftware.integration.hub.notification.processor.event.PolicyEvent;
 import com.blackducksoftware.integration.hub.service.HubRequestService;
 
-public class EmailProcessor extends NotificationProcessor<Collection<ProjectData>> {
+public class EmailProcessor extends NotificationProcessor<Collection<ProjectData>, NotificationEvent> {
 
     public EmailProcessor(HubRequestService hubRequestService, VulnerabilityRequestService vulnerabilityRequestService, MetaService metaService) {
-        final MapProcessorCache<PolicyEvent> policyCache = new MapProcessorCache<>();
+        final MapProcessorCache<NotificationEvent> policyCache = new MapProcessorCache<>();
         final VulnerabilityCache vulnerabilityCache = new VulnerabilityCache(hubRequestService, vulnerabilityRequestService, metaService);
         getCacheList().add(policyCache);
         getCacheList().add(vulnerabilityCache);
@@ -60,15 +59,15 @@ public class EmailProcessor extends NotificationProcessor<Collection<ProjectData
     }
 
     @Override
-    public Collection<ProjectData> processEvents(Collection<NotificationEvent<?>> eventList) throws HubIntegrationException {
+    public Collection<ProjectData> processEvents(Collection<NotificationEvent> eventList) throws HubIntegrationException {
         final Collection<ProjectData> projectMap = createCateoryDataMap(eventList);
         return projectMap;
     }
 
-    private Collection<ProjectData> createCateoryDataMap(final Collection<NotificationEvent<?>> eventMap) {
+    private Collection<ProjectData> createCateoryDataMap(final Collection<NotificationEvent> eventMap) {
         final Map<String, ProjectDataBuilder> projectDataMap = new LinkedHashMap<>();
-        for (final NotificationEvent<?> entry : eventMap) {
-            final NotificationEvent<?> event = entry;
+        for (final NotificationEvent entry : eventMap) {
+            final NotificationEvent event = entry;
             final String projectKey = event.getNotificationContent().getProjectVersion().getUrl();
             // get category map from the project or create the project data if
             // it doesn't exist

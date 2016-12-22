@@ -103,9 +103,9 @@ public class NotificationProcessorTest {
                 + "}]}}";
     }
 
-    private void assertPolicyDataValid(final Collection<NotificationEvent<?>> eventList, NotificationCategoryEnum categoryType) {
+    private void assertPolicyDataValid(final Collection<NotificationEvent> eventList, NotificationCategoryEnum categoryType) {
         int ruleIndex = 1;
-        for (final NotificationEvent<?> event : eventList) {
+        for (final NotificationEvent event : eventList) {
             assertEquals(ProcessorTestUtil.PROJECT_NAME, event.getNotificationContent().getProjectVersion().getProjectName());
             assertEquals(ProcessorTestUtil.PROJECT_VERSION_NAME, event.getNotificationContent().getProjectVersion().getProjectVersionName());
             final Set<ItemEntry> dataSet = event.getDataSet();
@@ -128,7 +128,7 @@ public class NotificationProcessorTest {
         notifications.add(
                 testUtil.createPolicyViolation(new Date(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT,
                         ProcessorTestUtil.VERSION));
-        final Collection<NotificationEvent<?>> eventList = createMockedNotificationProcessor().process(notifications);
+        final Collection<NotificationEvent> eventList = createMockedNotificationProcessor().process(notifications);
 
         assertPolicyDataValid(eventList, NotificationCategoryEnum.POLICY_VIOLATION);
     }
@@ -139,7 +139,7 @@ public class NotificationProcessorTest {
         notifications.add(
                 testUtil.createPolicyOverride(new Date(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT,
                         ProcessorTestUtil.VERSION));
-        final Collection<NotificationEvent<?>> eventList = createMockedNotificationProcessor().process(notifications);
+        final Collection<NotificationEvent> eventList = createMockedNotificationProcessor().process(notifications);
         assertFalse(eventList.isEmpty());
         assertPolicyDataValid(eventList, NotificationCategoryEnum.POLICY_VIOLATION_OVERRIDE);
     }
@@ -150,7 +150,7 @@ public class NotificationProcessorTest {
         notifications.add(
                 testUtil.createPolicyCleared(new Date(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT,
                         ProcessorTestUtil.VERSION));
-        final Collection<NotificationEvent<?>> eventList = createMockedNotificationProcessor().process(notifications);
+        final Collection<NotificationEvent> eventList = createMockedNotificationProcessor().process(notifications);
         assertFalse(eventList.isEmpty());
         assertPolicyDataValid(eventList, NotificationCategoryEnum.POLICY_VIOLATION_CLEARED);
     }
@@ -166,7 +166,7 @@ public class NotificationProcessorTest {
         final PolicyOverrideContentItem policyOverride = testUtil.createPolicyOverride(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, ProcessorTestUtil.VERSION);
         notifications.add(policyOverride);
-        final Collection<NotificationEvent<?>> eventList = createMockedNotificationProcessor().process(notifications);
+        final Collection<NotificationEvent> eventList = createMockedNotificationProcessor().process(notifications);
         assertTrue(eventList.isEmpty());
     }
 
@@ -181,7 +181,7 @@ public class NotificationProcessorTest {
         final PolicyViolationClearedContentItem policyCleared = testUtil.createPolicyCleared(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, ProcessorTestUtil.VERSION);
         notifications.add(policyCleared);
-        final Collection<NotificationEvent<?>> eventList = createMockedNotificationProcessor().process(notifications);
+        final Collection<NotificationEvent> eventList = createMockedNotificationProcessor().process(notifications);
         assertTrue(eventList.isEmpty());
     }
 
@@ -201,7 +201,7 @@ public class NotificationProcessorTest {
                 ProcessorTestUtil.COMPONENT,
                 ProcessorTestUtil.VERSION);
         notifications.add(policyViolation);
-        final Collection<NotificationEvent<?>> eventList = createMockedNotificationProcessor().process(notifications);
+        final Collection<NotificationEvent> eventList = createMockedNotificationProcessor().process(notifications);
         assertPolicyDataValid(eventList, NotificationCategoryEnum.POLICY_VIOLATION);
     }
 
@@ -221,7 +221,7 @@ public class NotificationProcessorTest {
                 ProcessorTestUtil.COMPONENT,
                 ProcessorTestUtil.VERSION);
         notifications.add(policyViolation);
-        final Collection<NotificationEvent<?>> eventList = createMockedNotificationProcessor().process(notifications);
+        final Collection<NotificationEvent> eventList = createMockedNotificationProcessor().process(notifications);
         assertPolicyDataValid(eventList, NotificationCategoryEnum.POLICY_VIOLATION);
     }
 
@@ -250,7 +250,7 @@ public class NotificationProcessorTest {
         final PolicyViolationClearedContentItem policyCleared = testUtil.createPolicyCleared(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, ProcessorTestUtil.VERSION);
         notifications.add(policyCleared);
-        final Collection<NotificationEvent<?>> eventList = createMockedNotificationProcessor().process(notifications);
+        final Collection<NotificationEvent> eventList = createMockedNotificationProcessor().process(notifications);
         assertPolicyDataValid(eventList, NotificationCategoryEnum.POLICY_VIOLATION);
     }
 
@@ -268,9 +268,9 @@ public class NotificationProcessorTest {
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, ProcessorTestUtil.VERSION, vulnerabilities, emptyVulnSourceList,
                 emptyVulnSourceList);
         notifications.add(vulnerability);
-        final Collection<NotificationEvent<?>> eventList = createMockedNotificationProcessor(vulnerabilityList).process(notifications);
+        final Collection<NotificationEvent> eventList = createMockedNotificationProcessor(vulnerabilityList).process(notifications);
 
-        for (final NotificationEvent<?> event : eventList) {
+        for (final NotificationEvent event : eventList) {
 
             final Set<ItemEntry> dataSet = event.getDataSet();
             final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(), ProcessorTestUtil.COMPONENT);
@@ -296,9 +296,9 @@ public class NotificationProcessorTest {
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, ProcessorTestUtil.VERSION, emptyVulnSourceList, vulnerabilities,
                 emptyVulnSourceList);
         notifications.add(vulnerability);
-        final Collection<NotificationEvent<?>> eventList = createMockedNotificationProcessor(vulnerabilityList).process(notifications);
+        final Collection<NotificationEvent> eventList = createMockedNotificationProcessor(vulnerabilityList).process(notifications);
 
-        for (final NotificationEvent<?> event : eventList) {
+        for (final NotificationEvent event : eventList) {
             final Set<ItemEntry> dataSet = event.getDataSet();
             final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(), ProcessorTestUtil.COMPONENT);
             assertTrue(dataSet.contains(componentKey));
@@ -323,7 +323,7 @@ public class NotificationProcessorTest {
                 emptyVulnSourceList,
                 vulnerabilities);
         notifications.add(vulnerability);
-        final Collection<NotificationEvent<?>> eventList = createMockedNotificationProcessor().process(notifications);
+        final Collection<NotificationEvent> eventList = createMockedNotificationProcessor().process(notifications);
         assertTrue(eventList.isEmpty());
     }
 
@@ -341,7 +341,7 @@ public class NotificationProcessorTest {
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, ProcessorTestUtil.VERSION, vulnerabilities, emptyVulnSourceList,
                 vulnerabilities);
         notifications.add(vulnerability);
-        final Collection<NotificationEvent<?>> eventList = createMockedNotificationProcessor().process(notifications);
+        final Collection<NotificationEvent> eventList = createMockedNotificationProcessor().process(notifications);
         assertTrue(eventList.isEmpty());
     }
 
@@ -376,9 +376,9 @@ public class NotificationProcessorTest {
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, ProcessorTestUtil.VERSION, added, updated, deleted);
         notifications.add(vulnerability);
 
-        final Collection<NotificationEvent<?>> eventList = createMockedNotificationProcessor(vulnerabilityList).process(notifications);
+        final Collection<NotificationEvent> eventList = createMockedNotificationProcessor(vulnerabilityList).process(notifications);
         assertFalse(eventList.isEmpty());
-        for (final NotificationEvent<?> event : eventList) {
+        for (final NotificationEvent event : eventList) {
 
             final Set<ItemEntry> dataSet = event.getDataSet();
             final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(), ProcessorTestUtil.COMPONENT);
@@ -441,9 +441,9 @@ public class NotificationProcessorTest {
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, ProcessorTestUtil.VERSION, added2, updated2, deleted2);
         notifications.add(vulnerability2);
 
-        final Collection<NotificationEvent<?>> eventList = createMockedNotificationProcessor(vulnerabilityList).process(notifications);
+        final Collection<NotificationEvent> eventList = createMockedNotificationProcessor(vulnerabilityList).process(notifications);
         assertFalse(eventList.isEmpty());
-        for (final NotificationEvent<?> event : eventList) {
+        for (final NotificationEvent event : eventList) {
             final Set<ItemEntry> dataSet = event.getDataSet();
             final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(), ProcessorTestUtil.COMPONENT);
             assertTrue(dataSet.contains(componentKey));

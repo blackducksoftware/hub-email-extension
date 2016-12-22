@@ -33,13 +33,12 @@ import com.blackducksoftware.integration.hub.dataservice.notification.item.Vulne
 import com.blackducksoftware.integration.hub.notification.processor.MapProcessorCache;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationProcessor;
 import com.blackducksoftware.integration.hub.notification.processor.event.NotificationEvent;
-import com.blackducksoftware.integration.hub.notification.processor.event.PolicyEvent;
 import com.blackducksoftware.integration.hub.service.HubRequestService;
 
-public class MockProcessor extends NotificationProcessor<Collection<NotificationEvent<?>>> {
+public class MockProcessor extends NotificationProcessor<Collection<NotificationEvent>, NotificationEvent> {
 
     public MockProcessor(HubRequestService hubRequestService, VulnerabilityRequestService vulnerabilityRequestService, MetaService metaService) {
-        final MapProcessorCache<PolicyEvent> policyCache = new MapProcessorCache<>();
+        final MapProcessorCache<NotificationEvent> policyCache = new MapProcessorCache<>();
         final VulnerabilityCache vulnerabilityCache = new VulnerabilityCache(hubRequestService, vulnerabilityRequestService, metaService);
         getCacheList().add(policyCache);
         getCacheList().add(vulnerabilityCache);
@@ -52,9 +51,9 @@ public class MockProcessor extends NotificationProcessor<Collection<Notification
     }
 
     @Override
-    public Collection<NotificationEvent<?>> processEvents(Collection<NotificationEvent<?>> eventCollection) {
-        final Collection<NotificationEvent<?>> dataList = new LinkedList<>();
-        for (final NotificationEvent<?> entry : eventCollection) {
+    public Collection<NotificationEvent> processEvents(Collection<NotificationEvent> eventCollection) {
+        final Collection<NotificationEvent> dataList = new LinkedList<>();
+        for (final NotificationEvent entry : eventCollection) {
             dataList.add(entry);
         }
         return dataList;

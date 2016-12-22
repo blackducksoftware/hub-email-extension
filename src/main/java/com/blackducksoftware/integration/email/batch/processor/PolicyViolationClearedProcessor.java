@@ -21,19 +21,22 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.email.batch.processor;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.blackducksoftware.integration.hub.api.item.MetaService;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.NotificationContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationClearedContentItem;
 import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
-import com.blackducksoftware.integration.hub.notification.processor.MapProcessorCache;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
-import com.blackducksoftware.integration.hub.notification.processor.NotificationSubProcessor;
+import com.blackducksoftware.integration.hub.notification.processor.SubProcessorCache;
+import com.blackducksoftware.integration.hub.notification.processor.event.NotificationEvent;
 import com.blackducksoftware.integration.hub.notification.processor.event.PolicyEvent;
 
-public class PolicyViolationClearedProcessor extends NotificationSubProcessor<PolicyEvent> {
+public class PolicyViolationClearedProcessor extends PolicyViolationProcessor {
 
-    public PolicyViolationClearedProcessor(final MapProcessorCache<PolicyEvent> cache, final MetaService metaService) {
+    public PolicyViolationClearedProcessor(final SubProcessorCache<NotificationEvent> cache, final MetaService metaService) {
         super(cache, metaService);
     }
 
@@ -41,8 +44,12 @@ public class PolicyViolationClearedProcessor extends NotificationSubProcessor<Po
     public void process(final NotificationContentItem notification) throws HubIntegrationException {
         if (notification instanceof PolicyViolationClearedContentItem) {
             final PolicyViolationClearedContentItem policyViolationCleared = (PolicyViolationClearedContentItem) notification;
+            final Map<String, Object> dataMap = new HashMap<>();
             for (final PolicyRule rule : policyViolationCleared.getPolicyRuleList()) {
-                final PolicyEvent event = new PolicyEvent(NotificationCategoryEnum.POLICY_VIOLATION, policyViolationCleared, rule,
+                dataMap.put(POLICY_CONTENT_ITEM, policyViolationCleared);
+                dataMap.put(POLICY_RULE, rule);
+                final String eventKey = generateEventKey(dataMap);
+                final PolicyEvent event = new PolicyEvent(eventKey, NotificationCategoryEnum.POLICY_VIOLATION, policyViolationCleared, rule,
                         getMetaService().getHref(rule));
                 if (getCache().hasEvent(event.getEventKey())) {
                     getCache().removeEvent(event);
