@@ -31,7 +31,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -51,7 +51,6 @@ import com.blackducksoftware.integration.hub.dataservice.notification.item.Polic
 import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationClearedContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.VulnerabilityContentItem;
-import com.blackducksoftware.integration.hub.notification.processor.ItemEntry;
 import com.blackducksoftware.integration.hub.notification.processor.ItemTypeEnum;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
 import com.blackducksoftware.integration.hub.notification.processor.event.NotificationEvent;
@@ -106,18 +105,13 @@ public class NotificationProcessorTest {
     private void assertPolicyDataValid(final Collection<NotificationEvent> eventList, NotificationCategoryEnum categoryType) {
         int ruleIndex = 1;
         for (final NotificationEvent event : eventList) {
-            assertEquals(ProcessorTestUtil.PROJECT_NAME, event.getNotificationContent().getProjectVersion().getProjectName());
-            assertEquals(ProcessorTestUtil.PROJECT_VERSION_NAME, event.getNotificationContent().getProjectVersion().getProjectVersionName());
-            final Set<ItemEntry> dataSet = event.getDataSet();
-
-            final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(), ProcessorTestUtil.COMPONENT);
-            assertTrue(dataSet.contains(componentKey));
-
-            final ItemEntry versionKey = new ItemEntry("", ProcessorTestUtil.VERSION);
-            assertTrue(dataSet.contains(versionKey));
-
-            final ItemEntry ruleKey = new ItemEntry(ItemTypeEnum.RULE.name(), ProcessorTestUtil.PREFIX_RULE + ruleIndex);
-            assertTrue(dataSet.contains(ruleKey));
+            final NotificationContentItem content = (NotificationContentItem) event.getDataSet().get(NotificationEvent.DATA_SET_KEY_NOTIFICATION_CONTENT);
+            assertEquals(ProcessorTestUtil.PROJECT_NAME, content.getProjectVersion().getProjectName());
+            assertEquals(ProcessorTestUtil.PROJECT_VERSION_NAME, content.getProjectVersion().getProjectVersionName());
+            final Map<String, Object> dataSet = event.getDataSet();
+            assertEquals(ProcessorTestUtil.COMPONENT, dataSet.get(ItemTypeEnum.COMPONENT.name()));
+            assertEquals(ProcessorTestUtil.VERSION, dataSet.get(ItemTypeEnum.VERSION.name()));
+            assertEquals(ProcessorTestUtil.PREFIX_RULE + ruleIndex, dataSet.get(ItemTypeEnum.RULE.name()));
             ruleIndex++;
         }
     }
@@ -271,13 +265,9 @@ public class NotificationProcessorTest {
         final Collection<NotificationEvent> eventList = createMockedNotificationProcessor(vulnerabilityList).process(notifications);
 
         for (final NotificationEvent event : eventList) {
-
-            final Set<ItemEntry> dataSet = event.getDataSet();
-            final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(), ProcessorTestUtil.COMPONENT);
-            assertTrue(dataSet.contains(componentKey));
-
-            final ItemEntry versionKey = new ItemEntry("", ProcessorTestUtil.VERSION);
-            assertTrue(dataSet.contains(versionKey));
+            final Map<String, Object> dataSet = event.getDataSet();
+            assertEquals(ProcessorTestUtil.COMPONENT, dataSet.get(ItemTypeEnum.COMPONENT.name()));
+            assertEquals(ProcessorTestUtil.VERSION, dataSet.get(ItemTypeEnum.VERSION.name()));
         }
     }
 
@@ -299,12 +289,9 @@ public class NotificationProcessorTest {
         final Collection<NotificationEvent> eventList = createMockedNotificationProcessor(vulnerabilityList).process(notifications);
 
         for (final NotificationEvent event : eventList) {
-            final Set<ItemEntry> dataSet = event.getDataSet();
-            final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(), ProcessorTestUtil.COMPONENT);
-            assertTrue(dataSet.contains(componentKey));
-
-            final ItemEntry versionKey = new ItemEntry("", ProcessorTestUtil.VERSION);
-            assertTrue(dataSet.contains(versionKey));
+            final Map<String, Object> dataSet = event.getDataSet();
+            assertEquals(ProcessorTestUtil.COMPONENT, dataSet.get(ItemTypeEnum.COMPONENT.name()));
+            assertEquals(ProcessorTestUtil.VERSION, dataSet.get(ItemTypeEnum.VERSION.name()));
         }
     }
 
@@ -380,12 +367,10 @@ public class NotificationProcessorTest {
         assertFalse(eventList.isEmpty());
         for (final NotificationEvent event : eventList) {
 
-            final Set<ItemEntry> dataSet = event.getDataSet();
-            final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(), ProcessorTestUtil.COMPONENT);
-            assertTrue(dataSet.contains(componentKey));
+            final Map<String, Object> dataSet = event.getDataSet();
+            assertEquals(ProcessorTestUtil.COMPONENT, dataSet.get(ItemTypeEnum.COMPONENT.name()));
+            assertEquals(ProcessorTestUtil.VERSION, dataSet.get(ItemTypeEnum.VERSION.name()));
 
-            final ItemEntry versionKey = new ItemEntry("", ProcessorTestUtil.VERSION);
-            assertTrue(dataSet.contains(versionKey));
         }
     }
 
@@ -444,12 +429,9 @@ public class NotificationProcessorTest {
         final Collection<NotificationEvent> eventList = createMockedNotificationProcessor(vulnerabilityList).process(notifications);
         assertFalse(eventList.isEmpty());
         for (final NotificationEvent event : eventList) {
-            final Set<ItemEntry> dataSet = event.getDataSet();
-            final ItemEntry componentKey = new ItemEntry(ItemTypeEnum.COMPONENT.name(), ProcessorTestUtil.COMPONENT);
-            assertTrue(dataSet.contains(componentKey));
-
-            final ItemEntry versionKey = new ItemEntry("", ProcessorTestUtil.VERSION);
-            assertTrue(dataSet.contains(versionKey));
+            final Map<String, Object> dataSet = event.getDataSet();
+            assertEquals(ProcessorTestUtil.COMPONENT, dataSet.get(ItemTypeEnum.COMPONENT.name()));
+            assertEquals(ProcessorTestUtil.VERSION, dataSet.get(ItemTypeEnum.VERSION.name()));
         }
     }
 }

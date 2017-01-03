@@ -345,7 +345,6 @@ public class NotificationCapacityTest {
         System.out.println("Start Time (ms) = " + startTime);
         System.out.println("End Time (ms)   = " + endTime);
         System.out.println("Diff (ms)       = " + diff);
-        System.out.println("ProjectData     = " + projectData);
         assertTrue(projectData.isEmpty());
     }
 
@@ -362,7 +361,6 @@ public class NotificationCapacityTest {
         System.out.println("Start Time (ms) = " + startTime);
         System.out.println("End Time (ms)   = " + endTime);
         System.out.println("Diff (ms)       = " + diff);
-        System.out.println("ProjectData     = " + projectData);
         assertTrue(projectData.isEmpty());
     }
 
@@ -382,7 +380,6 @@ public class NotificationCapacityTest {
         System.out.println("Start Time (ms) = " + startTime);
         System.out.println("End Time (ms)   = " + endTime);
         System.out.println("Diff (ms)       = " + diff);
-        System.out.println("ProjectData     = " + projectData);
         assertFalse(projectData.isEmpty());
     }
 
@@ -402,8 +399,6 @@ public class NotificationCapacityTest {
         System.out.println("Start Time (ms) = " + startTime);
         System.out.println("End Time (ms)   = " + endTime);
         System.out.println("Diff (ms)       = " + diff);
-        System.out.println("ProjectData     = " + projectData);
         assertFalse(projectData.isEmpty());
     }
-
 }

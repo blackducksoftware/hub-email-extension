@@ -29,20 +29,20 @@ import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.NotificationContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationContentItem;
 import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.hub.notification.processor.ItemTypeEnum;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationSubProcessor;
 import com.blackducksoftware.integration.hub.notification.processor.SubProcessorCache;
 import com.blackducksoftware.integration.hub.notification.processor.event.NotificationEvent;
 import com.blackducksoftware.integration.hub.notification.processor.event.NotificationEventConstants;
-import com.blackducksoftware.integration.hub.notification.processor.event.PolicyEvent;
 
-public class PolicyViolationProcessor extends NotificationSubProcessor<NotificationEvent> {
+public class PolicyViolationProcessor extends NotificationSubProcessor {
 
     public final static String POLICY_CONTENT_ITEM = "policyContentItem";
 
     public final static String POLICY_RULE = "policyRule";
 
-    public PolicyViolationProcessor(final SubProcessorCache<NotificationEvent> cache, final MetaService metaService) {
+    public PolicyViolationProcessor(final SubProcessorCache cache, final MetaService metaService) {
         super(cache, metaService);
     }
 
@@ -55,8 +55,8 @@ public class PolicyViolationProcessor extends NotificationSubProcessor<Notificat
                 dataMap.put(POLICY_CONTENT_ITEM, policyViolationContentItem);
                 dataMap.put(POLICY_RULE, rule);
                 final String eventKey = generateEventKey(dataMap);
-                final PolicyEvent event = new PolicyEvent(eventKey, NotificationCategoryEnum.POLICY_VIOLATION, policyViolationContentItem,
-                        rule, getMetaService().getHref(rule));
+                final Map<String, Object> dataSet = generateDataSet(dataMap);
+                final NotificationEvent event = new NotificationEvent(eventKey, NotificationCategoryEnum.POLICY_VIOLATION, dataSet);
                 getCache().addEvent(event);
             }
         }
@@ -92,5 +92,18 @@ public class PolicyViolationProcessor extends NotificationSubProcessor<Notificat
         keyBuilder.append(hashString(getMetaService().getHref(rule)));
         final String key = keyBuilder.toString();
         return key;
+    }
+
+    @Override
+    public Map<String, Object> generateDataSet(Map<String, Object> inputData) {
+        final Map<String, Object> dataSet = new HashMap<>();
+        final PolicyViolationContentItem policyViolationContentItem = (PolicyViolationContentItem) inputData.get(POLICY_CONTENT_ITEM);
+        final PolicyRule rule = (PolicyRule) inputData.get(POLICY_RULE);
+
+        dataSet.put(ItemTypeEnum.RULE.name(), rule.getName());
+        dataSet.put(ItemTypeEnum.COMPONENT.name(), policyViolationContentItem.getComponentName());
+        dataSet.put(ItemTypeEnum.VERSION.name(), policyViolationContentItem.getComponentVersion());
+        dataSet.put(NotificationEvent.DATA_SET_KEY_NOTIFICATION_CONTENT, policyViolationContentItem);
+        return dataSet;
     }
 }

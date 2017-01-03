@@ -24,19 +24,21 @@ package com.blackducksoftware.integration.email.batch.processor;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.blackducksoftware.integration.hub.api.item.MetaService;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.NotificationContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyOverrideContentItem;
 import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.hub.notification.processor.ItemTypeEnum;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
 import com.blackducksoftware.integration.hub.notification.processor.SubProcessorCache;
 import com.blackducksoftware.integration.hub.notification.processor.event.NotificationEvent;
-import com.blackducksoftware.integration.hub.notification.processor.event.PolicyOverrideEvent;
 
 public class PolicyOverrideProcessor extends PolicyViolationProcessor {
 
-    public PolicyOverrideProcessor(final SubProcessorCache<NotificationEvent> cache, final MetaService metaService) {
+    public PolicyOverrideProcessor(final SubProcessorCache cache, final MetaService metaService) {
         super(cache, metaService);
     }
 
@@ -48,8 +50,8 @@ public class PolicyOverrideProcessor extends PolicyViolationProcessor {
             dataMap.put(POLICY_CONTENT_ITEM, policyOverrideContentItem);
             dataMap.put(POLICY_RULE, rule);
             final String eventKey = generateEventKey(dataMap);
-            final PolicyOverrideEvent event = new PolicyOverrideEvent(eventKey, NotificationCategoryEnum.POLICY_VIOLATION,
-                    policyOverrideContentItem, rule, getMetaService().getHref(rule));
+            final Map<String, Object> dataSet = generateDataSet(dataMap);
+            final NotificationEvent event = new NotificationEvent(eventKey, NotificationCategoryEnum.POLICY_VIOLATION, dataSet);
             if (getCache().hasEvent(event.getEventKey())) {
                 getCache().removeEvent(event);
             } else {
@@ -57,5 +59,14 @@ public class PolicyOverrideProcessor extends PolicyViolationProcessor {
                 getCache().addEvent(event);
             }
         }
+    }
+
+    @Override
+    public Map<String, Object> generateDataSet(Map<String, Object> inputData) {
+        final PolicyOverrideContentItem policyOverride = (PolicyOverrideContentItem) inputData.get(POLICY_CONTENT_ITEM);
+        final Map<String, Object> dataSet = super.generateDataSet(inputData);
+        final String person = StringUtils.join(" ", policyOverride.getFirstName(), policyOverride.getLastName());
+        dataSet.put(ItemTypeEnum.PERSON.name(), person);
+        return dataSet;
     }
 }

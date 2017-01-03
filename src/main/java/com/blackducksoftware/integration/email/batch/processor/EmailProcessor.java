@@ -23,7 +23,6 @@ package com.blackducksoftware.integration.email.batch.processor;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -33,21 +32,23 @@ import com.blackducksoftware.integration.email.model.batch.ProjectData;
 import com.blackducksoftware.integration.email.model.batch.ProjectDataBuilder;
 import com.blackducksoftware.integration.hub.api.item.MetaService;
 import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityRequestService;
+import com.blackducksoftware.integration.hub.dataservice.notification.item.NotificationContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyOverrideContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationClearedContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.item.VulnerabilityContentItem;
 import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.hub.notification.processor.ItemTypeEnum;
 import com.blackducksoftware.integration.hub.notification.processor.MapProcessorCache;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationProcessor;
 import com.blackducksoftware.integration.hub.notification.processor.event.NotificationEvent;
 import com.blackducksoftware.integration.hub.service.HubRequestService;
 
-public class EmailProcessor extends NotificationProcessor<Collection<ProjectData>, NotificationEvent> {
+public class EmailProcessor extends NotificationProcessor<Collection<ProjectData>> {
 
     public EmailProcessor(HubRequestService hubRequestService, VulnerabilityRequestService vulnerabilityRequestService, MetaService metaService) {
-        final MapProcessorCache<NotificationEvent> policyCache = new MapProcessorCache<>();
+        final MapProcessorCache policyCache = new MapProcessorCache();
         final VulnerabilityCache vulnerabilityCache = new VulnerabilityCache(hubRequestService, vulnerabilityRequestService, metaService);
         getCacheList().add(policyCache);
         getCacheList().add(vulnerabilityCache);
@@ -68,14 +69,16 @@ public class EmailProcessor extends NotificationProcessor<Collection<ProjectData
         final Map<String, ProjectDataBuilder> projectDataMap = new LinkedHashMap<>();
         for (final NotificationEvent entry : eventMap) {
             final NotificationEvent event = entry;
-            final String projectKey = event.getNotificationContent().getProjectVersion().getUrl();
+            final NotificationContentItem notificationContent = (NotificationContentItem) event.getDataSet()
+                    .get(NotificationEvent.DATA_SET_KEY_NOTIFICATION_CONTENT);
+            final String projectKey = notificationContent.getProjectVersion().getUrl();
             // get category map from the project or create the project data if
             // it doesn't exist
             Map<NotificationCategoryEnum, CategoryDataBuilder> categoryBuilderMap;
             if (!projectDataMap.containsKey(projectKey)) {
                 final ProjectDataBuilder projectBuilder = new ProjectDataBuilder();
-                projectBuilder.setProjectName(event.getNotificationContent().getProjectVersion().getProjectName());
-                projectBuilder.setProjectVersion(event.getNotificationContent().getProjectVersion().getProjectVersionName());
+                projectBuilder.setProjectName(notificationContent.getProjectVersion().getProjectName());
+                projectBuilder.setProjectVersion(notificationContent.getProjectVersion().getProjectVersionName());
                 projectDataMap.put(projectKey, projectBuilder);
                 categoryBuilderMap = projectBuilder.getCategoryBuilderMap();
             } else {
@@ -92,9 +95,13 @@ public class EmailProcessor extends NotificationProcessor<Collection<ProjectData
             } else {
                 categoryData = categoryBuilderMap.get(categoryKey);
             }
-            categoryData.incrementItemCount(event.countCategoryItems());
-            categoryData.addItem(new ItemData(new LinkedHashSet<>(event.getDataSet())));
-            categoryData.addItem(new ItemData(new LinkedHashSet<>(event.getDataSet())));
+            int count = 1;
+            if (event.getDataSet().containsKey(ItemTypeEnum.COUNT.name())) {
+                count = (Integer) event.getDataSet().get(ItemTypeEnum.COUNT.name());
+            }
+            categoryData.incrementItemCount(count);
+            categoryData.addItem(new ItemData(event.getDataSet()));
+            categoryData.addItem(new ItemData(event.getDataSet()));
         }
         // build
         final Collection<ProjectData> dataList = new LinkedList<>();

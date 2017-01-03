@@ -47,19 +47,20 @@
                             <#list categoryItem.itemList as item>
                                 <#if item.dataSet?? && item.dataSet?size gt 0>
                                    <div>
-                                   <#list item.dataSet as itemEntry>
-                                       <#assign itemType="${itemEntry.key}">
+                                   <#list item.dataSet as item_key, item_value>
+                                       <#assign itemType="${item_key}">
                                        <div style="font-family: monospace;font-size: 14px;color: #445B68;padding-right: 15px;display: inline-block;">
                                        <#if itemType == "RULE">
-                                         Rule: ${itemEntry.value}
+                                         Rule: ${item_value}
                                        <#elseif itemType == "COMPONENT">
-                                         Component: ${itemEntry.value} 
+                                         Component: ${item_value} 
                                        <#elseif itemType == "COUNT">
-                                         (${itemEntry.value})
+                                         (${item_value})
                                        <#elseif itemType == "PERSON">
-                                         By: ${itemEntry.value}
+                                         By: ${item_value}
+                                       <#elseif itemType == "VERSION">
+                                         ${item_value}
                                        <#else>
-                                         ${itemEntry.key}${itemEntry.value}
                                        </#if>
                                        </div>
                                    </#list>

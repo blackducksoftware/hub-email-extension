@@ -35,10 +35,10 @@ import com.blackducksoftware.integration.hub.notification.processor.Notification
 import com.blackducksoftware.integration.hub.notification.processor.event.NotificationEvent;
 import com.blackducksoftware.integration.hub.service.HubRequestService;
 
-public class MockProcessor extends NotificationProcessor<Collection<NotificationEvent>, NotificationEvent> {
+public class MockProcessor extends NotificationProcessor<Collection<NotificationEvent>> {
 
     public MockProcessor(HubRequestService hubRequestService, VulnerabilityRequestService vulnerabilityRequestService, MetaService metaService) {
-        final MapProcessorCache<NotificationEvent> policyCache = new MapProcessorCache<>();
+        final MapProcessorCache policyCache = new MapProcessorCache();
         final VulnerabilityCache vulnerabilityCache = new VulnerabilityCache(hubRequestService, vulnerabilityRequestService, metaService);
         getCacheList().add(policyCache);
         getCacheList().add(vulnerabilityCache);
