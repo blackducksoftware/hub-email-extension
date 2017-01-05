@@ -32,6 +32,7 @@ import javax.mail.MessagingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.model.EmailTarget;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
@@ -48,8 +49,8 @@ public class TestEmailNotifier extends AbstractNotifier {
     private final Pattern emailPattern;
 
     public TestEmailNotifier(final ExtensionProperties extensionProperties, final EmailMessagingService emailMessagingService,
-            final DataServicesFactory dataServicesFactory) {
-        super(extensionProperties, emailMessagingService, dataServicesFactory);
+            final DataServicesFactory dataServicesFactory, final ExtensionInfo extensionInfoData) {
+        super(extensionProperties, emailMessagingService, dataServicesFactory, extensionInfoData);
         emailPattern = Pattern.compile("[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}$");
     }
 
@@ -74,7 +75,7 @@ public class TestEmailNotifier extends AbstractNotifier {
             if (isEmailAddressValid(emailAddress) == false) {
                 logger.info("Test email address {} is invalid.", emailAddress);
             } else {
-                ExtensionProperties globalConfig = createPropertiesFromGlobalConfig();
+                final ExtensionProperties globalConfig = createPropertiesFromGlobalConfig();
                 final Map<String, Object> model = new HashMap<>();
                 final EmailTarget emailTarget = new EmailTarget(emailAddress, getTemplateName(), model);
                 getEmailMessagingService().sendEmailMessage(emailTarget, globalConfig);
@@ -85,7 +86,7 @@ public class TestEmailNotifier extends AbstractNotifier {
     }
 
     private boolean isEmailAddressValid(String emailAddress) {
-        Matcher matcher = emailPattern.matcher(emailAddress);
+        final Matcher matcher = emailPattern.matcher(emailAddress);
         return matcher.matches();
     }
 

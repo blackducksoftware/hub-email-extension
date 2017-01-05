@@ -21,6 +21,7 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.email.mock;
 
+import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.notifier.AbstractNotifier;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
@@ -39,9 +40,9 @@ public class MockNotifier extends AbstractNotifier {
 
     public MockNotifier(final ExtensionProperties customerProperties, final NotificationDataService notificationService,
             final ExtensionConfigDataService extensionConfigDataService,
-            final EmailMessagingService emailMessagingService, final DataServicesFactory dataservicesFactory,
+            final EmailMessagingService emailMessagingService, final DataServicesFactory dataservicesFactory, final ExtensionInfo extensionInfoData,
             final String templateName) {
-        super(customerProperties, emailMessagingService, dataservicesFactory);
+        super(customerProperties, emailMessagingService, dataservicesFactory, extensionInfoData);
         this.templateName = templateName;
     }
 

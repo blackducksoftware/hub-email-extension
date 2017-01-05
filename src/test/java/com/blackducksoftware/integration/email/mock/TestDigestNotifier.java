@@ -28,6 +28,7 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.notifier.AbstractDigestNotifier;
@@ -47,8 +48,8 @@ public class TestDigestNotifier extends AbstractDigestNotifier {
     public TestDigestNotifier(final ExtensionProperties customerProperties,
             final NotificationDataService notificationDataService,
             final ExtensionConfigDataService extensionConfigDataService,
-            final EmailMessagingService emailMessagingService, final DataServicesFactory dataservicesFactory) {
-        super(customerProperties, emailMessagingService, dataservicesFactory);
+            final EmailMessagingService emailMessagingService, final DataServicesFactory dataservicesFactory, final ExtensionInfo extensionInfoData) {
+        super(customerProperties, emailMessagingService, dataservicesFactory, extensionInfoData);
         lastRunPath = getExtensionProperties().getNotifierVariableProperties()
                 .get(getNotifierPropertyKey() + ".lastrun.file");
         initialStartDate = getExtensionProperties().getNotifierVariableProperties()

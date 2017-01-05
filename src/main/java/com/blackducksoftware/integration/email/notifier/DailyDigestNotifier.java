@@ -25,6 +25,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
+import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
@@ -33,8 +34,8 @@ import com.blackducksoftware.integration.hub.dataservices.DataServicesFactory;
 public class DailyDigestNotifier extends AbstractDigestNotifier {
 
     public DailyDigestNotifier(final ExtensionProperties customerProperties,
-            final EmailMessagingService emailMessagingService, final DataServicesFactory dataservicesFactory) {
-        super(customerProperties, emailMessagingService, dataservicesFactory);
+            final EmailMessagingService emailMessagingService, final DataServicesFactory dataservicesFactory, final ExtensionInfo extensionInfoData) {
+        super(customerProperties, emailMessagingService, dataservicesFactory, extensionInfoData);
     }
 
     @Override

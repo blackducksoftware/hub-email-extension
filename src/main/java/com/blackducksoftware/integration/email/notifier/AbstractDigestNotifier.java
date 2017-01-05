@@ -21,6 +21,9 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.email.notifier;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -33,6 +36,8 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONException;
+import org.restlet.resource.ResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,17 +45,24 @@ import com.blackducksoftware.integration.email.EmailExtensionConstants;
 import com.blackducksoftware.integration.email.ExtensionLogger;
 import com.blackducksoftware.integration.email.batch.processor.NotificationCategoryEnum;
 import com.blackducksoftware.integration.email.batch.processor.NotificationProcessor;
+import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.model.EmailTarget;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.model.batch.CategoryData;
 import com.blackducksoftware.integration.email.model.batch.ProjectData;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
+import com.blackducksoftware.integration.hub.HubIntRestService;
 import com.blackducksoftware.integration.hub.api.user.UserItem;
 import com.blackducksoftware.integration.hub.dataservices.DataServicesFactory;
 import com.blackducksoftware.integration.hub.dataservices.extension.item.UserConfigItem;
 import com.blackducksoftware.integration.hub.dataservices.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.dataservices.notification.items.NotificationContentItem;
+import com.blackducksoftware.integration.hub.exception.BDRestException;
+import com.blackducksoftware.integration.hub.exception.ResourceDoesNotExistException;
+import com.blackducksoftware.integration.phone.home.PhoneHomeClient;
+import com.blackducksoftware.integration.phone.home.exception.PhoneHomeException;
+import com.blackducksoftware.integration.phone.home.exception.PropertiesLoaderException;
 
 public abstract class AbstractDigestNotifier extends AbstractNotifier {
     private static final String KEY_HUB_SERVER_URL = "hub_server_url";
@@ -82,8 +94,8 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
     private final NotificationDataService notificationDataService;
 
     public AbstractDigestNotifier(final ExtensionProperties extensionProperties,
-            final EmailMessagingService emailMessagingService, final DataServicesFactory dataServicesFactory) {
-        super(extensionProperties, emailMessagingService, dataServicesFactory);
+            final EmailMessagingService emailMessagingService, final DataServicesFactory dataServicesFactory, final ExtensionInfo extensionInfoData) {
+        super(extensionProperties, emailMessagingService, dataServicesFactory, extensionInfoData);
 
         final String quartzTriggerPropValue = getExtensionProperties().getNotifierVariableProperties()
                 .get(getNotifierPropertyKey() + ".cron.expression");
@@ -257,6 +269,36 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
             return value;
         } else {
             return new ArrayList<>();
+        }
+    }
+
+    private void bdPhoneHome() {
+        try {
+            final HubIntRestService intRestService = new HubIntRestService(getDataServicesFactory().getRestConnection());
+            final String hubVersion = getDataServicesFactory().getHubVersionRestService().getHubVersion();
+            String regId = null;
+            String hubHostName = null;
+            try {
+                regId = intRestService.getRegistrationId();
+            } catch (final Exception e) {
+                logger.debug("Could not get the Hub registration Id.");
+            }
+            try {
+                final URL url = new URL(getDataServicesFactory().getRestConnection().getBaseUrl());
+                hubHostName = url.getHost();
+            } catch (final Exception e) {
+                logger.debug("Could not get the Hub Host name.");
+            }
+
+            final String pluginVersion = getExtensionInfoData().getId();
+
+            final PhoneHomeClient phClient = new PhoneHomeClient();
+
+            phClient.callHomeIntegrations(regId, hubHostName, "Hub", hubVersion, "email-extension", "",
+                    pluginVersion);
+        } catch (ResourceException | JSONException | IOException | PropertiesLoaderException | PhoneHomeException | URISyntaxException
+                | ResourceDoesNotExistException | BDRestException ex) {
+            logger.debug("Unable to phone-home", ex);
         }
     }
 

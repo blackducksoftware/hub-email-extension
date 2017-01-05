@@ -90,7 +90,7 @@ public class TestEmailEngine extends EmailEngine {
         final DataServicesFactory dataServicesFactory = new DataServicesFactory(getRestConnection());
         final TestDigestNotifier digestNotifier = new TestDigestNotifier(getExtensionProperties(),
                 getNotificationDataService(), getExtConfigDataService(), getEmailMessagingService(),
-                dataServicesFactory);
+                dataServicesFactory, getExtensionInfoData());
         manager.attach(digestNotifier);
         return manager;
     }

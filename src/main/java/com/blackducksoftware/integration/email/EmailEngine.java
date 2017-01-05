@@ -297,10 +297,10 @@ public class EmailEngine implements IAuthorizedListener {
         final NotifierManager manager = new NotifierManager();
         final DataServicesFactory dataServicesFactory = new DataServicesFactory(getRestConnection());
         final DailyDigestNotifier dailyNotifier = new DailyDigestNotifier(extensionProperties, emailMessagingService,
-                dataServicesFactory);
+                dataServicesFactory, getExtensionInfoData());
 
-        final TestEmailNotifier testNotifier = new TestEmailNotifier(extensionProperties, emailMessagingService, dataServicesFactory);
-        final RealTimeNotifier realTimeNotifier = new RealTimeNotifier(extensionProperties, emailMessagingService, dataServicesFactory);
+        final TestEmailNotifier testNotifier = new TestEmailNotifier(extensionProperties, emailMessagingService, dataServicesFactory, getExtensionInfoData());
+        final RealTimeNotifier realTimeNotifier = new RealTimeNotifier(extensionProperties, emailMessagingService, dataServicesFactory, getExtensionInfoData());
         manager.attach(dailyNotifier);
         manager.attach(testNotifier);
         manager.attach(realTimeNotifier);

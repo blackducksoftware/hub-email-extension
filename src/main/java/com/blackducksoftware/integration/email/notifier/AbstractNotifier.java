@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.ExtensionLogger;
+import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.api.extension.ConfigurationItem;
@@ -49,13 +50,16 @@ public abstract class AbstractNotifier extends TimerTask {
 
     private final ExtensionConfigDataService extensionConfigDataService;
 
+    private final ExtensionInfo extensionInfoData;
+
     public AbstractNotifier(final ExtensionProperties extensionProperties,
-            final EmailMessagingService emailMessagingService, final DataServicesFactory dataServicesFactory) {
+            final EmailMessagingService emailMessagingService, final DataServicesFactory dataServicesFactory, final ExtensionInfo extensionInfoData) {
         this.extensionProperties = extensionProperties;
         this.emailMessagingService = emailMessagingService;
         this.dataServicesFactory = dataServicesFactory;
         final ExtensionLogger extLogger = new ExtensionLogger(logger);
         extensionConfigDataService = dataServicesFactory.createExtensionConfigDataService(extLogger);
+        this.extensionInfoData = extensionInfoData;
     }
 
     public ExtensionProperties createPropertiesFromGlobalConfig() throws UnexpectedHubResponseException {
@@ -104,5 +108,9 @@ public abstract class AbstractNotifier extends TimerTask {
 
     public ExtensionConfigDataService getExtensionConfigDataService() {
         return extensionConfigDataService;
+    }
+
+    public ExtensionInfo getExtensionInfoData() {
+        return extensionInfoData;
     }
 }

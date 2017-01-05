@@ -18,6 +18,7 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
@@ -31,8 +32,8 @@ public class RealTimeNotifier extends AbstractDigestNotifier {
     private final String lastRunPath;
 
     public RealTimeNotifier(final ExtensionProperties extensionProperties, final EmailMessagingService emailMessagingService,
-            final DataServicesFactory dataServicesFactory) {
-        super(extensionProperties, emailMessagingService, dataServicesFactory);
+            final DataServicesFactory dataServicesFactory, final ExtensionInfo extensionInfoData) {
+        super(extensionProperties, emailMessagingService, dataServicesFactory, extensionInfoData);
         lastRunPath = getExtensionProperties().getNotifierVariableProperties()
                 .get(getNotifierPropertyKey() + ".lastrun.file");
 

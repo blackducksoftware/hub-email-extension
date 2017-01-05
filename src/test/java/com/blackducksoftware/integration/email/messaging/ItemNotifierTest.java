@@ -53,7 +53,7 @@ public class ItemNotifierTest {
         engine.start();
         final DataServicesFactory dataservicesFactory = new DataServicesFactory(engine.getRestConnection());
         notifier = new MockNotifier(engine.getExtensionProperties(), engine.getNotificationDataService(),
-                engine.getExtConfigDataService(), engine.getEmailMessagingService(), dataservicesFactory, NOTIFIER_KEY);
+                engine.getExtConfigDataService(), engine.getEmailMessagingService(), dataservicesFactory, engine.getExtensionInfoData(), NOTIFIER_KEY);
 
     }
 
