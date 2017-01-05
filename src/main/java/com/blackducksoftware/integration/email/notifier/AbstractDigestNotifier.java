@@ -21,9 +21,6 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.email.notifier;
 
-import java.time.DateTimeException;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -96,7 +93,7 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
         notificationDataService = dataServicesFactory.createNotificationDataService(extLogger);
     }
 
-    public abstract DateRange createDateRange(final ZoneId zone);
+    public abstract DateRange createDateRange();
 
     public abstract String getCategory();
 
@@ -112,8 +109,7 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
             if (usersInCategory.isEmpty()) {
                 logger.info("No Users opted into this email notification");
             } else {
-                final ZoneId zoneId = getZoneId(globalConfig);
-                final DateRange dateRange = createDateRange(zoneId);
+                final DateRange dateRange = createDateRange();
                 final Date startDate = dateRange.getStart();
                 final Date endDate = dateRange.getEnd();
                 logger.info("Getting notification data between start: {} end: {}", startDate, endDate);
@@ -121,7 +117,7 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
                 int filteredUsers = 0;
                 for (final UserConfigItem userConfig : usersInCategory) {
                     try {
-                        UserItem userItem = userConfig.getUser();
+                        final UserItem userItem = userConfig.getUser();
                         logger.info("Processing hub user {}", userItem.getMeta().getHref());
                         final SortedSet<NotificationContentItem> notifications = notificationDataService.getUserNotifications(startDate, endDate,
                                 userItem);
@@ -165,28 +161,6 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
         logger.info("Finished iteration of {} digest email notifier",
 
                 getName());
-    }
-
-    private ZoneId getZoneId(final ExtensionProperties globalConfig) {
-        final ZoneId defaultZoneId = ZoneId.ofOffset("UTC", ZoneOffset.UTC);
-
-        final String timezoneVarKey = "all.timezone";
-        final Map<String, String> notifierVariableMap = globalConfig.getNotifierVariableProperties();
-        if (!notifierVariableMap.containsKey(timezoneVarKey)) {
-            return defaultZoneId;
-        } else {
-            final String timezoneId = notifierVariableMap.get(timezoneVarKey);
-            if (StringUtils.isBlank(timezoneId)) {
-                return defaultZoneId;
-            } else {
-                try {
-                    return ZoneId.of(timezoneId);
-                } catch (final DateTimeException ex) {
-                    logger.error("Error parsing global config timezone. Using UTC timezone", ex);
-                    return defaultZoneId;
-                }
-            }
-        }
     }
 
     private Collection<ProjectData> filterUserProjects(final Collection<ProjectData> projectList,

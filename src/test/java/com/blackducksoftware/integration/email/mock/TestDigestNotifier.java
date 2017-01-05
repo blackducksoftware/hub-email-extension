@@ -22,7 +22,6 @@
 package com.blackducksoftware.integration.email.mock;
 
 import java.io.File;
-import java.time.ZoneId;
 import java.util.Date;
 
 import org.apache.commons.io.FileUtils;
@@ -57,7 +56,7 @@ public class TestDigestNotifier extends AbstractDigestNotifier {
     }
 
     @Override
-    public DateRange createDateRange(final ZoneId zoneId) {
+    public DateRange createDateRange() {
         try {
             Date startDate = null;
             final File lastRunFile = new File(lastRunPath);

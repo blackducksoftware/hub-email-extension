@@ -56,6 +56,7 @@ import com.blackducksoftware.integration.email.model.HubServerBeanConfiguration;
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.notifier.DailyDigestNotifier;
 import com.blackducksoftware.integration.email.notifier.NotifierManager;
+import com.blackducksoftware.integration.email.notifier.RealTimeNotifier;
 import com.blackducksoftware.integration.email.notifier.TestEmailNotifier;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.exception.EncryptionException;
@@ -299,8 +300,10 @@ public class EmailEngine implements IAuthorizedListener {
                 dataServicesFactory);
 
         final TestEmailNotifier testNotifier = new TestEmailNotifier(extensionProperties, emailMessagingService, dataServicesFactory);
+        final RealTimeNotifier realTimeNotifier = new RealTimeNotifier(extensionProperties, emailMessagingService, dataServicesFactory);
         manager.attach(dailyNotifier);
         manager.attach(testNotifier);
+        manager.attach(realTimeNotifier);
         emailExtensionApplication.getContext().getAttributes().put(EmailExtensionConstants.CONTEXT_ATTRIBUTE_KEY_TEST_NOTIFIER, testNotifier);
         return manager;
     }

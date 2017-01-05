@@ -21,7 +21,6 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.email.notifier;
 
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
@@ -39,8 +38,9 @@ public class MonthlyDigestNotifier extends AbstractDigestNotifier {
     }
 
     @Override
-    public DateRange createDateRange(final ZoneId zone) {
-        final LocalDateTime currentTime = LocalDateTime.now();
+    public DateRange createDateRange() {
+        final ZonedDateTime currentTime = ZonedDateTime.now();
+        final ZoneId zone = currentTime.getZone();
         final ZonedDateTime endZonedTime = ZonedDateTime.of(currentTime.getYear(), currentTime.getMonthValue(),
                 currentTime.getDayOfMonth(), 23, 59, 59, 999, zone).minusDays(1);
         final ZonedDateTime startZonedTime = ZonedDateTime
