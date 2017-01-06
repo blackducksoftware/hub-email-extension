@@ -65,4 +65,10 @@ public class WeeklyDigestNotifier extends AbstractDigestNotifier {
     public String getCategory() {
         return "Weekly";
     }
+
+    @Override
+    public String createCronExpression() {
+        // every Sunday 6am
+        return "0 0 06 * * SUN *";
+    }
 }

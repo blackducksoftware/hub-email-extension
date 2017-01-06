@@ -60,4 +60,10 @@ public class DailyDigestNotifier extends AbstractDigestNotifier {
     public String getCategory() {
         return "Daily";
     }
+
+    @Override
+    public String createCronExpression() {
+        // 6am UTC time.
+        return "0 0 06 * * ? *";
+    }
 }

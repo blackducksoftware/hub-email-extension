@@ -54,9 +54,10 @@ import com.blackducksoftware.integration.email.extension.server.oauth.listeners.
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.model.HubServerBeanConfiguration;
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
+import com.blackducksoftware.integration.email.notifier.CustomDigestNotifier;
 import com.blackducksoftware.integration.email.notifier.DailyDigestNotifier;
 import com.blackducksoftware.integration.email.notifier.NotifierManager;
-import com.blackducksoftware.integration.email.notifier.RealTimeNotifier;
+import com.blackducksoftware.integration.email.notifier.RealTimeDigestNotifier;
 import com.blackducksoftware.integration.email.notifier.TestEmailNotifier;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.exception.EncryptionException;
@@ -200,7 +201,7 @@ public class EmailEngine implements IAuthorizedListener {
 
     public Properties createAppProperties() throws IOException {
         final Properties appProperties = new Properties();
-        final String configLocation = System.getProperty("ext.config.location");
+        final String configLocation = System.getProperty(ExtensionConfigManager.PROPERTY_KEY_CONFIG_LOCATION_PATH);
         final File customerPropertiesFile = new File(configLocation, "extension.properties");
         try (FileInputStream fileInputStream = new FileInputStream(customerPropertiesFile)) {
             appProperties.load(fileInputStream);
@@ -300,10 +301,14 @@ public class EmailEngine implements IAuthorizedListener {
                 dataServicesFactory, getExtensionInfoData());
 
         final TestEmailNotifier testNotifier = new TestEmailNotifier(extensionProperties, emailMessagingService, dataServicesFactory, getExtensionInfoData());
-        final RealTimeNotifier realTimeNotifier = new RealTimeNotifier(extensionProperties, emailMessagingService, dataServicesFactory, getExtensionInfoData());
+        final RealTimeDigestNotifier realTimeNotifier = new RealTimeDigestNotifier(extensionProperties, emailMessagingService, dataServicesFactory,
+                getExtensionInfoData());
+        final CustomDigestNotifier customNotifier = new CustomDigestNotifier(extensionProperties, emailMessagingService, dataServicesFactory,
+                getExtensionInfoData());
         manager.attach(dailyNotifier);
         manager.attach(testNotifier);
         manager.attach(realTimeNotifier);
+        manager.attach(customNotifier);
         emailExtensionApplication.getContext().getAttributes().put(EmailExtensionConstants.CONTEXT_ATTRIBUTE_KEY_TEST_NOTIFIER, testNotifier);
         return manager;
     }

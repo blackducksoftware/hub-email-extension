@@ -64,7 +64,7 @@ import com.blackducksoftware.integration.phone.home.PhoneHomeClient;
 import com.blackducksoftware.integration.phone.home.exception.PhoneHomeException;
 import com.blackducksoftware.integration.phone.home.exception.PropertiesLoaderException;
 
-public abstract class AbstractDigestNotifier extends AbstractNotifier {
+public abstract class AbstractDigestNotifier extends IntervalNotifier {
     private static final String KEY_HUB_SERVER_URL = "hub_server_url";
 
     public static final String KEY_TOPICS_LIST = "topicsList";
@@ -89,23 +89,15 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 
     private final Logger logger = LoggerFactory.getLogger(AbstractDigestNotifier.class);
 
-    private final String cronExpression;
-
     private final NotificationDataService notificationDataService;
 
     public AbstractDigestNotifier(final ExtensionProperties extensionProperties,
             final EmailMessagingService emailMessagingService, final DataServicesFactory dataServicesFactory, final ExtensionInfo extensionInfoData) {
         super(extensionProperties, emailMessagingService, dataServicesFactory, extensionInfoData);
-
-        final String quartzTriggerPropValue = getExtensionProperties().getNotifierVariableProperties()
-                .get(getNotifierPropertyKey() + ".cron.expression");
-        cronExpression = StringUtils.trimToNull(quartzTriggerPropValue);
         final Logger logger = LoggerFactory.getLogger(NotificationDataService.class);
         final ExtensionLogger extLogger = new ExtensionLogger(logger);
         notificationDataService = dataServicesFactory.createNotificationDataService(extLogger);
     }
-
-    public abstract DateRange createDateRange();
 
     public abstract String getCategory();
 
@@ -145,6 +137,7 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
                             if (projectsDigest.isEmpty()) {
                                 filteredUsers++;
                             } else {
+                                bdPhoneHome(); // extension used.
                                 final Map<String, Object> model = new HashMap<>();
                                 model.put(KEY_TOPICS_LIST, projectsDigest);
                                 model.put(KEY_START_DATE, String.valueOf(startDate));
@@ -290,8 +283,7 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
                 logger.debug("Could not get the Hub Host name.");
             }
 
-            final String pluginVersion = getExtensionInfoData().getId();
-
+            final String pluginVersion = getExtensionProperties().getExtensionVersion();
             final PhoneHomeClient phClient = new PhoneHomeClient();
 
             phClient.callHomeIntegrations(regId, hubHostName, "Hub", hubVersion, "email-extension", "",
@@ -305,10 +297,5 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
     @Override
     public String getTemplateName() {
         return "digest.ftl";
-    }
-
-    @Override
-    public String getCronExpression() {
-        return cronExpression;
     }
 }

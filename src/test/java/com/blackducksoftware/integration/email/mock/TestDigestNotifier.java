@@ -88,4 +88,10 @@ public class TestDigestNotifier extends AbstractDigestNotifier {
     public String getCategory() {
         return "daily";
     }
+
+    @Override
+    public String createCronExpression() {
+        // every minute
+        return "0 0/1 * 1/1 * ? *";
+    }
 }

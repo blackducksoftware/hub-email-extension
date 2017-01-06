@@ -23,7 +23,8 @@
             "description": "How often the Hub should be checked for notifications that might trigger emails",
             "options": [
                 {"name": "Daily", "title": "Daily" },
-                {"name": "Real Time", "title": "Real Time" }
+                {"name": "Real Time", "title": "Real Time" },
+                {"name": "Custom Interval", "title": "Custom" }
             ],
             "defaultValue": [
                 "Daily"

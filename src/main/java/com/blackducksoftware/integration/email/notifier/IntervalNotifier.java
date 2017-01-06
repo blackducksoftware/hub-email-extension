@@ -12,12 +12,15 @@
 package com.blackducksoftware.integration.email.notifier;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.email.extension.config.ExtensionConfigManager;
 import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
@@ -25,21 +28,32 @@ import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.dataservices.DataServicesFactory;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 
-public class RealTimeNotifier extends AbstractDigestNotifier {
+public abstract class IntervalNotifier extends AbstractNotifier {
+    private final Logger logger = LoggerFactory.getLogger(IntervalNotifier.class);
 
-    private final Logger logger = LoggerFactory.getLogger(RealTimeNotifier.class);
+    private final String cronExpression;
 
     private final String lastRunPath;
 
-    public RealTimeNotifier(final ExtensionProperties extensionProperties, final EmailMessagingService emailMessagingService,
-            final DataServicesFactory dataServicesFactory, final ExtensionInfo extensionInfoData) {
+    public IntervalNotifier(ExtensionProperties extensionProperties, EmailMessagingService emailMessagingService, DataServicesFactory dataServicesFactory,
+            ExtensionInfo extensionInfoData) {
         super(extensionProperties, emailMessagingService, dataServicesFactory, extensionInfoData);
-        lastRunPath = getExtensionProperties().getNotifierVariableProperties()
-                .get(getNotifierPropertyKey() + ".lastrun.file");
-
+        cronExpression = StringUtils.trimToNull(createCronExpression());
+        lastRunPath = findLastRunFilePath();
     }
 
-    @Override
+    private String findLastRunFilePath() {
+        String path = "";
+        try {
+            final String configLocation = System.getProperty(ExtensionConfigManager.PROPERTY_KEY_CONFIG_LOCATION_PATH);
+            final File file = new File(configLocation, getNotifierPropertyKey() + "-lastrun.txt");
+            path = file.getCanonicalPath();
+        } catch (final IOException ex) {
+            logger.error("Cannot find last run file path", ex);
+        }
+        return path;
+    }
+
     public DateRange createDateRange() {
         final Date endDate = new Date();
         Date startDate = endDate;
@@ -59,13 +73,10 @@ public class RealTimeNotifier extends AbstractDigestNotifier {
         return new DateRange(startDate, endDate);
     }
 
-    @Override
-    public String getNotifierPropertyKey() {
-        return "realTimeDigest";
-    }
+    public abstract String createCronExpression();
 
     @Override
-    public String getCategory() {
-        return "Real Time";
+    public String getCronExpression() {
+        return cronExpression;
     }
 }
