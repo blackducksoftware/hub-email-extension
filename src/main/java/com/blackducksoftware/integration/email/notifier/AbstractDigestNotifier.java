@@ -24,6 +24,7 @@ package com.blackducksoftware.integration.email.notifier;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -90,6 +91,10 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
     private final Logger logger = LoggerFactory.getLogger(AbstractDigestNotifier.class);
 
     private final NotificationDataService notificationDataService;
+
+    private int phoneHomeCurrentMonth = 0;
+
+    private int phoneHomeDayOfMonth = 0;
 
     public AbstractDigestNotifier(final ExtensionProperties extensionProperties,
             final EmailMessagingService emailMessagingService, final DataServicesFactory dataServicesFactory, final ExtensionInfo extensionInfoData) {
@@ -267,27 +272,35 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
 
     private void bdPhoneHome() {
         try {
-            final HubIntRestService intRestService = new HubIntRestService(getDataServicesFactory().getRestConnection());
-            final String hubVersion = getDataServicesFactory().getHubVersionRestService().getHubVersion();
-            String regId = null;
-            String hubHostName = null;
-            try {
-                regId = intRestService.getRegistrationId();
-            } catch (final Exception e) {
-                logger.debug("Could not get the Hub registration Id.");
-            }
-            try {
-                final URL url = new URL(getDataServicesFactory().getRestConnection().getBaseUrl());
-                hubHostName = url.getHost();
-            } catch (final Exception e) {
-                logger.debug("Could not get the Hub Host name.");
-            }
+            final LocalDateTime time = LocalDateTime.now();
+            final int currentMonth = time.getMonthValue();
+            final int currentDayOfMonth = time.getDayOfMonth();
+            // limit the amount of data sent to once a day. Primitive check to limit the request
+            if (phoneHomeDayOfMonth < currentDayOfMonth || phoneHomeCurrentMonth != currentMonth) {
+                final HubIntRestService intRestService = new HubIntRestService(getDataServicesFactory().getRestConnection());
+                final String hubVersion = getDataServicesFactory().getHubVersionRestService().getHubVersion();
+                String regId = null;
+                String hubHostName = null;
+                try {
+                    regId = intRestService.getRegistrationId();
+                } catch (final Exception e) {
+                    logger.debug("Could not get the Hub registration Id.");
+                }
+                try {
+                    final URL url = new URL(getDataServicesFactory().getRestConnection().getBaseUrl());
+                    hubHostName = url.getHost();
+                } catch (final Exception e) {
+                    logger.debug("Could not get the Hub Host name.");
+                }
 
-            final String pluginVersion = getExtensionProperties().getExtensionVersion();
-            final PhoneHomeClient phClient = new PhoneHomeClient();
+                final String pluginVersion = getExtensionProperties().getExtensionVersion();
+                final PhoneHomeClient phClient = new PhoneHomeClient();
 
-            phClient.callHomeIntegrations(regId, hubHostName, "Hub", hubVersion, "email-extension", "",
-                    pluginVersion);
+                phClient.callHomeIntegrations(regId, hubHostName, "Hub", hubVersion, "email-extension", "",
+                        pluginVersion);
+                phoneHomeCurrentMonth = currentMonth;
+                phoneHomeDayOfMonth = currentDayOfMonth;
+            }
         } catch (ResourceException | JSONException | IOException | PropertiesLoaderException | PhoneHomeException | URISyntaxException
                 | ResourceDoesNotExistException | BDRestException ex) {
             logger.debug("Unable to phone-home", ex);
