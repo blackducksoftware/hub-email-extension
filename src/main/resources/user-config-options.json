@@ -5,7 +5,7 @@
             "title": "Opt In / Opt Out",
             "required": true,
             "singleValue": true,
-            "description": "Whether or not you would like to receive emails from published notifications",
+            "description": "Opt In to receive notificaions by email",
             "options": [
                 {"name": "true", "title": "Opt In" },
                 {"name": "false", "title": "Opt Out" }
@@ -20,29 +20,14 @@
             "title": "Email Frequency",
             "required": true,
             "singleValue": true, 
-            "description": "How often the Hub should be checked for notifications that might trigger emails",
+            "description": "",
             "options": [
-                {"name": "Daily", "title": "Daily" },
-                {"name": "Real Time", "title": "Real Time" },
-                {"name": "Custom Interval", "title": "Custom" }
+                {"name": "Real Time", "title": "As Events Occur" },
+                {"name": "Daily", "title": "Daily Summary" },
+                {"name": "Custom Interval", "title": "Custom (Configured by Extension Admin)" }
             ],
             "defaultValue": [
                 "Daily"
-            ]
-       },
-       {
-            "name": "templateName",
-            "optionType": "STRING",
-            "title": "Template Name",
-            "required": true,
-            "singleValue": true,
-            "description": "The template for email rendering",
-            "options": [ 
-                {"name": "digest.ftl", "title": "Default Digest Template"},
-                {"name": "sampleTemplate.ftl", "title": "Sample Email Template"}
-            ],
-            "defaultValue": [
-                "digest.ftl"
             ]
        },
        {
@@ -51,7 +36,7 @@
             "title": "Email Notification Events",
             "required": false,
             "singleValue": false,
-            "description": "The user can specify any number of notification types that will appear in an email",
+            "description": "Select notification types to be included in email",
             "options": [
                 {"name": "POLICY_VIOLATION", "title": "Policy Violation" },
                 {"name": "POLICY_VIOLATION_CLEARED", "title": "Policy Violation Cleared" },
@@ -67,6 +52,21 @@
                 "HIGH_VULNERABILITY",
                 "MEDIUM_VULNERABILITY",
                 "LOW_VULNERABILITY"
+            ]
+       },
+       {
+            "name": "templateName",
+            "optionType": "STRING",
+            "title": "Template Name",
+            "required": true,
+            "singleValue": true,
+            "description": "The template for email rendering",
+            "options": [ 
+                {"name": "digest.ftl", "title": "Black Duck Template"},
+                {"name": "sampleTemplate.ftl", "title": "Sample Email Template"}
+            ],
+            "defaultValue": [
+                "digest.ftl"
             ]
        }
     ]
