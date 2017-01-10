@@ -63,7 +63,7 @@
             "description": "The template for email rendering",
             "options": [ 
                 {"name": "digest.ftl", "title": "Black Duck Template"},
-                {"name": "sampleTemplate.ftl", "title": "Sample Email Template"}
+                {"name": "sampleTemplate.ftl", "title": "Test Template (Verification only)"}
             ],
             "defaultValue": [
                 "digest.ftl"
