@@ -63,7 +63,7 @@ public class MonthlyDigestNotifier extends AbstractDigestNotifier {
 
     @Override
     public String createCronExpression() {
-        // 12:30am on the first of each month
-        return "0 30 0 1 1/1 ? *";
+        // 12:00am on the first of each month
+        return "0 0 0 1 1/1 ? *";
     }
 }

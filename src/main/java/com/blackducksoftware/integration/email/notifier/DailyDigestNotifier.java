@@ -63,7 +63,7 @@ public class DailyDigestNotifier extends AbstractDigestNotifier {
 
     @Override
     public String createCronExpression() {
-        // 12:10am UTC time.
-        return "0 10 0 1/1 * ? *";
+        // 12:00am UTC time.
+        return "0 0 0 1/1 * ? *";
     }
 }

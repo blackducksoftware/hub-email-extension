@@ -68,7 +68,7 @@ public class WeeklyDigestNotifier extends AbstractDigestNotifier {
 
     @Override
     public String createCronExpression() {
-        // every Sunday 12:15 UTCam
-        return "0 15 0 ? * SUN *";
+        // every Sunday 12:00am UTC
+        return "0 0 0 ? * SUN *";
     }
 }
