@@ -296,7 +296,7 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
                 final String pluginVersion = getExtensionProperties().getExtensionVersion();
                 final PhoneHomeClient phClient = new PhoneHomeClient();
 
-                phClient.callHomeIntegrations(regId, hubHostName, "Hub", hubVersion, "email-extension", "",
+                phClient.callHomeIntegrations(regId, hubHostName, "Hub", hubVersion, "Email-Extension", "",
                         pluginVersion);
                 phoneHomeCurrentMonth = currentMonth;
                 phoneHomeDayOfMonth = currentDayOfMonth;
