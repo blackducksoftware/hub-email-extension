@@ -28,8 +28,8 @@ DIR=`dirname "$PROGRAM"`
 
 checkIsRunning() {
   if [ -f $DIR/$PID_FILE ]; then
-    local running_pid="$(pgrep -f hub-email-extension)"
-    local saved_pid="$(<$DIR/$PID_FILE)"
+    local running_pid=($(pgrep -f hub-email-extension))
+    local saved_pid=($(<$DIR/$PID_FILE))
     if [ ! -z $running_pid  ]; then 
         if [ "$saved_pid" -eq "$running_pid" ]; then
             return 1 
@@ -50,7 +50,7 @@ startExtension() {
   echo "Starting Hub Email Extension"
   $DIR/hub-email-extension & 
   sleep 1s
-  local pid="$(pgrep -f hub-email-extension)"
+  local pid=($(pgrep -f hub-email-extension))
   echo "$pid" > $DIR/$PID_FILE  
   echo "Started extension with PID: $pid"
 }
@@ -80,7 +80,8 @@ extensionStatus () {
   checkIsRunning
   returnValue=$?
   if [ "$returnValue" == 1 ]; then
-     echo "Hub Email Extension is running"
+     local pid=$(<$DIR/$PID_FILE)
+     echo "Hub Email Extension is running with PID: $pid"
   else
      echo "Hub Email Extension is not running"
   fi
