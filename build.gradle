@@ -30,6 +30,7 @@ dependencies {
 	compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.6.2'
 	compile 'org.apache.logging.log4j:log4j-core:2.6.2'
 	runtime 'org.restlet.jse:org.restlet.ext.slf4j:2.3.7'
+	runtime 'org.restlet.jse:org.restlet.ext.jetty:2.3.7'
 	
 	compile 'org.apache.commons:commons-lang3:3.4'
 	compile 'commons-io:commons-io:2.5'
