@@ -32,11 +32,11 @@ import com.blackducksoftware.integration.email.model.batch.ProjectData;
 import com.blackducksoftware.integration.email.model.batch.ProjectDataBuilder;
 import com.blackducksoftware.integration.hub.api.item.MetaService;
 import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityRequestService;
-import com.blackducksoftware.integration.hub.dataservice.notification.item.NotificationContentItem;
-import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyOverrideContentItem;
-import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationClearedContentItem;
-import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationContentItem;
-import com.blackducksoftware.integration.hub.dataservice.notification.item.VulnerabilityContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.model.NotificationContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyOverrideContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyViolationClearedContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyViolationContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.model.VulnerabilityContentItem;
 import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 import com.blackducksoftware.integration.hub.notification.processor.ItemTypeEnum;
 import com.blackducksoftware.integration.hub.notification.processor.MapProcessorCache;
@@ -47,7 +47,8 @@ import com.blackducksoftware.integration.hub.service.HubRequestService;
 
 public class EmailProcessor extends NotificationProcessor<Collection<ProjectData>> {
 
-    public EmailProcessor(HubRequestService hubRequestService, VulnerabilityRequestService vulnerabilityRequestService, MetaService metaService) {
+    public EmailProcessor(final HubRequestService hubRequestService, final VulnerabilityRequestService vulnerabilityRequestService,
+            final MetaService metaService) {
         final MapProcessorCache policyCache = new MapProcessorCache();
         final VulnerabilityCache vulnerabilityCache = new VulnerabilityCache(hubRequestService, vulnerabilityRequestService, metaService);
         getCacheList().add(policyCache);
@@ -60,7 +61,7 @@ public class EmailProcessor extends NotificationProcessor<Collection<ProjectData
     }
 
     @Override
-    public Collection<ProjectData> processEvents(Collection<NotificationEvent> eventList) throws HubIntegrationException {
+    public Collection<ProjectData> processEvents(final Collection<NotificationEvent> eventList) throws HubIntegrationException {
         final Collection<ProjectData> projectMap = createCateoryDataMap(eventList);
         return projectMap;
     }

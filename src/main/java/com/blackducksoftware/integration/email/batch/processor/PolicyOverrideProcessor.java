@@ -28,8 +28,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.blackducksoftware.integration.hub.api.item.MetaService;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
-import com.blackducksoftware.integration.hub.dataservice.notification.item.NotificationContentItem;
-import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyOverrideContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.model.NotificationContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyOverrideContentItem;
 import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 import com.blackducksoftware.integration.hub.notification.processor.ItemTypeEnum;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
@@ -62,7 +62,7 @@ public class PolicyOverrideProcessor extends PolicyViolationProcessor {
     }
 
     @Override
-    public Map<String, Object> generateDataSet(Map<String, Object> inputData) {
+    public Map<String, Object> generateDataSet(final Map<String, Object> inputData) {
         final PolicyOverrideContentItem policyOverride = (PolicyOverrideContentItem) inputData.get(POLICY_CONTENT_ITEM);
         final Map<String, Object> dataSet = super.generateDataSet(inputData);
         final String person = StringUtils.join(" ", policyOverride.getFirstName(), policyOverride.getLastName());

@@ -26,10 +26,10 @@ import java.util.LinkedList;
 
 import com.blackducksoftware.integration.hub.api.item.MetaService;
 import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityRequestService;
-import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyOverrideContentItem;
-import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationClearedContentItem;
-import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationContentItem;
-import com.blackducksoftware.integration.hub.dataservice.notification.item.VulnerabilityContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyOverrideContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyViolationClearedContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyViolationContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.model.VulnerabilityContentItem;
 import com.blackducksoftware.integration.hub.notification.processor.MapProcessorCache;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationProcessor;
 import com.blackducksoftware.integration.hub.notification.processor.event.NotificationEvent;
@@ -37,7 +37,8 @@ import com.blackducksoftware.integration.hub.service.HubRequestService;
 
 public class MockProcessor extends NotificationProcessor<Collection<NotificationEvent>> {
 
-    public MockProcessor(HubRequestService hubRequestService, VulnerabilityRequestService vulnerabilityRequestService, MetaService metaService) {
+    public MockProcessor(final HubRequestService hubRequestService, final VulnerabilityRequestService vulnerabilityRequestService,
+            final MetaService metaService) {
         final MapProcessorCache policyCache = new MapProcessorCache();
         final VulnerabilityCache vulnerabilityCache = new VulnerabilityCache(hubRequestService, vulnerabilityRequestService, metaService);
         getCacheList().add(policyCache);
@@ -51,7 +52,7 @@ public class MockProcessor extends NotificationProcessor<Collection<Notification
     }
 
     @Override
-    public Collection<NotificationEvent> processEvents(Collection<NotificationEvent> eventCollection) {
+    public Collection<NotificationEvent> processEvents(final Collection<NotificationEvent> eventCollection) {
         final Collection<NotificationEvent> dataList = new LinkedList<>();
         for (final NotificationEvent entry : eventCollection) {
             dataList.add(entry);

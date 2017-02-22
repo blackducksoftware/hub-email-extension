@@ -52,7 +52,9 @@ import com.blackducksoftware.integration.hub.api.user.UserItem;
 import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityRequestService;
 import com.blackducksoftware.integration.hub.dataservice.extension.item.UserConfigItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.NotificationDataService;
-import com.blackducksoftware.integration.hub.dataservice.notification.item.NotificationContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.NotificationResults;
+import com.blackducksoftware.integration.hub.dataservice.notification.model.NotificationContentItem;
+import com.blackducksoftware.integration.hub.dataservice.parallel.ParallelResourceProcessorResults;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
 import com.blackducksoftware.integration.hub.service.HubRequestService;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
@@ -95,7 +97,7 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
     private final MetaService metaService;
 
     public AbstractDigestNotifier(final ExtensionProperties extensionProperties,
-            final EmailMessagingService emailMessagingService, HubServicesFactory hubServicesFactory) {
+            final EmailMessagingService emailMessagingService, final HubServicesFactory hubServicesFactory) {
         super(extensionProperties, emailMessagingService, hubServicesFactory);
 
         final String quartzTriggerPropValue = getExtensionProperties().getNotifierVariableProperties()
@@ -117,9 +119,9 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
         try {
             logger.info("Starting iteration of {} digest email notifier", getName());
             final ExtensionProperties globalConfig = createPropertiesFromGlobalConfig();
-            final List<UserConfigItem> userConfigList = getExtensionConfigDataService()
+            final ParallelResourceProcessorResults<UserConfigItem> userConfigResults = getExtensionConfigDataService()
                     .getUserConfigList(getHubExtensionUri());
-            final List<UserConfigItem> usersInCategory = createUserListInCategory(userConfigList);
+            final List<UserConfigItem> usersInCategory = createUserListInCategory(userConfigResults.getResults());
 
             if (usersInCategory.isEmpty()) {
                 logger.info("No Users opted into this email notification");
@@ -136,8 +138,9 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
                         final UserItem userItem = userConfig.getUser();
 
                         logger.info("Processing hub user {}", metaService.getHref(userItem));
-                        final SortedSet<NotificationContentItem> notifications = notificationDataService.getUserNotifications(startDate, endDate,
+                        final NotificationResults notificationResults = notificationDataService.getUserNotifications(startDate, endDate,
                                 userItem);
+                        final SortedSet<NotificationContentItem> notifications = notificationResults.getNotificationContentItems();
                         final EmailProcessor processor = new EmailProcessor(hubRequestService, vulnerabilityRequestService, metaService);
                         final Collection<ProjectData> projectList = processor.process(notifications);
                         if (projectList.isEmpty()) {

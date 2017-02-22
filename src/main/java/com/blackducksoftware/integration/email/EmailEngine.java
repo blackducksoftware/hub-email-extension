@@ -61,7 +61,6 @@ import com.blackducksoftware.integration.email.notifier.TestEmailNotifier;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.hub.dataservice.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservice.notification.NotificationDataService;
-import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
@@ -394,7 +393,7 @@ public class EmailEngine implements IAuthorizedListener {
             notifierManager = createNotifierManager();
             notifierManager.updateHubExtensionUri(tokenManager.getConfiguration().getExtensionUri());
             notifierManager.start();
-        } catch (final MalformedURLException | HubIntegrationException e) {
+        } catch (final MalformedURLException e) {
             logger.error("Error completing extension initialization", e);
         }
     }

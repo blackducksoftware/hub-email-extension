@@ -36,7 +36,6 @@ import com.blackducksoftware.integration.email.notifier.NotifierManager;
 import com.blackducksoftware.integration.exception.EncryptionException;
 import com.blackducksoftware.integration.hub.builder.HubProxyInfoBuilder;
 import com.blackducksoftware.integration.hub.dataservice.notification.NotificationDataService;
-import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 import com.blackducksoftware.integration.hub.global.HubCredentials;
 import com.blackducksoftware.integration.hub.global.HubProxyInfo;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
@@ -54,7 +53,7 @@ public class TestEmailEngine extends EmailEngine {
     }
 
     @Override
-    public RestConnection createRestConnection(String hubUri) {
+    public RestConnection createRestConnection(final String hubUri) {
         try {
             return new MockRestConnection(new URL(hubUri));
         } catch (final MalformedURLException e) {
@@ -92,28 +91,20 @@ public class TestEmailEngine extends EmailEngine {
     @Override
     public NotificationDataService createNotificationDataService() {
         HubServicesFactory hubServicesFactory;
-        try {
-            hubServicesFactory = new HubServicesFactory(getRestConnection());
-            final IntLogger hubLogger = new Slf4jIntLogger(logger);
-            return new MockNotificationDataService(hubLogger, getRestConnection(), hubServicesFactory.createNotificationRequestService(hubLogger),
-                    hubServicesFactory.createProjectVersionRequestService(hubLogger), hubServicesFactory.createPolicyRequestService(),
-                    hubServicesFactory.createVersionBomPolicyRequestService(), hubServicesFactory.createHubRequestService(),
-                    hubServicesFactory.createMetaService(hubLogger));
-        } catch (final HubIntegrationException e) {
-            throw new RuntimeException(e);
-        }
+        hubServicesFactory = new HubServicesFactory(getRestConnection());
+        final IntLogger hubLogger = new Slf4jIntLogger(logger);
+        return new MockNotificationDataService(hubLogger, getRestConnection(), hubServicesFactory.createNotificationRequestService(hubLogger),
+                hubServicesFactory.createProjectVersionRequestService(hubLogger), hubServicesFactory.createPolicyRequestService(),
+                hubServicesFactory.createVersionBomPolicyRequestService(), hubServicesFactory.createHubRequestService(),
+                hubServicesFactory.createMetaService(hubLogger));
+
     }
 
     @Override
     public NotifierManager createNotifierManager() {
         final NotifierManager manager = new NotifierManager();
-        try {
-            final HubServicesFactory hubServicesFactory = new HubServicesFactory(getRestConnection());
-            final TestDigestNotifier digestNotifier = new TestDigestNotifier(getExtensionProperties(), getEmailMessagingService(), getHubServicesFactory());
-            manager.attach(digestNotifier);
-        } catch (final HubIntegrationException e) {
-
-        }
+        final TestDigestNotifier digestNotifier = new TestDigestNotifier(getExtensionProperties(), getEmailMessagingService(), getHubServicesFactory());
+        manager.attach(digestNotifier);
         return manager;
     }
 

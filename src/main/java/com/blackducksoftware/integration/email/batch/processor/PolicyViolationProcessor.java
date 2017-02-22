@@ -26,8 +26,8 @@ import java.util.Map;
 
 import com.blackducksoftware.integration.hub.api.item.MetaService;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
-import com.blackducksoftware.integration.hub.dataservice.notification.item.NotificationContentItem;
-import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.model.NotificationContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyViolationContentItem;
 import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 import com.blackducksoftware.integration.hub.notification.processor.ItemTypeEnum;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
@@ -63,7 +63,7 @@ public class PolicyViolationProcessor extends NotificationSubProcessor {
     }
 
     @Override
-    public String generateEventKey(Map<String, Object> dataMap) throws HubIntegrationException {
+    public String generateEventKey(final Map<String, Object> dataMap) throws HubIntegrationException {
         final PolicyViolationContentItem content = (PolicyViolationContentItem) dataMap.get(POLICY_CONTENT_ITEM);
         final PolicyRule rule = (PolicyRule) dataMap.get(POLICY_RULE);
         final StringBuilder keyBuilder = new StringBuilder();
@@ -95,14 +95,14 @@ public class PolicyViolationProcessor extends NotificationSubProcessor {
     }
 
     @Override
-    public Map<String, Object> generateDataSet(Map<String, Object> inputData) {
+    public Map<String, Object> generateDataSet(final Map<String, Object> inputData) {
         final Map<String, Object> dataSet = new HashMap<>();
         final PolicyViolationContentItem policyViolationContentItem = (PolicyViolationContentItem) inputData.get(POLICY_CONTENT_ITEM);
         final PolicyRule rule = (PolicyRule) inputData.get(POLICY_RULE);
 
         dataSet.put(ItemTypeEnum.RULE.name(), rule.getName());
         dataSet.put(ItemTypeEnum.COMPONENT.name(), policyViolationContentItem.getComponentName());
-        dataSet.put(ItemTypeEnum.VERSION.name(), policyViolationContentItem.getComponentVersion());
+        dataSet.put(ItemTypeEnum.VERSION.name(), policyViolationContentItem.getComponentVersion().getVersionName());
         dataSet.put(NotificationEvent.DATA_SET_KEY_NOTIFICATION_CONTENT, policyViolationContentItem);
         return dataSet;
     }
