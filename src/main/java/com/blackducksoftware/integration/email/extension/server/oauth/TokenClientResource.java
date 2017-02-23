@@ -21,8 +21,8 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.email.extension.server.oauth;
 
+import java.io.IOException;
 import java.net.URI;
-import java.util.Objects;
 
 import org.restlet.Request;
 import org.restlet.Response;
@@ -36,23 +36,53 @@ import org.restlet.resource.ResourceException;
 
 public class TokenClientResource extends ClientResource implements OAuthResourceDefs {
 
-    private final Token token;
+    private final AccessType accessType;
 
-    public TokenClientResource(final URI uri, final Token token) {
+    private final TokenManager tokenManager;
+
+    public TokenClientResource(final URI uri, final TokenManager tokenManager, final AccessType accessType) {
         super(uri);
-        this.token = Objects.requireNonNull(token);
+        this.tokenManager = tokenManager;
+        this.accessType = accessType;
     }
 
     @Override
     public Response handleOutbound(final Request request) {
-        if (token.getTokenType().equalsIgnoreCase(TOKEN_TYPE_BEARER)) {
+        Response response;
+        Token token;
+        try {
+            token = tokenManager.getToken(accessType);
+            if (token.getTokenType().equalsIgnoreCase(TOKEN_TYPE_BEARER)) {
+                final ChallengeResponse cr = new ChallengeResponse(ChallengeScheme.HTTP_OAUTH_BEARER);
+                cr.setRawValue(token.getAccessToken());
+                request.setChallengeResponse(cr);
+            } else {
+                throw new ResourceException(Status.CLIENT_ERROR_UNAUTHORIZED, "Unsupported token type.");
+            }
+
+            response = super.handleOutbound(request);
+
+            if (response.getStatus() == Status.CLIENT_ERROR_UNAUTHORIZED) {
+                tokenManager.refreshToken(accessType);
+                token = tokenManager.getToken(accessType);
+                final ChallengeResponse cr = new ChallengeResponse(ChallengeScheme.HTTP_OAUTH_BEARER);
+                cr.setRawValue(token.getAccessToken());
+                request.setChallengeResponse(cr);
+                response = super.handleOutbound(request);
+            }
+        } catch (final IllegalStateException | IOException ex) {
+            try {
+                tokenManager.refreshToken(accessType);
+                token = tokenManager.getToken(accessType);
+            } catch (final IOException e) {
+                throw new RuntimeException(e);
+            }
             final ChallengeResponse cr = new ChallengeResponse(ChallengeScheme.HTTP_OAUTH_BEARER);
             cr.setRawValue(token.getAccessToken());
             request.setChallengeResponse(cr);
-        } else {
-            throw new ResourceException(Status.CLIENT_ERROR_UNAUTHORIZED, "Unsupported token type.");
+            response = super.handleOutbound(request);
         }
 
-        return super.handleOutbound(request);
+        return response;
     }
 }

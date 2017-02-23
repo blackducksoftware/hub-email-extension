@@ -145,8 +145,7 @@ public class TokenManager {
 
     public TokenClientResource createClientResource(final String reference, final AccessType accessType)
             throws IOException, URISyntaxException {
-        final Token token = getToken(accessType);
-        return new TokenClientResource(new URI(reference), token);
+        return new TokenClientResource(new URI(reference), this, accessType);
     }
 
     public void completeAuthorization() throws IOException, URISyntaxException {
@@ -171,7 +170,7 @@ public class TokenManager {
         notifyAuthorizedListeners();
     }
 
-    private Token getToken(final AccessType accessType) throws IOException {
+    public Token getToken(final AccessType accessType) throws IOException {
         Token result = null;
 
         if (AccessType.USER.equals(accessType)) {
