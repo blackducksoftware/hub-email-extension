@@ -35,7 +35,7 @@ import com.blackducksoftware.integration.hub.api.notification.VulnerabilitySourc
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
 import com.blackducksoftware.integration.hub.api.vulnerability.SeverityEnum;
 import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityItem;
-import com.blackducksoftware.integration.hub.dataservice.model.ProjectVersion;
+import com.blackducksoftware.integration.hub.dataservice.model.ProjectVersionModel;
 import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyOverrideContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyViolationClearedContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyViolationContentItem;
@@ -182,7 +182,7 @@ public class ProcessorTestUtil {
             final String projectVersionName, final String componentName, final ComponentVersion componentVersion)
             throws URISyntaxException, IntegrationException {
         final String projectVersionUrl = PROJECT_VERSION_URL_PREFIX + projectName + PROJECT_VERSION_URL_SEGMENT + projectVersionName;
-        final ProjectVersion projectVersion = new ProjectVersion();
+        final ProjectVersionModel projectVersion = new ProjectVersionModel();
         projectVersion.setProjectName(projectName);
         projectVersion.setProjectVersionName(projectVersionName);
         projectVersion.setUrl(projectVersionUrl);
@@ -201,7 +201,7 @@ public class ProcessorTestUtil {
             final String projectVersionName, final String componentName, final ComponentVersion componentVersion)
             throws URISyntaxException, IntegrationException {
         final String projectVersionUrl = PROJECT_VERSION_URL_PREFIX + projectName + PROJECT_VERSION_URL_SEGMENT + projectVersionName;
-        final ProjectVersion projectVersion = new ProjectVersion();
+        final ProjectVersionModel projectVersion = new ProjectVersionModel();
         projectVersion.setProjectName(projectName);
         projectVersion.setProjectVersionName(projectVersionName);
         projectVersion.setUrl(projectVersionUrl);
@@ -220,7 +220,7 @@ public class ProcessorTestUtil {
             final String projectVersionName, final String componentName, final ComponentVersion componentVersion)
             throws URISyntaxException, IntegrationException {
         final String projectVersionUrl = PROJECT_VERSION_URL_PREFIX + projectName + PROJECT_VERSION_URL_SEGMENT + projectVersionName;
-        final ProjectVersion projectVersion = new ProjectVersion();
+        final ProjectVersionModel projectVersion = new ProjectVersionModel();
         projectVersion.setProjectName(projectName);
         projectVersion.setProjectVersionName(projectVersionName);
         projectVersion.setUrl(projectVersionUrl);
@@ -240,7 +240,7 @@ public class ProcessorTestUtil {
             final List<VulnerabilitySourceQualifiedId> added, final List<VulnerabilitySourceQualifiedId> updated,
             final List<VulnerabilitySourceQualifiedId> deleted) throws URISyntaxException {
         final String projectVersionUrl = PROJECT_VERSION_URL_PREFIX + projectName + PROJECT_VERSION_URL_SEGMENT + projectVersionName;
-        final ProjectVersion projectVersion = new ProjectVersion();
+        final ProjectVersionModel projectVersion = new ProjectVersionModel();
         projectVersion.setProjectName(projectName);
         projectVersion.setProjectVersionName(projectVersionName);
         projectVersion.setUrl(projectVersionUrl);

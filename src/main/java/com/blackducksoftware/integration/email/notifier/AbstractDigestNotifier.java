@@ -161,7 +161,7 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
                                 model.put(KEY_USER_LAST_NAME, userConfig.getUser().getLastName());
                                 model.put(KEY_NOTIFIER_CATEGORY, getCategory().toUpperCase());
                                 model.put(KEY_HUB_SERVER_URL,
-                                        hubRequestService.getRestConnection().getBaseUrl());
+                                        hubRequestService.getRestConnection().getHubBaseUrl());
                                 final String emailAddress = userConfig.getUser().getEmail();
                                 final String templateName = getTemplateName(userConfig);
                                 final EmailTarget emailTarget = new EmailTarget(emailAddress, templateName, model);

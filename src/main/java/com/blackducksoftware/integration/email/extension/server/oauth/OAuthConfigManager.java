@@ -42,6 +42,8 @@ import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.exception.EncryptionException;
 
+import okhttp3.OkHttpClient;
+
 public class OAuthConfigManager {
 
     public static final String OAUTH_CONFIG_FILE_NAME = "oauth.properties";
@@ -64,7 +66,9 @@ public class OAuthConfigManager {
 
     private static final String MSG_PROPERTY_FILE_LOCATION = "Property file location: {}";
 
-    public final Logger logger = LoggerFactory.getLogger(OAuthConfigManager.class);
+    private final Logger logger = LoggerFactory.getLogger(OAuthConfigManager.class);
+
+    private final OkHttpClient.Builder builder = new OkHttpClient.Builder();
 
     public OAuthConfiguration load() {
         final File propFile = getPropFile();
@@ -146,16 +150,16 @@ public class OAuthConfigManager {
         return config;
     }
 
-    private String getPropertyValue(String propertyValue) throws IllegalArgumentException, EncryptionException {
+    private String getPropertyValue(final String propertyValue) throws IllegalArgumentException, EncryptionException {
         final Decoder decoder = Base64.getUrlDecoder();
         final String value = new String(decoder.decode(propertyValue));
         return value;
     }
 
-    private String encodePropertyValue(String value) throws IllegalArgumentException, EncryptionException {
+    private String encodePropertyValue(final String value) throws IllegalArgumentException, EncryptionException {
         // simply obfuscate the values from clear text.
-        Encoder encoder = Base64.getUrlEncoder();
-        String encoded = encoder.encodeToString(value.getBytes());
+        final Encoder encoder = Base64.getUrlEncoder();
+        final String encoded = encoder.encodeToString(value.getBytes());
         return encoded;
     }
 

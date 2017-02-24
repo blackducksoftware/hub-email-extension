@@ -36,6 +36,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.blackducksoftware.integration.email.mock.MockLogger;
 import com.blackducksoftware.integration.email.mock.MockRestConnection;
 import com.blackducksoftware.integration.email.model.batch.ProjectData;
 import com.blackducksoftware.integration.hub.api.component.version.ComponentVersion;
@@ -64,7 +65,7 @@ public class NotificationCapacityTest {
 
     @Before
     public void init() throws Exception {
-        final RestConnection restConnection = new MockRestConnection(null);
+        final RestConnection restConnection = new MockRestConnection(new MockLogger(), null);
         final HubServicesFactory factory = new HubServicesFactory(restConnection);
         final IntLogger logger = new IntBufferedLogger();
         metaService = factory.createMetaService(logger);

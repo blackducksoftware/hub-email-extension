@@ -55,7 +55,7 @@ public class TestEmailEngine extends EmailEngine {
     @Override
     public RestConnection createRestConnection(final String hubUri) {
         try {
-            return new MockRestConnection(new URL(hubUri));
+            return new MockRestConnection(new MockLogger(), new URL(hubUri));
         } catch (final MalformedURLException e) {
             throw new RuntimeException(e);
         }

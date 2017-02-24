@@ -24,8 +24,11 @@ package com.blackducksoftware.integration.email.extension.server.oauth;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
@@ -41,11 +44,22 @@ import org.restlet.resource.ResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.email.ExtensionLogger;
 import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.extension.server.oauth.listeners.IAuthorizedListener;
+import com.blackducksoftware.integration.exception.IntegrationException;
+import com.blackducksoftware.integration.hub.rest.RestConnection;
+import com.blackducksoftware.integration.log.IntLogger;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class TokenManager {
 
@@ -68,11 +82,14 @@ public class TokenManager {
 
     private final OAuthConfigManager configManager;
 
+    private final OkHttpClient client;
+
     public TokenManager(final ExtensionInfo extensionInfo) {
         configManager = new OAuthConfigManager();
         configuration = configManager.load();
         this.extensionInfo = extensionInfo;
         authorizedListeners = new ArrayList<>();
+        client = new OkHttpClient.Builder().build();
     }
 
     public OAuthConfiguration getConfiguration() {
@@ -127,6 +144,8 @@ public class TokenManager {
     public void exchangeForToken(final String authorizationCode) throws IOException {
         final AccessTokenClientResource tokenResource = configManager.getTokenResource(configuration);
         try {
+
+            // TODO create the builder to submit token request
             userToken = tokenResource
                     .requestToken(configManager.getAccessTokenParameters(configuration, authorizationCode));
             completeAuthorization();
@@ -192,6 +211,7 @@ public class TokenManager {
 
     private void refreshUserAccessToken() throws IOException {
         if (StringUtils.isNotBlank(configuration.getUserRefreshToken())) {
+            // TODO okhttp
             final AccessTokenClientResource tokenResource = configManager.getTokenResource(configuration);
             try {
                 userToken = tokenResource
@@ -206,6 +226,43 @@ public class TokenManager {
     }
 
     private void refreshClientAccessToken() throws IOException {
+        // TODO okhttp
+        final IntLogger intLogger = new ExtensionLogger(logger);
+        final URL url = new URL(configuration.getoAuthTokenUri());
+        final RestConnection connection = new RestConnection(intLogger, url, 120) {
+
+            @Override
+            public void clientAuthenticate() throws IntegrationException {
+
+            }
+
+            @Override
+            public void addBuilderAuthentication() throws IntegrationException {
+
+            }
+        };
+
+        final Map<String, String> formDataMap = new LinkedHashMap<>();
+        formDataMap.put("grant_type", "client_credential");
+        formDataMap.put("scope", "read%20write");
+        formDataMap.put("client_id", configuration.getClientId());
+
+        final List<String> contentList = new ArrayList<>();
+        for (final Map.Entry<String, String> entry : formDataMap.entrySet()) {
+            contentList.add(String.format("%s=%s", entry.getKey(), entry.getValue()));
+        }
+        final String content = StringUtils.join(contentList, "&");
+        final RequestBody requestBody = RequestBody.create(MediaType.parse("application/x-www-form-urlencoded; charset=utf-8"), content);
+        final HttpUrl httpUrl = connection.createHttpUrl();
+        final Request request = connection.createPostRequest(httpUrl, requestBody);
+
+        Response response = null;
+        try {
+            response = connection.handleExecuteClientCall(request);
+        } catch (final IntegrationException e1) {
+
+        }
+
         final AccessTokenClientResource tokenResource = configManager.getTokenResource(configuration);
         try {
             clientToken = tokenResource.requestToken(configManager.getClientTokenParameters());
@@ -217,6 +274,8 @@ public class TokenManager {
     private void updateAuthorized(final ClientResource resource) throws IOException {
         final Representation rep = resource.get();
         final JsonParser parser = new JsonParser();
+
+        // TODO use OKhttp
         try {
             logger.info("Updating hub of authentication status");
             final JsonElement json = parser.parse(rep.getText());

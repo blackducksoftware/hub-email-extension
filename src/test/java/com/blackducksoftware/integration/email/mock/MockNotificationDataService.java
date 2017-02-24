@@ -40,7 +40,7 @@ import com.blackducksoftware.integration.hub.api.policy.PolicyRequestService;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
 import com.blackducksoftware.integration.hub.api.project.version.ProjectVersionRequestService;
 import com.blackducksoftware.integration.hub.api.version.VersionBomPolicyRequestService;
-import com.blackducksoftware.integration.hub.dataservice.model.ProjectVersion;
+import com.blackducksoftware.integration.hub.dataservice.model.ProjectVersionModel;
 import com.blackducksoftware.integration.hub.dataservice.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.dataservice.notification.NotificationResults;
 import com.blackducksoftware.integration.hub.dataservice.notification.model.NotificationContentItem;
@@ -83,7 +83,7 @@ public class MockNotificationDataService extends NotificationDataService {
     private List<PolicyViolationContentItem> createPolicyViolations() throws URISyntaxException {
         final List<PolicyViolationContentItem> itemList = new ArrayList<>();
         for (int index = 0; index < 5; index++) {
-            final ProjectVersion projectVersion = new ProjectVersion();
+            final ProjectVersionModel projectVersion = new ProjectVersionModel();
             final String componentName = "Component" + index;
             final String versionName = "Version" + index;
             final ComponentVersion componentVersion = Mockito.mock(ComponentVersion.class);
@@ -105,7 +105,7 @@ public class MockNotificationDataService extends NotificationDataService {
     private List<PolicyOverrideContentItem> createPolicyOverrides() throws URISyntaxException {
         final List<PolicyOverrideContentItem> itemList = new ArrayList<>();
         for (int index = 0; index < 5; index++) {
-            final ProjectVersion projectVersion = new ProjectVersion();
+            final ProjectVersionModel projectVersion = new ProjectVersionModel();
             final String componentName = "Component" + index;
             final String versionName = "Version" + index;
             final ComponentVersion componentVersion = Mockito.mock(ComponentVersion.class);
@@ -129,7 +129,7 @@ public class MockNotificationDataService extends NotificationDataService {
     private List<VulnerabilityContentItem> createVulnerabilities() throws URISyntaxException {
         final List<VulnerabilityContentItem> itemList = new ArrayList<>();
         for (int index = 0; index < 5; index++) {
-            final ProjectVersion projectVersion = new ProjectVersion();
+            final ProjectVersionModel projectVersion = new ProjectVersionModel();
             final String componentName = "Component" + index;
             final String versionName = "Version" + index;
             final ComponentVersion componentVersion = Mockito.mock(ComponentVersion.class);
@@ -158,7 +158,7 @@ public class MockNotificationDataService extends NotificationDataService {
     private List<PolicyViolationClearedContentItem> createPolicyViolationsCleared() throws URISyntaxException {
         final List<PolicyViolationClearedContentItem> itemList = new ArrayList<>();
         for (int index = 0; index < 5; index++) {
-            final ProjectVersion projectVersion = new ProjectVersion();
+            final ProjectVersionModel projectVersion = new ProjectVersionModel();
             final String componentName = "Component" + index;
             final String versionName = "Version" + index;
             final ComponentVersion componentVersion = Mockito.mock(ComponentVersion.class);

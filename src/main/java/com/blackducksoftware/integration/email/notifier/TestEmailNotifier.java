@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 import com.blackducksoftware.integration.email.model.EmailTarget;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
 
 import freemarker.template.TemplateException;
@@ -48,7 +48,7 @@ public class TestEmailNotifier extends AbstractNotifier {
     private final Pattern emailPattern;
 
     public TestEmailNotifier(final ExtensionProperties extensionProperties, final EmailMessagingService emailMessagingService,
-            HubServicesFactory hubServicesFactory) {
+            final HubServicesFactory hubServicesFactory) {
         super(extensionProperties, emailMessagingService, hubServicesFactory);
         emailPattern = Pattern.compile("[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}$");
     }
@@ -80,12 +80,12 @@ public class TestEmailNotifier extends AbstractNotifier {
                 final EmailTarget emailTarget = new EmailTarget(emailAddress, getTemplateName(), model);
                 getEmailMessagingService().sendEmailMessage(emailTarget, globalConfig);
             }
-        } catch (HubIntegrationException | MessagingException | IOException | TemplateException ex) {
+        } catch (IntegrationException | MessagingException | IOException | TemplateException ex) {
             logger.error("Error occurred sending test email.", ex);
         }
     }
 
-    private boolean isEmailAddressValid(String emailAddress) {
+    private boolean isEmailAddressValid(final String emailAddress) {
         final Matcher matcher = emailPattern.matcher(emailAddress);
         return matcher.matches();
     }
@@ -94,7 +94,7 @@ public class TestEmailNotifier extends AbstractNotifier {
         return emailAddress;
     }
 
-    public void setEmailAddress(String emailAddress) {
+    public void setEmailAddress(final String emailAddress) {
         this.emailAddress = emailAddress;
     }
 }

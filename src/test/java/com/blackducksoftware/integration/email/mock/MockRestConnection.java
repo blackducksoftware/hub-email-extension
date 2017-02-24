@@ -24,18 +24,13 @@ package com.blackducksoftware.integration.email.mock;
 import java.net.URL;
 
 import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
-import com.blackducksoftware.integration.hub.global.HubProxyInfo;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.log.IntLogger;
 
 public class MockRestConnection extends RestConnection {
 
-    public MockRestConnection(URL baseUrl) {
-        super(baseUrl);
-    }
-
-    public MockRestConnection(IntLogger logger, URL baseUrl, HubProxyInfo hubProxyInfo) {
-        super(logger, baseUrl, hubProxyInfo);
+    public MockRestConnection(final IntLogger logger, final URL baseUrl) {
+        super(logger, baseUrl, 120);
     }
 
     @Override

@@ -64,6 +64,7 @@ import com.blackducksoftware.integration.hub.dataservice.notification.Notificati
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
+import com.blackducksoftware.integration.log.IntLogger;
 import com.google.gson.JsonParser;
 
 import freemarker.template.Configuration;
@@ -285,7 +286,9 @@ public class EmailEngine implements IAuthorizedListener {
     }
 
     public RestConnection initRestConnection(final String hubUri) {
-        final RestConnection restConnection = new OAuthRestConnection(hubServerConfig.getHubUrl(), hubServerConfig.getProxyInfo(), tokenManager);
+        final IntLogger extLogger = new ExtensionLogger(logger);
+        final RestConnection restConnection = new OAuthRestConnection(extLogger, hubServerConfig.getHubUrl(), hubServerConfig.getTimeout(),
+                hubServerConfig.getProxyInfo(), tokenManager);
         return restConnection;
     }
 

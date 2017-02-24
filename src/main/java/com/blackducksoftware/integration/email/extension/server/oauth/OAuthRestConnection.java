@@ -24,6 +24,7 @@ package com.blackducksoftware.integration.email.extension.server.oauth;
 import java.io.IOException;
 import java.net.URL;
 
+import com.blackducksoftware.integration.exception.EncryptionException;
 import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
 import com.blackducksoftware.integration.hub.global.HubProxyInfo;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
@@ -33,13 +34,17 @@ public class OAuthRestConnection extends RestConnection {
 
     private final TokenManager tokenManager;
 
-    public OAuthRestConnection(URL baseUrl, HubProxyInfo proxyInfo, TokenManager tokenManager) {
-        super(baseUrl);
-        this.tokenManager = tokenManager;
-    }
-
-    public OAuthRestConnection(IntLogger logger, URL baseUrl, HubProxyInfo proxyInfo, TokenManager tokenManager) {
-        super(logger, baseUrl, proxyInfo);
+    public OAuthRestConnection(final IntLogger logger, final URL hubBaseUrl, final int timeout, final HubProxyInfo proxyInfo, final TokenManager tokenManager) {
+        super(logger, hubBaseUrl, timeout);
+        this.setProxyHost(proxyInfo.getHost());
+        this.setProxyPort(proxyInfo.getPort());
+        this.setProxyNoHosts(proxyInfo.getIgnoredProxyHosts());
+        this.setProxyUsername(proxyInfo.getUsername());
+        try {
+            this.setProxyPassword(proxyInfo.getDecryptedPassword());
+        } catch (IllegalArgumentException | EncryptionException e) {
+            logger.error("Error decrypting proxy info", e);
+        }
         this.tokenManager = tokenManager;
     }
 
