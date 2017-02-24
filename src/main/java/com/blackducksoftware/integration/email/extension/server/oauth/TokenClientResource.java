@@ -62,7 +62,7 @@ public class TokenClientResource extends ClientResource implements OAuthResource
 
             response = super.handleOutbound(request);
 
-            if (response.getStatus() == Status.CLIENT_ERROR_UNAUTHORIZED) {
+            if (!isSuccess(response.getStatus().getCode())) {
                 tokenManager.refreshToken(accessType);
                 token = tokenManager.getToken(accessType);
                 final ChallengeResponse cr = new ChallengeResponse(ChallengeScheme.HTTP_OAUTH_BEARER);
@@ -84,5 +84,9 @@ public class TokenClientResource extends ClientResource implements OAuthResource
         }
 
         return response;
+    }
+
+    public boolean isSuccess(final int responseCode) {
+        return responseCode >= 200 && responseCode < 300;
     }
 }
