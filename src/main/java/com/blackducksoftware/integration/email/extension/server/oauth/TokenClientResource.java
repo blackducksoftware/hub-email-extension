@@ -30,9 +30,10 @@ import org.restlet.data.ChallengeResponse;
 import org.restlet.data.ChallengeScheme;
 import org.restlet.data.Status;
 import org.restlet.ext.oauth.OAuthResourceDefs;
-import org.restlet.ext.oauth.internal.Token;
 import org.restlet.resource.ClientResource;
 import org.restlet.resource.ResourceException;
+
+import com.blackducksoftware.integration.hub.api.oauth.Token;
 
 public class TokenClientResource extends ClientResource implements OAuthResourceDefs {
 
@@ -45,9 +46,9 @@ public class TokenClientResource extends ClientResource implements OAuthResource
 
     @Override
     public Response handleOutbound(final Request request) {
-        if (token.getTokenType().equalsIgnoreCase(TOKEN_TYPE_BEARER)) {
+        if (token.tokenType.equalsIgnoreCase(TOKEN_TYPE_BEARER)) {
             final ChallengeResponse cr = new ChallengeResponse(ChallengeScheme.HTTP_OAUTH_BEARER);
-            cr.setRawValue(token.getAccessToken());
+            cr.setRawValue(token.accessToken);
             request.setChallengeResponse(cr);
         } else {
             throw new ResourceException(Status.CLIENT_ERROR_UNAUTHORIZED, "Unsupported token type.");

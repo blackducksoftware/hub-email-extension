@@ -42,8 +42,6 @@ import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.exception.EncryptionException;
 
-import okhttp3.OkHttpClient;
-
 public class OAuthConfigManager {
 
     public static final String OAUTH_CONFIG_FILE_NAME = "oauth.properties";
@@ -68,9 +66,7 @@ public class OAuthConfigManager {
 
     private final Logger logger = LoggerFactory.getLogger(OAuthConfigManager.class);
 
-    private final OkHttpClient.Builder builder = new OkHttpClient.Builder();
-
-    public OAuthConfiguration load() {
+    public ExtensionOAuthConfiguration load() {
         final File propFile = getPropFile();
         logger.info("Loading OAUTH configuration...");
         try {
@@ -81,19 +77,19 @@ public class OAuthConfigManager {
                     props.load(fileInputStream);
                 } catch (final IOException e) {
                     logger.error(MSG_COULD_NOT_LOAD_PROPS, e);
-                    return new OAuthConfiguration();
+                    return new ExtensionOAuthConfiguration();
                 }
                 return createFromProperties(props);
             } else {
                 logger.error(MSG_COULD_NOT_LOAD_PROPS);
-                return new OAuthConfiguration();
+                return new ExtensionOAuthConfiguration();
             }
         } catch (final IOException | IllegalArgumentException | EncryptionException e) {
-            return new OAuthConfiguration();
+            return new ExtensionOAuthConfiguration();
         }
     }
 
-    public void persist(final OAuthConfiguration config) {
+    public void persist(final ExtensionOAuthConfiguration config) {
         final File propFile = getPropFile();
         logger.info("Saving OAuth configuration...");
         try {
@@ -133,7 +129,7 @@ public class OAuthConfigManager {
         }
     }
 
-    private OAuthConfiguration createFromProperties(final Properties properties) throws IllegalArgumentException, EncryptionException {
+    private ExtensionOAuthConfiguration createFromProperties(final Properties properties) throws IllegalArgumentException, EncryptionException {
         final String clientId = getPropertyValue(properties.getProperty(OAUTH_PROPERTY_CLIENT_ID));
         final String userRefreshToken = getPropertyValue(properties.getProperty(OAUTH_PROPERTY_USER_REFRESH_TOKEN));
         final String callbackUrl = getPropertyValue(properties.getProperty(OAUTH_PROPERTY_CALLBACK_URL));
@@ -141,7 +137,7 @@ public class OAuthConfigManager {
         final String extensionUri = getPropertyValue(properties.getProperty(OAUTH_PROPERTY_EXTENSION_URI));
         final String authorizeUri = getPropertyValue(properties.getProperty(OAUTH_PROPERTY_AUTHORIZE_URI));
         final String tokenUri = getPropertyValue(properties.getProperty(OAUTH_PROPERTY_TOKEN_URI));
-        final OAuthConfiguration config = new OAuthConfiguration();
+        final ExtensionOAuthConfiguration config = new ExtensionOAuthConfiguration();
         config.setClientId(clientId);
         config.setCallbackUrl(callbackUrl);
         config.setUserRefreshToken(userRefreshToken);
@@ -163,7 +159,7 @@ public class OAuthConfigManager {
         return encoded;
     }
 
-    public String getOAuthAuthorizationUrl(final OAuthConfiguration config, final Optional<StateUrlProcessor> state) {
+    public String getOAuthAuthorizationUrl(final ExtensionOAuthConfiguration config, final Optional<StateUrlProcessor> state) {
         final Reference reference = new Reference(config.getoAuthAuthorizeUri());
 
         final OAuthParameters parameters = new OAuthParameters();
@@ -183,7 +179,7 @@ public class OAuthConfigManager {
         return parameters.toReference(reference.toString()).toString();
     }
 
-    public AccessTokenClientResource getTokenResource(final OAuthConfiguration config) {
+    public AccessTokenClientResource getTokenResource(final ExtensionOAuthConfiguration config) {
         final Reference reference = new Reference(config.getoAuthTokenUri());
 
         final AccessTokenClientResource tokenResource = new AccessTokenClientResource(reference);
@@ -196,7 +192,7 @@ public class OAuthConfigManager {
         return tokenResource;
     }
 
-    public OAuthParameters getAccessTokenParameters(final OAuthConfiguration config, final String code) {
+    public OAuthParameters getAccessTokenParameters(final ExtensionOAuthConfiguration config, final String code) {
         final OAuthParameters parameters = new OAuthParameters();
         parameters.grantType(GrantType.authorization_code);
         parameters.redirectURI(config.getCallbackUrl());

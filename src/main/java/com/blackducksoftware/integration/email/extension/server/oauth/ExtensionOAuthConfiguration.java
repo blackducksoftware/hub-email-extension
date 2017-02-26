@@ -21,22 +21,15 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.email.extension.server.oauth;
 
-public class OAuthConfiguration {
-    private String clientId;
+import com.blackducksoftware.integration.hub.api.oauth.OAuthConfiguration;
 
-    private String callbackUrl;
+public class ExtensionOAuthConfiguration extends OAuthConfiguration {
 
     private String hubUri;
 
     private String extensionUri;
 
-    private String oAuthAuthorizeUri;
-
-    private String oAuthTokenUri;
-
-    private String userRefreshToken;
-
-    public OAuthConfiguration() {
+    public ExtensionOAuthConfiguration() {
     }
 
     public boolean isClientConfigured() {
@@ -76,34 +69,34 @@ public class OAuthConfiguration {
     }
 
     public String getoAuthAuthorizeUri() {
-        return oAuthAuthorizeUri;
+        return authorizeUri;
     }
 
     public void setoAuthAuthorizeUri(final String oAuthAuthorizeUri) {
-        this.oAuthAuthorizeUri = oAuthAuthorizeUri;
+        this.authorizeUri = oAuthAuthorizeUri;
     }
 
     public String getoAuthTokenUri() {
-        return oAuthTokenUri;
+        return tokenUri;
     }
 
     public void setoAuthTokenUri(final String oAuthTokenUri) {
-        this.oAuthTokenUri = oAuthTokenUri;
+        this.tokenUri = oAuthTokenUri;
     }
 
     public String getUserRefreshToken() {
-        return userRefreshToken;
+        return refreshToken;
     }
 
     public void setUserRefreshToken(final String userRefreshToken) {
-        this.userRefreshToken = userRefreshToken;
+        this.refreshToken = userRefreshToken;
     }
 
     public void setAddresses(final String hubUri, final String extensionUri, final String oAuthAuthorizeUri,
             final String oAuthTokenUri) {
         this.hubUri = hubUri;
         this.extensionUri = extensionUri;
-        this.oAuthAuthorizeUri = oAuthAuthorizeUri;
-        this.oAuthTokenUri = oAuthTokenUri;
+        this.authorizeUri = oAuthAuthorizeUri;
+        this.tokenUri = oAuthTokenUri;
     }
 }

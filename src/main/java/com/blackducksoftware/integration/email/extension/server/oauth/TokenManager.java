@@ -22,46 +22,31 @@
 package com.blackducksoftware.integration.email.extension.server.oauth;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-import org.apache.commons.lang3.StringUtils;
-import org.json.JSONException;
-import org.restlet.data.Status;
-import org.restlet.ext.json.JsonRepresentation;
-import org.restlet.ext.oauth.AccessTokenClientResource;
-import org.restlet.ext.oauth.OAuthException;
-import org.restlet.ext.oauth.internal.Token;
-import org.restlet.representation.Representation;
-import org.restlet.resource.ClientResource;
-import org.restlet.resource.ResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.integration.email.ExtensionLogger;
 import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.extension.server.oauth.listeners.IAuthorizedListener;
 import com.blackducksoftware.integration.exception.IntegrationException;
-import com.blackducksoftware.integration.hub.rest.RestConnection;
+import com.blackducksoftware.integration.hub.api.oauth.Token;
+import com.blackducksoftware.integration.hub.rest.oauth.AccessType;
+import com.blackducksoftware.integration.hub.rest.oauth.OAuthRestConnection;
 import com.blackducksoftware.integration.log.IntLogger;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonObject;
 
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class TokenManager {
+public class TokenManager extends com.blackducksoftware.integration.hub.rest.oauth.TokenManager {
 
     private final Logger logger = LoggerFactory.getLogger(TokenManager.class);
 
@@ -69,12 +54,7 @@ public class TokenManager {
 
     public static final String EXTENSIONS_URL_IDENTIFIER = "externalextensions";
 
-    private final OAuthConfiguration configuration;
-
-    // Internal storage for tokens - done in-memory as a simple example
-    private Token userToken = null;
-
-    private Token clientToken = null;
+    private final ExtensionOAuthConfiguration configuration;
 
     private final ExtensionInfo extensionInfo;
 
@@ -82,17 +62,19 @@ public class TokenManager {
 
     private final OAuthConfigManager configManager;
 
-    private final OkHttpClient client;
+    private Token userToken;
 
-    public TokenManager(final ExtensionInfo extensionInfo) {
+    public TokenManager(final IntLogger logger, final int timeout, final ExtensionInfo extensionInfo) {
+        super(logger, timeout);
         configManager = new OAuthConfigManager();
         configuration = configManager.load();
+        setConfiguration(configuration);
         this.extensionInfo = extensionInfo;
         authorizedListeners = new ArrayList<>();
-        client = new OkHttpClient.Builder().build();
     }
 
-    public OAuthConfiguration getConfiguration() {
+    @Override
+    public ExtensionOAuthConfiguration getConfiguration() {
         return configuration;
     }
 
@@ -109,16 +91,16 @@ public class TokenManager {
     }
 
     public void updateCallbackUrl(final String callbackUrl) {
-        configuration.setCallbackUrl(callbackUrl);
+        getConfiguration().callbackUrl = callbackUrl;
     }
 
     public void updateClientId(final String clientId) {
-        configuration.setClientId(clientId);
+        getConfiguration().clientId = clientId;
     }
 
     public void setAddresses(final String hubUri, final String extensionUri, final String oAuthAuthorizeUri,
             final String oAuthTokenUri) {
-        logger.info("Received hub addresses hubUri: {}, extensionUri: {}, oAuthAuthorizeUri: {}, oAuthTokenUri: {}",
+        logger.debug("Received hub addresses hubUri: {}, extensionUri: {}, oAuthAuthorizeUri: {}, oAuthTokenUri: {}",
                 hubUri, extensionUri, oAuthAuthorizeUri, oAuthTokenUri);
         configuration.setAddresses(hubUri, extensionUri, oAuthAuthorizeUri, oAuthTokenUri);
     }
@@ -141,149 +123,39 @@ public class TokenManager {
         }
     }
 
-    public void exchangeForToken(final String authorizationCode) throws IOException {
-        final AccessTokenClientResource tokenResource = configManager.getTokenResource(configuration);
-        try {
-
-            // TODO create the builder to submit token request
-            userToken = tokenResource
-                    .requestToken(configManager.getAccessTokenParameters(configuration, authorizationCode));
-            completeAuthorization();
-        } catch (JSONException | OAuthException | URISyntaxException e) {
-            throw new IOException(e);
-        }
+    public void exchangeForToken(final String authorizationCode) throws IntegrationException, MalformedURLException {
+        userToken = this.exchangeForUserToken(authorizationCode);
+        completeAuthorization();
     }
 
-    public void refreshToken(final AccessType accessType) throws IOException {
-        if (AccessType.USER.equals(accessType)) {
-            refreshUserAccessToken();
-        } else if (AccessType.CLIENT.equals(accessType)) {
-            refreshClientAccessToken();
-        }
-    }
-
-    public TokenClientResource createClientResource(final String reference, final AccessType accessType)
-            throws IOException, URISyntaxException {
-        final Token token = getToken(accessType);
-        return new TokenClientResource(new URI(reference), token);
-    }
-
-    public void completeAuthorization() throws IOException, URISyntaxException {
+    public void completeAuthorization() throws MalformedURLException, IntegrationException {
         // Update authorization status
         // this is hub specific as far as I can tell to send status for
         // the authorization.
-        final String hubExtensionUri = getConfiguration().getExtensionUri();
-        final TokenClientResource resource = createClientResource(hubExtensionUri, AccessType.CLIENT);
-        try {
-            updateAuthorized(resource);
-        } catch (final ResourceException e) {
-            if (Status.CLIENT_ERROR_UNAUTHORIZED.equals(e.getStatus())) {
-                // Try one more time, after refreshing tokens
-                refreshToken(AccessType.CLIENT);
-                updateAuthorized(resource);
-            } else {
-                throw e;
-            }
-        }
-        configuration.setUserRefreshToken(userToken.getRefreshToken());
+        updateAuthorized(true);
+
+        configuration.setUserRefreshToken(userToken.refreshToken);
         configManager.persist(configuration);
         notifyAuthorizedListeners();
+
     }
 
-    private Token getToken(final AccessType accessType) throws IOException {
-        Token result = null;
-
-        if (AccessType.USER.equals(accessType)) {
-            if (userToken == null) {
-                throw new IllegalStateException("User token not populated");
-            } else {
-                result = userToken;
-            }
-        } else if (AccessType.CLIENT.equals(accessType)) {
-            if (clientToken == null) {
-                refreshClientAccessToken();
-            }
-            result = clientToken;
-        }
-
-        return result;
-    }
-
-    private void refreshUserAccessToken() throws IOException {
-        if (StringUtils.isNotBlank(configuration.getUserRefreshToken())) {
-            // TODO okhttp
-            final AccessTokenClientResource tokenResource = configManager.getTokenResource(configuration);
-            try {
-                userToken = tokenResource
-                        .requestToken(configManager.getRefreshTokenParameters(configuration.getUserRefreshToken()));
-                completeAuthorization();
-            } catch (JSONException | OAuthException | URISyntaxException e) {
-                throw new IOException(e);
-            }
-        } else {
-            throw new IllegalStateException("No token present to refresh");
-        }
-    }
-
-    private void refreshClientAccessToken() throws IOException {
-        // TODO okhttp
-        final IntLogger intLogger = new ExtensionLogger(logger);
-        final URL url = new URL(configuration.getoAuthTokenUri());
-        final RestConnection connection = new RestConnection(intLogger, url, 120) {
-
-            @Override
-            public void clientAuthenticate() throws IntegrationException {
-
-            }
-
-            @Override
-            public void addBuilderAuthentication() throws IntegrationException {
-
-            }
-        };
-
-        final Map<String, String> formDataMap = new LinkedHashMap<>();
-        formDataMap.put("grant_type", "client_credential");
-        formDataMap.put("scope", "read%20write");
-        formDataMap.put("client_id", configuration.getClientId());
-
-        final List<String> contentList = new ArrayList<>();
-        for (final Map.Entry<String, String> entry : formDataMap.entrySet()) {
-            contentList.add(String.format("%s=%s", entry.getKey(), entry.getValue()));
-        }
-        final String content = StringUtils.join(contentList, "&");
-        final RequestBody requestBody = RequestBody.create(MediaType.parse("application/x-www-form-urlencoded; charset=utf-8"), content);
-        final HttpUrl httpUrl = connection.createHttpUrl();
-        final Request request = connection.createPostRequest(httpUrl, requestBody);
-
-        Response response = null;
+    private void updateAuthorized(final boolean authorized) throws IntegrationException, MalformedURLException {
         try {
-            response = connection.handleExecuteClientCall(request);
-        } catch (final IntegrationException e1) {
-
-        }
-
-        final AccessTokenClientResource tokenResource = configManager.getTokenResource(configuration);
-        try {
-            clientToken = tokenResource.requestToken(configManager.getClientTokenParameters());
-        } catch (JSONException | OAuthException e) {
-            throw new IOException(e);
-        }
-    }
-
-    private void updateAuthorized(final ClientResource resource) throws IOException {
-        final Representation rep = resource.get();
-        final JsonParser parser = new JsonParser();
-
-        // TODO use OKhttp
-        try {
-            logger.info("Updating hub of authentication status");
-            final JsonElement json = parser.parse(rep.getText());
-            json.getAsJsonObject().add("authenticated", new JsonPrimitive(true));
-
-            resource.put(new JsonRepresentation(json.toString()));
-        } catch (final IOException e) {
-            throw e;
+            final URL url = new URL(getConfiguration().getExtensionUri());
+            final OAuthRestConnection connection = new OAuthRestConnection(getLogger(), url, getTimeout(), this, AccessType.CLIENT);
+            final HttpUrl httpUrl = connection.createHttpUrl();
+            final Request request = connection.createGetRequest(httpUrl);
+            // submit the data to the hub
+            final Response response = connection.handleExecuteClientCall(request);
+            final JsonObject responseBody = connection.getGson().fromJson(response.body().string(), JsonObject.class);
+            responseBody.addProperty("authenticated", Boolean.TRUE);
+            final String content = connection.getGson().toJson(responseBody);
+            final RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), content);
+            final Request putRequest = connection.createPutRequest(httpUrl, requestBody);
+            connection.handleExecuteClientCall(putRequest);
+        } catch (final IOException ex) {
+            throw new IntegrationException("Couldn't update authenticated property of extension", ex);
         }
     }
 }

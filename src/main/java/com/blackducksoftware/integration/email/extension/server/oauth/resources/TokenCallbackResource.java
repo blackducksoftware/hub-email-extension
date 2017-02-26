@@ -21,7 +21,7 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.email.extension.server.oauth.resources;
 
-import java.io.IOException;
+import java.net.MalformedURLException;
 
 import org.restlet.data.Reference;
 import org.restlet.data.Status;
@@ -29,6 +29,7 @@ import org.restlet.resource.Get;
 
 import com.blackducksoftware.integration.email.extension.server.oauth.StateUrlProcessor;
 import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
+import com.blackducksoftware.integration.exception.IntegrationException;
 
 public class TokenCallbackResource extends OAuthServerResource {
 
@@ -51,7 +52,7 @@ public class TokenCallbackResource extends OAuthServerResource {
             try {
                 tokenManager.exchangeForToken(authorizationCode);
                 getResponse().redirectSeeOther(redirectTo);
-            } catch (final IOException e) {
+            } catch (final IntegrationException | MalformedURLException e) {
                 getResponse().setStatus(Status.SERVER_ERROR_INTERNAL, e);
             }
         } else {

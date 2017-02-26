@@ -46,9 +46,7 @@ import org.slf4j.LoggerFactory;
 import com.blackducksoftware.integration.email.extension.config.ExtensionConfigManager;
 import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.extension.server.EmailExtensionApplication;
-import com.blackducksoftware.integration.email.extension.server.oauth.AccessType;
 import com.blackducksoftware.integration.email.extension.server.oauth.OAuthEndpoint;
-import com.blackducksoftware.integration.email.extension.server.oauth.OAuthRestConnection;
 import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
 import com.blackducksoftware.integration.email.extension.server.oauth.listeners.IAuthorizedListener;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
@@ -63,6 +61,8 @@ import com.blackducksoftware.integration.hub.dataservice.extension.ExtensionConf
 import com.blackducksoftware.integration.hub.dataservice.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
+import com.blackducksoftware.integration.hub.rest.oauth.AccessType;
+import com.blackducksoftware.integration.hub.rest.oauth.OAuthRestConnection;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
 import com.blackducksoftware.integration.log.IntLogger;
 import com.google.gson.JsonParser;
@@ -287,8 +287,8 @@ public class EmailEngine implements IAuthorizedListener {
 
     public RestConnection initRestConnection(final String hubUri) {
         final IntLogger extLogger = new ExtensionLogger(logger);
-        final RestConnection restConnection = new OAuthRestConnection(extLogger, hubServerConfig.getHubUrl(), hubServerConfig.getTimeout(),
-                hubServerConfig.getProxyInfo(), tokenManager);
+        final RestConnection restConnection = new OAuthRestConnection(extLogger, hubServerConfig.getHubUrl(), hubServerConfig.getTimeout(), tokenManager,
+                AccessType.USER);
         return restConnection;
     }
 
@@ -361,7 +361,11 @@ public class EmailEngine implements IAuthorizedListener {
     }
 
     public TokenManager createTokenManager() {
-        final TokenManager tokenManager = new TokenManager(extensionInfoData);
+        final Logger tokenManagerLogger = LoggerFactory.getLogger(TokenManager.class);
+        final ExtensionLogger serviceLogger = new ExtensionLogger(tokenManagerLogger);
+        final String timeoutString = extensionProperties.getHubServerTimeout();
+        final int timeout = Integer.parseInt(timeoutString);
+        final TokenManager tokenManager = new TokenManager(serviceLogger, timeout, extensionInfoData);
         tokenManager.addAuthorizedListener(this);
         return tokenManager;
     }
