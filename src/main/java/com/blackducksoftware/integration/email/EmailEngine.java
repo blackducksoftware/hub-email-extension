@@ -402,6 +402,8 @@ public class EmailEngine implements IAuthorizedListener {
             notifierManager.start();
         } catch (final MalformedURLException e) {
             logger.error("Error completing extension initialization", e);
+        } finally {
+            tokenManager.removeAuthorizedListener(this);
         }
     }
 

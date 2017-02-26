@@ -25,8 +25,12 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,48 +118,84 @@ public class TokenManager extends com.blackducksoftware.integration.hub.rest.oau
     }
 
     public boolean removeAuthorizedListener(final IAuthorizedListener listener) {
-        return authorizedListeners.remove(listener);
+        final Iterator<IAuthorizedListener> iterator = authorizedListeners.iterator();
+        while (iterator.hasNext()) {
+            final IAuthorizedListener item = iterator.next();
+            if (item.equals(listener)) {
+                iterator.remove();
+                return true;
+            }
+        }
+        return false;
     }
 
     public void notifyAuthorizedListeners() {
+        final ExecutorService executor = Executors.newFixedThreadPool(1);
         for (final IAuthorizedListener listener : authorizedListeners) {
-            listener.onAuthorized();
+            final FutureTask<Object> task = new FutureTask<>(new Runnable() {
+
+                @Override
+                public void run() {
+                    listener.onAuthorized();
+                }
+            }, null);
+            executor.execute(task);
         }
+
+        executor.shutdown();
     }
 
     public void exchangeForToken(final String authorizationCode) throws IntegrationException, MalformedURLException {
         userToken = this.exchangeForUserToken(authorizationCode);
-        completeAuthorization();
-    }
-
-    public void completeAuthorization() throws MalformedURLException, IntegrationException {
         // Update authorization status
         // this is hub specific as far as I can tell to send status for
         // the authorization.
         updateAuthorized(true);
-
-        configuration.setUserRefreshToken(userToken.refreshToken);
-        configManager.persist(configuration);
-        notifyAuthorizedListeners();
-
+        completeAuthorization(userToken);
     }
 
-    private void updateAuthorized(final boolean authorized) throws IntegrationException, MalformedURLException {
+    @Override
+    public Token refreshToken(final AccessType accessType) throws IntegrationException {
+        final Token token = super.refreshToken(accessType);
+        // TODO may need to refactor this code.
+        if (AccessType.USER.equals(accessType)) {
+            completeAuthorization(token);
+        }
+        return token;
+    }
+
+    public void completeAuthorization(final Token token) throws IntegrationException {
+        configuration.setUserRefreshToken(token.refreshToken);
+        configManager.persist(configuration);
+        notifyAuthorizedListeners();
+    }
+
+    private void updateAuthorized(final boolean authorized) throws IntegrationException {
+        Response getResponse = null;
+        Response putResponse = null;
         try {
             final URL url = new URL(getConfiguration().getExtensionUri());
             final OAuthRestConnection connection = new OAuthRestConnection(getLogger(), url, getTimeout(), this, AccessType.CLIENT);
             final HttpUrl httpUrl = connection.createHttpUrl();
             final Request request = connection.createGetRequest(httpUrl);
             // submit the data to the hub
-            final Response response = connection.handleExecuteClientCall(request);
-            final JsonObject responseBody = connection.getGson().fromJson(response.body().string(), JsonObject.class);
+            getResponse = connection.handleExecuteClientCall(request);
+            final JsonObject responseBody = connection.getGson().fromJson(getResponse.body().string(), JsonObject.class);
             responseBody.addProperty("authenticated", Boolean.TRUE);
             final String content = connection.getGson().toJson(responseBody);
             final RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), content);
             final Request putRequest = connection.createPutRequest(httpUrl, requestBody);
-            connection.handleExecuteClientCall(putRequest);
+            putResponse = connection.handleExecuteClientCall(putRequest);
         } catch (final IOException ex) {
             throw new IntegrationException("Couldn't update authenticated property of extension", ex);
+        } finally {
+            if (getResponse != null) {
+                getResponse.close();
+            }
+
+            if (putResponse != null) {
+                putResponse.close();
+            }
         }
     }
 }
