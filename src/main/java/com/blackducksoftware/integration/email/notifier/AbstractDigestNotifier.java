@@ -46,15 +46,21 @@ import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.model.batch.CategoryData;
 import com.blackducksoftware.integration.email.model.batch.ProjectData;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
+import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.api.item.MetaService;
+import com.blackducksoftware.integration.hub.api.nonpublic.HubVersionRequestService;
 import com.blackducksoftware.integration.hub.api.user.UserItem;
 import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityRequestService;
+import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
 import com.blackducksoftware.integration.hub.dataservice.extension.item.UserConfigItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.dataservice.notification.NotificationResults;
 import com.blackducksoftware.integration.hub.dataservice.notification.model.NotificationContentItem;
 import com.blackducksoftware.integration.hub.dataservice.parallel.ParallelResourceProcessorResults;
+import com.blackducksoftware.integration.hub.dataservice.phonehome.PhoneHomeDataService;
+import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
+import com.blackducksoftware.integration.hub.phonehome.IntegrationInfo;
 import com.blackducksoftware.integration.hub.service.HubRequestService;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
 
@@ -91,9 +97,9 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
 
     private final MetaService metaService;
 
-    private final int phoneHomeCurrentMonth = 0;
+    private final PhoneHomeDataService phoneHomeService;
 
-    private final int phoneHomeDayOfMonth = 0;
+    private final HubVersionRequestService versionService;
 
     public AbstractDigestNotifier(final ExtensionProperties extensionProperties,
             final EmailMessagingService emailMessagingService, final HubServicesFactory hubServicesFactory, final ExtensionInfo extensionInfoData) {
@@ -104,7 +110,8 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
         notificationDataService = hubServicesFactory.createNotificationDataService(extLogger);
         vulnerabilityRequestService = hubServicesFactory.createVulnerabilityRequestService();
         metaService = hubServicesFactory.createMetaService(extLogger);
-
+        this.phoneHomeService = hubServicesFactory.createPhoneHomeDataService(extLogger);
+        this.versionService = hubServicesFactory.createHubVersionRequestService();
     }
 
     public abstract String getCategory();
@@ -274,42 +281,34 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
         }
     }
 
+    private HubServerConfig buildHubServerConfig() {
+        final HubServerConfigBuilder configBuilder = new HubServerConfigBuilder();
+        configBuilder.setHubUrl(getHubServicesFactory().getRestConnection().getHubBaseUrl().toString());
+        // using oauth the username and password aren't used but need to be set
+        // for the builder
+        configBuilder.setUsername("auser");
+        configBuilder.setPassword("apassword");
+        configBuilder.setTimeout(getExtensionProperties().getHubServerTimeout());
+        configBuilder.setProxyHost(getExtensionProperties().getHubProxyHost());
+        configBuilder.setProxyPort(getExtensionProperties().getHubProxyPort());
+        configBuilder.setIgnoredProxyHosts(getExtensionProperties().getHubProxyNoHost());
+        configBuilder.setProxyUsername(getExtensionProperties().getHubProxyUser());
+        configBuilder.setProxyPassword(getExtensionProperties().getHubProxyPassword());
+
+        return configBuilder.build();
+    }
+
     private void bdPhoneHome() {
-        // try {
-        // final LocalDateTime time = LocalDateTime.now();
-        // final int currentMonth = time.getMonthValue();
-        // final int currentDayOfMonth = time.getDayOfMonth();
-        // // limit the amount of data sent to once a day. Primitive check to limit the request
-        // if (phoneHomeDayOfMonth < currentDayOfMonth || phoneHomeCurrentMonth != currentMonth) {
-        // final HubIntRestService intRestService = new HubIntRestService(getHubServicesFactory().getRestConnection());
-        // final String hubVersion = getHubServicesFactory().getHubVersionRestService().getHubVersion();
-        // String regId = null;
-        // String hubHostName = null;
-        // try {
-        // regId = intRestService.getRegistrationId();
-        // } catch (final Exception e) {
-        // logger.debug("Could not get the Hub registration Id.");
-        // }
-        // try {
-        // final URL url = new URL(getHubServicesFactory().getRestConnection().getBaseUrl());
-        // hubHostName = url.getHost();
-        // } catch (final Exception e) {
-        // logger.debug("Could not get the Hub Host name.");
-        // }
-        //
-        // final String pluginVersion = getExtensionProperties().getExtensionVersion();
-        // final PhoneHomeClient phClient = new PhoneHomeClient();
-        //
-        // phClient.callHomeIntegrations(regId, hubHostName, "Hub", hubVersion, "Email-Extension", "",
-        // pluginVersion);
-        // phoneHomeCurrentMonth = currentMonth;
-        // phoneHomeDayOfMonth = currentDayOfMonth;
-        // }
-        // } catch (ResourceException | JSONException | IOException | PropertiesLoaderException | PhoneHomeException |
-        // URISyntaxException
-        // | ResourceDoesNotExistException | BDRestException ex) {
-        // logger.debug("Unable to phone-home", ex);
-        // }
+        try {
+            final String pluginVersion = getExtensionProperties().getExtensionVersion();
+            final String hubVersion = versionService.getHubVersion();
+
+            final IntegrationInfo integrationInfo = new IntegrationInfo("Email-Extension", "", pluginVersion);
+            final HubServerConfig hubServerConfig = buildHubServerConfig();
+            this.phoneHomeService.phoneHome(hubServerConfig, integrationInfo, hubVersion);
+        } catch (final IntegrationException ex) {
+            logger.debug("Unable to phone home", ex);
+        }
     }
 
     @Override

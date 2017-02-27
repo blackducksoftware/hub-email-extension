@@ -46,11 +46,10 @@ import org.slf4j.LoggerFactory;
 import com.blackducksoftware.integration.email.extension.config.ExtensionConfigManager;
 import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.extension.server.EmailExtensionApplication;
-import com.blackducksoftware.integration.email.extension.server.oauth.OAuthEndpoint;
 import com.blackducksoftware.integration.email.extension.server.oauth.ExtensionTokenManager;
+import com.blackducksoftware.integration.email.extension.server.oauth.OAuthEndpoint;
 import com.blackducksoftware.integration.email.extension.server.oauth.listeners.IAuthorizedListener;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
-import com.blackducksoftware.integration.email.model.HubServerBeanConfiguration;
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.notifier.CustomDigestNotifier;
 import com.blackducksoftware.integration.email.notifier.DailyDigestNotifier;
@@ -58,6 +57,7 @@ import com.blackducksoftware.integration.email.notifier.NotifierManager;
 import com.blackducksoftware.integration.email.notifier.RealTimeDigestNotifier;
 import com.blackducksoftware.integration.email.notifier.TestEmailNotifier;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
+import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
 import com.blackducksoftware.integration.hub.dataservice.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservice.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
@@ -268,9 +268,34 @@ public class EmailEngine implements IAuthorizedListener {
     }
 
     public HubServerConfig createHubConfig(final String hubUri) {
-        final HubServerBeanConfiguration serverBeanConfig = new HubServerBeanConfiguration(hubUri, extensionProperties);
+        try {
+            final HubServerConfigBuilder configBuilder = new HubServerConfigBuilder();
+            configBuilder.setHubUrl(hubUri);
+            // using oauth the username and password aren't used but need to be set
+            // for the builder
+            configBuilder.setUsername("auser");
+            configBuilder.setPassword("apassword");
+            configBuilder.setTimeout(extensionProperties.getHubServerTimeout());
+            configBuilder.setProxyHost(extensionProperties.getHubProxyHost());
+            configBuilder.setProxyPort(extensionProperties.getHubProxyPort());
+            configBuilder.setIgnoredProxyHosts(extensionProperties.getHubProxyNoHost());
+            configBuilder.setProxyUsername(extensionProperties.getHubProxyUser());
+            configBuilder.setProxyPassword(extensionProperties.getHubProxyPassword());
 
-        return serverBeanConfig.build();
+            // output the configuration details
+            logger.info("Hub Server URL          = " + configBuilder.getHubUrl());
+            logger.info("Hub Timeout             = " + configBuilder.getTimeout());
+            logger.info("Hub Proxy Host          = " + configBuilder.getProxyHost());
+            logger.info("Hub Proxy Port          = " + configBuilder.getProxyPort());
+            logger.info("Hub Ignored Proxy Hosts = " + configBuilder.getIgnoredProxyHosts());
+            logger.info("Hub Proxy User          = " + configBuilder.getProxyUsername());
+
+            return configBuilder.build();
+        } catch (final IllegalStateException ex) {
+            logger.error("Error with the hub configuration", ex);
+        }
+
+        return null;
     }
 
     public RestConnection createRestConnection(final String hubUri) {
