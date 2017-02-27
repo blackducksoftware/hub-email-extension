@@ -166,7 +166,7 @@ public class ExtensionTokenManager extends TokenManager {
     }
 
     public void completeAuthorization(final Token token) throws IntegrationException {
-        configuration.setUserRefreshToken(token.refreshToken);
+        configuration.refreshToken = token.refreshToken;
         configManager.persist(configuration);
         notifyAuthorizedListeners();
     }
@@ -175,7 +175,7 @@ public class ExtensionTokenManager extends TokenManager {
         Response getResponse = null;
         Response putResponse = null;
         try {
-            final URL url = new URL(getConfiguration().getExtensionUri());
+            final URL url = new URL(getConfiguration().extensionUri);
             final OAuthRestConnection connection = new OAuthRestConnection(getLogger(), url, getTimeout(), this, AccessType.CLIENT);
             final HttpUrl httpUrl = connection.createHttpUrl();
             final Request request = connection.createGetRequest(httpUrl);

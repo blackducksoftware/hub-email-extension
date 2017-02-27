@@ -420,7 +420,7 @@ public class EmailEngine implements IAuthorizedListener {
     public void onAuthorized() {
         try {
             String hubUri;
-            hubUri = createHubBaseUrl(tokenManager.getConfiguration().getHubUri());
+            hubUri = createHubBaseUrl(tokenManager.getConfiguration().hubUri);
             hubServerConfig = createHubConfig(hubUri);
             restConnection = createRestConnection(hubUri);
             javaMailWrapper = createJavaMailWrapper();
@@ -429,7 +429,7 @@ public class EmailEngine implements IAuthorizedListener {
             notificationDataService = createNotificationDataService();
             extConfigDataService = createExtensionConfigDataService();
             notifierManager = createNotifierManager();
-            notifierManager.updateHubExtensionUri(tokenManager.getConfiguration().getExtensionUri());
+            notifierManager.updateHubExtensionUri(tokenManager.getConfiguration().extensionUri);
             notifierManager.start();
         } catch (final MalformedURLException e) {
             logger.error("Error completing extension initialization", e);

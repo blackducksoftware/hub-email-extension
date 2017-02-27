@@ -25,71 +25,15 @@ import com.blackducksoftware.integration.hub.api.oauth.OAuthConfiguration;
 
 public class ExtensionOAuthConfiguration extends OAuthConfiguration {
 
-    private String hubUri;
+    public String hubUri;
 
-    private String extensionUri;
+    public String extensionUri;
 
     public ExtensionOAuthConfiguration() {
     }
 
     public boolean isClientConfigured() {
         return clientId != null;
-    }
-
-    public String getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(final String clientId) {
-        this.clientId = clientId;
-    }
-
-    public String getCallbackUrl() {
-        return callbackUrl;
-    }
-
-    public void setCallbackUrl(final String callbackUrl) {
-        this.callbackUrl = callbackUrl;
-    }
-
-    public String getHubUri() {
-        return hubUri;
-    }
-
-    public void setHubUri(final String hubUri) {
-        this.hubUri = hubUri;
-    }
-
-    public String getExtensionUri() {
-        return extensionUri;
-    }
-
-    public void setExtensionUri(final String extensionUri) {
-        this.extensionUri = extensionUri;
-    }
-
-    public String getoAuthAuthorizeUri() {
-        return authorizeUri;
-    }
-
-    public void setoAuthAuthorizeUri(final String oAuthAuthorizeUri) {
-        this.authorizeUri = oAuthAuthorizeUri;
-    }
-
-    public String getoAuthTokenUri() {
-        return tokenUri;
-    }
-
-    public void setoAuthTokenUri(final String oAuthTokenUri) {
-        this.tokenUri = oAuthTokenUri;
-    }
-
-    public String getUserRefreshToken() {
-        return refreshToken;
-    }
-
-    public void setUserRefreshToken(final String userRefreshToken) {
-        this.refreshToken = userRefreshToken;
     }
 
     public void setAddresses(final String hubUri, final String extensionUri, final String oAuthAuthorizeUri,
