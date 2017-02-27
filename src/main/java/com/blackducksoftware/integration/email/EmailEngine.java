@@ -47,7 +47,7 @@ import com.blackducksoftware.integration.email.extension.config.ExtensionConfigM
 import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.extension.server.EmailExtensionApplication;
 import com.blackducksoftware.integration.email.extension.server.oauth.OAuthEndpoint;
-import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
+import com.blackducksoftware.integration.email.extension.server.oauth.ExtensionTokenManager;
 import com.blackducksoftware.integration.email.extension.server.oauth.listeners.IAuthorizedListener;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.model.HubServerBeanConfiguration;
@@ -92,7 +92,7 @@ public class EmailEngine implements IAuthorizedListener {
 
     private NotifierManager notifierManager;
 
-    private final TokenManager tokenManager;
+    private final ExtensionTokenManager tokenManager;
 
     private final OAuthEndpoint restletComponent;
 
@@ -156,7 +156,7 @@ public class EmailEngine implements IAuthorizedListener {
         return notifierManager;
     }
 
-    public TokenManager getTokenManager() {
+    public ExtensionTokenManager getTokenManager() {
         return tokenManager;
     }
 
@@ -366,12 +366,12 @@ public class EmailEngine implements IAuthorizedListener {
         return endpoint;
     }
 
-    public TokenManager createTokenManager() {
-        final Logger tokenManagerLogger = LoggerFactory.getLogger(TokenManager.class);
+    public ExtensionTokenManager createTokenManager() {
+        final Logger tokenManagerLogger = LoggerFactory.getLogger(ExtensionTokenManager.class);
         final ExtensionLogger serviceLogger = new ExtensionLogger(tokenManagerLogger);
         final String timeoutString = extensionProperties.getHubServerTimeout();
         final int timeout = Integer.parseInt(timeoutString);
-        final TokenManager tokenManager = new TokenManager(serviceLogger, timeout, extensionInfoData);
+        final ExtensionTokenManager tokenManager = new ExtensionTokenManager(serviceLogger, timeout, extensionInfoData);
         tokenManager.addAuthorizedListener(this);
         return tokenManager;
     }

@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.extension.server.oauth.StateUrlProcessor;
-import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
+import com.blackducksoftware.integration.email.extension.server.oauth.ExtensionTokenManager;
 
 public class TokenAuthenticationResource extends OAuthServerResource {
 
@@ -47,7 +47,7 @@ public class TokenAuthenticationResource extends OAuthServerResource {
         } else if (getRequest().getReferrerRef() != null) {
             state.setReturnUrl(getRequest().getReferrerRef().toString());
         }
-        final TokenManager tokenManager = getTokenManager();
+        final ExtensionTokenManager tokenManager = getTokenManager();
         if (tokenManager != null) {
             logger.info("Authenticate method called to obtain authorization url");
             final Reference authUrl = new Reference(tokenManager.getOAuthAuthorizationUrl(Optional.of(state)));

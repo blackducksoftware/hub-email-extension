@@ -26,7 +26,7 @@ import org.restlet.data.Status;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.resource.Post;
 
-import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
+import com.blackducksoftware.integration.email.extension.server.oauth.ExtensionTokenManager;
 
 public class ClientIdRegistrationResource extends OAuthServerResource {
 
@@ -35,7 +35,7 @@ public class ClientIdRegistrationResource extends OAuthServerResource {
         final String clientId = entity.getJsonObject().getString("clientId");
 
         if (StringUtils.isNotBlank(clientId)) {
-            final TokenManager tokenManager = getTokenManager();
+            final ExtensionTokenManager tokenManager = getTokenManager();
             if (tokenManager != null) {
                 getTokenManager().updateClientId(clientId);
             } else {

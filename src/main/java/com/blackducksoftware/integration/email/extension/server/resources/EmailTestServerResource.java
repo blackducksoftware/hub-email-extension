@@ -33,7 +33,7 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 
 import com.blackducksoftware.integration.email.EmailExtensionConstants;
-import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
+import com.blackducksoftware.integration.email.extension.server.oauth.ExtensionTokenManager;
 import com.blackducksoftware.integration.email.notifier.TestEmailNotifier;
 
 public class EmailTestServerResource extends ExtensionServerResource {
@@ -44,7 +44,7 @@ public class EmailTestServerResource extends ExtensionServerResource {
 
     @Post
     public void postFormData(final Representation entity) {
-        TokenManager tokenManager = getTokenManager();
+        ExtensionTokenManager tokenManager = getTokenManager();
         if (tokenManager.authenticationRequired()) {
             getResponse().setStatus(Status.CLIENT_ERROR_UNAUTHORIZED);
         } else {
@@ -62,7 +62,7 @@ public class EmailTestServerResource extends ExtensionServerResource {
 
     @Get
     public FileRepresentation getTestForm() {
-        TokenManager tokenManager = this.getTokenManager();
+        ExtensionTokenManager tokenManager = this.getTokenManager();
         if (tokenManager.authenticationRequired()) {
             getResponse().setStatus(Status.CLIENT_ERROR_UNAUTHORIZED);
             return null;

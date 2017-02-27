@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.EmailEngine;
-import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
+import com.blackducksoftware.integration.email.extension.server.oauth.ExtensionTokenManager;
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.notifier.NotifierManager;
 import com.blackducksoftware.integration.exception.EncryptionException;
@@ -62,8 +62,8 @@ public class TestEmailEngine extends EmailEngine {
     }
 
     @Override
-    public TokenManager createTokenManager() {
-        final TokenManager tokenManager = super.createTokenManager();
+    public ExtensionTokenManager createTokenManager() {
+        final ExtensionTokenManager tokenManager = super.createTokenManager();
         tokenManager.setAddresses("http://localhost:8080", "http://localhost:8100", "", "");
         return tokenManager;
     }

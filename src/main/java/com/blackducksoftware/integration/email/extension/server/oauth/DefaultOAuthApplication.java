@@ -25,7 +25,7 @@ import org.restlet.routing.Router;
 
 public class DefaultOAuthApplication extends AbstractOAuthApplication {
 
-    public DefaultOAuthApplication(final TokenManager tokenManager) {
+    public DefaultOAuthApplication(final ExtensionTokenManager tokenManager) {
         super(tokenManager);
     }
 

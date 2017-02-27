@@ -23,11 +23,11 @@ package com.blackducksoftware.integration.email.extension.server.oauth.resources
 
 import org.restlet.resource.ServerResource;
 
-import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
+import com.blackducksoftware.integration.email.extension.server.oauth.ExtensionTokenManager;
 
 public class OAuthServerResource extends ServerResource {
 
-    public TokenManager getTokenManager() {
-        return (TokenManager) getContext().getAttributes().get(TokenManager.CONTEXT_ATTRIBUTE_KEY);
+    public ExtensionTokenManager getTokenManager() {
+        return (ExtensionTokenManager) getContext().getAttributes().get(ExtensionTokenManager.CONTEXT_ATTRIBUTE_KEY);
     }
 }

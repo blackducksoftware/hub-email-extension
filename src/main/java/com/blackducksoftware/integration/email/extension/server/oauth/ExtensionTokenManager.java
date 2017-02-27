@@ -41,6 +41,7 @@ import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.api.oauth.Token;
 import com.blackducksoftware.integration.hub.rest.oauth.AccessType;
 import com.blackducksoftware.integration.hub.rest.oauth.OAuthRestConnection;
+import com.blackducksoftware.integration.hub.rest.oauth.TokenManager;
 import com.blackducksoftware.integration.log.IntLogger;
 import com.google.gson.JsonObject;
 
@@ -50,9 +51,9 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class TokenManager extends com.blackducksoftware.integration.hub.rest.oauth.TokenManager {
+public class ExtensionTokenManager extends TokenManager {
 
-    private final Logger logger = LoggerFactory.getLogger(TokenManager.class);
+    private final Logger logger = LoggerFactory.getLogger(ExtensionTokenManager.class);
 
     public final static String CONTEXT_ATTRIBUTE_KEY = "blackduck-oauth-token-manager";
 
@@ -68,7 +69,7 @@ public class TokenManager extends com.blackducksoftware.integration.hub.rest.oau
 
     private Token userToken;
 
-    public TokenManager(final IntLogger logger, final int timeout, final ExtensionInfo extensionInfo) {
+    public ExtensionTokenManager(final IntLogger logger, final int timeout, final ExtensionInfo extensionInfo) {
         super(logger, timeout);
         configManager = new OAuthConfigManager();
         configuration = configManager.load();

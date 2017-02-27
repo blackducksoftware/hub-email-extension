@@ -28,14 +28,14 @@ import org.restlet.data.Status;
 import org.restlet.resource.Get;
 
 import com.blackducksoftware.integration.email.extension.server.oauth.StateUrlProcessor;
-import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
+import com.blackducksoftware.integration.email.extension.server.oauth.ExtensionTokenManager;
 import com.blackducksoftware.integration.exception.IntegrationException;
 
 public class TokenCallbackResource extends OAuthServerResource {
 
     @Get
     public void accept() {
-        final TokenManager tokenManager = getTokenManager();
+        final ExtensionTokenManager tokenManager = getTokenManager();
         if (tokenManager != null) {
             final String authorizationCode = getQuery().getFirstValue("code");
             final String urlState = getQuery().getFirstValue("state");
