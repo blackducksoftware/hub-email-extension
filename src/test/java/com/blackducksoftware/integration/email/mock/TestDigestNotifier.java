@@ -22,13 +22,13 @@
 package com.blackducksoftware.integration.email.mock;
 
 import java.io.File;
-import java.time.ZoneId;
 import java.util.Date;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.notifier.AbstractDigestNotifier;
@@ -44,8 +44,8 @@ public class TestDigestNotifier extends AbstractDigestNotifier {
     private final String initialStartDate;
 
     public TestDigestNotifier(final ExtensionProperties extensionProperties,
-            final EmailMessagingService emailMessagingService, HubServicesFactory hubServicesFactory) {
-        super(extensionProperties, emailMessagingService, hubServicesFactory);
+            final EmailMessagingService emailMessagingService, final HubServicesFactory hubServicesFactory, final ExtensionInfo extensionInfo) {
+        super(extensionProperties, emailMessagingService, hubServicesFactory, extensionInfo);
         lastRunPath = getExtensionProperties().getNotifierVariableProperties()
                 .get(getNotifierPropertyKey() + ".lastrun.file");
         initialStartDate = getExtensionProperties().getNotifierVariableProperties()
@@ -53,7 +53,7 @@ public class TestDigestNotifier extends AbstractDigestNotifier {
     }
 
     @Override
-    public DateRange createDateRange(final ZoneId zoneId) {
+    public DateRange createDateRange() {
         try {
             Date startDate = null;
             final File lastRunFile = new File(lastRunPath);
@@ -83,5 +83,11 @@ public class TestDigestNotifier extends AbstractDigestNotifier {
     @Override
     public String getCategory() {
         return "daily";
+    }
+
+    @Override
+    public String createCronExpression() {
+        // every minute
+        return "0 0/1 * 1/1 * ? *";
     }
 }

@@ -32,7 +32,7 @@
                               <#assign categoryName="Policy Violations">
                             <#elseif categoryType == "POLICY_VIOLATION_CLEARED">
                               <#assign categoryName="Policy Violations Cleared">
-                            <#elseif categoryType == "POLICY_VIOLATION_OVERRIDE)">
+                            <#elseif categoryType == "POLICY_VIOLATION_OVERRIDE">
                               <#assign categoryName="Policy Violation Overrides">
                             <#elseif categoryType == "HIGH_VULNERABILITY">
                               <#assign categoryName="High Vulnerabilities">

@@ -103,7 +103,8 @@ public class TestEmailEngine extends EmailEngine {
     @Override
     public NotifierManager createNotifierManager() {
         final NotifierManager manager = new NotifierManager();
-        final TestDigestNotifier digestNotifier = new TestDigestNotifier(getExtensionProperties(), getEmailMessagingService(), getHubServicesFactory());
+        final TestDigestNotifier digestNotifier = new TestDigestNotifier(getExtensionProperties(), getEmailMessagingService(), getHubServicesFactory(),
+                getExtensionInfoData());
         manager.attach(digestNotifier);
         return manager;
     }

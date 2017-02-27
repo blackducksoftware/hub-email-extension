@@ -39,7 +39,7 @@ public class ExtensionConfigManager {
 
     public static final String CONTEXT_ATTRIBUTE_KEY = "blackduck-extension-config-manager";
 
-    private static final String CONFIG_LOCATION_PATH = "ext.config.location";
+    public static final String PROPERTY_KEY_CONFIG_LOCATION_PATH = "ext.config.location";
 
     private final ExtensionInfo extensionInfo;
 
@@ -55,7 +55,7 @@ public class ExtensionConfigManager {
     }
 
     public String loadGlobalConfigJSON() {
-        final String configLocation = System.getProperty(CONFIG_LOCATION_PATH);
+        final String configLocation = System.getProperty(PROPERTY_KEY_CONFIG_LOCATION_PATH);
         final File globalConfig = new File(configLocation, "config-options.json");
         logger.info("Reading extension global configuration descriptor file {}", globalConfig);
         if (!globalConfig.exists()) {
@@ -74,7 +74,7 @@ public class ExtensionConfigManager {
     }
 
     public String loadUserConfigJSON() {
-        final String configLocation = System.getProperty(CONFIG_LOCATION_PATH);
+        final String configLocation = System.getProperty(PROPERTY_KEY_CONFIG_LOCATION_PATH);
         final File userConfig = new File(configLocation, "user-config-options.json");
         logger.info("Reading extension user configuration descriptor file {}", userConfig);
         if (!userConfig.exists()) {

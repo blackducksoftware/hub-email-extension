@@ -32,6 +32,7 @@ import javax.mail.MessagingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.model.EmailTarget;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
@@ -48,8 +49,8 @@ public class TestEmailNotifier extends AbstractNotifier {
     private final Pattern emailPattern;
 
     public TestEmailNotifier(final ExtensionProperties extensionProperties, final EmailMessagingService emailMessagingService,
-            final HubServicesFactory hubServicesFactory) {
-        super(extensionProperties, emailMessagingService, hubServicesFactory);
+            final HubServicesFactory hubServicesFactory, final ExtensionInfo extensionInfo) {
+        super(extensionProperties, emailMessagingService, hubServicesFactory, extensionInfo);
         emailPattern = Pattern.compile("[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}$");
     }
 

@@ -37,6 +37,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.blackducksoftware.integration.email.EmailEngine;
+import com.blackducksoftware.integration.email.extension.config.ExtensionConfigManager;
 import com.blackducksoftware.integration.email.mock.TestEmailEngine;
 import com.blackducksoftware.integration.email.model.EmailTarget;
 import com.blackducksoftware.integration.email.model.batch.CategoryData;
@@ -56,7 +57,7 @@ public class EmailMessagingServiceTest {
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         final URL propFileUrl = classLoader.getResource("extension.properties");
         final File file = new File(propFileUrl.toURI());
-        System.setProperty("ext.config.location", file.getCanonicalFile().getParent());
+        System.setProperty(ExtensionConfigManager.PROPERTY_KEY_CONFIG_LOCATION_PATH, file.getCanonicalFile().getParent());
         engine = new TestEmailEngine();
         engine.start();
     }

@@ -40,6 +40,7 @@ import org.restlet.ext.oauth.ResponseType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.email.extension.config.ExtensionConfigManager;
 import com.blackducksoftware.integration.exception.EncryptionException;
 
 public class OAuthConfigManager {
@@ -120,7 +121,7 @@ public class OAuthConfigManager {
     }
 
     private File getPropFile() {
-        final String parentLocation = System.getProperty("ext.config.location");
+        final String parentLocation = System.getProperty(ExtensionConfigManager.PROPERTY_KEY_CONFIG_LOCATION_PATH);
 
         if (StringUtils.isNotBlank(parentLocation)) {
             return new File(parentLocation, OAUTH_CONFIG_FILE_NAME);

@@ -21,9 +21,6 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.email.notifier;
 
-import java.time.DateTimeException;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -40,7 +37,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.EmailExtensionConstants;
+import com.blackducksoftware.integration.email.ExtensionLogger;
 import com.blackducksoftware.integration.email.batch.processor.EmailProcessor;
+import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.model.EmailTarget;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
@@ -58,10 +57,8 @@ import com.blackducksoftware.integration.hub.dataservice.parallel.ParallelResour
 import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
 import com.blackducksoftware.integration.hub.service.HubRequestService;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
-import com.blackducksoftware.integration.log.IntLogger;
-import com.blackducksoftware.integration.log.Slf4jIntLogger;
 
-public abstract class AbstractDigestNotifier extends AbstractNotifier {
+public abstract class AbstractDigestNotifier extends IntervalNotifier {
     private static final String KEY_HUB_SERVER_URL = "hub_server_url";
 
     public static final String KEY_TOPICS_LIST = "topicsList";
@@ -86,8 +83,6 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 
     private final Logger logger = LoggerFactory.getLogger(AbstractDigestNotifier.class);
 
-    private final String cronExpression;
-
     private final HubRequestService hubRequestService;
 
     private final NotificationDataService notificationDataService;
@@ -96,21 +91,21 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
 
     private final MetaService metaService;
 
+    private final int phoneHomeCurrentMonth = 0;
+
+    private final int phoneHomeDayOfMonth = 0;
+
     public AbstractDigestNotifier(final ExtensionProperties extensionProperties,
-            final EmailMessagingService emailMessagingService, final HubServicesFactory hubServicesFactory) {
-        super(extensionProperties, emailMessagingService, hubServicesFactory);
+            final EmailMessagingService emailMessagingService, final HubServicesFactory hubServicesFactory, final ExtensionInfo extensionInfoData) {
+        super(extensionProperties, emailMessagingService, hubServicesFactory, extensionInfoData);
+        final Logger logger = LoggerFactory.getLogger(NotificationDataService.class);
+        final ExtensionLogger extLogger = new ExtensionLogger(logger);
+        hubRequestService = hubServicesFactory.createHubRequestService();
+        notificationDataService = hubServicesFactory.createNotificationDataService(extLogger);
+        vulnerabilityRequestService = hubServicesFactory.createVulnerabilityRequestService();
+        metaService = hubServicesFactory.createMetaService(extLogger);
 
-        final String quartzTriggerPropValue = getExtensionProperties().getNotifierVariableProperties()
-                .get(getNotifierPropertyKey() + ".cron.expression");
-        cronExpression = StringUtils.trimToNull(quartzTriggerPropValue);
-        this.hubRequestService = hubServicesFactory.createHubRequestService();
-        this.vulnerabilityRequestService = hubServicesFactory.createVulnerabilityRequestService();
-        final IntLogger intLogger = new Slf4jIntLogger(logger);
-        this.notificationDataService = hubServicesFactory.createNotificationDataService(intLogger);
-        this.metaService = hubServicesFactory.createMetaService(intLogger);
     }
-
-    public abstract DateRange createDateRange(final ZoneId zone);
 
     public abstract String getCategory();
 
@@ -126,8 +121,7 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
             if (usersInCategory.isEmpty()) {
                 logger.info("No Users opted into this email notification");
             } else {
-                final ZoneId zoneId = getZoneId(globalConfig);
-                final DateRange dateRange = createDateRange(zoneId);
+                final DateRange dateRange = createDateRange();
                 final Date startDate = dateRange.getStart();
                 final Date endDate = dateRange.getEnd();
                 logger.info("Getting notification data between start: {} end: {}", startDate, endDate);
@@ -136,7 +130,6 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
                 for (final UserConfigItem userConfig : usersInCategory) {
                     try {
                         final UserItem userItem = userConfig.getUser();
-
                         logger.info("Processing hub user {}", metaService.getHref(userItem));
                         final NotificationResults notificationResults = notificationDataService.getUserNotifications(startDate, endDate,
                                 userItem);
@@ -153,6 +146,7 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
                             if (projectsDigest.isEmpty()) {
                                 filteredUsers++;
                             } else {
+                                bdPhoneHome(); // extension used.
                                 final Map<String, Object> model = new HashMap<>();
                                 model.put(KEY_TOPICS_LIST, projectsDigest);
                                 model.put(KEY_START_DATE, String.valueOf(startDate));
@@ -181,28 +175,6 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
         logger.info("Finished iteration of {} digest email notifier",
 
                 getName());
-    }
-
-    private ZoneId getZoneId(final ExtensionProperties globalConfig) {
-        final ZoneId defaultZoneId = ZoneId.ofOffset("UTC", ZoneOffset.UTC);
-
-        final String timezoneVarKey = "all.timezone";
-        final Map<String, String> notifierVariableMap = globalConfig.getNotifierVariableProperties();
-        if (!notifierVariableMap.containsKey(timezoneVarKey)) {
-            return defaultZoneId;
-        } else {
-            final String timezoneId = notifierVariableMap.get(timezoneVarKey);
-            if (StringUtils.isBlank(timezoneId)) {
-                return defaultZoneId;
-            } else {
-                try {
-                    return ZoneId.of(timezoneId);
-                } catch (final DateTimeException ex) {
-                    logger.error("Error parsing global config timezone. Using UTC timezone", ex);
-                    return defaultZoneId;
-                }
-            }
-        }
     }
 
     private Collection<ProjectData> filterUserProjects(final Collection<ProjectData> projectList,
@@ -302,13 +274,46 @@ public abstract class AbstractDigestNotifier extends AbstractNotifier {
         }
     }
 
-    @Override
-    public String getTemplateName() {
-        return "digest.ftl";
+    private void bdPhoneHome() {
+        // try {
+        // final LocalDateTime time = LocalDateTime.now();
+        // final int currentMonth = time.getMonthValue();
+        // final int currentDayOfMonth = time.getDayOfMonth();
+        // // limit the amount of data sent to once a day. Primitive check to limit the request
+        // if (phoneHomeDayOfMonth < currentDayOfMonth || phoneHomeCurrentMonth != currentMonth) {
+        // final HubIntRestService intRestService = new HubIntRestService(getHubServicesFactory().getRestConnection());
+        // final String hubVersion = getHubServicesFactory().getHubVersionRestService().getHubVersion();
+        // String regId = null;
+        // String hubHostName = null;
+        // try {
+        // regId = intRestService.getRegistrationId();
+        // } catch (final Exception e) {
+        // logger.debug("Could not get the Hub registration Id.");
+        // }
+        // try {
+        // final URL url = new URL(getHubServicesFactory().getRestConnection().getBaseUrl());
+        // hubHostName = url.getHost();
+        // } catch (final Exception e) {
+        // logger.debug("Could not get the Hub Host name.");
+        // }
+        //
+        // final String pluginVersion = getExtensionProperties().getExtensionVersion();
+        // final PhoneHomeClient phClient = new PhoneHomeClient();
+        //
+        // phClient.callHomeIntegrations(regId, hubHostName, "Hub", hubVersion, "Email-Extension", "",
+        // pluginVersion);
+        // phoneHomeCurrentMonth = currentMonth;
+        // phoneHomeDayOfMonth = currentDayOfMonth;
+        // }
+        // } catch (ResourceException | JSONException | IOException | PropertiesLoaderException | PhoneHomeException |
+        // URISyntaxException
+        // | ResourceDoesNotExistException | BDRestException ex) {
+        // logger.debug("Unable to phone-home", ex);
+        // }
     }
 
     @Override
-    public String getCronExpression() {
-        return cronExpression;
+    public String getTemplateName() {
+        return "digest.ftl";
     }
 }

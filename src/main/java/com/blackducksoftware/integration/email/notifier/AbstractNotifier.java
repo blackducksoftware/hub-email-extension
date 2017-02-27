@@ -28,6 +28,7 @@ import java.util.TimerTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.exception.IntegrationException;
@@ -49,12 +50,16 @@ public abstract class AbstractNotifier extends TimerTask {
 
     private final ExtensionConfigDataService extensionConfigDataService;
 
+    private final ExtensionInfo extensionInfo;
+
     public AbstractNotifier(final ExtensionProperties extensionProperties,
-            final EmailMessagingService emailMessagingService, final HubServicesFactory hubServicesFactory) {
+            final EmailMessagingService emailMessagingService, final HubServicesFactory hubServicesFactory, final ExtensionInfo extensionInfo) {
         this.extensionProperties = extensionProperties;
         this.emailMessagingService = emailMessagingService;
         this.hubServicesFactory = hubServicesFactory;
+        this.extensionInfo = extensionInfo;
         extensionConfigDataService = hubServicesFactory.createExtensionConfigDataService(new Slf4jIntLogger(logger));
+
     }
 
     public ExtensionProperties createPropertiesFromGlobalConfig() throws IntegrationException {
@@ -103,5 +108,9 @@ public abstract class AbstractNotifier extends TimerTask {
 
     public HubServicesFactory getHubServicesFactory() {
         return hubServicesFactory;
+    }
+
+    public ExtensionInfo getExtensionInfoData() {
+        return extensionInfo;
     }
 }
