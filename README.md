@@ -3,8 +3,8 @@ Hub extension for email. This hub extension provides ability to send emails base
 
 ## Build ##
 
-[![Build Status](https://travis-ci.org/blackducksoftware/hub-bamboo.svg?branch=master)](https://travis-ci.org/blackducksoftware/hub-email-extension)
-[![Coverage Status](https://coveralls.io/repos/github/blackducksoftware/hub-bamboo/badge.svg?branch=master)](https://coveralls.io/github/blackducksoftware/hub-email-extension?branch=master)
+[![Build Status](https://travis-ci.org/blackducksoftware/hub-email-extension.svg?branch=master)](https://travis-ci.org/blackducksoftware/hub-email-extension)
+[![Coverage Status](https://coveralls.io/repos/github/blackducksoftware/hub-email-extension/badge.svg?branch=master)](https://coveralls.io/github/blackducksoftware/hub-email-extension?branch=master)
 
 ## Where can I get the latest release? ##
 You can download the latest source from GitHub: https://github.com/blackducksoftware/hub-email-extension. 
