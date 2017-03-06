@@ -7,7 +7,7 @@ tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
 tasks.withType(GroovyCompile) { options.encoding = 'UTF-8' }
 
 group = 'com.blackducksoftware.integration'
-version = '1.1.1-SNAPSHOT'
+version = '1.1.1'
 description = ''
 mainClassName = 'com.blackducksoftware.integration.email.Application'
 applicationDefaultJvmArgs = ['-DAPP_HOME=APP_HOME_VAR_TOKEN', '-Dlog4j.configurationFile=APP_HOME_VAR_TOKEN/config/log4j.xml', '-Dext.config.location=APP_HOME_VAR_TOKEN/config']
