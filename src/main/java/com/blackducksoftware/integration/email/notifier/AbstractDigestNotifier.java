@@ -49,7 +49,6 @@ import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.api.item.MetaService;
 import com.blackducksoftware.integration.hub.api.nonpublic.HubVersionRequestService;
-import com.blackducksoftware.integration.hub.api.user.UserItem;
 import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityRequestService;
 import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
 import com.blackducksoftware.integration.hub.dataservice.extension.item.UserConfigItem;
@@ -59,9 +58,10 @@ import com.blackducksoftware.integration.hub.dataservice.notification.model.Noti
 import com.blackducksoftware.integration.hub.dataservice.parallel.ParallelResourceProcessorResults;
 import com.blackducksoftware.integration.hub.dataservice.phonehome.PhoneHomeDataService;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
+import com.blackducksoftware.integration.hub.model.view.UserView;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
 import com.blackducksoftware.integration.hub.phonehome.IntegrationInfo;
-import com.blackducksoftware.integration.hub.service.HubRequestService;
+import com.blackducksoftware.integration.hub.service.HubResponseService;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
 
 public abstract class AbstractDigestNotifier extends IntervalNotifier {
@@ -89,7 +89,7 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
 
     private final Logger logger = LoggerFactory.getLogger(AbstractDigestNotifier.class);
 
-    private final HubRequestService hubRequestService;
+    private final HubResponseService hubResponseService;
 
     private final NotificationDataService notificationDataService;
 
@@ -106,7 +106,7 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
         super(extensionProperties, emailMessagingService, hubServicesFactory, extensionInfoData);
         final Logger logger = LoggerFactory.getLogger(NotificationDataService.class);
         final ExtensionLogger extLogger = new ExtensionLogger(logger);
-        hubRequestService = hubServicesFactory.createHubRequestService();
+        hubResponseService = hubServicesFactory.createHubResponseService();
         notificationDataService = hubServicesFactory.createNotificationDataService(extLogger);
         vulnerabilityRequestService = hubServicesFactory.createVulnerabilityRequestService();
         metaService = hubServicesFactory.createMetaService(extLogger);
@@ -136,12 +136,12 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
                 int filteredUsers = 0;
                 for (final UserConfigItem userConfig : usersInCategory) {
                     try {
-                        final UserItem userItem = userConfig.getUser();
+                        final UserView userItem = userConfig.getUser();
                         logger.info("Processing hub user {}", metaService.getHref(userItem));
                         final NotificationResults notificationResults = notificationDataService.getUserNotifications(startDate, endDate,
                                 userItem);
                         final SortedSet<NotificationContentItem> notifications = notificationResults.getNotificationContentItems();
-                        final EmailProcessor processor = new EmailProcessor(hubRequestService, vulnerabilityRequestService, metaService);
+                        final EmailProcessor processor = new EmailProcessor(hubResponseService, vulnerabilityRequestService, metaService);
                         final Collection<ProjectData> projectList = processor.process(notifications);
                         if (projectList.isEmpty()) {
                             logger.info("Project Aggregated Data list is empty no email to generate");
@@ -162,7 +162,7 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
                                 model.put(KEY_USER_LAST_NAME, userConfig.getUser().getLastName());
                                 model.put(KEY_NOTIFIER_CATEGORY, getCategory().toUpperCase());
                                 model.put(KEY_HUB_SERVER_URL,
-                                        hubRequestService.getRestConnection().getHubBaseUrl());
+                                        hubResponseService.getHubBaseUrl());
                                 final String emailAddress = userConfig.getUser().getEmail();
                                 final String templateName = getTemplateName(userConfig);
                                 final EmailTarget emailTarget = new EmailTarget(emailAddress, templateName, model);
@@ -283,7 +283,7 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
 
     private HubServerConfig buildHubServerConfig() {
         final HubServerConfigBuilder configBuilder = new HubServerConfigBuilder();
-        configBuilder.setHubUrl(getHubServicesFactory().getRestConnection().getHubBaseUrl().toString());
+        configBuilder.setHubUrl(getHubServicesFactory().getRestConnection().hubBaseUrl.toString());
         // using oauth the username and password aren't used but need to be set
         // for the builder
         configBuilder.setUsername("auser");

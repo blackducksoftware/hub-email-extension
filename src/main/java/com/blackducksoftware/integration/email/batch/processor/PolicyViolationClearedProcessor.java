@@ -25,10 +25,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.blackducksoftware.integration.hub.api.item.MetaService;
-import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
 import com.blackducksoftware.integration.hub.dataservice.notification.model.NotificationContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyViolationClearedContentItem;
 import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.hub.model.view.PolicyRuleView;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
 import com.blackducksoftware.integration.hub.notification.processor.SubProcessorCache;
 import com.blackducksoftware.integration.hub.notification.processor.event.NotificationEvent;
@@ -44,7 +44,7 @@ public class PolicyViolationClearedProcessor extends PolicyViolationProcessor {
         if (notification instanceof PolicyViolationClearedContentItem) {
             final PolicyViolationClearedContentItem policyViolationCleared = (PolicyViolationClearedContentItem) notification;
             final Map<String, Object> dataMap = new HashMap<>();
-            for (final PolicyRule rule : policyViolationCleared.getPolicyRuleList()) {
+            for (final PolicyRuleView rule : policyViolationCleared.getPolicyRuleList()) {
                 dataMap.put(POLICY_CONTENT_ITEM, policyViolationCleared);
                 dataMap.put(POLICY_RULE, rule);
                 final String eventKey = generateEventKey(dataMap);

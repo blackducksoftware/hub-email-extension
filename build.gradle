@@ -27,9 +27,10 @@ repositories {
 }
 
 dependencies {
-    compile 'com.blackducksoftware.integration:hub-rest-common:1.0.0-SNAPSHOT'
-    compile 'com.blackducksoftware.integration:hub-common:8.0.0-SNAPSHOT'
-    compile 'com.blackducksoftware.integration:phone-home-api:1.1.7'
+    compile 'com.blackducksoftware.integration:hub-common-rest:1.0.0'
+    compile 'com.blackducksoftware.integration:hub-common-response:0.0.5'
+    compile 'com.blackducksoftware.integration:hub-common:8.1.2'
+    compile 'com.blackducksoftware.integration:phone-home-api:1.5.1'
 
     compile 'org.slf4j:slf4j-api:1.7.21'
 	compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.6.2'

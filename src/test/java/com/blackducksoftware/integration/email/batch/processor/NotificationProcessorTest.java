@@ -42,24 +42,25 @@ import org.mockito.Mockito;
 
 import com.blackducksoftware.integration.email.mock.MockLogger;
 import com.blackducksoftware.integration.email.mock.MockRestConnection;
-import com.blackducksoftware.integration.hub.api.component.version.ComponentVersion;
 import com.blackducksoftware.integration.hub.api.item.MetaService;
-import com.blackducksoftware.integration.hub.api.notification.VulnerabilitySourceQualifiedId;
-import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityItem;
 import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityRequestService;
 import com.blackducksoftware.integration.hub.dataservice.notification.model.NotificationContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyOverrideContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyViolationClearedContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyViolationContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.model.VulnerabilityContentItem;
+import com.blackducksoftware.integration.hub.model.view.ComponentVersionView;
+import com.blackducksoftware.integration.hub.model.view.VulnerabilityView;
+import com.blackducksoftware.integration.hub.model.view.components.VulnerabilitySourceQualifiedId;
 import com.blackducksoftware.integration.hub.notification.processor.ItemTypeEnum;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
 import com.blackducksoftware.integration.hub.notification.processor.event.NotificationEvent;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
-import com.blackducksoftware.integration.hub.service.HubRequestService;
+import com.blackducksoftware.integration.hub.service.HubResponseService;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
 import com.blackducksoftware.integration.log.IntBufferedLogger;
 import com.blackducksoftware.integration.log.IntLogger;
+import com.google.gson.Gson;
 
 public class NotificationProcessorTest {
 
@@ -67,29 +68,32 @@ public class NotificationProcessorTest {
 
     private MetaService metaService;
 
+    private Gson gson;
+
     @Before
     public void init() throws Exception {
         final RestConnection restConnection = new MockRestConnection(new MockLogger(), null);
         final HubServicesFactory factory = new HubServicesFactory(restConnection);
         final IntLogger logger = new IntBufferedLogger();
         metaService = factory.createMetaService(logger);
+        gson = restConnection.gson;
     }
 
     public MockProcessor createMockedNotificationProcessor() {
         final VulnerabilityRequestService vulnerabilityRequestService = Mockito.mock(VulnerabilityRequestService.class);
-        final HubRequestService hubRequestService = Mockito.mock(HubRequestService.class);
-        final MockProcessor processor = new MockProcessor(hubRequestService, vulnerabilityRequestService, metaService);
+        final HubResponseService hubResponseService = Mockito.mock(HubResponseService.class);
+        final MockProcessor processor = new MockProcessor(hubResponseService, vulnerabilityRequestService, metaService);
         return processor;
     }
 
-    public MockProcessor createMockedNotificationProcessor(final List<VulnerabilityItem> vulnerabilityList) throws Exception {
-        final ComponentVersion compVersion = Mockito.mock(ComponentVersion.class);
-        Mockito.when(compVersion.getJson()).thenReturn(createComponentJson());
+    public MockProcessor createMockedNotificationProcessor(final List<VulnerabilityView> vulnerabilityList) throws Exception {
+        final ComponentVersionView compVersion = Mockito.mock(ComponentVersionView.class);
+        compVersion.json = createComponentJson();
         final VulnerabilityRequestService vulnerabilityRequestService = Mockito.mock(VulnerabilityRequestService.class);
-        final HubRequestService hubRequestService = Mockito.mock(HubRequestService.class);
-        Mockito.when(hubRequestService.getItem(Mockito.anyString(), Mockito.eq(ComponentVersion.class))).thenReturn(compVersion);
+        final HubResponseService hubResponseService = Mockito.mock(HubResponseService.class);
+        Mockito.when(hubResponseService.getItem(Mockito.anyString(), Mockito.eq(ComponentVersionView.class))).thenReturn(compVersion);
         Mockito.when(vulnerabilityRequestService.getComponentVersionVulnerabilities(Mockito.anyString())).thenReturn(vulnerabilityList);
-        final MockProcessor processor = new MockProcessor(hubRequestService, vulnerabilityRequestService, metaService);
+        final MockProcessor processor = new MockProcessor(hubResponseService, vulnerabilityRequestService, metaService);
         return processor;
     }
 
@@ -121,7 +125,7 @@ public class NotificationProcessorTest {
     public void testPolicyViolationAdd() throws Exception {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
 
-        final ComponentVersion componentVersion = Mockito.mock(ComponentVersion.class);
+        final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
         notifications.add(
                 testUtil.createPolicyViolation(new Date(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT,
@@ -134,7 +138,7 @@ public class NotificationProcessorTest {
     @Test
     public void testPolicyViolationOverride() throws Exception {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
-        final ComponentVersion componentVersion = Mockito.mock(ComponentVersion.class);
+        final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
         notifications.add(
                 testUtil.createPolicyOverride(new Date(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT,
@@ -147,7 +151,7 @@ public class NotificationProcessorTest {
     @Test
     public void testPolicyViolationCleared() throws Exception {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
-        final ComponentVersion componentVersion = Mockito.mock(ComponentVersion.class);
+        final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
         notifications.add(
                 testUtil.createPolicyCleared(new Date(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT,
@@ -160,7 +164,7 @@ public class NotificationProcessorTest {
     @Test
     public void testPolicyViolationAndOverride() throws Exception {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
-        final ComponentVersion componentVersion = Mockito.mock(ComponentVersion.class);
+        final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
         DateTime dateTime = new DateTime();
         final PolicyViolationContentItem policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
@@ -177,7 +181,7 @@ public class NotificationProcessorTest {
     @Test
     public void testPolicyViolationAndCleared() throws Exception {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
-        final ComponentVersion componentVersion = Mockito.mock(ComponentVersion.class);
+        final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
         DateTime dateTime = new DateTime();
         final PolicyViolationContentItem policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
@@ -195,7 +199,7 @@ public class NotificationProcessorTest {
     public void testPolicyViolationAndClearedAndViolated() throws Exception {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
         DateTime dateTime = new DateTime();
-        final ComponentVersion componentVersion = Mockito.mock(ComponentVersion.class);
+        final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
         PolicyViolationContentItem policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
@@ -218,7 +222,7 @@ public class NotificationProcessorTest {
     public void testPolicyViolationAndOverrideAndViolated() throws Exception {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
         DateTime dateTime = new DateTime();
-        final ComponentVersion componentVersion = Mockito.mock(ComponentVersion.class);
+        final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
         PolicyViolationContentItem policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
@@ -240,7 +244,7 @@ public class NotificationProcessorTest {
     public void testComplexPolicyOverride() throws Exception {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
         DateTime dateTime = new DateTime();
-        final ComponentVersion componentVersion = Mockito.mock(ComponentVersion.class);
+        final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
         PolicyViolationContentItem policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
@@ -270,13 +274,13 @@ public class NotificationProcessorTest {
     @Test
     public void testVulnerabilityAdded() throws Exception {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
-        final ComponentVersion componentVersion = Mockito.mock(ComponentVersion.class);
+        final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
         final List<VulnerabilitySourceQualifiedId> vulnerabilities = new LinkedList<>();
         vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
         vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
         vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID));
-        final List<VulnerabilityItem> vulnerabilityList = testUtil.createVulnerabiltyItemList(vulnerabilities);
+        final List<VulnerabilityView> vulnerabilityList = testUtil.createVulnerabiltyItemList(vulnerabilities, gson);
         final DateTime dateTime = new DateTime();
         final List<VulnerabilitySourceQualifiedId> emptyVulnSourceList = Collections.emptyList();
         final VulnerabilityContentItem vulnerability = testUtil.createVulnerability(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
@@ -295,13 +299,13 @@ public class NotificationProcessorTest {
     @Test
     public void testVulnerabilityUpdated() throws Exception {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
-        final ComponentVersion componentVersion = Mockito.mock(ComponentVersion.class);
+        final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
         final List<VulnerabilitySourceQualifiedId> vulnerabilities = new LinkedList<>();
         vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
         vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
         vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID));
-        final List<VulnerabilityItem> vulnerabilityList = testUtil.createVulnerabiltyItemList(vulnerabilities);
+        final List<VulnerabilityView> vulnerabilityList = testUtil.createVulnerabiltyItemList(vulnerabilities, gson);
 
         final DateTime dateTime = new DateTime();
         final List<VulnerabilitySourceQualifiedId> emptyVulnSourceList = Collections.emptyList();
@@ -321,7 +325,7 @@ public class NotificationProcessorTest {
     @Test
     public void testVulnerabilityDeleted() throws Exception {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
-        final ComponentVersion componentVersion = Mockito.mock(ComponentVersion.class);
+        final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
         final List<VulnerabilitySourceQualifiedId> vulnerabilities = new LinkedList<>();
         vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
@@ -342,7 +346,7 @@ public class NotificationProcessorTest {
     @Test
     public void testVulnAddedAndDeleted() throws Exception {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
-        final ComponentVersion componentVersion = Mockito.mock(ComponentVersion.class);
+        final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
         final List<VulnerabilitySourceQualifiedId> vulnerabilities = new LinkedList<>();
         vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
@@ -363,12 +367,12 @@ public class NotificationProcessorTest {
     public void testComplexVulnerability() throws Exception {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
         DateTime dateTime = new DateTime();
-        final ComponentVersion componentVersion = Mockito.mock(ComponentVersion.class);
+        final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
         final List<VulnerabilitySourceQualifiedId> resultVulnList = new ArrayList<>(2);
         resultVulnList.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
         resultVulnList.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
-        final List<VulnerabilityItem> vulnerabilityList = testUtil.createVulnerabiltyItemList(resultVulnList);
+        final List<VulnerabilityView> vulnerabilityList = testUtil.createVulnerabiltyItemList(resultVulnList, gson);
 
         final List<VulnerabilitySourceQualifiedId> added = new ArrayList<>(3);
         added.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
@@ -406,12 +410,12 @@ public class NotificationProcessorTest {
     public void testComplexVulnerabilityMulti() throws Exception {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
         DateTime dateTime = new DateTime();
-        final ComponentVersion componentVersion = Mockito.mock(ComponentVersion.class);
+        final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
         final List<VulnerabilitySourceQualifiedId> resultVulnList = new ArrayList<>(2);
         resultVulnList.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
         resultVulnList.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
-        final List<VulnerabilityItem> vulnerabilityList = testUtil.createVulnerabiltyItemList(resultVulnList);
+        final List<VulnerabilityView> vulnerabilityList = testUtil.createVulnerabiltyItemList(resultVulnList, gson);
 
         final List<VulnerabilitySourceQualifiedId> added1 = new LinkedList<>();
         added1.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));

@@ -32,14 +32,10 @@ import java.util.UUID;
 
 import org.mockito.Mockito;
 
-import com.blackducksoftware.integration.hub.api.component.version.ComponentVersion;
 import com.blackducksoftware.integration.hub.api.item.MetaService;
 import com.blackducksoftware.integration.hub.api.notification.NotificationRequestService;
-import com.blackducksoftware.integration.hub.api.notification.VulnerabilitySourceQualifiedId;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRequestService;
-import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
 import com.blackducksoftware.integration.hub.api.project.version.ProjectVersionRequestService;
-import com.blackducksoftware.integration.hub.api.version.VersionBomPolicyRequestService;
 import com.blackducksoftware.integration.hub.dataservice.model.ProjectVersionModel;
 import com.blackducksoftware.integration.hub.dataservice.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.dataservice.notification.NotificationResults;
@@ -48,17 +44,18 @@ import com.blackducksoftware.integration.hub.dataservice.notification.model.Poli
 import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyViolationClearedContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyViolationContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.model.VulnerabilityContentItem;
-import com.blackducksoftware.integration.hub.rest.RestConnection;
-import com.blackducksoftware.integration.hub.service.HubRequestService;
+import com.blackducksoftware.integration.hub.model.view.ComponentVersionView;
+import com.blackducksoftware.integration.hub.model.view.PolicyRuleView;
+import com.blackducksoftware.integration.hub.model.view.components.VulnerabilitySourceQualifiedId;
+import com.blackducksoftware.integration.hub.service.HubResponseService;
 import com.blackducksoftware.integration.log.IntLogger;
 
 public class MockNotificationDataService extends NotificationDataService {
-    public MockNotificationDataService(final IntLogger logger, final RestConnection restConnection, final NotificationRequestService notificationRequestService,
+    public MockNotificationDataService(final IntLogger logger, final HubResponseService hubResponseService,
+            final NotificationRequestService notificationRequestService,
             final ProjectVersionRequestService projectVersionRequestService, final PolicyRequestService policyRequestService,
-            final VersionBomPolicyRequestService versionBomPolicyRequestService,
-            final HubRequestService hubRequestService, final MetaService metaService) {
-        super(logger, restConnection, notificationRequestService, projectVersionRequestService, policyRequestService, versionBomPolicyRequestService,
-                hubRequestService, metaService);
+            final MetaService metaService) {
+        super(logger, hubResponseService, notificationRequestService, projectVersionRequestService, policyRequestService, null, metaService);
     }
 
     @Override
@@ -86,14 +83,14 @@ public class MockNotificationDataService extends NotificationDataService {
             final ProjectVersionModel projectVersion = new ProjectVersionModel();
             final String componentName = "Component" + index;
             final String versionName = "Version" + index;
-            final ComponentVersion componentVersion = Mockito.mock(ComponentVersion.class);
+            final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
             Mockito.when(componentVersion.getVersionName()).thenReturn(versionName);
             final UUID componentId = UUID.randomUUID();
             final UUID componentVersionId = UUID.randomUUID();
             final String componentUrl = "http://localhost/api/components/" + componentId;
             final String componentVersionUrl = "http://localhost/api/components/" + componentId + "/versions/"
                     + componentVersionId;
-            final List<PolicyRule> policyRuleList = new ArrayList<>();
+            final List<PolicyRuleView> policyRuleList = new ArrayList<>();
             final PolicyViolationContentItem item = new PolicyViolationContentItem(new Date(), projectVersion,
                     componentName, componentVersion, componentUrl, componentVersionUrl, policyRuleList);
             itemList.add(item);
@@ -108,7 +105,7 @@ public class MockNotificationDataService extends NotificationDataService {
             final ProjectVersionModel projectVersion = new ProjectVersionModel();
             final String componentName = "Component" + index;
             final String versionName = "Version" + index;
-            final ComponentVersion componentVersion = Mockito.mock(ComponentVersion.class);
+            final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
             Mockito.when(componentVersion.getVersionName()).thenReturn(versionName);
             final UUID componentId = UUID.randomUUID();
             final UUID componentVersionId = UUID.randomUUID();
@@ -117,7 +114,7 @@ public class MockNotificationDataService extends NotificationDataService {
                     + componentVersionId;
             final String firstName = "firstName";
             final String lastName = "lastName";
-            final List<PolicyRule> policyRuleList = new ArrayList<>();
+            final List<PolicyRuleView> policyRuleList = new ArrayList<>();
             final PolicyOverrideContentItem item = new PolicyOverrideContentItem(new Date(), projectVersion,
                     componentName, componentVersion, componentUrl, componentVersionUrl, policyRuleList, firstName,
                     lastName);
@@ -132,7 +129,7 @@ public class MockNotificationDataService extends NotificationDataService {
             final ProjectVersionModel projectVersion = new ProjectVersionModel();
             final String componentName = "Component" + index;
             final String versionName = "Version" + index;
-            final ComponentVersion componentVersion = Mockito.mock(ComponentVersion.class);
+            final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
             Mockito.when(componentVersion.getVersionName()).thenReturn(versionName);
             final UUID componentId = UUID.randomUUID();
             final UUID componentVersionId = UUID.randomUUID();
@@ -161,14 +158,14 @@ public class MockNotificationDataService extends NotificationDataService {
             final ProjectVersionModel projectVersion = new ProjectVersionModel();
             final String componentName = "Component" + index;
             final String versionName = "Version" + index;
-            final ComponentVersion componentVersion = Mockito.mock(ComponentVersion.class);
+            final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
             Mockito.when(componentVersion.getVersionName()).thenReturn(versionName);
             final UUID componentId = UUID.randomUUID();
             final UUID componentVersionId = UUID.randomUUID();
             final String componentUrl = "http://localhost/api/components/" + componentId;
             final String componentVersionUrl = "http://localhost/api/components/" + componentId + "/versions/"
                     + componentVersionId;
-            final List<PolicyRule> policyRuleList = new ArrayList<>();
+            final List<PolicyRuleView> policyRuleList = new ArrayList<>();
             final PolicyViolationClearedContentItem item = new PolicyViolationClearedContentItem(new Date(),
                     projectVersion, componentName, componentVersion, componentUrl, componentVersionUrl, policyRuleList);
             itemList.add(item);

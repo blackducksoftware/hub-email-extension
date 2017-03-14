@@ -33,14 +33,14 @@ import com.blackducksoftware.integration.hub.dataservice.notification.model.Vuln
 import com.blackducksoftware.integration.hub.notification.processor.MapProcessorCache;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationProcessor;
 import com.blackducksoftware.integration.hub.notification.processor.event.NotificationEvent;
-import com.blackducksoftware.integration.hub.service.HubRequestService;
+import com.blackducksoftware.integration.hub.service.HubResponseService;
 
 public class MockProcessor extends NotificationProcessor<Collection<NotificationEvent>> {
 
-    public MockProcessor(final HubRequestService hubRequestService, final VulnerabilityRequestService vulnerabilityRequestService,
+    public MockProcessor(final HubResponseService hubResponseService, final VulnerabilityRequestService vulnerabilityRequestService,
             final MetaService metaService) {
         final MapProcessorCache policyCache = new MapProcessorCache();
-        final VulnerabilityCache vulnerabilityCache = new VulnerabilityCache(hubRequestService, vulnerabilityRequestService, metaService);
+        final VulnerabilityCache vulnerabilityCache = new VulnerabilityCache(hubResponseService, vulnerabilityRequestService, metaService);
         getCacheList().add(policyCache);
         getCacheList().add(vulnerabilityCache);
         getProcessorMap().put(PolicyViolationContentItem.class, new PolicyViolationProcessor(policyCache, metaService));

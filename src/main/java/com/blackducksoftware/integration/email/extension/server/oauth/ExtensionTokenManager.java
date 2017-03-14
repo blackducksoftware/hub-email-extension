@@ -181,9 +181,9 @@ public class ExtensionTokenManager extends TokenManager {
             final Request request = connection.createGetRequest(httpUrl);
             // submit the data to the hub
             getResponse = connection.handleExecuteClientCall(request);
-            final JsonObject responseBody = connection.getGson().fromJson(getResponse.body().string(), JsonObject.class);
+            final JsonObject responseBody = connection.gson.fromJson(getResponse.body().string(), JsonObject.class);
             responseBody.addProperty("authenticated", Boolean.TRUE);
-            final String content = connection.getGson().toJson(responseBody);
+            final String content = connection.gson.toJson(responseBody);
             final RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), content);
             final Request putRequest = connection.createPutRequest(httpUrl, requestBody);
             putResponse = connection.handleExecuteClientCall(putRequest);

@@ -30,18 +30,23 @@ import java.util.List;
 import java.util.Map;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
-import com.blackducksoftware.integration.hub.api.component.version.ComponentVersion;
-import com.blackducksoftware.integration.hub.api.notification.VulnerabilitySourceQualifiedId;
-import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
-import com.blackducksoftware.integration.hub.api.vulnerability.SeverityEnum;
-import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityItem;
+import com.blackducksoftware.integration.hub.api.item.MetaService;
 import com.blackducksoftware.integration.hub.dataservice.model.ProjectVersionModel;
 import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyOverrideContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyViolationClearedContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyViolationContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.model.VulnerabilityContentItem;
 import com.blackducksoftware.integration.hub.meta.MetaAllowEnum;
+import com.blackducksoftware.integration.hub.model.enumeration.VulnerabilitySeverityEnum;
+import com.blackducksoftware.integration.hub.model.view.ComponentVersionView;
+import com.blackducksoftware.integration.hub.model.view.PolicyRuleView;
+import com.blackducksoftware.integration.hub.model.view.VulnerabilityView;
+import com.blackducksoftware.integration.hub.model.view.components.VulnerabilitySourceQualifiedId;
 import com.blackducksoftware.integration.util.ObjectFactory;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class ProcessorTestUtil {
     public static final String DESCRIPTION = "description";
@@ -120,24 +125,27 @@ public class ProcessorTestUtil {
 
     public static final List<MetaAllowEnum> ALLOW_LIST = Collections.emptyList();
 
-    public List<VulnerabilityItem> createVulnerabiltyItemList(final List<VulnerabilitySourceQualifiedId> vulnSourceList) throws IntegrationException {
-        final List<VulnerabilityItem> vulnerabilityList = new ArrayList<>(vulnSourceList.size());
+    public final JsonParser jsonParser = new JsonParser();
+
+    public List<VulnerabilityView> createVulnerabiltyItemList(final List<VulnerabilitySourceQualifiedId> vulnSourceList, final Gson gson)
+            throws IntegrationException {
+        final List<VulnerabilityView> vulnerabilityList = new ArrayList<>(vulnSourceList.size());
         for (final VulnerabilitySourceQualifiedId vulnSource : vulnSourceList) {
             final String vulnId = vulnSource.getVulnerabilityId();
-            SeverityEnum severity = SeverityEnum.UNKNOWN;
+            VulnerabilitySeverityEnum severity = null;
             if (vulnId.startsWith(HIGH_VULN_PREFIX)) {
-                severity = SeverityEnum.HIGH;
+                severity = VulnerabilitySeverityEnum.HIGH;
             } else if (vulnId.startsWith(MEDIUM_VULN_PREFIX)) {
-                severity = SeverityEnum.MEDIUM;
+                severity = VulnerabilitySeverityEnum.MEDIUM;
             } else if (vulnId.startsWith(LOW_VULN_PREFIX)) {
-                severity = SeverityEnum.LOW;
+                severity = VulnerabilitySeverityEnum.LOW;
             }
-            vulnerabilityList.add(createVulnerability(vulnId, severity));
+            vulnerabilityList.add(createVulnerability(vulnId, severity, gson));
         }
         return vulnerabilityList;
     }
 
-    public VulnerabilityItem createVulnerability(final String vulnId, final SeverityEnum severity) throws IntegrationException {
+    public VulnerabilityView createVulnerability(final String vulnId, final VulnerabilitySeverityEnum severity, final Gson gson) throws IntegrationException {
         final Map<String, Object> fieldMap = new HashMap<>();
         fieldMap.put("vulnerabilityName", vulnId);
         fieldMap.put("description", "A vulnerability");
@@ -147,7 +155,9 @@ public class ProcessorTestUtil {
         fieldMap.put("impactSubscore", 5.0);
         fieldMap.put("exploitabilitySubscore", 1.0);
         fieldMap.put("source", "");
-        fieldMap.put("severity", severity.name());
+        if (severity != null) {
+            fieldMap.put("severity", severity.name());
+        }
         fieldMap.put("accessVector", "");
         fieldMap.put("accessComplexity", "");
         fieldMap.put("authentication", "");
@@ -155,10 +165,20 @@ public class ProcessorTestUtil {
         fieldMap.put("integrityImpact", "");
         fieldMap.put("availabilityImpact", "");
         fieldMap.put("cweId", vulnId);
-        return ObjectFactory.INSTANCE.createPopulatedInstance(VulnerabilityItem.class, fieldMap);
+        final VulnerabilityView view = ObjectFactory.INSTANCE.createPopulatedInstance(VulnerabilityView.class, fieldMap);
+        view.json = gson.toJson(view);
+
+        final JsonElement element = jsonParser.parse(view.json);
+        final JsonObject jsonObject = element.getAsJsonObject();
+        final JsonObject links = new JsonObject();
+        links.addProperty(MetaService.VULNERABILITIES_LINK, "");
+        jsonObject.add("_meta", links);
+
+        view.json = gson.toJson(jsonObject);
+        return view;
     }
 
-    public PolicyRule createPolicyRule(final String name, final String description, final String createdBy, final String updatedBy, final String href)
+    public PolicyRuleView createPolicyRule(final String name, final String description, final String createdBy, final String updatedBy, final String href)
             throws IntegrationException {
         final Map<String, Object> fieldMap = new HashMap<>();
         fieldMap.put("name", name);
@@ -171,7 +191,7 @@ public class ProcessorTestUtil {
         fieldMap.put("updatedAt", new Date());
         fieldMap.put("updatedBy", updatedBy);
         fieldMap.put("json", createPolicyRuleJSon(href));
-        return ObjectFactory.INSTANCE.createPopulatedInstance(PolicyRule.class, fieldMap);
+        return ObjectFactory.INSTANCE.createPopulatedInstance(PolicyRuleView.class, fieldMap);
     }
 
     public String createPolicyRuleJSon(final String href) {
@@ -179,7 +199,7 @@ public class ProcessorTestUtil {
     }
 
     public PolicyOverrideContentItem createPolicyOverride(final Date createdTime, final String projectName,
-            final String projectVersionName, final String componentName, final ComponentVersion componentVersion)
+            final String projectVersionName, final String componentName, final ComponentVersionView componentVersion)
             throws URISyntaxException, IntegrationException {
         final String projectVersionUrl = PROJECT_VERSION_URL_PREFIX + projectName + PROJECT_VERSION_URL_SEGMENT + projectVersionName;
         final ProjectVersionModel projectVersion = new ProjectVersionModel();
@@ -189,7 +209,7 @@ public class ProcessorTestUtil {
         final String componentUrl = COMPONENT_URL_PREFIX + componentName;
         final String componentVersionUrl = COMPONENT_URL_PREFIX + componentName + VERSIONS_URL_SEGMENT
                 + componentVersion.getVersionName();
-        final List<PolicyRule> policyRuleList = new ArrayList<>();
+        final List<PolicyRuleView> policyRuleList = new ArrayList<>();
         policyRuleList.add(createPolicyRule(RULE_NAME_1, DESCRIPTION, CREATED_BY, UPDATED_BY, POLICY_RULE_1_HREF_URL));
         policyRuleList.add(createPolicyRule(RULE_NAME_2, DESCRIPTION, CREATED_BY, UPDATED_BY, POLICY_RULE_2_HREF_URL));
         final PolicyOverrideContentItem item = new PolicyOverrideContentItem(createdTime, projectVersion, componentName,
@@ -198,7 +218,7 @@ public class ProcessorTestUtil {
     }
 
     public PolicyViolationClearedContentItem createPolicyCleared(final Date createdTime, final String projectName,
-            final String projectVersionName, final String componentName, final ComponentVersion componentVersion)
+            final String projectVersionName, final String componentName, final ComponentVersionView componentVersion)
             throws URISyntaxException, IntegrationException {
         final String projectVersionUrl = PROJECT_VERSION_URL_PREFIX + projectName + PROJECT_VERSION_URL_SEGMENT + projectVersionName;
         final ProjectVersionModel projectVersion = new ProjectVersionModel();
@@ -208,7 +228,7 @@ public class ProcessorTestUtil {
         final String componentUrl = COMPONENT_URL_PREFIX + componentName;
         final String componentVersionUrl = COMPONENT_URL_PREFIX + componentName + VERSIONS_URL_SEGMENT
                 + componentVersion.getVersionName();
-        final List<PolicyRule> policyRuleList = new ArrayList<>();
+        final List<PolicyRuleView> policyRuleList = new ArrayList<>();
         policyRuleList.add(createPolicyRule(RULE_NAME_1, DESCRIPTION, CREATED_BY, UPDATED_BY, POLICY_RULE_1_HREF_URL));
         policyRuleList.add(createPolicyRule(RULE_NAME_2, DESCRIPTION, CREATED_BY, UPDATED_BY, POLICY_RULE_2_HREF_URL));
         final PolicyViolationClearedContentItem item = new PolicyViolationClearedContentItem(createdTime,
@@ -217,7 +237,7 @@ public class ProcessorTestUtil {
     }
 
     public PolicyViolationContentItem createPolicyViolation(final Date createdTime, final String projectName,
-            final String projectVersionName, final String componentName, final ComponentVersion componentVersion)
+            final String projectVersionName, final String componentName, final ComponentVersionView componentVersion)
             throws URISyntaxException, IntegrationException {
         final String projectVersionUrl = PROJECT_VERSION_URL_PREFIX + projectName + PROJECT_VERSION_URL_SEGMENT + projectVersionName;
         final ProjectVersionModel projectVersion = new ProjectVersionModel();
@@ -227,7 +247,7 @@ public class ProcessorTestUtil {
         final String componentUrl = COMPONENT_URL_PREFIX + componentName;
         final String componentVersionUrl = COMPONENT_URL_PREFIX + componentName + VERSIONS_URL_SEGMENT
                 + componentVersion.getVersionName();
-        final List<PolicyRule> policyRuleList = new ArrayList<>();
+        final List<PolicyRuleView> policyRuleList = new ArrayList<>();
         policyRuleList.add(createPolicyRule(RULE_NAME_1, DESCRIPTION, CREATED_BY, UPDATED_BY, POLICY_RULE_1_HREF_URL));
         policyRuleList.add(createPolicyRule(RULE_NAME_2, DESCRIPTION, CREATED_BY, UPDATED_BY, POLICY_RULE_2_HREF_URL));
         final PolicyViolationContentItem item = new PolicyViolationContentItem(createdTime, projectVersion,
@@ -236,7 +256,7 @@ public class ProcessorTestUtil {
     }
 
     public VulnerabilityContentItem createVulnerability(final Date createdTime, final String projectName,
-            final String projectVersionName, final String componentName, final ComponentVersion componentVersion,
+            final String projectVersionName, final String componentName, final ComponentVersionView componentVersion,
             final List<VulnerabilitySourceQualifiedId> added, final List<VulnerabilitySourceQualifiedId> updated,
             final List<VulnerabilitySourceQualifiedId> deleted) throws URISyntaxException {
         final String projectVersionUrl = PROJECT_VERSION_URL_PREFIX + projectName + PROJECT_VERSION_URL_SEGMENT + projectVersionName;

@@ -29,12 +29,12 @@ import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.model.DateRange;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.hub.service.HubRequestService;
+import com.blackducksoftware.integration.hub.service.HubResponseService;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
 
 public class WeeklyDigestNotifier extends AbstractDigestNotifier {
     public WeeklyDigestNotifier(final ExtensionProperties extensionProperties,
-            final EmailMessagingService emailMessagingService, final HubRequestService hubRequestService, final HubServicesFactory hubServicesFactory,
+            final EmailMessagingService emailMessagingService, final HubResponseService hubResponseService, final HubServicesFactory hubServicesFactory,
             final ExtensionInfo extensionInfo) {
         super(extensionProperties, emailMessagingService, hubServicesFactory, extensionInfo);
     }

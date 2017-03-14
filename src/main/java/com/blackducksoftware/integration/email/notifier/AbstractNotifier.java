@@ -32,8 +32,8 @@ import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
 import com.blackducksoftware.integration.exception.IntegrationException;
-import com.blackducksoftware.integration.hub.api.extension.ConfigurationItem;
 import com.blackducksoftware.integration.hub.dataservice.extension.ExtensionConfigDataService;
+import com.blackducksoftware.integration.hub.model.view.ExternalExtensionConfigValueView;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
 import com.blackducksoftware.integration.log.Slf4jIntLogger;
 
@@ -63,10 +63,10 @@ public abstract class AbstractNotifier extends TimerTask {
     }
 
     public ExtensionProperties createPropertiesFromGlobalConfig() throws IntegrationException {
-        final Map<String, ConfigurationItem> globalMap = extensionConfigDataService
+        final Map<String, ExternalExtensionConfigValueView> globalMap = extensionConfigDataService
                 .getGlobalConfigMap(getHubExtensionUri());
         final Properties globalProperties = new Properties();
-        for (final Map.Entry<String, ConfigurationItem> entry : globalMap.entrySet()) {
+        for (final Map.Entry<String, ExternalExtensionConfigValueView> entry : globalMap.entrySet()) {
             globalProperties.put(entry.getKey(), entry.getValue().getValue().get(0));
         }
         return new ExtensionProperties(globalProperties);

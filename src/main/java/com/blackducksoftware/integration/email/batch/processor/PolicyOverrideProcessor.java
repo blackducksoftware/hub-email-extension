@@ -27,10 +27,10 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 import com.blackducksoftware.integration.hub.api.item.MetaService;
-import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
 import com.blackducksoftware.integration.hub.dataservice.notification.model.NotificationContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyOverrideContentItem;
 import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.hub.model.view.PolicyRuleView;
 import com.blackducksoftware.integration.hub.notification.processor.ItemTypeEnum;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
 import com.blackducksoftware.integration.hub.notification.processor.SubProcessorCache;
@@ -46,7 +46,7 @@ public class PolicyOverrideProcessor extends PolicyViolationProcessor {
     public void process(final NotificationContentItem notification) throws HubIntegrationException {
         final PolicyOverrideContentItem policyOverrideContentItem = (PolicyOverrideContentItem) notification;
         final Map<String, Object> dataMap = new HashMap<>();
-        for (final PolicyRule rule : policyOverrideContentItem.getPolicyRuleList()) {
+        for (final PolicyRuleView rule : policyOverrideContentItem.getPolicyRuleList()) {
             dataMap.put(POLICY_CONTENT_ITEM, policyOverrideContentItem);
             dataMap.put(POLICY_RULE, rule);
             final String eventKey = generateEventKey(dataMap);

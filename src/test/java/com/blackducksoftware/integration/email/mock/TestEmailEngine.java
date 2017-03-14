@@ -93,9 +93,9 @@ public class TestEmailEngine extends EmailEngine {
         HubServicesFactory hubServicesFactory;
         hubServicesFactory = new HubServicesFactory(getRestConnection());
         final IntLogger hubLogger = new Slf4jIntLogger(logger);
-        return new MockNotificationDataService(hubLogger, getRestConnection(), hubServicesFactory.createNotificationRequestService(hubLogger),
+        return new MockNotificationDataService(hubLogger, hubServicesFactory.createHubResponseService(),
+                hubServicesFactory.createNotificationRequestService(hubLogger),
                 hubServicesFactory.createProjectVersionRequestService(hubLogger), hubServicesFactory.createPolicyRequestService(),
-                hubServicesFactory.createVersionBomPolicyRequestService(), hubServicesFactory.createHubRequestService(),
                 hubServicesFactory.createMetaService(hubLogger));
 
     }
