@@ -24,12 +24,12 @@ package com.blackducksoftware.integration.email.extension.server;
 import org.restlet.routing.Router;
 
 import com.blackducksoftware.integration.email.extension.config.ExtensionConfigManager;
-import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
+import com.blackducksoftware.integration.email.extension.server.oauth.ExtensionTokenManager;
 import com.blackducksoftware.integration.email.extension.server.resources.EmailTestServerResource;
 
 public class EmailExtensionApplication extends RestletApplication {
 
-    public EmailExtensionApplication(TokenManager tokenManager, ExtensionConfigManager extConfigManager) {
+    public EmailExtensionApplication(ExtensionTokenManager tokenManager, ExtensionConfigManager extConfigManager) {
         super(tokenManager, extConfigManager);
     }
 

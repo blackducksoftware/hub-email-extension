@@ -23,41 +23,43 @@ package com.blackducksoftware.integration.email.mock;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
 
+import org.mockito.Mockito;
+
+import com.blackducksoftware.integration.hub.api.item.MetaService;
 import com.blackducksoftware.integration.hub.api.notification.NotificationRequestService;
-import com.blackducksoftware.integration.hub.api.notification.VulnerabilitySourceQualifiedId;
 import com.blackducksoftware.integration.hub.api.policy.PolicyRequestService;
-import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
-import com.blackducksoftware.integration.hub.api.project.ProjectVersion;
 import com.blackducksoftware.integration.hub.api.project.version.ProjectVersionRequestService;
-import com.blackducksoftware.integration.hub.api.version.VersionBomPolicyRequestService;
+import com.blackducksoftware.integration.hub.dataservice.model.ProjectVersionModel;
 import com.blackducksoftware.integration.hub.dataservice.notification.NotificationDataService;
-import com.blackducksoftware.integration.hub.dataservice.notification.item.NotificationContentItem;
-import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyNotificationFilter;
-import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyOverrideContentItem;
-import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationClearedContentItem;
-import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationContentItem;
-import com.blackducksoftware.integration.hub.dataservice.notification.item.VulnerabilityContentItem;
-import com.blackducksoftware.integration.hub.rest.RestConnection;
-import com.blackducksoftware.integration.hub.service.HubRequestService;
+import com.blackducksoftware.integration.hub.dataservice.notification.NotificationResults;
+import com.blackducksoftware.integration.hub.dataservice.notification.model.NotificationContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyOverrideContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyViolationClearedContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyViolationContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.model.VulnerabilityContentItem;
+import com.blackducksoftware.integration.hub.model.view.ComponentVersionView;
+import com.blackducksoftware.integration.hub.model.view.PolicyRuleView;
+import com.blackducksoftware.integration.hub.model.view.components.VulnerabilitySourceQualifiedId;
+import com.blackducksoftware.integration.hub.service.HubResponseService;
 import com.blackducksoftware.integration.log.IntLogger;
 
 public class MockNotificationDataService extends NotificationDataService {
-    public MockNotificationDataService(IntLogger logger, RestConnection restConnection, NotificationRequestService notificationRequestService,
-            ProjectVersionRequestService projectVersionRequestService, PolicyRequestService policyRequestService,
-            VersionBomPolicyRequestService versionBomPolicyRequestService,
-            HubRequestService hubRequestService, PolicyNotificationFilter policyNotificationFilter) {
-        super(logger, restConnection, notificationRequestService, projectVersionRequestService, policyRequestService, versionBomPolicyRequestService,
-                hubRequestService, policyNotificationFilter);
+    public MockNotificationDataService(final IntLogger logger, final HubResponseService hubResponseService,
+            final NotificationRequestService notificationRequestService,
+            final ProjectVersionRequestService projectVersionRequestService, final PolicyRequestService policyRequestService,
+            final MetaService metaService) {
+        super(logger, hubResponseService, notificationRequestService, projectVersionRequestService, policyRequestService, null, metaService);
     }
 
     @Override
-    public SortedSet<NotificationContentItem> getAllNotifications(final Date startDate, final Date endDate) {
+    public NotificationResults getAllNotifications(final Date startDate, final Date endDate) {
         try {
             return createNotificationList();
         } catch (final URISyntaxException e) {
@@ -65,27 +67,30 @@ public class MockNotificationDataService extends NotificationDataService {
         }
     }
 
-    private SortedSet<NotificationContentItem> createNotificationList() throws URISyntaxException {
+    private NotificationResults createNotificationList() throws URISyntaxException {
         final SortedSet<NotificationContentItem> contentList = new TreeSet<>();
         contentList.addAll(createPolicyViolations());
         contentList.addAll(createPolicyOverrides());
         contentList.addAll(createVulnerabilities());
         contentList.addAll(createPolicyViolationsCleared());
-        return contentList;
+        final NotificationResults results = new NotificationResults(contentList, Collections.emptyList());
+        return results;
     }
 
     private List<PolicyViolationContentItem> createPolicyViolations() throws URISyntaxException {
         final List<PolicyViolationContentItem> itemList = new ArrayList<>();
         for (int index = 0; index < 5; index++) {
-            final ProjectVersion projectVersion = new ProjectVersion();
+            final ProjectVersionModel projectVersion = new ProjectVersionModel();
             final String componentName = "Component" + index;
-            final String componentVersion = "Version" + index;
+            final String versionName = "Version" + index;
+            final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
+            Mockito.when(componentVersion.getVersionName()).thenReturn(versionName);
             final UUID componentId = UUID.randomUUID();
             final UUID componentVersionId = UUID.randomUUID();
             final String componentUrl = "http://localhost/api/components/" + componentId;
             final String componentVersionUrl = "http://localhost/api/components/" + componentId + "/versions/"
                     + componentVersionId;
-            final List<PolicyRule> policyRuleList = new ArrayList<>();
+            final List<PolicyRuleView> policyRuleList = new ArrayList<>();
             final PolicyViolationContentItem item = new PolicyViolationContentItem(new Date(), projectVersion,
                     componentName, componentVersion, componentUrl, componentVersionUrl, policyRuleList);
             itemList.add(item);
@@ -97,9 +102,11 @@ public class MockNotificationDataService extends NotificationDataService {
     private List<PolicyOverrideContentItem> createPolicyOverrides() throws URISyntaxException {
         final List<PolicyOverrideContentItem> itemList = new ArrayList<>();
         for (int index = 0; index < 5; index++) {
-            final ProjectVersion projectVersion = new ProjectVersion();
+            final ProjectVersionModel projectVersion = new ProjectVersionModel();
             final String componentName = "Component" + index;
-            final String componentVersion = "Version" + index;
+            final String versionName = "Version" + index;
+            final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
+            Mockito.when(componentVersion.getVersionName()).thenReturn(versionName);
             final UUID componentId = UUID.randomUUID();
             final UUID componentVersionId = UUID.randomUUID();
             final String componentUrl = "http://localhost/api/components/" + componentId;
@@ -107,7 +114,7 @@ public class MockNotificationDataService extends NotificationDataService {
                     + componentVersionId;
             final String firstName = "firstName";
             final String lastName = "lastName";
-            final List<PolicyRule> policyRuleList = new ArrayList<>();
+            final List<PolicyRuleView> policyRuleList = new ArrayList<>();
             final PolicyOverrideContentItem item = new PolicyOverrideContentItem(new Date(), projectVersion,
                     componentName, componentVersion, componentUrl, componentVersionUrl, policyRuleList, firstName,
                     lastName);
@@ -119,9 +126,11 @@ public class MockNotificationDataService extends NotificationDataService {
     private List<VulnerabilityContentItem> createVulnerabilities() throws URISyntaxException {
         final List<VulnerabilityContentItem> itemList = new ArrayList<>();
         for (int index = 0; index < 5; index++) {
-            final ProjectVersion projectVersion = new ProjectVersion();
+            final ProjectVersionModel projectVersion = new ProjectVersionModel();
             final String componentName = "Component" + index;
-            final String componentVersion = "Version" + index;
+            final String versionName = "Version" + index;
+            final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
+            Mockito.when(componentVersion.getVersionName()).thenReturn(versionName);
             final UUID componentId = UUID.randomUUID();
             final UUID componentVersionId = UUID.randomUUID();
             final String componentVersionUrl = "http://localhost/api/components/" + componentId + "/versions/"
@@ -146,15 +155,17 @@ public class MockNotificationDataService extends NotificationDataService {
     private List<PolicyViolationClearedContentItem> createPolicyViolationsCleared() throws URISyntaxException {
         final List<PolicyViolationClearedContentItem> itemList = new ArrayList<>();
         for (int index = 0; index < 5; index++) {
-            final ProjectVersion projectVersion = new ProjectVersion();
+            final ProjectVersionModel projectVersion = new ProjectVersionModel();
             final String componentName = "Component" + index;
-            final String componentVersion = "Version" + index;
+            final String versionName = "Version" + index;
+            final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
+            Mockito.when(componentVersion.getVersionName()).thenReturn(versionName);
             final UUID componentId = UUID.randomUUID();
             final UUID componentVersionId = UUID.randomUUID();
             final String componentUrl = "http://localhost/api/components/" + componentId;
             final String componentVersionUrl = "http://localhost/api/components/" + componentId + "/versions/"
                     + componentVersionId;
-            final List<PolicyRule> policyRuleList = new ArrayList<>();
+            final List<PolicyRuleView> policyRuleList = new ArrayList<>();
             final PolicyViolationClearedContentItem item = new PolicyViolationClearedContentItem(new Date(),
                     projectVersion, componentName, componentVersion, componentUrl, componentVersionUrl, policyRuleList);
             itemList.add(item);

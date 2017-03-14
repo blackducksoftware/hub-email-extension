@@ -19,8 +19,28 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package com.blackducksoftware.integration.email.batch.processor;
+package com.blackducksoftware.integration.email.extension.server.oauth;
 
-public enum ItemTypeEnum {
-    RULE, COMPONENT, COUNT, PERSON;
+import com.blackducksoftware.integration.hub.api.oauth.OAuthConfiguration;
+
+public class ExtensionOAuthConfiguration extends OAuthConfiguration {
+
+    public String hubUri;
+
+    public String extensionUri;
+
+    public ExtensionOAuthConfiguration() {
+    }
+
+    public boolean isClientConfigured() {
+        return clientId != null;
+    }
+
+    public void setAddresses(final String hubUri, final String extensionUri, final String oAuthAuthorizeUri,
+            final String oAuthTokenUri) {
+        this.hubUri = hubUri;
+        this.extensionUri = extensionUri;
+        this.authorizeUri = oAuthAuthorizeUri;
+        this.tokenUri = oAuthTokenUri;
+    }
 }

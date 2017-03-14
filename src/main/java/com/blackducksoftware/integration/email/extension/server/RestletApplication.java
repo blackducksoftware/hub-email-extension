@@ -26,7 +26,7 @@ import org.restlet.routing.Router;
 
 import com.blackducksoftware.integration.email.extension.config.ExtensionConfigManager;
 import com.blackducksoftware.integration.email.extension.server.oauth.AbstractOAuthApplication;
-import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
+import com.blackducksoftware.integration.email.extension.server.oauth.ExtensionTokenManager;
 import com.blackducksoftware.integration.email.extension.server.resources.ExtensionInfoServerResource;
 import com.blackducksoftware.integration.email.extension.server.resources.GlobalConfigServerResource;
 import com.blackducksoftware.integration.email.extension.server.resources.UserConfigServerResource;
@@ -35,7 +35,7 @@ public class RestletApplication extends AbstractOAuthApplication {
 
     private final ExtensionConfigManager extConfigManager;
 
-    public RestletApplication(final TokenManager tokenManager, final ExtensionConfigManager extConfigManager) {
+    public RestletApplication(final ExtensionTokenManager tokenManager, final ExtensionConfigManager extConfigManager) {
         super(tokenManager);
         this.extConfigManager = extConfigManager;
     }

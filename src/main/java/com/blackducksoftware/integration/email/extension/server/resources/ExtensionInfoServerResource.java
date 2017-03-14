@@ -34,7 +34,7 @@ import com.blackducksoftware.integration.email.extension.server.api.model.Extens
 import com.blackducksoftware.integration.email.extension.server.api.model.ResourceLink;
 import com.blackducksoftware.integration.email.extension.server.api.model.ResourceMetadata;
 import com.blackducksoftware.integration.email.extension.server.oauth.OAuthServerConstants;
-import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
+import com.blackducksoftware.integration.email.extension.server.oauth.ExtensionTokenManager;
 import com.google.common.collect.Lists;
 
 public class ExtensionInfoServerResource extends ExtensionServerResource {
@@ -42,7 +42,7 @@ public class ExtensionInfoServerResource extends ExtensionServerResource {
     @Get("json")
     public ExtensionDescriptor represent() {
         final ExtensionConfigManager extConfigManager = getExtensionConfigManager();
-        final TokenManager tokenManager = getTokenManager();
+        final ExtensionTokenManager tokenManager = getTokenManager();
         if (extConfigManager != null && tokenManager != null) {
             final ExtensionInfo extensionInfo = extConfigManager.getExtensionInfo();
             final ResourceMetadata metadata = buildMetadata(extensionInfo, tokenManager);
@@ -60,7 +60,7 @@ public class ExtensionInfoServerResource extends ExtensionServerResource {
         return ref.toString();
     }
 
-    public ResourceMetadata buildMetadata(final ExtensionInfo extensionInfo, final TokenManager tokenManager) {
+    public ResourceMetadata buildMetadata(final ExtensionInfo extensionInfo, final ExtensionTokenManager tokenManager) {
         final String configAddress = buildAddress(extensionInfo, OAuthServerConstants.EXTENSION_CONFIG);
         final String clientConfigAddress = buildAddress(extensionInfo, OAuthServerConstants.REGISTRATION);
         final String authAddress = buildAddress(extensionInfo, OAuthServerConstants.AUTH_GRANT);

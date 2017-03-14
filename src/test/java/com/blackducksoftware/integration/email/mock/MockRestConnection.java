@@ -19,8 +19,27 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package com.blackducksoftware.integration.email.batch.processor;
+package com.blackducksoftware.integration.email.mock;
 
-public enum ProcessingAction {
-    ADD, REMOVE;
+import java.net.URL;
+
+import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.hub.rest.RestConnection;
+import com.blackducksoftware.integration.log.IntLogger;
+
+public class MockRestConnection extends RestConnection {
+
+    public MockRestConnection(final IntLogger logger, final URL baseUrl) {
+        super(logger, baseUrl, 120);
+    }
+
+    @Override
+    public void addBuilderAuthentication() throws HubIntegrationException {
+
+    }
+
+    @Override
+    public void clientAuthenticate() throws HubIntegrationException {
+
+    }
 }

@@ -21,10 +21,11 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.email.mock;
 
+import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.notifier.AbstractNotifier;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.hub.dataservice.extension.ExtensionConfigDataService;
+import com.blackducksoftware.integration.hub.service.HubServicesFactory;
 
 public class MockNotifier extends AbstractNotifier {
     public static final String CRON_EXPRESSION = "0 0/1 * 1/1 * ? *";
@@ -36,8 +37,9 @@ public class MockNotifier extends AbstractNotifier {
     private boolean ran = false;
 
     public MockNotifier(final ExtensionProperties extensionProperties,
-            final EmailMessagingService emailMessagingService, ExtensionConfigDataService extensionConfigDataService, String templateName) {
-        super(extensionProperties, emailMessagingService, extensionConfigDataService);
+            final EmailMessagingService emailMessagingService, final HubServicesFactory hubServicesFactory, final String templateName,
+            final ExtensionInfo extensionInfo) {
+        super(extensionProperties, emailMessagingService, hubServicesFactory, extensionInfo);
         this.templateName = templateName;
     }
 

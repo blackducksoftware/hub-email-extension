@@ -21,21 +21,24 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.email.model.batch;
 
-import java.util.Set;
+import java.util.Map;
+
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class ItemData {
-    private final Set<ItemEntry> dataSet;
+    private final Map<String, Object> dataSet;
 
-    public ItemData(final Set<ItemEntry> dataMap) {
+    public ItemData(final Map<String, Object> dataMap) {
         this.dataSet = dataMap;
     }
 
-    public Set<ItemEntry> getDataSet() {
+    public Map<String, Object> getDataSet() {
         return dataSet;
     }
 
     @Override
     public String toString() {
-        return "ItemData [dataSet=" + dataSet + "]";
+        return ReflectionToStringBuilder.toString(this, ToStringStyle.JSON_STYLE);
     }
 }

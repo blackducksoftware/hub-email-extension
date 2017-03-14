@@ -46,25 +46,26 @@ import org.slf4j.LoggerFactory;
 import com.blackducksoftware.integration.email.extension.config.ExtensionConfigManager;
 import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.extension.server.EmailExtensionApplication;
-import com.blackducksoftware.integration.email.extension.server.oauth.AccessType;
+import com.blackducksoftware.integration.email.extension.server.oauth.ExtensionTokenManager;
 import com.blackducksoftware.integration.email.extension.server.oauth.OAuthEndpoint;
-import com.blackducksoftware.integration.email.extension.server.oauth.OAuthRestConnection;
-import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
 import com.blackducksoftware.integration.email.extension.server.oauth.listeners.IAuthorizedListener;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
-import com.blackducksoftware.integration.email.model.HubServerBeanConfiguration;
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
+import com.blackducksoftware.integration.email.notifier.CustomDigestNotifier;
 import com.blackducksoftware.integration.email.notifier.DailyDigestNotifier;
 import com.blackducksoftware.integration.email.notifier.NotifierManager;
+import com.blackducksoftware.integration.email.notifier.RealTimeDigestNotifier;
 import com.blackducksoftware.integration.email.notifier.TestEmailNotifier;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityRequestService;
+import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
 import com.blackducksoftware.integration.hub.dataservice.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservice.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
-import com.blackducksoftware.integration.hub.service.HubRequestService;
+import com.blackducksoftware.integration.hub.rest.oauth.AccessType;
+import com.blackducksoftware.integration.hub.rest.oauth.OAuthRestConnection;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
+import com.blackducksoftware.integration.log.IntLogger;
 import com.google.gson.JsonParser;
 
 import freemarker.template.Configuration;
@@ -91,7 +92,7 @@ public class EmailEngine implements IAuthorizedListener {
 
     private NotifierManager notifierManager;
 
-    private final TokenManager tokenManager;
+    private final ExtensionTokenManager tokenManager;
 
     private final OAuthEndpoint restletComponent;
 
@@ -155,7 +156,7 @@ public class EmailEngine implements IAuthorizedListener {
         return notifierManager;
     }
 
-    public TokenManager getTokenManager() {
+    public ExtensionTokenManager getTokenManager() {
         return tokenManager;
     }
 
@@ -173,6 +174,10 @@ public class EmailEngine implements IAuthorizedListener {
 
     public ExtensionConfigDataService getExtConfigDataService() {
         return extConfigDataService;
+    }
+
+    public HubServicesFactory getHubServicesFactory() {
+        return hubServicesFactory;
     }
 
     public void start() {
@@ -195,7 +200,7 @@ public class EmailEngine implements IAuthorizedListener {
 
     public Properties createAppProperties() throws FileNotFoundException, IOException {
         final Properties appProperties = new Properties();
-        final String configLocation = System.getProperty("ext.config.location");
+        final String configLocation = System.getProperty(ExtensionConfigManager.PROPERTY_KEY_CONFIG_LOCATION_PATH);
         final File customerPropertiesFile = new File(configLocation, "extension.properties");
         try (FileInputStream fileInputStream = new FileInputStream(customerPropertiesFile)) {
             appProperties.load(fileInputStream);
@@ -263,9 +268,34 @@ public class EmailEngine implements IAuthorizedListener {
     }
 
     public HubServerConfig createHubConfig(final String hubUri) {
-        final HubServerBeanConfiguration serverBeanConfig = new HubServerBeanConfiguration(hubUri, extensionProperties);
+        try {
+            final HubServerConfigBuilder configBuilder = new HubServerConfigBuilder();
+            configBuilder.setHubUrl(hubUri);
+            // using oauth the username and password aren't used but need to be set
+            // for the builder
+            configBuilder.setUsername("auser");
+            configBuilder.setPassword("apassword");
+            configBuilder.setTimeout(extensionProperties.getHubServerTimeout());
+            configBuilder.setProxyHost(extensionProperties.getHubProxyHost());
+            configBuilder.setProxyPort(extensionProperties.getHubProxyPort());
+            configBuilder.setIgnoredProxyHosts(extensionProperties.getHubProxyNoHost());
+            configBuilder.setProxyUsername(extensionProperties.getHubProxyUser());
+            configBuilder.setProxyPassword(extensionProperties.getHubProxyPassword());
 
-        return serverBeanConfig.build();
+            // output the configuration details
+            logger.info("Hub Server URL          = " + configBuilder.getHubUrl());
+            logger.info("Hub Timeout             = " + configBuilder.getTimeout());
+            logger.info("Hub Proxy Host          = " + configBuilder.getProxyHost());
+            logger.info("Hub Proxy Port          = " + configBuilder.getProxyPort());
+            logger.info("Hub Ignored Proxy Hosts = " + configBuilder.getIgnoredProxyHosts());
+            logger.info("Hub Proxy User          = " + configBuilder.getProxyUsername());
+
+            return configBuilder.build();
+        } catch (final IllegalStateException ex) {
+            logger.error("Error with the hub configuration", ex);
+        }
+
+        return null;
     }
 
     public RestConnection createRestConnection(final String hubUri) {
@@ -282,23 +312,26 @@ public class EmailEngine implements IAuthorizedListener {
     }
 
     public RestConnection initRestConnection(final String hubUri) {
-        final RestConnection restConnection = new OAuthRestConnection(hubServerConfig, tokenManager);
+        final IntLogger extLogger = new ExtensionLogger(logger);
+        final RestConnection restConnection = new OAuthRestConnection(extLogger, hubServerConfig.getHubUrl(), hubServerConfig.getTimeout(), tokenManager,
+                AccessType.USER);
         return restConnection;
     }
 
     public NotifierManager createNotifierManager() {
         final NotifierManager manager = new NotifierManager();
 
-        final HubRequestService hubRequestService = hubServicesFactory.createHubRequestService();
-
-        final VulnerabilityRequestService vulnerabilityRequestService = hubServicesFactory.createVulnerabilityRequestService();
-
-        final DailyDigestNotifier dailyNotifier = new DailyDigestNotifier(extensionProperties, emailMessagingService, hubRequestService,
-                vulnerabilityRequestService, extConfigDataService, notificationDataService);
-
-        final TestEmailNotifier testNotifier = new TestEmailNotifier(extensionProperties, emailMessagingService, extConfigDataService);
+        final DailyDigestNotifier dailyNotifier = new DailyDigestNotifier(extensionProperties, emailMessagingService, hubServicesFactory,
+                getExtensionInfoData());
+        final TestEmailNotifier testNotifier = new TestEmailNotifier(extensionProperties, emailMessagingService, hubServicesFactory, getExtensionInfoData());
+        final RealTimeDigestNotifier realTimeNotifier = new RealTimeDigestNotifier(extensionProperties, emailMessagingService, hubServicesFactory,
+                getExtensionInfoData());
+        final CustomDigestNotifier customNotifier = new CustomDigestNotifier(extensionProperties, emailMessagingService, hubServicesFactory,
+                getExtensionInfoData());
         manager.attach(dailyNotifier);
+        manager.attach(realTimeNotifier);
         manager.attach(testNotifier);
+        manager.attach(customNotifier);
         emailExtensionApplication.getContext().getAttributes().put(EmailExtensionConstants.CONTEXT_ATTRIBUTE_KEY_TEST_NOTIFIER, testNotifier);
         return manager;
     }
@@ -358,8 +391,12 @@ public class EmailEngine implements IAuthorizedListener {
         return endpoint;
     }
 
-    public TokenManager createTokenManager() {
-        final TokenManager tokenManager = new TokenManager(extensionInfoData);
+    public ExtensionTokenManager createTokenManager() {
+        final Logger tokenManagerLogger = LoggerFactory.getLogger(ExtensionTokenManager.class);
+        final ExtensionLogger serviceLogger = new ExtensionLogger(tokenManagerLogger);
+        final String timeoutString = extensionProperties.getHubServerTimeout();
+        final int timeout = Integer.parseInt(timeoutString);
+        final ExtensionTokenManager tokenManager = new ExtensionTokenManager(serviceLogger, timeout, extensionInfoData);
         tokenManager.addAuthorizedListener(this);
         return tokenManager;
     }
@@ -383,7 +420,7 @@ public class EmailEngine implements IAuthorizedListener {
     public void onAuthorized() {
         try {
             String hubUri;
-            hubUri = createHubBaseUrl(tokenManager.getConfiguration().getHubUri());
+            hubUri = createHubBaseUrl(tokenManager.getConfiguration().hubUri);
             hubServerConfig = createHubConfig(hubUri);
             restConnection = createRestConnection(hubUri);
             javaMailWrapper = createJavaMailWrapper();
@@ -392,10 +429,12 @@ public class EmailEngine implements IAuthorizedListener {
             notificationDataService = createNotificationDataService();
             extConfigDataService = createExtensionConfigDataService();
             notifierManager = createNotifierManager();
-            notifierManager.updateHubExtensionUri(tokenManager.getConfiguration().getExtensionUri());
+            notifierManager.updateHubExtensionUri(tokenManager.getConfiguration().extensionUri);
             notifierManager.start();
         } catch (final MalformedURLException e) {
             logger.error("Error completing extension initialization", e);
+        } finally {
+            tokenManager.removeAuthorizedListener(this);
         }
     }
 

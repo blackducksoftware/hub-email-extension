@@ -32,16 +32,16 @@ import com.blackducksoftware.integration.email.extension.server.oauth.resources.
 
 public abstract class AbstractOAuthApplication extends Application {
 
-    private final TokenManager tokenManager;
+    private final ExtensionTokenManager tokenManager;
 
-    public AbstractOAuthApplication(final TokenManager tokenManager) {
+    public AbstractOAuthApplication(final ExtensionTokenManager tokenManager) {
         super();
         this.tokenManager = tokenManager;
     }
 
     @Override
     public Restlet createInboundRoot() {
-        getContext().getAttributes().put(TokenManager.CONTEXT_ATTRIBUTE_KEY, tokenManager);
+        getContext().getAttributes().put(ExtensionTokenManager.CONTEXT_ATTRIBUTE_KEY, tokenManager);
         additionalContextConfig();
         final Router router = new Router(getContext());
 

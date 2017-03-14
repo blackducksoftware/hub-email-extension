@@ -28,9 +28,9 @@ DIR=`dirname "$PROGRAM"`
 
 checkIsRunning() {
   if [ -f $DIR/$PID_FILE ]; then
-    local running_pid="$(pgrep -f hub-email-extension)"
-    local saved_pid="$(<$DIR/$PID_FILE)"
-    if [ ! -z $running_pid  ]; then 
+    local running_pid=$(pgrep -f hub-email-extension)
+    local saved_pid=`cat $DIR/$PID_FILE`
+    if [ ! -z $running_pid  ]; then
         if [ "$saved_pid" -eq "$running_pid" ]; then
             return 1 
         fi
@@ -43,14 +43,14 @@ checkIsRunning() {
 startExtension() {
   checkIsRunning
   returnValue=$?
-  if [ "$returnValue" == 1 ]; then 
+  if [ "$returnValue" -eq "1" ]; then 
       echo "Hub Email Extension is already running"
       return 0;
   fi
   echo "Starting Hub Email Extension"
   $DIR/hub-email-extension & 
   sleep 1s
-  local pid="$(pgrep -f hub-email-extension)"
+  local pid=$(pgrep -f hub-email-extension)
   echo "$pid" > $DIR/$PID_FILE  
   echo "Started extension with PID: $pid"
 }
@@ -58,13 +58,13 @@ startExtension() {
 stopExtension() {
   checkIsRunning
   returnValue=$?
-  if [ "$returnValue" == 1 ]; then
-     local pid=$(<$DIR/$PID_FILE)
+  if [ "$returnValue" -eq "1" ]; then
+     local pid=`cat $DIR/$PID_FILE`
      echo "Stopping extension with PID: $pid"
-     for ((index=0; index<MAX_ATTEMPTS; index ++)); do 
+     for index in `seq 1 $MAX_ATTEMPTS`; do 
        checkIsRunning
        stillRunning=$?
-       if [ "$stillRunning" == 0 ]; then
+       if [ "$stillRunning" -eq "0" ]; then
          rm -f $PID_FILE
          echo "Stopped extension with PID: $pid"
          return 0;
@@ -79,8 +79,9 @@ stopExtension() {
 extensionStatus () {
   checkIsRunning
   returnValue=$?
-  if [ "$returnValue" == 1 ]; then
-     echo "Hub Email Extension is running"
+  if [ "$returnValue" -eq "1" ]; then
+     local pid=`cat $DIR/$PID_FILE`
+     echo "Hub Email Extension is running with PID: $pid"
   else
      echo "Hub Email Extension is not running"
   fi

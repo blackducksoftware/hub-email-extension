@@ -25,33 +25,48 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TimerTask;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.hub.api.extension.ConfigurationItem;
+import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.dataservice.extension.ExtensionConfigDataService;
-import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.hub.model.view.ExternalExtensionConfigValueView;
+import com.blackducksoftware.integration.hub.service.HubServicesFactory;
+import com.blackducksoftware.integration.log.Slf4jIntLogger;
 
 public abstract class AbstractNotifier extends TimerTask {
+    private final Logger logger = LoggerFactory.getLogger(AbstractNotifier.class);
+
     private final ExtensionProperties extensionProperties;
 
     private final EmailMessagingService emailMessagingService;
 
     private String hubExtensionUri;
 
+    private final HubServicesFactory hubServicesFactory;
+
     private final ExtensionConfigDataService extensionConfigDataService;
 
+    private final ExtensionInfo extensionInfo;
+
     public AbstractNotifier(final ExtensionProperties extensionProperties,
-            final EmailMessagingService emailMessagingService, ExtensionConfigDataService extensionConfigDataService) {
+            final EmailMessagingService emailMessagingService, final HubServicesFactory hubServicesFactory, final ExtensionInfo extensionInfo) {
         this.extensionProperties = extensionProperties;
         this.emailMessagingService = emailMessagingService;
-        this.extensionConfigDataService = extensionConfigDataService;
+        this.hubServicesFactory = hubServicesFactory;
+        this.extensionInfo = extensionInfo;
+        extensionConfigDataService = hubServicesFactory.createExtensionConfigDataService(new Slf4jIntLogger(logger));
+
     }
 
-    public ExtensionProperties createPropertiesFromGlobalConfig() throws HubIntegrationException {
-        final Map<String, ConfigurationItem> globalMap = extensionConfigDataService
+    public ExtensionProperties createPropertiesFromGlobalConfig() throws IntegrationException {
+        final Map<String, ExternalExtensionConfigValueView> globalMap = extensionConfigDataService
                 .getGlobalConfigMap(getHubExtensionUri());
         final Properties globalProperties = new Properties();
-        for (final Map.Entry<String, ConfigurationItem> entry : globalMap.entrySet()) {
+        for (final Map.Entry<String, ExternalExtensionConfigValueView> entry : globalMap.entrySet()) {
             globalProperties.put(entry.getKey(), entry.getValue().getValue().get(0));
         }
         return new ExtensionProperties(globalProperties);
@@ -89,5 +104,13 @@ public abstract class AbstractNotifier extends TimerTask {
 
     public ExtensionConfigDataService getExtensionConfigDataService() {
         return extensionConfigDataService;
+    }
+
+    public HubServicesFactory getHubServicesFactory() {
+        return hubServicesFactory;
+    }
+
+    public ExtensionInfo getExtensionInfoData() {
+        return extensionInfo;
     }
 }

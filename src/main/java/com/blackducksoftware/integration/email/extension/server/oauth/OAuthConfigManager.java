@@ -40,6 +40,7 @@ import org.restlet.ext.oauth.ResponseType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.integration.email.extension.config.ExtensionConfigManager;
 import com.blackducksoftware.integration.exception.EncryptionException;
 
 public class OAuthConfigManager {
@@ -64,9 +65,9 @@ public class OAuthConfigManager {
 
     private static final String MSG_PROPERTY_FILE_LOCATION = "Property file location: {}";
 
-    public final Logger logger = LoggerFactory.getLogger(OAuthConfigManager.class);
+    private final Logger logger = LoggerFactory.getLogger(OAuthConfigManager.class);
 
-    public OAuthConfiguration load() {
+    public ExtensionOAuthConfiguration load() {
         final File propFile = getPropFile();
         logger.info("Loading OAUTH configuration...");
         try {
@@ -77,19 +78,19 @@ public class OAuthConfigManager {
                     props.load(fileInputStream);
                 } catch (final IOException e) {
                     logger.error(MSG_COULD_NOT_LOAD_PROPS, e);
-                    return new OAuthConfiguration();
+                    return new ExtensionOAuthConfiguration();
                 }
                 return createFromProperties(props);
             } else {
                 logger.error(MSG_COULD_NOT_LOAD_PROPS);
-                return new OAuthConfiguration();
+                return new ExtensionOAuthConfiguration();
             }
         } catch (final IOException | IllegalArgumentException | EncryptionException e) {
-            return new OAuthConfiguration();
+            return new ExtensionOAuthConfiguration();
         }
     }
 
-    public void persist(final OAuthConfiguration config) {
+    public void persist(final ExtensionOAuthConfiguration config) {
         final File propFile = getPropFile();
         logger.info("Saving OAuth configuration...");
         try {
@@ -106,13 +107,13 @@ public class OAuthConfigManager {
 
         try (FileOutputStream outputStream = new FileOutputStream(propFile)) {
             final Properties props = new Properties();
-            props.put(OAUTH_PROPERTY_CLIENT_ID, encodePropertyValue(StringUtils.trimToEmpty(config.getClientId())));
-            props.put(OAUTH_PROPERTY_USER_REFRESH_TOKEN, encodePropertyValue(StringUtils.trimToEmpty(config.getUserRefreshToken())));
-            props.put(OAUTH_PROPERTY_CALLBACK_URL, encodePropertyValue(StringUtils.trimToEmpty(config.getCallbackUrl())));
-            props.put(OAUTH_PROPERTY_HUB_URI, encodePropertyValue(StringUtils.trimToEmpty(config.getHubUri())));
-            props.put(OAUTH_PROPERTY_EXTENSION_URI, encodePropertyValue(StringUtils.trimToEmpty(config.getExtensionUri())));
-            props.put(OAUTH_PROPERTY_AUTHORIZE_URI, encodePropertyValue(StringUtils.trimToEmpty(config.getoAuthAuthorizeUri())));
-            props.put(OAUTH_PROPERTY_TOKEN_URI, encodePropertyValue(StringUtils.trimToEmpty(config.getoAuthTokenUri())));
+            props.put(OAUTH_PROPERTY_CLIENT_ID, encodePropertyValue(StringUtils.trimToEmpty(config.clientId)));
+            props.put(OAUTH_PROPERTY_USER_REFRESH_TOKEN, encodePropertyValue(StringUtils.trimToEmpty(config.refreshToken)));
+            props.put(OAUTH_PROPERTY_CALLBACK_URL, encodePropertyValue(StringUtils.trimToEmpty(config.callbackUrl)));
+            props.put(OAUTH_PROPERTY_HUB_URI, encodePropertyValue(StringUtils.trimToEmpty(config.hubUri)));
+            props.put(OAUTH_PROPERTY_EXTENSION_URI, encodePropertyValue(StringUtils.trimToEmpty(config.extensionUri)));
+            props.put(OAUTH_PROPERTY_AUTHORIZE_URI, encodePropertyValue(StringUtils.trimToEmpty(config.authorizeUri)));
+            props.put(OAUTH_PROPERTY_TOKEN_URI, encodePropertyValue(StringUtils.trimToEmpty(config.tokenUri)));
             props.store(outputStream, "OAUTH Client configuration");
         } catch (final IOException | IllegalArgumentException | EncryptionException e) {
             logger.error("Could not save OAUTH configuration", e);
@@ -120,7 +121,7 @@ public class OAuthConfigManager {
     }
 
     private File getPropFile() {
-        final String parentLocation = System.getProperty("ext.config.location");
+        final String parentLocation = System.getProperty(ExtensionConfigManager.PROPERTY_KEY_CONFIG_LOCATION_PATH);
 
         if (StringUtils.isNotBlank(parentLocation)) {
             return new File(parentLocation, OAUTH_CONFIG_FILE_NAME);
@@ -129,7 +130,7 @@ public class OAuthConfigManager {
         }
     }
 
-    private OAuthConfiguration createFromProperties(final Properties properties) throws IllegalArgumentException, EncryptionException {
+    private ExtensionOAuthConfiguration createFromProperties(final Properties properties) throws IllegalArgumentException, EncryptionException {
         final String clientId = getPropertyValue(properties.getProperty(OAUTH_PROPERTY_CLIENT_ID));
         final String userRefreshToken = getPropertyValue(properties.getProperty(OAUTH_PROPERTY_USER_REFRESH_TOKEN));
         final String callbackUrl = getPropertyValue(properties.getProperty(OAUTH_PROPERTY_CALLBACK_URL));
@@ -137,35 +138,35 @@ public class OAuthConfigManager {
         final String extensionUri = getPropertyValue(properties.getProperty(OAUTH_PROPERTY_EXTENSION_URI));
         final String authorizeUri = getPropertyValue(properties.getProperty(OAUTH_PROPERTY_AUTHORIZE_URI));
         final String tokenUri = getPropertyValue(properties.getProperty(OAUTH_PROPERTY_TOKEN_URI));
-        final OAuthConfiguration config = new OAuthConfiguration();
-        config.setClientId(clientId);
-        config.setCallbackUrl(callbackUrl);
-        config.setUserRefreshToken(userRefreshToken);
+        final ExtensionOAuthConfiguration config = new ExtensionOAuthConfiguration();
+        config.clientId = clientId;
+        config.callbackUrl = callbackUrl;
+        config.refreshToken = userRefreshToken;
         config.setAddresses(hubUri, extensionUri, authorizeUri, tokenUri);
 
         return config;
     }
 
-    private String getPropertyValue(String propertyValue) throws IllegalArgumentException, EncryptionException {
+    private String getPropertyValue(final String propertyValue) throws IllegalArgumentException, EncryptionException {
         final Decoder decoder = Base64.getUrlDecoder();
         final String value = new String(decoder.decode(propertyValue));
         return value;
     }
 
-    private String encodePropertyValue(String value) throws IllegalArgumentException, EncryptionException {
+    private String encodePropertyValue(final String value) throws IllegalArgumentException, EncryptionException {
         // simply obfuscate the values from clear text.
-        Encoder encoder = Base64.getUrlEncoder();
-        String encoded = encoder.encodeToString(value.getBytes());
+        final Encoder encoder = Base64.getUrlEncoder();
+        final String encoded = encoder.encodeToString(value.getBytes());
         return encoded;
     }
 
-    public String getOAuthAuthorizationUrl(final OAuthConfiguration config, final Optional<StateUrlProcessor> state) {
-        final Reference reference = new Reference(config.getoAuthAuthorizeUri());
+    public String getOAuthAuthorizationUrl(final ExtensionOAuthConfiguration config, final Optional<StateUrlProcessor> state) {
+        final Reference reference = new Reference(config.authorizeUri);
 
         final OAuthParameters parameters = new OAuthParameters();
         parameters.responseType(ResponseType.code);
-        parameters.add(OAuthParameters.CLIENT_ID, config.getClientId());
-        parameters.redirectURI(config.getCallbackUrl());
+        parameters.add(OAuthParameters.CLIENT_ID, config.clientId);
+        parameters.redirectURI(config.callbackUrl);
         parameters.scope(new String[] { "read" });
 
         if (state.isPresent()) {
@@ -179,23 +180,23 @@ public class OAuthConfigManager {
         return parameters.toReference(reference.toString()).toString();
     }
 
-    public AccessTokenClientResource getTokenResource(final OAuthConfiguration config) {
-        final Reference reference = new Reference(config.getoAuthTokenUri());
+    public AccessTokenClientResource getTokenResource(final ExtensionOAuthConfiguration config) {
+        final Reference reference = new Reference(config.authorizeUri);
 
         final AccessTokenClientResource tokenResource = new AccessTokenClientResource(reference);
         // Client ID here and not on OAuthParams so that it can auto-add to
         // parameters internally. null auth so it does
         // NPE trying to format challenge response
-        tokenResource.setClientCredentials(config.getClientId(), null);
+        tokenResource.setClientCredentials(config.clientId, null);
         tokenResource.setAuthenticationMethod(null);
 
         return tokenResource;
     }
 
-    public OAuthParameters getAccessTokenParameters(final OAuthConfiguration config, final String code) {
+    public OAuthParameters getAccessTokenParameters(final ExtensionOAuthConfiguration config, final String code) {
         final OAuthParameters parameters = new OAuthParameters();
         parameters.grantType(GrantType.authorization_code);
-        parameters.redirectURI(config.getCallbackUrl());
+        parameters.redirectURI(config.callbackUrl);
         parameters.code(code);
 
         return parameters;

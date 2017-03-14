@@ -28,10 +28,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.mail.MessagingException;
 
@@ -39,14 +37,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.blackducksoftware.integration.email.EmailEngine;
-import com.blackducksoftware.integration.email.batch.processor.NotificationCategoryEnum;
+import com.blackducksoftware.integration.email.extension.config.ExtensionConfigManager;
 import com.blackducksoftware.integration.email.mock.TestEmailEngine;
 import com.blackducksoftware.integration.email.model.EmailTarget;
 import com.blackducksoftware.integration.email.model.batch.CategoryData;
 import com.blackducksoftware.integration.email.model.batch.ItemData;
-import com.blackducksoftware.integration.email.model.batch.ItemEntry;
 import com.blackducksoftware.integration.email.model.batch.ProjectData;
 import com.blackducksoftware.integration.email.notifier.AbstractDigestNotifier;
+import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
 
 import freemarker.template.TemplateException;
 
@@ -59,7 +57,7 @@ public class EmailMessagingServiceTest {
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         final URL propFileUrl = classLoader.getResource("extension.properties");
         final File file = new File(propFileUrl.toURI());
-        System.setProperty("ext.config.location", file.getCanonicalFile().getParent());
+        System.setProperty(ExtensionConfigManager.PROPERTY_KEY_CONFIG_LOCATION_PATH, file.getCanonicalFile().getParent());
         engine = new TestEmailEngine();
         engine.start();
     }
@@ -95,8 +93,8 @@ public class EmailMessagingServiceTest {
         for (int index = 0; index < 5; index++) {
             final List<ItemData> itemList = new ArrayList<>(15);
             for (int itemIndex = 0; itemIndex < 15; itemIndex++) {
-                final Set<ItemEntry> dataSet = new HashSet<>();
-                dataSet.add(new ItemEntry("KEY_" + itemIndex, "VALUE_" + itemIndex));
+                final Map<String, Object> dataSet = new HashMap<>();
+                dataSet.put("KEY_" + itemIndex, "VALUE_" + itemIndex);
                 itemList.add(new ItemData(dataSet));
             }
             final String projectName = "PROJECT_NAME";

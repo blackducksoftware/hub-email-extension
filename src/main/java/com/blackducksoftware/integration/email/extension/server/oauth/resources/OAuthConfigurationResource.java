@@ -26,14 +26,14 @@ import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.resource.Post;
 
 import com.blackducksoftware.integration.email.extension.server.api.model.ExtensionConfigurationItem;
-import com.blackducksoftware.integration.email.extension.server.oauth.TokenManager;
+import com.blackducksoftware.integration.email.extension.server.oauth.ExtensionTokenManager;
 
 public class OAuthConfigurationResource extends OAuthServerResource {
 
     @Post
     public void configure(final JsonRepresentation request) {
         final ExtensionConfigurationItem item = new ExtensionConfigurationItem(request.getJsonObject());
-        final TokenManager tokenManager = getTokenManager();
+        final ExtensionTokenManager tokenManager = getTokenManager();
 
         if (tokenManager != null) {
             tokenManager.setAddresses(item.getHubBaseUrl(), item.getExtensionUrl(), item.getoAuthAuthorizeUrl(),

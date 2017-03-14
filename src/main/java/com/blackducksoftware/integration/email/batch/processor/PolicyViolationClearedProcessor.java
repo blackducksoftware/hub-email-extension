@@ -21,38 +21,40 @@
  *******************************************************************************/
 package com.blackducksoftware.integration.email.batch.processor;
 
-import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.blackducksoftware.integration.hub.api.item.MetaService;
+import com.blackducksoftware.integration.hub.dataservice.notification.model.NotificationContentItem;
+import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyViolationClearedContentItem;
+import com.blackducksoftware.integration.hub.exception.HubIntegrationException;
+import com.blackducksoftware.integration.hub.model.view.PolicyRuleView;
+import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
+import com.blackducksoftware.integration.hub.notification.processor.SubProcessorCache;
+import com.blackducksoftware.integration.hub.notification.processor.event.NotificationEvent;
 
-import com.blackducksoftware.integration.hub.api.policy.PolicyRule;
-import com.blackducksoftware.integration.hub.dataservice.notification.item.NotificationContentItem;
-import com.blackducksoftware.integration.hub.dataservice.notification.item.PolicyViolationClearedContentItem;
+public class PolicyViolationClearedProcessor extends PolicyViolationProcessor {
 
-public class PolicyViolationClearedProcessor extends NotificationSubProcessor<PolicyEvent> {
-    private final Logger logger = LoggerFactory.getLogger(PolicyViolationProcessor.class);
-
-    public PolicyViolationClearedProcessor(final SubProcessorCache<PolicyEvent> cache) {
-        super(cache);
+    public PolicyViolationClearedProcessor(final SubProcessorCache cache, final MetaService metaService) {
+        super(cache, metaService);
     }
 
     @Override
-    public void process(final NotificationContentItem notification) {
+    public void process(final NotificationContentItem notification) throws HubIntegrationException {
         if (notification instanceof PolicyViolationClearedContentItem) {
             final PolicyViolationClearedContentItem policyViolationCleared = (PolicyViolationClearedContentItem) notification;
-            for (final PolicyRule rule : policyViolationCleared.getPolicyRuleList()) {
-                try {
-                    final PolicyEvent event = new PolicyEvent(ProcessingAction.REMOVE, NotificationCategoryEnum.POLICY_VIOLATION, policyViolationCleared, rule);
-                    if (getCache().hasEvent(event.getEventKey())) {
-                        getCache().removeEvent(event);
-                    } else {
-                        event.setAction(ProcessingAction.ADD);
-                        event.setCategoryType(NotificationCategoryEnum.POLICY_VIOLATION_CLEARED);
-                        getCache().addEvent(event);
-                    }
-                } catch (final URISyntaxException e) {
-                    logger.error("Error processing policy violation cleared item {} ", policyViolationCleared, e);
+            final Map<String, Object> dataMap = new HashMap<>();
+            for (final PolicyRuleView rule : policyViolationCleared.getPolicyRuleList()) {
+                dataMap.put(POLICY_CONTENT_ITEM, policyViolationCleared);
+                dataMap.put(POLICY_RULE, rule);
+                final String eventKey = generateEventKey(dataMap);
+                final Map<String, Object> dataSet = generateDataSet(dataMap);
+                final NotificationEvent event = new NotificationEvent(eventKey, NotificationCategoryEnum.POLICY_VIOLATION, dataSet);
+                if (getCache().hasEvent(event.getEventKey())) {
+                    getCache().removeEvent(event);
+                } else {
+                    event.setCategoryType(NotificationCategoryEnum.POLICY_VIOLATION_CLEARED);
+                    getCache().addEvent(event);
                 }
             }
         }
