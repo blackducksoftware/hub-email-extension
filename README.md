@@ -5,6 +5,7 @@ Hub extension for email. This hub extension provides ability to send emails base
 
 [![Build Status](https://travis-ci.org/blackducksoftware/hub-email-extension.svg?branch=master)](https://travis-ci.org/blackducksoftware/hub-email-extension)
 [![Coverage Status](https://coveralls.io/repos/github/blackducksoftware/hub-email-extension/badge.svg?branch=master)](https://coveralls.io/github/blackducksoftware/hub-email-extension?branch=master)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## Where can I get the latest release? ##
 You can download the latest source from GitHub: https://github.com/blackducksoftware/hub-email-extension. 
@@ -12,7 +13,4 @@ You can download the latest source from GitHub: https://github.com/blackducksoft
 You can download the latest release artifacts from GitHub: https://github.com/blackducksoftware/hub-email-extension/releases
 
 ## Documentation ##
-All documentation for hub-email-extension can be found on the base project:  https://github.com/blackducksoftware/hub-email-extension/wiki
-
-## License ##
-Apache License 2.0 
+All documentation for hub-email-extension can be found on public [Black Duck Confluence](https://blackducksoftware.atlassian.net/wiki/display/INTDOCS/)
