@@ -65,6 +65,7 @@ import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.rest.oauth.AccessType;
 import com.blackducksoftware.integration.hub.rest.oauth.OAuthRestConnection;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
+import com.blackducksoftware.integration.hub.util.HostnameHelper;
 import com.blackducksoftware.integration.log.IntLogger;
 import com.google.gson.JsonParser;
 
@@ -340,8 +341,19 @@ public class EmailEngine implements IAuthorizedListener {
         final String id = generateExtensionId();
         final String name = extensionProperties.getExtensionName();
         final String description = extensionProperties.getExtensionDescription();
-        final String baseUrl = extensionProperties.getExtensionBaseUrl();
-
+        String baseUrl = extensionProperties.getExtensionBaseUrl();
+        URL extensionUrl;
+        try {
+            extensionUrl = new URL(baseUrl);
+            if (extensionUrl.getHost().equals("localhost")) {
+                final String hostName = HostnameHelper.getMyHostname();
+                final URL url = new URL(extensionUrl.getProtocol(), hostName, extensionUrl.getPort(), extensionUrl.getFile());
+                baseUrl = url.toString();
+            }
+        } catch (final MalformedURLException e) {
+            baseUrl = extensionProperties.getExtensionBaseUrl();
+        }
+        logger.info("Extension Base URL: {}", baseUrl);
         return new ExtensionInfo(id, name, description, baseUrl);
     }
 
