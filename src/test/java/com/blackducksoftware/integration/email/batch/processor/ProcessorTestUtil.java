@@ -131,7 +131,7 @@ public class ProcessorTestUtil {
             throws IntegrationException {
         final List<VulnerabilityView> vulnerabilityList = new ArrayList<>(vulnSourceList.size());
         for (final VulnerabilitySourceQualifiedId vulnSource : vulnSourceList) {
-            final String vulnId = vulnSource.getVulnerabilityId();
+            final String vulnId = vulnSource.vulnerabilityId;
             VulnerabilitySeverityEnum severity = null;
             if (vulnId.startsWith(HIGH_VULN_PREFIX)) {
                 severity = VulnerabilitySeverityEnum.HIGH;
@@ -269,5 +269,12 @@ public class ProcessorTestUtil {
         final VulnerabilityContentItem item = new VulnerabilityContentItem(createdTime, projectVersion, componentName,
                 componentVersion, componentVersionUrl, added, updated, deleted);
         return item;
+    }
+
+    public VulnerabilitySourceQualifiedId createVulnerabilitySourceId(final String source, final String vulnerabilityId) {
+        final VulnerabilitySourceQualifiedId sourceId = new VulnerabilitySourceQualifiedId();
+        sourceId.source = source;
+        sourceId.vulnerabilityId = vulnerabilityId;
+        return sourceId;
     }
 }

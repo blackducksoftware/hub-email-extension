@@ -146,7 +146,9 @@ public class MockNotificationDataService extends NotificationDataService {
     private List<VulnerabilitySourceQualifiedId> createVulnSourceIds() {
         final List<VulnerabilitySourceQualifiedId> sourceIdList = new ArrayList<>();
         for (int index = 0; index < 2; index++) {
-            final VulnerabilitySourceQualifiedId sourceId = new VulnerabilitySourceQualifiedId("source", "id");
+            final VulnerabilitySourceQualifiedId sourceId = new VulnerabilitySourceQualifiedId();
+            sourceId.source = "source";
+            sourceId.vulnerabilityId = "id";
             sourceIdList.add(sourceId);
         }
         return sourceIdList;

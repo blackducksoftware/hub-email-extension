@@ -107,9 +107,9 @@ public class NotificationCapacityTest {
         final int count = VULNERABILITY_COUNT;
         final List<VulnerabilitySourceQualifiedId> list = new ArrayList<>(count);
         for (int index = 0; index < count; index++) {
-            list.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE + index, ProcessorTestUtil.HIGH_VULN_ID + index));
-            list.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE + index, ProcessorTestUtil.MEDIUM_VULN_ID + index));
-            list.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE + index, ProcessorTestUtil.LOW_VULN_ID + index));
+            list.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE + index, ProcessorTestUtil.HIGH_VULN_ID + index));
+            list.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE + index, ProcessorTestUtil.MEDIUM_VULN_ID + index));
+            list.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE + index, ProcessorTestUtil.LOW_VULN_ID + index));
         }
 
         return list;

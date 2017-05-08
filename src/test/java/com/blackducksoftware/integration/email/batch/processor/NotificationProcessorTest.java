@@ -277,9 +277,9 @@ public class NotificationProcessorTest {
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
         final List<VulnerabilitySourceQualifiedId> vulnerabilities = new LinkedList<>();
-        vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
-        vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
-        vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID));
+        vulnerabilities.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
+        vulnerabilities.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
+        vulnerabilities.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID));
         final List<VulnerabilityView> vulnerabilityList = testUtil.createVulnerabiltyItemList(vulnerabilities, gson);
         final DateTime dateTime = new DateTime();
         final List<VulnerabilitySourceQualifiedId> emptyVulnSourceList = Collections.emptyList();
@@ -302,9 +302,9 @@ public class NotificationProcessorTest {
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
         final List<VulnerabilitySourceQualifiedId> vulnerabilities = new LinkedList<>();
-        vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
-        vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
-        vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID));
+        vulnerabilities.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
+        vulnerabilities.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
+        vulnerabilities.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID));
         final List<VulnerabilityView> vulnerabilityList = testUtil.createVulnerabiltyItemList(vulnerabilities, gson);
 
         final DateTime dateTime = new DateTime();
@@ -328,9 +328,9 @@ public class NotificationProcessorTest {
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
         final List<VulnerabilitySourceQualifiedId> vulnerabilities = new LinkedList<>();
-        vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
-        vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
-        vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID));
+        vulnerabilities.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
+        vulnerabilities.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
+        vulnerabilities.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID));
 
         final DateTime dateTime = new DateTime();
         final List<VulnerabilitySourceQualifiedId> emptyVulnSourceList = Collections.emptyList();
@@ -349,9 +349,9 @@ public class NotificationProcessorTest {
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
         final List<VulnerabilitySourceQualifiedId> vulnerabilities = new LinkedList<>();
-        vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
-        vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
-        vulnerabilities.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID));
+        vulnerabilities.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
+        vulnerabilities.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
+        vulnerabilities.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID));
 
         final DateTime dateTime = new DateTime();
         final List<VulnerabilitySourceQualifiedId> emptyVulnSourceList = Collections.emptyList();
@@ -370,26 +370,26 @@ public class NotificationProcessorTest {
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
         final List<VulnerabilitySourceQualifiedId> resultVulnList = new ArrayList<>(2);
-        resultVulnList.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
-        resultVulnList.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
+        resultVulnList.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
+        resultVulnList.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
         final List<VulnerabilityView> vulnerabilityList = testUtil.createVulnerabiltyItemList(resultVulnList, gson);
 
         final List<VulnerabilitySourceQualifiedId> added = new ArrayList<>(3);
-        added.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
-        added.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
-        added.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID));
+        added.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
+        added.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
+        added.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID));
 
         final List<VulnerabilitySourceQualifiedId> updated = new ArrayList<>(4);
-        updated.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
-        updated.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID2));
-        updated.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID2));
-        updated.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID1));
+        updated.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
+        updated.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID2));
+        updated.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID2));
+        updated.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID1));
 
         final List<VulnerabilitySourceQualifiedId> deleted = new ArrayList<>(3);
 
-        deleted.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID));
-        deleted.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID2));
-        deleted.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID1));
+        deleted.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID));
+        deleted.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID2));
+        deleted.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID1));
         dateTime = dateTime.plusSeconds(1);
         final VulnerabilityContentItem vulnerability = testUtil.createVulnerability(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion, added, updated, deleted);
@@ -413,47 +413,47 @@ public class NotificationProcessorTest {
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
         final List<VulnerabilitySourceQualifiedId> resultVulnList = new ArrayList<>(2);
-        resultVulnList.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
-        resultVulnList.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
+        resultVulnList.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
+        resultVulnList.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
         final List<VulnerabilityView> vulnerabilityList = testUtil.createVulnerabiltyItemList(resultVulnList, gson);
 
         final List<VulnerabilitySourceQualifiedId> added1 = new LinkedList<>();
-        added1.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
-        added1.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
-        added1.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID));
+        added1.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
+        added1.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
+        added1.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID));
 
         final List<VulnerabilitySourceQualifiedId> updated1 = new LinkedList<>();
-        updated1.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
-        updated1.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID2));
-        updated1.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID2));
-        updated1.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID1));
+        updated1.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
+        updated1.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID2));
+        updated1.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID2));
+        updated1.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID1));
 
         final List<VulnerabilitySourceQualifiedId> deleted1 = new LinkedList<>();
 
-        deleted1.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID));
-        deleted1.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID2));
-        deleted1.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID1));
+        deleted1.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID));
+        deleted1.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID2));
+        deleted1.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID1));
         dateTime = dateTime.plusSeconds(1);
         final VulnerabilityContentItem vulnerability = testUtil.createVulnerability(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion, added1, updated1, deleted1);
         notifications.add(vulnerability);
 
         final List<VulnerabilitySourceQualifiedId> added2 = new LinkedList<>();
-        added1.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
-        added1.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
-        added1.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID));
+        added1.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
+        added1.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
+        added1.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID));
 
         final List<VulnerabilitySourceQualifiedId> updated2 = new LinkedList<>();
-        updated1.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
-        updated1.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID2));
-        updated1.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID2));
-        updated1.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID1));
+        updated1.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
+        updated1.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID2));
+        updated1.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID2));
+        updated1.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID1));
 
         final List<VulnerabilitySourceQualifiedId> deleted2 = new LinkedList<>();
 
-        deleted1.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID));
-        deleted1.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID2));
-        deleted1.add(new VulnerabilitySourceQualifiedId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID1));
+        deleted1.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID));
+        deleted1.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID2));
+        deleted1.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID1));
         dateTime = dateTime.plusSeconds(1);
         final VulnerabilityContentItem vulnerability2 = testUtil.createVulnerability(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion, added2, updated2, deleted2);
