@@ -26,9 +26,10 @@ import java.net.MalformedURLException;
 import org.restlet.data.Reference;
 import org.restlet.data.Status;
 import org.restlet.resource.Get;
+import org.restlet.resource.ResourceException;
 
-import com.blackducksoftware.integration.email.extension.server.oauth.StateUrlProcessor;
 import com.blackducksoftware.integration.email.extension.server.oauth.ExtensionTokenManager;
+import com.blackducksoftware.integration.email.extension.server.oauth.StateUrlProcessor;
 import com.blackducksoftware.integration.exception.IntegrationException;
 
 public class TokenCallbackResource extends OAuthServerResource {
@@ -50,10 +51,12 @@ public class TokenCallbackResource extends OAuthServerResource {
             }
 
             try {
-                tokenManager.exchangeForToken(authorizationCode);
+                if (authorizationCode != null) {
+                    tokenManager.exchangeForToken(authorizationCode);
+                }
                 getResponse().redirectSeeOther(redirectTo);
-            } catch (final IntegrationException | MalformedURLException e) {
-                getResponse().setStatus(Status.SERVER_ERROR_INTERNAL, e);
+            } catch (final IntegrationException | MalformedURLException | ResourceException e) {
+                getResponse().redirectSeeOther(redirectTo);
             }
         } else {
             getResponse().setStatus(Status.SERVER_ERROR_INTERNAL, "No token manager available");
