@@ -47,13 +47,11 @@ public class TokenCallbackResource extends OAuthServerResource {
             if (state.getReturnUrl().isPresent()) {
                 redirectTo = new Reference(state.getReturnUrl().get());
             } else {
-                redirectTo = new Reference(tokenManager.getLocalAddress());
+                redirectTo = new Reference(tokenManager.getConfiguration().extensionUri);
             }
 
             try {
-                if (authorizationCode != null) {
-                    tokenManager.exchangeForToken(authorizationCode);
-                }
+                tokenManager.exchangeForToken(authorizationCode);
                 getResponse().redirectSeeOther(redirectTo);
             } catch (final IntegrationException | MalformedURLException | ResourceException e) {
                 getResponse().redirectSeeOther(redirectTo);
