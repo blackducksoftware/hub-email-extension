@@ -147,12 +147,16 @@ public class ExtensionTokenManager extends TokenManager {
     }
 
     public void exchangeForToken(final String authorizationCode) throws IntegrationException, MalformedURLException {
-        userToken = this.exchangeForUserToken(authorizationCode);
-        // Update authorization status
-        // this is hub specific as far as I can tell to send status for
-        // the authorization.
-        updateAuthorized(true);
-        completeAuthorization(userToken);
+        if (authorizationCode != null) {
+            userToken = this.exchangeForUserToken(authorizationCode);
+            // Update authorization status
+            // this is hub specific as far as I can tell to send status for
+            // the authorization.
+            updateAuthorized(true);
+            completeAuthorization(userToken);
+        } else {
+            throw new IntegrationException("The authorization code cannot be null.");
+        }
     }
 
     @Override
