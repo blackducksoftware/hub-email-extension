@@ -76,7 +76,7 @@ public class TestEmailEngine extends EmailEngine {
             credentials = new HubCredentials("user", "password");
 
             final HubProxyInfo proxyInfo = new HubProxyInfoBuilder().build();
-            serverConfig = new HubServerConfig(new URL("http://localhost"), 120, credentials, proxyInfo);
+            serverConfig = new HubServerConfig(new URL("http://localhost"), 120, credentials, proxyInfo, false);
         } catch (final EncryptionException | MalformedURLException e) {
             logger.error("Error creating hub server config", e);
         }

@@ -67,7 +67,7 @@ public abstract class AbstractNotifier extends TimerTask {
                 .getGlobalConfigMap(getHubExtensionUri());
         final Properties globalProperties = new Properties();
         for (final Map.Entry<String, ExternalExtensionConfigValueView> entry : globalMap.entrySet()) {
-            globalProperties.put(entry.getKey(), entry.getValue().getValue().get(0));
+            globalProperties.put(entry.getKey(), entry.getValue().value.get(0));
         }
         return new ExtensionProperties(globalProperties);
     }

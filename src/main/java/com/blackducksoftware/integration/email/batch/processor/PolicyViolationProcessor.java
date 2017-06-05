@@ -100,9 +100,9 @@ public class PolicyViolationProcessor extends NotificationSubProcessor {
         final PolicyViolationContentItem policyViolationContentItem = (PolicyViolationContentItem) inputData.get(POLICY_CONTENT_ITEM);
         final PolicyRuleView rule = (PolicyRuleView) inputData.get(POLICY_RULE);
 
-        dataSet.put(ItemTypeEnum.RULE.name(), rule.getName());
+        dataSet.put(ItemTypeEnum.RULE.name(), rule.name);
         dataSet.put(ItemTypeEnum.COMPONENT.name(), policyViolationContentItem.getComponentName());
-        dataSet.put(ItemTypeEnum.VERSION.name(), policyViolationContentItem.getComponentVersion().getVersionName());
+        dataSet.put(ItemTypeEnum.VERSION.name(), policyViolationContentItem.getComponentVersion().versionName);
         dataSet.put(NotificationEvent.DATA_SET_KEY_NOTIFICATION_CONTENT, policyViolationContentItem);
         return dataSet;
     }

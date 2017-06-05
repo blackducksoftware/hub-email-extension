@@ -126,7 +126,7 @@ public class NotificationProcessorTest {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
 
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
-        Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
+        componentVersion.versionName = ProcessorTestUtil.VERSION;
         notifications.add(
                 testUtil.createPolicyViolation(new Date(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT,
                         componentVersion));
@@ -139,7 +139,7 @@ public class NotificationProcessorTest {
     public void testPolicyViolationOverride() throws Exception {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
-        Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
+        componentVersion.versionName = ProcessorTestUtil.VERSION;
         notifications.add(
                 testUtil.createPolicyOverride(new Date(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT,
                         componentVersion));
@@ -152,7 +152,7 @@ public class NotificationProcessorTest {
     public void testPolicyViolationCleared() throws Exception {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
-        Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
+        componentVersion.versionName = ProcessorTestUtil.VERSION;
         notifications.add(
                 testUtil.createPolicyCleared(new Date(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT,
                         componentVersion));
@@ -165,7 +165,7 @@ public class NotificationProcessorTest {
     public void testPolicyViolationAndOverride() throws Exception {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
-        Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
+        componentVersion.versionName = ProcessorTestUtil.VERSION;
         DateTime dateTime = new DateTime();
         final PolicyViolationContentItem policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
@@ -182,7 +182,7 @@ public class NotificationProcessorTest {
     public void testPolicyViolationAndCleared() throws Exception {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
-        Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
+        componentVersion.versionName = ProcessorTestUtil.VERSION;
         DateTime dateTime = new DateTime();
         final PolicyViolationContentItem policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
@@ -200,7 +200,7 @@ public class NotificationProcessorTest {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
         DateTime dateTime = new DateTime();
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
-        Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
+        componentVersion.versionName = ProcessorTestUtil.VERSION;
         PolicyViolationContentItem policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
         notifications.add(policyViolation);
@@ -223,7 +223,7 @@ public class NotificationProcessorTest {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
         DateTime dateTime = new DateTime();
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
-        Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
+        componentVersion.versionName = ProcessorTestUtil.VERSION;
         PolicyViolationContentItem policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
         notifications.add(policyViolation);
@@ -245,7 +245,7 @@ public class NotificationProcessorTest {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
         DateTime dateTime = new DateTime();
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
-        Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
+        componentVersion.versionName = ProcessorTestUtil.VERSION;
         PolicyViolationContentItem policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
                 ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
         notifications.add(policyViolation);
@@ -275,7 +275,7 @@ public class NotificationProcessorTest {
     public void testVulnerabilityAdded() throws Exception {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
-        Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
+        componentVersion.versionName = ProcessorTestUtil.VERSION;
         final List<VulnerabilitySourceQualifiedId> vulnerabilities = new LinkedList<>();
         vulnerabilities.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
         vulnerabilities.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
@@ -300,7 +300,7 @@ public class NotificationProcessorTest {
     public void testVulnerabilityUpdated() throws Exception {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
-        Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
+        componentVersion.versionName = ProcessorTestUtil.VERSION;
         final List<VulnerabilitySourceQualifiedId> vulnerabilities = new LinkedList<>();
         vulnerabilities.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
         vulnerabilities.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
@@ -326,7 +326,7 @@ public class NotificationProcessorTest {
     public void testVulnerabilityDeleted() throws Exception {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
-        Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
+        componentVersion.versionName = ProcessorTestUtil.VERSION;
         final List<VulnerabilitySourceQualifiedId> vulnerabilities = new LinkedList<>();
         vulnerabilities.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
         vulnerabilities.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
@@ -347,7 +347,7 @@ public class NotificationProcessorTest {
     public void testVulnAddedAndDeleted() throws Exception {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
-        Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
+        componentVersion.versionName = ProcessorTestUtil.VERSION;
         final List<VulnerabilitySourceQualifiedId> vulnerabilities = new LinkedList<>();
         vulnerabilities.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
         vulnerabilities.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
@@ -368,7 +368,7 @@ public class NotificationProcessorTest {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
         DateTime dateTime = new DateTime();
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
-        Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
+        componentVersion.versionName = ProcessorTestUtil.VERSION;
         final List<VulnerabilitySourceQualifiedId> resultVulnList = new ArrayList<>(2);
         resultVulnList.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
         resultVulnList.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));
@@ -411,7 +411,7 @@ public class NotificationProcessorTest {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
         DateTime dateTime = new DateTime();
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
-        Mockito.when(componentVersion.getVersionName()).thenReturn(ProcessorTestUtil.VERSION);
+        componentVersion.versionName = ProcessorTestUtil.VERSION;
         final List<VulnerabilitySourceQualifiedId> resultVulnList = new ArrayList<>(2);
         resultVulnList.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.HIGH_VULN_ID));
         resultVulnList.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.MEDIUM_VULN_ID));

@@ -283,15 +283,16 @@ public class EmailEngine implements IAuthorizedListener {
             configBuilder.setProxyUsername(extensionProperties.getHubProxyUser());
             configBuilder.setProxyPassword(extensionProperties.getHubProxyPassword());
 
+            final HubServerConfig config = configBuilder.build();
             // output the configuration details
-            logger.info("Hub Server URL          = " + configBuilder.getHubUrl());
-            logger.info("Hub Timeout             = " + configBuilder.getTimeout());
-            logger.info("Hub Proxy Host          = " + configBuilder.getProxyHost());
-            logger.info("Hub Proxy Port          = " + configBuilder.getProxyPort());
-            logger.info("Hub Ignored Proxy Hosts = " + configBuilder.getIgnoredProxyHosts());
-            logger.info("Hub Proxy User          = " + configBuilder.getProxyUsername());
+            logger.info("Hub Server URL          = " + config.getHubUrl());
+            logger.info("Hub Timeout             = " + config.getTimeout());
+            logger.info("Hub Proxy Host          = " + config.getProxyInfo().getHost());
+            logger.info("Hub Proxy Port          = " + config.getProxyInfo().getPort());
+            logger.info("Hub Ignored Proxy Hosts = " + config.getProxyInfo().getIgnoredProxyHosts());
+            logger.info("Hub Proxy User          = " + config.getProxyInfo().getUsername());
 
-            return configBuilder.build();
+            return config;
         } catch (final IllegalStateException ex) {
             logger.error("Error with the hub configuration", ex);
         }

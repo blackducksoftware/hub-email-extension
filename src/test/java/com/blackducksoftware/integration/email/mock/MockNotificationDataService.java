@@ -84,7 +84,7 @@ public class MockNotificationDataService extends NotificationDataService {
             final String componentName = "Component" + index;
             final String versionName = "Version" + index;
             final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
-            Mockito.when(componentVersion.getVersionName()).thenReturn(versionName);
+            componentVersion.versionName = versionName;
             final UUID componentId = UUID.randomUUID();
             final UUID componentVersionId = UUID.randomUUID();
             final String componentUrl = "http://localhost/api/components/" + componentId;
@@ -92,7 +92,7 @@ public class MockNotificationDataService extends NotificationDataService {
                     + componentVersionId;
             final List<PolicyRuleView> policyRuleList = new ArrayList<>();
             final PolicyViolationContentItem item = new PolicyViolationContentItem(new Date(), projectVersion,
-                    componentName, componentVersion, componentUrl, componentVersionUrl, policyRuleList);
+                    componentName, componentVersion, componentUrl, componentVersionUrl, policyRuleList, "");
             itemList.add(item);
         }
         return itemList;
@@ -106,7 +106,7 @@ public class MockNotificationDataService extends NotificationDataService {
             final String componentName = "Component" + index;
             final String versionName = "Version" + index;
             final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
-            Mockito.when(componentVersion.getVersionName()).thenReturn(versionName);
+            componentVersion.versionName = versionName;
             final UUID componentId = UUID.randomUUID();
             final UUID componentVersionId = UUID.randomUUID();
             final String componentUrl = "http://localhost/api/components/" + componentId;
@@ -117,7 +117,7 @@ public class MockNotificationDataService extends NotificationDataService {
             final List<PolicyRuleView> policyRuleList = new ArrayList<>();
             final PolicyOverrideContentItem item = new PolicyOverrideContentItem(new Date(), projectVersion,
                     componentName, componentVersion, componentUrl, componentVersionUrl, policyRuleList, firstName,
-                    lastName);
+                    lastName, "");
             itemList.add(item);
         }
         return itemList;
@@ -130,14 +130,14 @@ public class MockNotificationDataService extends NotificationDataService {
             final String componentName = "Component" + index;
             final String versionName = "Version" + index;
             final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
-            Mockito.when(componentVersion.getVersionName()).thenReturn(versionName);
+            componentVersion.versionName = versionName;
             final UUID componentId = UUID.randomUUID();
             final UUID componentVersionId = UUID.randomUUID();
             final String componentVersionUrl = "http://localhost/api/components/" + componentId + "/versions/"
                     + componentVersionId;
             final VulnerabilityContentItem item = new VulnerabilityContentItem(new Date(), projectVersion,
                     componentName, componentVersion, componentVersionUrl, createVulnSourceIds(), createVulnSourceIds(),
-                    createVulnSourceIds());
+                    createVulnSourceIds(), "");
             itemList.add(item);
         }
         return itemList;
@@ -161,7 +161,7 @@ public class MockNotificationDataService extends NotificationDataService {
             final String componentName = "Component" + index;
             final String versionName = "Version" + index;
             final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
-            Mockito.when(componentVersion.getVersionName()).thenReturn(versionName);
+            componentVersion.versionName = versionName;
             final UUID componentId = UUID.randomUUID();
             final UUID componentVersionId = UUID.randomUUID();
             final String componentUrl = "http://localhost/api/components/" + componentId;
@@ -169,7 +169,7 @@ public class MockNotificationDataService extends NotificationDataService {
                     + componentVersionId;
             final List<PolicyRuleView> policyRuleList = new ArrayList<>();
             final PolicyViolationClearedContentItem item = new PolicyViolationClearedContentItem(new Date(),
-                    projectVersion, componentName, componentVersion, componentUrl, componentVersionUrl, policyRuleList);
+                    projectVersion, componentName, componentVersion, componentUrl, componentVersionUrl, policyRuleList, "");
             itemList.add(item);
         }
         return itemList;

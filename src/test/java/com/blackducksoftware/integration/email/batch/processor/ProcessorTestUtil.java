@@ -208,12 +208,12 @@ public class ProcessorTestUtil {
         projectVersion.setUrl(projectVersionUrl);
         final String componentUrl = COMPONENT_URL_PREFIX + componentName;
         final String componentVersionUrl = COMPONENT_URL_PREFIX + componentName + VERSIONS_URL_SEGMENT
-                + componentVersion.getVersionName();
+                + componentVersion.versionName;
         final List<PolicyRuleView> policyRuleList = new ArrayList<>();
         policyRuleList.add(createPolicyRule(RULE_NAME_1, DESCRIPTION, CREATED_BY, UPDATED_BY, POLICY_RULE_1_HREF_URL));
         policyRuleList.add(createPolicyRule(RULE_NAME_2, DESCRIPTION, CREATED_BY, UPDATED_BY, POLICY_RULE_2_HREF_URL));
         final PolicyOverrideContentItem item = new PolicyOverrideContentItem(createdTime, projectVersion, componentName,
-                componentVersion, componentUrl, componentVersionUrl, policyRuleList, FIRST_NAME, LAST_NAME);
+                componentVersion, componentUrl, componentVersionUrl, policyRuleList, FIRST_NAME, LAST_NAME, "");
         return item;
     }
 
@@ -227,12 +227,12 @@ public class ProcessorTestUtil {
         projectVersion.setUrl(projectVersionUrl);
         final String componentUrl = COMPONENT_URL_PREFIX + componentName;
         final String componentVersionUrl = COMPONENT_URL_PREFIX + componentName + VERSIONS_URL_SEGMENT
-                + componentVersion.getVersionName();
+                + componentVersion.versionName;
         final List<PolicyRuleView> policyRuleList = new ArrayList<>();
         policyRuleList.add(createPolicyRule(RULE_NAME_1, DESCRIPTION, CREATED_BY, UPDATED_BY, POLICY_RULE_1_HREF_URL));
         policyRuleList.add(createPolicyRule(RULE_NAME_2, DESCRIPTION, CREATED_BY, UPDATED_BY, POLICY_RULE_2_HREF_URL));
         final PolicyViolationClearedContentItem item = new PolicyViolationClearedContentItem(createdTime,
-                projectVersion, componentName, componentVersion, componentUrl, componentVersionUrl, policyRuleList);
+                projectVersion, componentName, componentVersion, componentUrl, componentVersionUrl, policyRuleList, "");
         return item;
     }
 
@@ -246,12 +246,12 @@ public class ProcessorTestUtil {
         projectVersion.setUrl(projectVersionUrl);
         final String componentUrl = COMPONENT_URL_PREFIX + componentName;
         final String componentVersionUrl = COMPONENT_URL_PREFIX + componentName + VERSIONS_URL_SEGMENT
-                + componentVersion.getVersionName();
+                + componentVersion.versionName;
         final List<PolicyRuleView> policyRuleList = new ArrayList<>();
         policyRuleList.add(createPolicyRule(RULE_NAME_1, DESCRIPTION, CREATED_BY, UPDATED_BY, POLICY_RULE_1_HREF_URL));
         policyRuleList.add(createPolicyRule(RULE_NAME_2, DESCRIPTION, CREATED_BY, UPDATED_BY, POLICY_RULE_2_HREF_URL));
         final PolicyViolationContentItem item = new PolicyViolationContentItem(createdTime, projectVersion,
-                componentName, componentVersion, componentUrl, componentVersionUrl, policyRuleList);
+                componentName, componentVersion, componentUrl, componentVersionUrl, policyRuleList, "");
         return item;
     }
 
@@ -265,9 +265,9 @@ public class ProcessorTestUtil {
         projectVersion.setProjectVersionName(projectVersionName);
         projectVersion.setUrl(projectVersionUrl);
         final String componentVersionUrl = COMPONENT_URL_PREFIX + componentName + VERSIONS_URL_SEGMENT
-                + componentVersion.getVersionName();
+                + componentVersion.versionName;
         final VulnerabilityContentItem item = new VulnerabilityContentItem(createdTime, projectVersion, componentName,
-                componentVersion, componentVersionUrl, added, updated, deleted);
+                componentVersion, componentVersionUrl, added, updated, deleted, "");
         return item;
     }
 

@@ -158,12 +158,12 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
                                 model.put(KEY_TOPICS_LIST, projectsDigest);
                                 model.put(KEY_START_DATE, String.valueOf(startDate));
                                 model.put(KEY_END_DATE, String.valueOf(endDate));
-                                model.put(KEY_USER_FIRST_NAME, userConfig.getUser().getFirstName());
-                                model.put(KEY_USER_LAST_NAME, userConfig.getUser().getLastName());
+                                model.put(KEY_USER_FIRST_NAME, userConfig.getUser().firstName);
+                                model.put(KEY_USER_LAST_NAME, userConfig.getUser().lastName);
                                 model.put(KEY_NOTIFIER_CATEGORY, getCategory().toUpperCase());
                                 model.put(KEY_HUB_SERVER_URL,
                                         hubResponseService.getHubBaseUrl());
-                                final String emailAddress = userConfig.getUser().getEmail();
+                                final String emailAddress = userConfig.getUser().email;
                                 final String templateName = getTemplateName(userConfig);
                                 final EmailTarget emailTarget = new EmailTarget(emailAddress, templateName, model);
                                 getEmailMessagingService().sendEmailMessage(emailTarget, globalConfig);
@@ -265,7 +265,7 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
 
     private String getSingleConfigValue(final UserConfigItem userConfig, final String key) {
         if (userConfig.getConfigMap().containsKey(key)) {
-            final String value = userConfig.getConfigMap().get(key).getValue().get(0);
+            final String value = userConfig.getConfigMap().get(key).value.get(0);
             return value;
         } else {
             return "";
@@ -274,7 +274,7 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
 
     private List<String> getConfigValueList(final UserConfigItem userConfig, final String key) {
         if (userConfig.getConfigMap().containsKey(key)) {
-            final List<String> value = userConfig.getConfigMap().get(key).getValue();
+            final List<String> value = userConfig.getConfigMap().get(key).value;
             return value;
         } else {
             return new ArrayList<>();
