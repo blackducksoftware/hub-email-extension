@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	<Appenders>
+		<Console name="Console">
+			<PatternLayout pattern="%d [%t] %-5p %c - %m%n"/>
+		</Console>
+	</Appenders>
+	<Loggers>
+		<Logger name="org.eclipse.jetty" level="info"/>
+		<Logger name="org.restlet" level="info"/>
+		<Root level="info">
+			<AppenderRef ref="Console"/>
+		</Root>
+	</Loggers>
+</Configuration>

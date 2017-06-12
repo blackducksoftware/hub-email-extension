@@ -27,12 +27,16 @@ import org.restlet.data.Reference;
 import org.restlet.data.Status;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.extension.server.oauth.ExtensionTokenManager;
 import com.blackducksoftware.integration.email.extension.server.oauth.StateUrlProcessor;
 import com.blackducksoftware.integration.exception.IntegrationException;
 
 public class TokenCallbackResource extends OAuthServerResource {
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Get
     public void accept() {
@@ -54,6 +58,7 @@ public class TokenCallbackResource extends OAuthServerResource {
                 tokenManager.exchangeForToken(authorizationCode);
                 getResponse().redirectSeeOther(redirectTo);
             } catch (final IntegrationException | MalformedURLException | ResourceException e) {
+                logger.error("Failed to obtain token from authorization code", e);
                 getResponse().redirectSeeOther(redirectTo);
             }
         } else {

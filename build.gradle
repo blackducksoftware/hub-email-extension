@@ -1,6 +1,5 @@
 buildscript {
     repositories {
-        mavenCentral()
         jcenter()
     }
     dependencies {
@@ -14,7 +13,6 @@ apply plugin: 'maven'
 apply plugin: 'application'
 apply plugin: 'com.bmuschko.docker-remote-api'
 
-import com.bmuschko.gradle.docker.tasks.image.Dockerfile
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 
 tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
@@ -23,9 +21,6 @@ tasks.withType(GroovyCompile) { options.encoding = 'UTF-8' }
 group = 'com.blackducksoftware.integration'
 version = '1.2.0-SNAPSHOT'
 description = ''
-
-String hubDockerImageName = 'hub-email-extension'
-String hubDockerImageVersion = '1.2.0'
 
 mainClassName = 'com.blackducksoftware.integration.email.Application'
 applicationDefaultJvmArgs = [
@@ -53,6 +48,7 @@ dependencies {
 	compile 'org.apache.logging.log4j:log4j-core:2.6.2'
 	runtime 'org.restlet.jse:org.restlet.ext.slf4j:2.3.7'
 	runtime 'org.restlet.jse:org.restlet.ext.jetty:2.3.7'
+	runtime 'org.restlet.jse:org.restlet.ext.gson:2.3.7'
 	
 	compile 'org.apache.commons:commons-lang3:3.4'
 	compile 'commons-io:commons-io:2.5'
@@ -139,41 +135,22 @@ distributions {
     }
 }
 
-task createDockerfile(type:Dockerfile) {
-    dependsOn distTar
-    def labelMap = ['com.blackducksoftware.integration.email.vendor': 'Black Duck Software, Inc.',
-                    'com.blackducksoftware.integration.email.version':"${hubDockerImageVersion}"]
-    def mvString = 
-    
-    destFile = project.file('build/Dockerfile')
-    from 'java:openjdk-8-jre-alpine'
-    
-    label labelMap
-    
-    environmentVariable("EMAIL_EXT_HOME", "/opt/blackduck/extensions/hub-email-extension")
-    environmentVariable("PATH", '$EMAIL_EXT_HOME/bin:$PATH')
-    
-    addFile("distributions/${project.name}-${version}.tar", "/opt/blackduck/extensions/")
-    exposePort 55000
-    
-    runCommand 'set -e'
-    runCommand 'apk update'
-    runCommand 'apk add bash'
-    runCommand 'mv "$EMAIL_EXT_HOME-' + "${version}" + '" "$EMAIL_EXT_HOME"'
-    runCommand 'addgroup -S emailextension'
-    runCommand 'adduser -h "$EMAIL_EXT_HOME" -g emailextension -s /sbin/nologin -G emailextension -S -D -H emailextension'
-    runCommand 'chown -R emailextension:emailextension "$EMAIL_EXT_HOME"'
-    runCommand 'chmod 744 "$EMAIL_EXT_HOME/bin/email_extension.sh"'
-    
-    user 'emailextension'
-    entryPoint('/bin/bash', '-c')
-    defaultCommand('/opt/blackduck/extensions/hub-email-extension/bin/email_extension.sh', 'start')
+task stageDocker(type:Copy) {
+	into "${project.buildDir}/docker"
+	from("${project.projectDir}") {
+		include 'Dockerfile'
+		include 'src/docker/resources/**'
+	}
+	into('build/distributions') {
+		from distTar
+	}
 }
 
 task buildDockerImage(type:DockerBuildImage) {
-    dependsOn createDockerfile
-    inputDir = createDockerfile.destFile.parentFile
-    tag = "${hubDockerImageName}"
+    dependsOn stageDocker
+    inputDir = file("${project.buildDir}/docker")
+    tag = "blackducksoftware/${project.name}:${project.version}"
+    buildArgs = [ 'VERSION': "${project.version}" ]
 }
 
 tasks.processResources.dependsOn modifyExtVersionProperty
