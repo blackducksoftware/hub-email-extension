@@ -30,6 +30,7 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -346,7 +347,7 @@ public class EmailEngine implements IAuthorizedListener {
         try {
             extensionUrl = new URL(baseUrl);
             if (extensionUrl.getHost().equals("localhost")) {
-                final String hostName = HostnameHelper.getMyHostname();
+                final String hostName = Optional.ofNullable(System.getenv("PUBLIC_HUB_WEBSERVER_HOST")).orElseGet(() -> HostnameHelper.getMyHostname());
                 final URL url = new URL(extensionUrl.getProtocol(), hostName, extensionUrl.getPort(), extensionUrl.getFile());
                 baseUrl = url.toString();
             }
