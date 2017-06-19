@@ -153,4 +153,10 @@ task buildDockerImage(type:DockerBuildImage) {
     buildArgs = [ 'VERSION': "${project.version}" ]
 }
 
+task pushImage(type:Exec, dependsOn: [buildDockerImage]) {
+    commandLine "docker", "push", "blackducksoftware/${project.name}:${project.version}"
+}
+
 tasks.processResources.dependsOn modifyExtVersionProperty
+
+task all(dependsOn: [build, buildDockerImage, pushImage]) {}
