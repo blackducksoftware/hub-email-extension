@@ -47,8 +47,7 @@ import com.blackducksoftware.integration.hub.service.HubResponseService;
 
 public class EmailProcessor extends NotificationProcessor<Collection<ProjectData>> {
 
-    public EmailProcessor(final HubResponseService hubResponseService, final VulnerabilityRequestService vulnerabilityRequestService,
-            final MetaService metaService) {
+    public EmailProcessor(final HubResponseService hubResponseService, final VulnerabilityRequestService vulnerabilityRequestService, final MetaService metaService) {
         final MapProcessorCache policyCache = new MapProcessorCache();
         final VulnerabilityCache vulnerabilityCache = new VulnerabilityCache(hubResponseService, vulnerabilityRequestService, metaService);
         getCacheList().add(policyCache);
@@ -56,8 +55,7 @@ public class EmailProcessor extends NotificationProcessor<Collection<ProjectData
         getProcessorMap().put(PolicyViolationContentItem.class, new PolicyViolationProcessor(policyCache, metaService));
         getProcessorMap().put(PolicyViolationClearedContentItem.class, new PolicyViolationClearedProcessor(policyCache, metaService));
         getProcessorMap().put(PolicyOverrideContentItem.class, new PolicyOverrideProcessor(policyCache, metaService));
-        getProcessorMap().put(VulnerabilityContentItem.class,
-                new VulnerabilityProcessor(vulnerabilityCache, metaService));
+        getProcessorMap().put(VulnerabilityContentItem.class, new VulnerabilityProcessor(vulnerabilityCache, metaService));
     }
 
     @Override
@@ -70,8 +68,7 @@ public class EmailProcessor extends NotificationProcessor<Collection<ProjectData
         final Map<String, ProjectDataBuilder> projectDataMap = new LinkedHashMap<>();
         for (final NotificationEvent entry : eventMap) {
             final NotificationEvent event = entry;
-            final NotificationContentItem notificationContent = (NotificationContentItem) event.getDataSet()
-                    .get(NotificationEvent.DATA_SET_KEY_NOTIFICATION_CONTENT);
+            final NotificationContentItem notificationContent = (NotificationContentItem) event.getDataSet().get(NotificationEvent.DATA_SET_KEY_NOTIFICATION_CONTENT);
             final String projectKey = notificationContent.getProjectVersion().getUrl();
             // get category map from the project or create the project data if
             // it doesn't exist
@@ -101,7 +98,6 @@ public class EmailProcessor extends NotificationProcessor<Collection<ProjectData
                 count = (Integer) event.getDataSet().get(ItemTypeEnum.COUNT.name());
             }
             categoryData.incrementItemCount(count);
-            categoryData.addItem(new ItemData(event.getDataSet()));
             categoryData.addItem(new ItemData(event.getDataSet()));
         }
         // build

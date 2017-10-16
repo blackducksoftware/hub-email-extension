@@ -307,30 +307,23 @@ public class EmailEngine implements IAuthorizedListener {
     }
 
     public NotificationDataService createNotificationDataService() {
-        final Logger notificationLogger = LoggerFactory.getLogger(NotificationDataService.class);
-        final ExtensionLogger serviceLogger = new ExtensionLogger(notificationLogger);
-        final NotificationDataService notificationDataService = hubServicesFactory
-                .createNotificationDataService(serviceLogger);
+        final NotificationDataService notificationDataService = hubServicesFactory.createNotificationDataService();
         return notificationDataService;
     }
 
     public RestConnection initRestConnection(final String hubUri) {
         final IntLogger extLogger = new ExtensionLogger(logger);
-        final RestConnection restConnection = new OAuthRestConnection(extLogger, hubServerConfig.getHubUrl(), hubServerConfig.getTimeout(), tokenManager,
-                AccessType.USER);
+        final RestConnection restConnection = new OAuthRestConnection(extLogger, hubServerConfig.getHubUrl(), hubServerConfig.getTimeout(), tokenManager, AccessType.USER);
         return restConnection;
     }
 
     public NotifierManager createNotifierManager() {
         final NotifierManager manager = new NotifierManager();
 
-        final DailyDigestNotifier dailyNotifier = new DailyDigestNotifier(extensionProperties, emailMessagingService, hubServicesFactory,
-                getExtensionInfoData());
+        final DailyDigestNotifier dailyNotifier = new DailyDigestNotifier(extensionProperties, emailMessagingService, hubServicesFactory, getExtensionInfoData());
         final TestEmailNotifier testNotifier = new TestEmailNotifier(extensionProperties, emailMessagingService, hubServicesFactory, getExtensionInfoData());
-        final RealTimeDigestNotifier realTimeNotifier = new RealTimeDigestNotifier(extensionProperties, emailMessagingService, hubServicesFactory,
-                getExtensionInfoData());
-        final CustomDigestNotifier customNotifier = new CustomDigestNotifier(extensionProperties, emailMessagingService, hubServicesFactory,
-                getExtensionInfoData());
+        final RealTimeDigestNotifier realTimeNotifier = new RealTimeDigestNotifier(extensionProperties, emailMessagingService, hubServicesFactory, getExtensionInfoData());
+        final CustomDigestNotifier customNotifier = new CustomDigestNotifier(extensionProperties, emailMessagingService, hubServicesFactory, getExtensionInfoData());
         manager.attach(dailyNotifier);
         manager.attach(realTimeNotifier);
         manager.attach(testNotifier);
@@ -423,10 +416,7 @@ public class EmailEngine implements IAuthorizedListener {
     }
 
     public ExtensionConfigDataService createExtensionConfigDataService() {
-        final Logger extensionServiceLogger = LoggerFactory.getLogger(ExtensionConfigDataService.class);
-        final ExtensionLogger serviceLogger = new ExtensionLogger(extensionServiceLogger);
-        final ExtensionConfigDataService extConfigDataService = hubServicesFactory
-                .createExtensionConfigDataService(serviceLogger);
+        final ExtensionConfigDataService extConfigDataService = hubServicesFactory.createExtensionConfigDataService();
         return extConfigDataService;
     }
 

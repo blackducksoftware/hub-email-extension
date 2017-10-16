@@ -42,16 +42,19 @@ public class RestletApplication extends AbstractOAuthApplication {
 
     @Override
     public void additionalContextConfig() {
-        getContext().getAttributes().put(ExtensionConfigManager.CONTEXT_ATTRIBUTE_KEY, extConfigManager);
+        getContext().getAttributes().put(ExtensionConfigManager.CONTEXT_ATTRIBUTE_KEY, getExtConfigManager());
     }
 
     @Override
     public void additionalRouterConfig(final Router router) {
-        router.attach("/",
-                new Redirector(getContext(), ExtensionServerConstants.EXTENSION_INFO, Redirector.MODE_CLIENT_FOUND));
-
+        final String baseURL = getExtConfigManager().getExtensionInfo().getBaseUrl();
+        router.attach("/", new Redirector(getContext(), baseURL + ExtensionServerConstants.EXTENSION_INFO, Redirector.MODE_CLIENT_FOUND));
         router.attach(ExtensionServerConstants.EXTENSION_INFO, ExtensionInfoServerResource.class);
         router.attach(ExtensionServerConstants.GLOBAL_CONFIG_VALUES, GlobalConfigServerResource.class);
         router.attach(ExtensionServerConstants.USER_CONFIG_VALUES, UserConfigServerResource.class);
+    }
+
+    public ExtensionConfigManager getExtConfigManager() {
+        return extConfigManager;
     }
 }

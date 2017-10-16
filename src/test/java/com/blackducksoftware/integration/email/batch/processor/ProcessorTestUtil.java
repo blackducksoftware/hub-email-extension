@@ -23,7 +23,6 @@ package com.blackducksoftware.integration.email.batch.processor;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -36,11 +35,11 @@ import com.blackducksoftware.integration.hub.dataservice.notification.model.Poli
 import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyViolationClearedContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyViolationContentItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.model.VulnerabilityContentItem;
-import com.blackducksoftware.integration.hub.meta.MetaAllowEnum;
 import com.blackducksoftware.integration.hub.model.enumeration.VulnerabilitySeverityEnum;
 import com.blackducksoftware.integration.hub.model.view.ComponentVersionView;
 import com.blackducksoftware.integration.hub.model.view.PolicyRuleView;
 import com.blackducksoftware.integration.hub.model.view.VulnerabilityView;
+import com.blackducksoftware.integration.hub.model.view.components.MetaView;
 import com.blackducksoftware.integration.hub.model.view.components.VulnerabilitySourceQualifiedId;
 import com.blackducksoftware.integration.util.ObjectFactory;
 import com.google.gson.Gson;
@@ -123,12 +122,9 @@ public class ProcessorTestUtil {
 
     public static final String COMPONENT_VERSION_ID = "component_version_id";
 
-    public static final List<MetaAllowEnum> ALLOW_LIST = Collections.emptyList();
-
     public final JsonParser jsonParser = new JsonParser();
 
-    public List<VulnerabilityView> createVulnerabiltyItemList(final List<VulnerabilitySourceQualifiedId> vulnSourceList, final Gson gson)
-            throws IntegrationException {
+    public List<VulnerabilityView> createVulnerabiltyItemList(final List<VulnerabilitySourceQualifiedId> vulnSourceList, final Gson gson) throws IntegrationException {
         final List<VulnerabilityView> vulnerabilityList = new ArrayList<>(vulnSourceList.size());
         for (final VulnerabilitySourceQualifiedId vulnSource : vulnSourceList) {
             final String vulnId = vulnSource.vulnerabilityId;
@@ -178,8 +174,7 @@ public class ProcessorTestUtil {
         return view;
     }
 
-    public PolicyRuleView createPolicyRule(final String name, final String description, final String createdBy, final String updatedBy, final String href)
-            throws IntegrationException {
+    public PolicyRuleView createPolicyRule(final String name, final String description, final String createdBy, final String updatedBy, final String href) throws IntegrationException {
         final Map<String, Object> fieldMap = new HashMap<>();
         fieldMap.put("name", name);
         fieldMap.put("description", description);
@@ -191,6 +186,9 @@ public class ProcessorTestUtil {
         fieldMap.put("updatedAt", new Date());
         fieldMap.put("updatedBy", updatedBy);
         fieldMap.put("json", createPolicyRuleJSon(href));
+        final MetaView metaView = new MetaView();
+        metaView.href = href;
+        fieldMap.put("meta", metaView);
         return ObjectFactory.INSTANCE.createPopulatedInstance(PolicyRuleView.class, fieldMap);
     }
 
@@ -198,8 +196,7 @@ public class ProcessorTestUtil {
         return "{ \"_meta\": { \"href\": \"" + href + "\" }}";
     }
 
-    public PolicyOverrideContentItem createPolicyOverride(final Date createdTime, final String projectName,
-            final String projectVersionName, final String componentName, final ComponentVersionView componentVersion)
+    public PolicyOverrideContentItem createPolicyOverride(final Date createdTime, final String projectName, final String projectVersionName, final String componentName, final ComponentVersionView componentVersion)
             throws URISyntaxException, IntegrationException {
         final String projectVersionUrl = PROJECT_VERSION_URL_PREFIX + projectName + PROJECT_VERSION_URL_SEGMENT + projectVersionName;
         final ProjectVersionModel projectVersion = new ProjectVersionModel();
@@ -207,18 +204,15 @@ public class ProcessorTestUtil {
         projectVersion.setProjectVersionName(projectVersionName);
         projectVersion.setUrl(projectVersionUrl);
         final String componentUrl = COMPONENT_URL_PREFIX + componentName;
-        final String componentVersionUrl = COMPONENT_URL_PREFIX + componentName + VERSIONS_URL_SEGMENT
-                + componentVersion.versionName;
+        final String componentVersionUrl = COMPONENT_URL_PREFIX + componentName + VERSIONS_URL_SEGMENT + componentVersion.versionName;
         final List<PolicyRuleView> policyRuleList = new ArrayList<>();
         policyRuleList.add(createPolicyRule(RULE_NAME_1, DESCRIPTION, CREATED_BY, UPDATED_BY, POLICY_RULE_1_HREF_URL));
         policyRuleList.add(createPolicyRule(RULE_NAME_2, DESCRIPTION, CREATED_BY, UPDATED_BY, POLICY_RULE_2_HREF_URL));
-        final PolicyOverrideContentItem item = new PolicyOverrideContentItem(createdTime, projectVersion, componentName,
-                componentVersion, componentUrl, componentVersionUrl, policyRuleList, FIRST_NAME, LAST_NAME, "");
+        final PolicyOverrideContentItem item = new PolicyOverrideContentItem(createdTime, projectVersion, componentName, componentVersion, componentUrl, componentVersionUrl, policyRuleList, FIRST_NAME, LAST_NAME, "");
         return item;
     }
 
-    public PolicyViolationClearedContentItem createPolicyCleared(final Date createdTime, final String projectName,
-            final String projectVersionName, final String componentName, final ComponentVersionView componentVersion)
+    public PolicyViolationClearedContentItem createPolicyCleared(final Date createdTime, final String projectName, final String projectVersionName, final String componentName, final ComponentVersionView componentVersion)
             throws URISyntaxException, IntegrationException {
         final String projectVersionUrl = PROJECT_VERSION_URL_PREFIX + projectName + PROJECT_VERSION_URL_SEGMENT + projectVersionName;
         final ProjectVersionModel projectVersion = new ProjectVersionModel();
@@ -226,18 +220,15 @@ public class ProcessorTestUtil {
         projectVersion.setProjectVersionName(projectVersionName);
         projectVersion.setUrl(projectVersionUrl);
         final String componentUrl = COMPONENT_URL_PREFIX + componentName;
-        final String componentVersionUrl = COMPONENT_URL_PREFIX + componentName + VERSIONS_URL_SEGMENT
-                + componentVersion.versionName;
+        final String componentVersionUrl = COMPONENT_URL_PREFIX + componentName + VERSIONS_URL_SEGMENT + componentVersion.versionName;
         final List<PolicyRuleView> policyRuleList = new ArrayList<>();
         policyRuleList.add(createPolicyRule(RULE_NAME_1, DESCRIPTION, CREATED_BY, UPDATED_BY, POLICY_RULE_1_HREF_URL));
         policyRuleList.add(createPolicyRule(RULE_NAME_2, DESCRIPTION, CREATED_BY, UPDATED_BY, POLICY_RULE_2_HREF_URL));
-        final PolicyViolationClearedContentItem item = new PolicyViolationClearedContentItem(createdTime,
-                projectVersion, componentName, componentVersion, componentUrl, componentVersionUrl, policyRuleList, "");
+        final PolicyViolationClearedContentItem item = new PolicyViolationClearedContentItem(createdTime, projectVersion, componentName, componentVersion, componentUrl, componentVersionUrl, policyRuleList, "");
         return item;
     }
 
-    public PolicyViolationContentItem createPolicyViolation(final Date createdTime, final String projectName,
-            final String projectVersionName, final String componentName, final ComponentVersionView componentVersion)
+    public PolicyViolationContentItem createPolicyViolation(final Date createdTime, final String projectName, final String projectVersionName, final String componentName, final ComponentVersionView componentVersion)
             throws URISyntaxException, IntegrationException {
         final String projectVersionUrl = PROJECT_VERSION_URL_PREFIX + projectName + PROJECT_VERSION_URL_SEGMENT + projectVersionName;
         final ProjectVersionModel projectVersion = new ProjectVersionModel();
@@ -245,29 +236,23 @@ public class ProcessorTestUtil {
         projectVersion.setProjectVersionName(projectVersionName);
         projectVersion.setUrl(projectVersionUrl);
         final String componentUrl = COMPONENT_URL_PREFIX + componentName;
-        final String componentVersionUrl = COMPONENT_URL_PREFIX + componentName + VERSIONS_URL_SEGMENT
-                + componentVersion.versionName;
+        final String componentVersionUrl = COMPONENT_URL_PREFIX + componentName + VERSIONS_URL_SEGMENT + componentVersion.versionName;
         final List<PolicyRuleView> policyRuleList = new ArrayList<>();
         policyRuleList.add(createPolicyRule(RULE_NAME_1, DESCRIPTION, CREATED_BY, UPDATED_BY, POLICY_RULE_1_HREF_URL));
         policyRuleList.add(createPolicyRule(RULE_NAME_2, DESCRIPTION, CREATED_BY, UPDATED_BY, POLICY_RULE_2_HREF_URL));
-        final PolicyViolationContentItem item = new PolicyViolationContentItem(createdTime, projectVersion,
-                componentName, componentVersion, componentUrl, componentVersionUrl, policyRuleList, "");
+        final PolicyViolationContentItem item = new PolicyViolationContentItem(createdTime, projectVersion, componentName, componentVersion, componentUrl, componentVersionUrl, policyRuleList, "");
         return item;
     }
 
-    public VulnerabilityContentItem createVulnerability(final Date createdTime, final String projectName,
-            final String projectVersionName, final String componentName, final ComponentVersionView componentVersion,
-            final List<VulnerabilitySourceQualifiedId> added, final List<VulnerabilitySourceQualifiedId> updated,
-            final List<VulnerabilitySourceQualifiedId> deleted) throws URISyntaxException {
+    public VulnerabilityContentItem createVulnerability(final Date createdTime, final String projectName, final String projectVersionName, final String componentName, final ComponentVersionView componentVersion,
+            final List<VulnerabilitySourceQualifiedId> added, final List<VulnerabilitySourceQualifiedId> updated, final List<VulnerabilitySourceQualifiedId> deleted) throws URISyntaxException {
         final String projectVersionUrl = PROJECT_VERSION_URL_PREFIX + projectName + PROJECT_VERSION_URL_SEGMENT + projectVersionName;
         final ProjectVersionModel projectVersion = new ProjectVersionModel();
         projectVersion.setProjectName(projectName);
         projectVersion.setProjectVersionName(projectVersionName);
         projectVersion.setUrl(projectVersionUrl);
-        final String componentVersionUrl = COMPONENT_URL_PREFIX + componentName + VERSIONS_URL_SEGMENT
-                + componentVersion.versionName;
-        final VulnerabilityContentItem item = new VulnerabilityContentItem(createdTime, projectVersion, componentName,
-                componentVersion, componentVersionUrl, added, updated, deleted, "");
+        final String componentVersionUrl = COMPONENT_URL_PREFIX + componentName + VERSIONS_URL_SEGMENT + componentVersion.versionName;
+        final VulnerabilityContentItem item = new VulnerabilityContentItem(createdTime, projectVersion, componentName, componentVersion, componentVersionUrl, added, updated, deleted, "");
         return item;
     }
 

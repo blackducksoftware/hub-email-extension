@@ -25,9 +25,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TimerTask;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
@@ -35,10 +32,8 @@ import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.dataservice.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.model.view.ExternalExtensionConfigValueView;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
-import com.blackducksoftware.integration.log.Slf4jIntLogger;
 
 public abstract class AbstractNotifier extends TimerTask {
-    private final Logger logger = LoggerFactory.getLogger(AbstractNotifier.class);
 
     private final ExtensionProperties extensionProperties;
 
@@ -52,19 +47,17 @@ public abstract class AbstractNotifier extends TimerTask {
 
     private final ExtensionInfo extensionInfo;
 
-    public AbstractNotifier(final ExtensionProperties extensionProperties,
-            final EmailMessagingService emailMessagingService, final HubServicesFactory hubServicesFactory, final ExtensionInfo extensionInfo) {
+    public AbstractNotifier(final ExtensionProperties extensionProperties, final EmailMessagingService emailMessagingService, final HubServicesFactory hubServicesFactory, final ExtensionInfo extensionInfo) {
         this.extensionProperties = extensionProperties;
         this.emailMessagingService = emailMessagingService;
         this.hubServicesFactory = hubServicesFactory;
         this.extensionInfo = extensionInfo;
-        extensionConfigDataService = hubServicesFactory.createExtensionConfigDataService(new Slf4jIntLogger(logger));
+        extensionConfigDataService = hubServicesFactory.createExtensionConfigDataService();
 
     }
 
     public ExtensionProperties createPropertiesFromGlobalConfig() throws IntegrationException {
-        final Map<String, ExternalExtensionConfigValueView> globalMap = extensionConfigDataService
-                .getGlobalConfigMap(getHubExtensionUri());
+        final Map<String, ExternalExtensionConfigValueView> globalMap = extensionConfigDataService.getGlobalConfigMap(getHubExtensionUri());
         final Properties globalProperties = new Properties();
         for (final Map.Entry<String, ExternalExtensionConfigValueView> entry : globalMap.entrySet()) {
             globalProperties.put(entry.getKey(), entry.getValue().value.get(0));
