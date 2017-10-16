@@ -31,7 +31,11 @@ then
 fi
 
 #Workaround as the hub refresh token is not usuable
-rm $EMAIL_EXT_HOME/config/oauth.properties
+if [ -f $EMAIL_EXT_HOME/config/oauth.properties ] 
+then
+	rm $EMAIL_EXT_HOME/config/oauth.properties
+fi
+
 keytool -printcert -rfc -sslserver "$PUBLIC_HUB_WEBSERVER_HOST:$PUBLIC_HUB_WEBSERVER_PORT" -v | keytool -importcert -keystore "$JAVA_HOME/lib/security/cacerts" -storepass changeit -alias publichubwebserver -noprompt
 
 echo "Completed importing Hub Certificate"
