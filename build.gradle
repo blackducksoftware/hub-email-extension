@@ -140,6 +140,7 @@ task stageDocker(type:Copy) {
 	from("${project.projectDir}") {
 		include 'Dockerfile'
 		include 'src/docker/resources/**'
+		include 'docker-entrypoint.sh'
 	}
 	into('build/distributions') {
 		from distTar
