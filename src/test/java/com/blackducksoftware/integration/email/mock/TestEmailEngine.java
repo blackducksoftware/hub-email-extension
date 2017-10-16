@@ -93,18 +93,15 @@ public class TestEmailEngine extends EmailEngine {
         HubServicesFactory hubServicesFactory;
         hubServicesFactory = new HubServicesFactory(getRestConnection());
         final IntLogger hubLogger = new Slf4jIntLogger(logger);
-        return new MockNotificationDataService(hubLogger, hubServicesFactory.createHubResponseService(),
-                hubServicesFactory.createNotificationRequestService(hubLogger),
-                hubServicesFactory.createProjectVersionRequestService(hubLogger), hubServicesFactory.createPolicyRequestService(),
-                hubServicesFactory.createMetaService(hubLogger));
+        return new MockNotificationDataService(hubLogger, hubServicesFactory.createHubResponseService(), hubServicesFactory.createNotificationRequestService(), hubServicesFactory.createProjectVersionRequestService(),
+                hubServicesFactory.createPolicyRequestService(), hubServicesFactory.createMetaService());
 
     }
 
     @Override
     public NotifierManager createNotifierManager() {
         final NotifierManager manager = new NotifierManager();
-        final TestDigestNotifier digestNotifier = new TestDigestNotifier(getExtensionProperties(), getEmailMessagingService(), getHubServicesFactory(),
-                getExtensionInfoData());
+        final TestDigestNotifier digestNotifier = new TestDigestNotifier(getExtensionProperties(), getEmailMessagingService(), getHubServicesFactory(), getExtensionInfoData());
         manager.attach(digestNotifier);
         return manager;
     }

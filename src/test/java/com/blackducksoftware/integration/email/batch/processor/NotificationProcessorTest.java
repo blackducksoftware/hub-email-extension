@@ -40,7 +40,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.blackducksoftware.integration.email.mock.MockLogger;
 import com.blackducksoftware.integration.email.mock.MockRestConnection;
 import com.blackducksoftware.integration.hub.api.item.MetaService;
 import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityRequestService;
@@ -51,6 +50,8 @@ import com.blackducksoftware.integration.hub.dataservice.notification.model.Poli
 import com.blackducksoftware.integration.hub.dataservice.notification.model.VulnerabilityContentItem;
 import com.blackducksoftware.integration.hub.model.view.ComponentVersionView;
 import com.blackducksoftware.integration.hub.model.view.VulnerabilityView;
+import com.blackducksoftware.integration.hub.model.view.components.LinkView;
+import com.blackducksoftware.integration.hub.model.view.components.MetaView;
 import com.blackducksoftware.integration.hub.model.view.components.VulnerabilitySourceQualifiedId;
 import com.blackducksoftware.integration.hub.notification.processor.ItemTypeEnum;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
@@ -59,7 +60,6 @@ import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.service.HubResponseService;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
 import com.blackducksoftware.integration.log.IntBufferedLogger;
-import com.blackducksoftware.integration.log.IntLogger;
 import com.google.gson.Gson;
 
 public class NotificationProcessorTest {
@@ -72,10 +72,9 @@ public class NotificationProcessorTest {
 
     @Before
     public void init() throws Exception {
-        final RestConnection restConnection = new MockRestConnection(new MockLogger(), null);
+        final RestConnection restConnection = new MockRestConnection(new IntBufferedLogger(), null);
         final HubServicesFactory factory = new HubServicesFactory(restConnection);
-        final IntLogger logger = new IntBufferedLogger();
-        metaService = factory.createMetaService(logger);
+        metaService = factory.createMetaService();
         gson = restConnection.gson;
     }
 
@@ -89,6 +88,7 @@ public class NotificationProcessorTest {
     public MockProcessor createMockedNotificationProcessor(final List<VulnerabilityView> vulnerabilityList) throws Exception {
         final ComponentVersionView compVersion = Mockito.mock(ComponentVersionView.class);
         compVersion.json = createComponentJson();
+        compVersion.meta = createMetaView();
         final VulnerabilityRequestService vulnerabilityRequestService = Mockito.mock(VulnerabilityRequestService.class);
         final HubResponseService hubResponseService = Mockito.mock(HubResponseService.class);
         Mockito.when(hubResponseService.getItem(Mockito.anyString(), Mockito.eq(ComponentVersionView.class))).thenReturn(compVersion);
@@ -98,13 +98,23 @@ public class NotificationProcessorTest {
     }
 
     private String createComponentJson() {
-        return "{ \"_meta\": { \"href\": \"" + ProcessorTestUtil.COMPONENT_VERSION_URL + "\","
-                + "\"links\": [ {"
-                + "\"rel\": \"vulnerabilities\","
-                + "\"href\": \"" + ProcessorTestUtil.COMPONENT_VERSION_URL + "\"},{"
-                + "\"rel\":\"vulnerable-components\","
-                + "\"href\": \"" + ProcessorTestUtil.COMPONENT_VERSION_URL + "\""
-                + "}]}}";
+        return "{ \"_meta\": { \"href\": \"" + ProcessorTestUtil.COMPONENT_VERSION_URL + "\"," + "\"links\": [ {" + "\"rel\": \"vulnerabilities\"," + "\"href\": \"" + ProcessorTestUtil.COMPONENT_VERSION_URL + "\"},{"
+                + "\"rel\":\"vulnerable-components\"," + "\"href\": \"" + ProcessorTestUtil.COMPONENT_VERSION_URL + "\"" + "}]}}";
+    }
+
+    private MetaView createMetaView() {
+        final MetaView metaView = new MetaView();
+        metaView.href = ProcessorTestUtil.COMPONENT_VERSION_URL;
+        metaView.links = new ArrayList<>();
+        final LinkView vulnerabilities = new LinkView();
+        vulnerabilities.rel = "vulnerabilities";
+        vulnerabilities.href = ProcessorTestUtil.COMPONENT_VERSION_URL;
+        metaView.links.add(vulnerabilities);
+        final LinkView vulnerableComps = new LinkView();
+        vulnerableComps.rel = "vulnerable-components";
+        vulnerableComps.href = ProcessorTestUtil.COMPONENT_VERSION_URL;
+        metaView.links.add(vulnerableComps);
+        return metaView;
     }
 
     private void assertPolicyDataValid(final Collection<NotificationEvent> eventList, final NotificationCategoryEnum categoryType) {
@@ -127,9 +137,7 @@ public class NotificationProcessorTest {
 
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         componentVersion.versionName = ProcessorTestUtil.VERSION;
-        notifications.add(
-                testUtil.createPolicyViolation(new Date(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT,
-                        componentVersion));
+        notifications.add(testUtil.createPolicyViolation(new Date(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion));
         final Collection<NotificationEvent> eventList = createMockedNotificationProcessor().process(notifications);
 
         assertPolicyDataValid(eventList, NotificationCategoryEnum.POLICY_VIOLATION);
@@ -140,9 +148,7 @@ public class NotificationProcessorTest {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         componentVersion.versionName = ProcessorTestUtil.VERSION;
-        notifications.add(
-                testUtil.createPolicyOverride(new Date(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT,
-                        componentVersion));
+        notifications.add(testUtil.createPolicyOverride(new Date(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion));
         final Collection<NotificationEvent> eventList = createMockedNotificationProcessor().process(notifications);
         assertFalse(eventList.isEmpty());
         assertPolicyDataValid(eventList, NotificationCategoryEnum.POLICY_VIOLATION_OVERRIDE);
@@ -153,9 +159,7 @@ public class NotificationProcessorTest {
         final SortedSet<NotificationContentItem> notifications = new TreeSet<>();
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         componentVersion.versionName = ProcessorTestUtil.VERSION;
-        notifications.add(
-                testUtil.createPolicyCleared(new Date(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT,
-                        componentVersion));
+        notifications.add(testUtil.createPolicyCleared(new Date(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion));
         final Collection<NotificationEvent> eventList = createMockedNotificationProcessor().process(notifications);
         assertFalse(eventList.isEmpty());
         assertPolicyDataValid(eventList, NotificationCategoryEnum.POLICY_VIOLATION_CLEARED);
@@ -167,12 +171,10 @@ public class NotificationProcessorTest {
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         componentVersion.versionName = ProcessorTestUtil.VERSION;
         DateTime dateTime = new DateTime();
-        final PolicyViolationContentItem policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
-                ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
+        final PolicyViolationContentItem policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
         notifications.add(policyViolation);
         dateTime = dateTime.plusSeconds(1);
-        final PolicyOverrideContentItem policyOverride = testUtil.createPolicyOverride(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
-                ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
+        final PolicyOverrideContentItem policyOverride = testUtil.createPolicyOverride(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
         notifications.add(policyOverride);
         final Collection<NotificationEvent> eventList = createMockedNotificationProcessor().process(notifications);
         assertTrue(eventList.isEmpty());
@@ -184,12 +186,10 @@ public class NotificationProcessorTest {
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         componentVersion.versionName = ProcessorTestUtil.VERSION;
         DateTime dateTime = new DateTime();
-        final PolicyViolationContentItem policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
-                ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
+        final PolicyViolationContentItem policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
         notifications.add(policyViolation);
         dateTime = dateTime.plusSeconds(1);
-        final PolicyViolationClearedContentItem policyCleared = testUtil.createPolicyCleared(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
-                ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
+        final PolicyViolationClearedContentItem policyCleared = testUtil.createPolicyCleared(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
         notifications.add(policyCleared);
         final Collection<NotificationEvent> eventList = createMockedNotificationProcessor().process(notifications);
         assertTrue(eventList.isEmpty());
@@ -201,18 +201,14 @@ public class NotificationProcessorTest {
         DateTime dateTime = new DateTime();
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         componentVersion.versionName = ProcessorTestUtil.VERSION;
-        PolicyViolationContentItem policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
-                ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
+        PolicyViolationContentItem policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
         notifications.add(policyViolation);
         dateTime = dateTime.plusSeconds(1);
 
-        final PolicyViolationClearedContentItem policyCleared = testUtil.createPolicyCleared(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
-                ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
+        final PolicyViolationClearedContentItem policyCleared = testUtil.createPolicyCleared(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
         notifications.add(policyCleared);
         dateTime = dateTime.plusSeconds(1);
-        policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME,
-                ProcessorTestUtil.COMPONENT,
-                componentVersion);
+        policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
         notifications.add(policyViolation);
         final Collection<NotificationEvent> eventList = createMockedNotificationProcessor().process(notifications);
         assertPolicyDataValid(eventList, NotificationCategoryEnum.POLICY_VIOLATION);
@@ -224,17 +220,13 @@ public class NotificationProcessorTest {
         DateTime dateTime = new DateTime();
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         componentVersion.versionName = ProcessorTestUtil.VERSION;
-        PolicyViolationContentItem policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
-                ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
+        PolicyViolationContentItem policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
         notifications.add(policyViolation);
         dateTime = dateTime.plusSeconds(1);
-        final PolicyOverrideContentItem policyCleared = testUtil.createPolicyOverride(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
-                ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
+        final PolicyOverrideContentItem policyCleared = testUtil.createPolicyOverride(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
         notifications.add(policyCleared);
         dateTime = dateTime.plusSeconds(1);
-        policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME,
-                ProcessorTestUtil.COMPONENT,
-                componentVersion);
+        policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
         notifications.add(policyViolation);
         final Collection<NotificationEvent> eventList = createMockedNotificationProcessor().process(notifications);
         assertPolicyDataValid(eventList, NotificationCategoryEnum.POLICY_VIOLATION);
@@ -246,26 +238,19 @@ public class NotificationProcessorTest {
         DateTime dateTime = new DateTime();
         final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
         componentVersion.versionName = ProcessorTestUtil.VERSION;
-        PolicyViolationContentItem policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
-                ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
+        PolicyViolationContentItem policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
         notifications.add(policyViolation);
         dateTime = dateTime.plusSeconds(1);
-        policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME,
-                ProcessorTestUtil.COMPONENT,
-                componentVersion);
+        policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
         notifications.add(policyViolation);
         dateTime = dateTime.plusSeconds(1);
-        final PolicyOverrideContentItem policyOverride = testUtil.createPolicyOverride(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
-                ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
+        final PolicyOverrideContentItem policyOverride = testUtil.createPolicyOverride(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
         notifications.add(policyOverride);
         dateTime = dateTime.plusSeconds(1);
-        policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME,
-                ProcessorTestUtil.COMPONENT,
-                componentVersion);
+        policyViolation = testUtil.createPolicyViolation(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
         notifications.add(policyViolation);
         dateTime = dateTime.plusSeconds(1);
-        final PolicyViolationClearedContentItem policyCleared = testUtil.createPolicyCleared(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
-                ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
+        final PolicyViolationClearedContentItem policyCleared = testUtil.createPolicyCleared(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion);
         notifications.add(policyCleared);
         final Collection<NotificationEvent> eventList = createMockedNotificationProcessor().process(notifications);
         assertPolicyDataValid(eventList, NotificationCategoryEnum.POLICY_VIOLATION);
@@ -283,9 +268,8 @@ public class NotificationProcessorTest {
         final List<VulnerabilityView> vulnerabilityList = testUtil.createVulnerabiltyItemList(vulnerabilities, gson);
         final DateTime dateTime = new DateTime();
         final List<VulnerabilitySourceQualifiedId> emptyVulnSourceList = Collections.emptyList();
-        final VulnerabilityContentItem vulnerability = testUtil.createVulnerability(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
-                ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion, vulnerabilities, emptyVulnSourceList,
-                emptyVulnSourceList);
+        final VulnerabilityContentItem vulnerability = testUtil.createVulnerability(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion, vulnerabilities,
+                emptyVulnSourceList, emptyVulnSourceList);
         notifications.add(vulnerability);
         final Collection<NotificationEvent> eventList = createMockedNotificationProcessor(vulnerabilityList).process(notifications);
 
@@ -309,9 +293,8 @@ public class NotificationProcessorTest {
 
         final DateTime dateTime = new DateTime();
         final List<VulnerabilitySourceQualifiedId> emptyVulnSourceList = Collections.emptyList();
-        final VulnerabilityContentItem vulnerability = testUtil.createVulnerability(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
-                ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion, emptyVulnSourceList, vulnerabilities,
-                emptyVulnSourceList);
+        final VulnerabilityContentItem vulnerability = testUtil.createVulnerability(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion,
+                emptyVulnSourceList, vulnerabilities, emptyVulnSourceList);
         notifications.add(vulnerability);
         final Collection<NotificationEvent> eventList = createMockedNotificationProcessor(vulnerabilityList).process(notifications);
 
@@ -334,10 +317,8 @@ public class NotificationProcessorTest {
 
         final DateTime dateTime = new DateTime();
         final List<VulnerabilitySourceQualifiedId> emptyVulnSourceList = Collections.emptyList();
-        final VulnerabilityContentItem vulnerability = testUtil.createVulnerability(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
-                ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion, emptyVulnSourceList,
-                emptyVulnSourceList,
-                vulnerabilities);
+        final VulnerabilityContentItem vulnerability = testUtil.createVulnerability(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion,
+                emptyVulnSourceList, emptyVulnSourceList, vulnerabilities);
         notifications.add(vulnerability);
         final Collection<NotificationEvent> eventList = createMockedNotificationProcessor().process(notifications);
         assertTrue(eventList.isEmpty());
@@ -355,9 +336,8 @@ public class NotificationProcessorTest {
 
         final DateTime dateTime = new DateTime();
         final List<VulnerabilitySourceQualifiedId> emptyVulnSourceList = Collections.emptyList();
-        final VulnerabilityContentItem vulnerability = testUtil.createVulnerability(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
-                ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion, vulnerabilities, emptyVulnSourceList,
-                vulnerabilities);
+        final VulnerabilityContentItem vulnerability = testUtil.createVulnerability(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion, vulnerabilities,
+                emptyVulnSourceList, vulnerabilities);
         notifications.add(vulnerability);
         final Collection<NotificationEvent> eventList = createMockedNotificationProcessor().process(notifications);
         assertTrue(eventList.isEmpty());
@@ -391,8 +371,8 @@ public class NotificationProcessorTest {
         deleted.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID2));
         deleted.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID1));
         dateTime = dateTime.plusSeconds(1);
-        final VulnerabilityContentItem vulnerability = testUtil.createVulnerability(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
-                ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion, added, updated, deleted);
+        final VulnerabilityContentItem vulnerability = testUtil.createVulnerability(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion, added, updated,
+                deleted);
         notifications.add(vulnerability);
 
         final Collection<NotificationEvent> eventList = createMockedNotificationProcessor(vulnerabilityList).process(notifications);
@@ -434,8 +414,8 @@ public class NotificationProcessorTest {
         deleted1.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID2));
         deleted1.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID1));
         dateTime = dateTime.plusSeconds(1);
-        final VulnerabilityContentItem vulnerability = testUtil.createVulnerability(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
-                ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion, added1, updated1, deleted1);
+        final VulnerabilityContentItem vulnerability = testUtil.createVulnerability(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion, added1, updated1,
+                deleted1);
         notifications.add(vulnerability);
 
         final List<VulnerabilitySourceQualifiedId> added2 = new LinkedList<>();
@@ -455,8 +435,8 @@ public class NotificationProcessorTest {
         deleted1.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID2));
         deleted1.add(testUtil.createVulnerabilitySourceId(ProcessorTestUtil.VULN_SOURCE, ProcessorTestUtil.LOW_VULN_ID1));
         dateTime = dateTime.plusSeconds(1);
-        final VulnerabilityContentItem vulnerability2 = testUtil.createVulnerability(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME,
-                ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion, added2, updated2, deleted2);
+        final VulnerabilityContentItem vulnerability2 = testUtil.createVulnerability(dateTime.toDate(), ProcessorTestUtil.PROJECT_NAME, ProcessorTestUtil.PROJECT_VERSION_NAME, ProcessorTestUtil.COMPONENT, componentVersion, added2, updated2,
+                deleted2);
         notifications.add(vulnerability2);
 
         final Collection<NotificationEvent> eventList = createMockedNotificationProcessor(vulnerabilityList).process(notifications);

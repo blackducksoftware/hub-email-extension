@@ -37,7 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.integration.email.EmailExtensionConstants;
-import com.blackducksoftware.integration.email.ExtensionLogger;
 import com.blackducksoftware.integration.email.batch.processor.EmailProcessor;
 import com.blackducksoftware.integration.email.extension.config.ExtensionInfo;
 import com.blackducksoftware.integration.email.model.DateRange;
@@ -46,23 +45,20 @@ import com.blackducksoftware.integration.email.model.ExtensionProperties;
 import com.blackducksoftware.integration.email.model.batch.CategoryData;
 import com.blackducksoftware.integration.email.model.batch.ProjectData;
 import com.blackducksoftware.integration.email.service.EmailMessagingService;
-import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.api.item.MetaService;
-import com.blackducksoftware.integration.hub.api.nonpublic.HubVersionRequestService;
 import com.blackducksoftware.integration.hub.api.vulnerability.VulnerabilityRequestService;
-import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
 import com.blackducksoftware.integration.hub.dataservice.extension.item.UserConfigItem;
 import com.blackducksoftware.integration.hub.dataservice.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.dataservice.notification.NotificationResults;
 import com.blackducksoftware.integration.hub.dataservice.notification.model.NotificationContentItem;
 import com.blackducksoftware.integration.hub.dataservice.parallel.ParallelResourceProcessorResults;
 import com.blackducksoftware.integration.hub.dataservice.phonehome.PhoneHomeDataService;
-import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.model.view.UserView;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
-import com.blackducksoftware.integration.hub.phonehome.IntegrationInfo;
 import com.blackducksoftware.integration.hub.service.HubResponseService;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
+import com.blackducksoftware.integration.phonehome.PhoneHomeRequestBody;
+import com.blackducksoftware.integration.phonehome.enums.ThirdPartyName;
 
 public abstract class AbstractDigestNotifier extends IntervalNotifier {
     private static final String KEY_HUB_SERVER_URL = "hub_server_url";
@@ -99,19 +95,13 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
 
     private final PhoneHomeDataService phoneHomeService;
 
-    private final HubVersionRequestService versionService;
-
-    public AbstractDigestNotifier(final ExtensionProperties extensionProperties,
-            final EmailMessagingService emailMessagingService, final HubServicesFactory hubServicesFactory, final ExtensionInfo extensionInfoData) {
+    public AbstractDigestNotifier(final ExtensionProperties extensionProperties, final EmailMessagingService emailMessagingService, final HubServicesFactory hubServicesFactory, final ExtensionInfo extensionInfoData) {
         super(extensionProperties, emailMessagingService, hubServicesFactory, extensionInfoData);
-        final Logger logger = LoggerFactory.getLogger(NotificationDataService.class);
-        final ExtensionLogger extLogger = new ExtensionLogger(logger);
         hubResponseService = hubServicesFactory.createHubResponseService();
-        notificationDataService = hubServicesFactory.createNotificationDataService(extLogger);
+        notificationDataService = hubServicesFactory.createNotificationDataService();
         vulnerabilityRequestService = hubServicesFactory.createVulnerabilityRequestService();
-        metaService = hubServicesFactory.createMetaService(extLogger);
-        this.phoneHomeService = hubServicesFactory.createPhoneHomeDataService(extLogger);
-        this.versionService = hubServicesFactory.createHubVersionRequestService();
+        metaService = hubServicesFactory.createMetaService();
+        this.phoneHomeService = hubServicesFactory.createPhoneHomeDataService();
     }
 
     public abstract String getCategory();
@@ -121,8 +111,7 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
         try {
             logger.info("Starting iteration of {} digest email notifier", getName());
             final ExtensionProperties globalConfig = createPropertiesFromGlobalConfig();
-            final ParallelResourceProcessorResults<UserConfigItem> userConfigResults = getExtensionConfigDataService()
-                    .getUserConfigList(getHubExtensionUri());
+            final ParallelResourceProcessorResults<UserConfigItem> userConfigResults = getExtensionConfigDataService().getUserConfigList(getHubExtensionUri());
             final List<UserConfigItem> usersInCategory = createUserListInCategory(userConfigResults.getResults());
 
             if (usersInCategory.isEmpty()) {
@@ -138,8 +127,7 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
                     try {
                         final UserView userItem = userConfig.getUser();
                         logger.info("Processing hub user {}", metaService.getHref(userItem));
-                        final NotificationResults notificationResults = notificationDataService.getUserNotifications(startDate, endDate,
-                                userItem);
+                        final NotificationResults notificationResults = notificationDataService.getUserNotifications(startDate, endDate, userItem);
                         final SortedSet<NotificationContentItem> notifications = notificationResults.getNotificationContentItems();
                         final EmailProcessor processor = new EmailProcessor(hubResponseService, vulnerabilityRequestService, metaService);
                         final Collection<ProjectData> projectList = processor.process(notifications);
@@ -161,8 +149,7 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
                                 model.put(KEY_USER_FIRST_NAME, userConfig.getUser().firstName);
                                 model.put(KEY_USER_LAST_NAME, userConfig.getUser().lastName);
                                 model.put(KEY_NOTIFIER_CATEGORY, getCategory().toUpperCase());
-                                model.put(KEY_HUB_SERVER_URL,
-                                        hubResponseService.getHubBaseUrl());
+                                model.put(KEY_HUB_SERVER_URL, hubResponseService.getHubBaseUrl());
                                 final String emailAddress = userConfig.getUser().email;
                                 final String templateName = getTemplateName(userConfig);
                                 final EmailTarget emailTarget = new EmailTarget(emailAddress, templateName, model);
@@ -184,25 +171,21 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
                 getName());
     }
 
-    private Collection<ProjectData> filterUserProjects(final Collection<ProjectData> projectList,
-            final UserConfigItem userConfig) {
+    private Collection<ProjectData> filterUserProjects(final Collection<ProjectData> projectList, final UserConfigItem userConfig) {
         final List<ProjectData> filteredList = new ArrayList<>(projectList.size());
 
         return filteredList;
     }
 
-    private Collection<ProjectData> filterCategories(final Collection<ProjectData> projectList,
-            final UserConfigItem userConfig) {
+    private Collection<ProjectData> filterCategories(final Collection<ProjectData> projectList, final UserConfigItem userConfig) {
         final List<ProjectData> filteredList = new ArrayList<>(projectList.size());
         final Set<NotificationCategoryEnum> triggerSet = getTriggerSet(userConfig);
 
         if (!triggerSet.isEmpty()) {
             for (final ProjectData projectData : projectList) {
                 final Map<NotificationCategoryEnum, CategoryData> categoryDataMap = new TreeMap<>();
-                final ProjectData newProject = new ProjectData(projectData.getProjectName(),
-                        projectData.getProjectVersion(), categoryDataMap);
-                for (final Map.Entry<NotificationCategoryEnum, CategoryData> entry : projectData.getCategoryMap()
-                        .entrySet()) {
+                final ProjectData newProject = new ProjectData(projectData.getProjectName(), projectData.getProjectVersion(), categoryDataMap);
+                for (final Map.Entry<NotificationCategoryEnum, CategoryData> entry : projectData.getCategoryMap().entrySet()) {
                     if (triggerSet.contains(entry.getKey())) {
                         categoryDataMap.put(entry.getKey(), entry.getValue());
                     }
@@ -281,33 +264,13 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
         }
     }
 
-    private HubServerConfig buildHubServerConfig() {
-        final HubServerConfigBuilder configBuilder = new HubServerConfigBuilder();
-        configBuilder.setHubUrl(getHubServicesFactory().getRestConnection().hubBaseUrl.toString());
-        // using oauth the username and password aren't used but need to be set
-        // for the builder
-        configBuilder.setUsername("auser");
-        configBuilder.setPassword("apassword");
-        configBuilder.setTimeout(getExtensionProperties().getHubServerTimeout());
-        configBuilder.setProxyHost(getExtensionProperties().getHubProxyHost());
-        configBuilder.setProxyPort(getExtensionProperties().getHubProxyPort());
-        configBuilder.setIgnoredProxyHosts(getExtensionProperties().getHubProxyNoHost());
-        configBuilder.setProxyUsername(getExtensionProperties().getHubProxyUser());
-        configBuilder.setProxyPassword(getExtensionProperties().getHubProxyPassword());
-
-        return configBuilder.build();
-    }
-
     private void bdPhoneHome() {
         try {
             final String pluginVersion = getExtensionProperties().getExtensionVersion();
-            final String hubVersion = versionService.getHubVersion();
-
-            final IntegrationInfo integrationInfo = new IntegrationInfo("Email-Extension", "", pluginVersion);
-            final HubServerConfig hubServerConfig = buildHubServerConfig();
-            this.phoneHomeService.phoneHome(hubServerConfig, integrationInfo, hubVersion);
-        } catch (final IntegrationException ex) {
-            logger.debug("Unable to phone home", ex);
+            final PhoneHomeRequestBody phoneHomeRequestBody = this.phoneHomeService.createInitialPhoneHomeRequestBodyBuilder(ThirdPartyName.EMAIL_EXTENSION, pluginVersion, pluginVersion).build();
+            this.phoneHomeService.phoneHome(phoneHomeRequestBody);
+        } catch (final IllegalStateException ex) {
+            logger.debug("Error phone home", ex);
         }
     }
 

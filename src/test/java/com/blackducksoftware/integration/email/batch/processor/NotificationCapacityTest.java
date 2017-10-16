@@ -36,7 +36,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.blackducksoftware.integration.email.mock.MockLogger;
 import com.blackducksoftware.integration.email.mock.MockRestConnection;
 import com.blackducksoftware.integration.email.model.batch.ProjectData;
 import com.blackducksoftware.integration.hub.api.item.MetaService;
@@ -47,12 +46,13 @@ import com.blackducksoftware.integration.hub.dataservice.notification.model.Poli
 import com.blackducksoftware.integration.hub.dataservice.notification.model.PolicyViolationContentItem;
 import com.blackducksoftware.integration.hub.model.view.ComponentVersionView;
 import com.blackducksoftware.integration.hub.model.view.VulnerabilityView;
+import com.blackducksoftware.integration.hub.model.view.components.LinkView;
+import com.blackducksoftware.integration.hub.model.view.components.MetaView;
 import com.blackducksoftware.integration.hub.model.view.components.VulnerabilitySourceQualifiedId;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.service.HubResponseService;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
 import com.blackducksoftware.integration.log.IntBufferedLogger;
-import com.blackducksoftware.integration.log.IntLogger;
 import com.google.gson.Gson;
 
 public class NotificationCapacityTest {
@@ -68,10 +68,9 @@ public class NotificationCapacityTest {
 
     @Before
     public void init() throws Exception {
-        final RestConnection restConnection = new MockRestConnection(new MockLogger(), null);
+        final RestConnection restConnection = new MockRestConnection(new IntBufferedLogger(), null);
         final HubServicesFactory factory = new HubServicesFactory(restConnection);
-        final IntLogger logger = new IntBufferedLogger();
-        metaService = factory.createMetaService(logger);
+        metaService = factory.createMetaService();
         gson = restConnection.gson;
     }
 
@@ -85,6 +84,7 @@ public class NotificationCapacityTest {
     private EmailProcessor createNotificationProcessor(final List<VulnerabilityView> vulnerabilityList) throws Exception {
         final ComponentVersionView compVersion = Mockito.mock(ComponentVersionView.class);
         compVersion.json = createComponentJson();
+        compVersion.meta = createMetaView();
         final VulnerabilityRequestService vulnerabilityRequestService = Mockito.mock(VulnerabilityRequestService.class);
         final HubResponseService hubResponseService = Mockito.mock(HubResponseService.class);
         Mockito.when(hubResponseService.getItem(Mockito.anyString(), Mockito.eq(ComponentVersionView.class))).thenReturn(compVersion);
@@ -94,13 +94,23 @@ public class NotificationCapacityTest {
     }
 
     private String createComponentJson() {
-        return "{ \"_meta\": { \"href\": \"" + ProcessorTestUtil.COMPONENT_VERSION_URL + "\","
-                + "\"links\": [ {"
-                + "\"rel\": \"vulnerabilities\","
-                + "\"href\": \"" + ProcessorTestUtil.COMPONENT_VERSION_URL + "\"},{"
-                + "\"rel\":\"vulnerable-components\","
-                + "\"href\": \"" + ProcessorTestUtil.COMPONENT_VERSION_URL + "\""
-                + "}]}}";
+        return "{ \"_meta\": { \"href\": \"" + ProcessorTestUtil.COMPONENT_VERSION_URL + "\"," + "\"links\": [ {" + "\"rel\": \"vulnerabilities\"," + "\"href\": \"" + ProcessorTestUtil.COMPONENT_VERSION_URL + "\"},{"
+                + "\"rel\":\"vulnerable-components\"," + "\"href\": \"" + ProcessorTestUtil.COMPONENT_VERSION_URL + "\"" + "}]}}";
+    }
+
+    private MetaView createMetaView() {
+        final MetaView metaView = new MetaView();
+        metaView.href = ProcessorTestUtil.COMPONENT_VERSION_URL;
+        metaView.links = new ArrayList<>();
+        final LinkView vulnerabilities = new LinkView();
+        vulnerabilities.rel = "vulnerabilities";
+        vulnerabilities.href = ProcessorTestUtil.COMPONENT_VERSION_URL;
+        metaView.links.add(vulnerabilities);
+        final LinkView vulnerableComps = new LinkView();
+        vulnerableComps.rel = "vulnerable-components";
+        vulnerableComps.href = ProcessorTestUtil.COMPONENT_VERSION_URL;
+        metaView.links.add(vulnerableComps);
+        return metaView;
     }
 
     private List<VulnerabilitySourceQualifiedId> createVulnerbilityList() {
@@ -115,8 +125,7 @@ public class NotificationCapacityTest {
         return list;
     }
 
-    private SortedSet<NotificationContentItem> createOverrideNotificationCancellationList(final int policyViolationCount)
-            throws Exception {
+    private SortedSet<NotificationContentItem> createOverrideNotificationCancellationList(final int policyViolationCount) throws Exception {
         final int policyCount = policyViolationCount;
         final SortedSet<NotificationContentItem> notificationSet = new TreeSet<>();
         final DateTime dateTime = DateTime.now();
@@ -129,9 +138,7 @@ public class NotificationCapacityTest {
             final String versionName = ProcessorTestUtil.VERSION + index;
             final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
             componentVersion.versionName = versionName;
-            final PolicyViolationContentItem item = testUtil.createPolicyViolation(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion,
-                    componentName,
-                    componentVersion);
+            final PolicyViolationContentItem item = testUtil.createPolicyViolation(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion, componentName, componentVersion);
             notificationSet.add(item);
             secondOffset++;
         }
@@ -143,9 +150,7 @@ public class NotificationCapacityTest {
             final String versionName = ProcessorTestUtil.VERSION + index;
             final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
             componentVersion.versionName = versionName;
-            final PolicyOverrideContentItem item = testUtil.createPolicyOverride(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion,
-                    componentName,
-                    componentVersion);
+            final PolicyOverrideContentItem item = testUtil.createPolicyOverride(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion, componentName, componentVersion);
             notificationSet.add(item);
             secondOffset++;
         }
@@ -153,8 +158,7 @@ public class NotificationCapacityTest {
         return notificationSet;
     }
 
-    private SortedSet<NotificationContentItem> createClearedNotificationCancellationList(final int policyViolationCount)
-            throws Exception {
+    private SortedSet<NotificationContentItem> createClearedNotificationCancellationList(final int policyViolationCount) throws Exception {
         final int policyCount = policyViolationCount;
         final SortedSet<NotificationContentItem> notificationSet = new TreeSet<>();
         final DateTime dateTime = DateTime.now();
@@ -166,9 +170,7 @@ public class NotificationCapacityTest {
             final String versionName = ProcessorTestUtil.VERSION + index;
             final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
             componentVersion.versionName = versionName;
-            final PolicyViolationContentItem item = testUtil.createPolicyViolation(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion,
-                    componentName,
-                    componentVersion);
+            final PolicyViolationContentItem item = testUtil.createPolicyViolation(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion, componentName, componentVersion);
             notificationSet.add(item);
             secondOffset++;
         }
@@ -180,9 +182,7 @@ public class NotificationCapacityTest {
             final String versionName = ProcessorTestUtil.VERSION + index;
             final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
             componentVersion.versionName = versionName;
-            final PolicyViolationClearedContentItem item = testUtil.createPolicyCleared(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName,
-                    projectVersion,
-                    componentName, componentVersion);
+            final PolicyViolationClearedContentItem item = testUtil.createPolicyCleared(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion, componentName, componentVersion);
             notificationSet.add(item);
             secondOffset++;
         }
@@ -190,20 +190,17 @@ public class NotificationCapacityTest {
         return notificationSet;
     }
 
-    private SortedSet<NotificationContentItem> createOverrideNotificationCancellationList()
-            throws Exception {
+    private SortedSet<NotificationContentItem> createOverrideNotificationCancellationList() throws Exception {
         final int policyCount = NOTIFICATION_COUNT;
         return createOverrideNotificationCancellationList(policyCount);
     }
 
-    private SortedSet<NotificationContentItem> createClearedNotificationCancellationList()
-            throws Exception {
+    private SortedSet<NotificationContentItem> createClearedNotificationCancellationList() throws Exception {
         final int policyCount = NOTIFICATION_COUNT;
         return createClearedNotificationCancellationList(policyCount);
     }
 
-    private SortedSet<NotificationContentItem> createVulnerabilityAddedList(final List<VulnerabilitySourceQualifiedId> vulnerabilitySourceList)
-            throws Exception {
+    private SortedSet<NotificationContentItem> createVulnerabilityAddedList(final List<VulnerabilitySourceQualifiedId> vulnerabilitySourceList) throws Exception {
         final int policyCount = NOTIFICATION_COUNT;
         final int half = policyCount / 2;
         final int vulnerabilityCount = policyCount;
@@ -217,9 +214,7 @@ public class NotificationCapacityTest {
             final String versionName = ProcessorTestUtil.VERSION + index;
             final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
             componentVersion.versionName = versionName;
-            notificationSet
-                    .add(testUtil.createPolicyViolation(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion, componentName,
-                            componentVersion));
+            notificationSet.add(testUtil.createPolicyViolation(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion, componentName, componentVersion));
             secondOffset++;
         }
 
@@ -230,9 +225,7 @@ public class NotificationCapacityTest {
             final String versionName = ProcessorTestUtil.VERSION + index;
             final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
             componentVersion.versionName = versionName;
-            notificationSet
-                    .add(testUtil.createPolicyOverride(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion, componentName,
-                            componentVersion));
+            notificationSet.add(testUtil.createPolicyOverride(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion, componentName, componentVersion));
             secondOffset++;
         }
         for (int index = half - 1; index < policyCount; index++) {
@@ -242,9 +235,7 @@ public class NotificationCapacityTest {
             final String versionName = ProcessorTestUtil.VERSION + index;
             final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
             componentVersion.versionName = versionName;
-            notificationSet
-                    .add(testUtil.createPolicyCleared(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion, componentName,
-                            componentVersion));
+            notificationSet.add(testUtil.createPolicyCleared(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion, componentName, componentVersion));
             secondOffset++;
         }
 
@@ -255,16 +246,15 @@ public class NotificationCapacityTest {
             final String versionName = ProcessorTestUtil.VERSION + index;
             final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
             componentVersion.versionName = versionName;
-            notificationSet.add(testUtil.createVulnerability(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion,
-                    componentName, componentVersion, vulnerabilitySourceList, vulnerabilitySourceList, Collections.emptyList()));
+            notificationSet.add(
+                    testUtil.createVulnerability(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion, componentName, componentVersion, vulnerabilitySourceList, vulnerabilitySourceList, Collections.emptyList()));
             secondOffset++;
         }
 
         return notificationSet;
     }
 
-    private SortedSet<NotificationContentItem> createComplexNotificationList(final List<VulnerabilitySourceQualifiedId> vulnerabilitySourceList)
-            throws Exception {
+    private SortedSet<NotificationContentItem> createComplexNotificationList(final List<VulnerabilitySourceQualifiedId> vulnerabilitySourceList) throws Exception {
         final int policyCount = NOTIFICATION_COUNT;
         final int half = policyCount / 2;
         final int vulnerabilityCount = policyCount;
@@ -285,9 +275,7 @@ public class NotificationCapacityTest {
             }
             final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
             componentVersion.versionName = versionName;
-            notificationSet
-                    .add(testUtil.createPolicyViolation(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion, componentName,
-                            componentVersion));
+            notificationSet.add(testUtil.createPolicyViolation(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion, componentName, componentVersion));
             secondOffset++;
         }
 
@@ -304,9 +292,7 @@ public class NotificationCapacityTest {
             }
             final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
             componentVersion.versionName = versionName;
-            notificationSet
-                    .add(testUtil.createPolicyOverride(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion, componentName,
-                            componentVersion));
+            notificationSet.add(testUtil.createPolicyOverride(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion, componentName, componentVersion));
             secondOffset++;
         }
         for (int index = half - 1; index < policyCount; index++) {
@@ -322,9 +308,7 @@ public class NotificationCapacityTest {
             }
             final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
             componentVersion.versionName = versionName;
-            notificationSet
-                    .add(testUtil.createPolicyCleared(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion, componentName,
-                            componentVersion));
+            notificationSet.add(testUtil.createPolicyCleared(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion, componentName, componentVersion));
             secondOffset++;
         }
 
@@ -351,8 +335,7 @@ public class NotificationCapacityTest {
             }
             final ComponentVersionView componentVersion = Mockito.mock(ComponentVersionView.class);
             componentVersion.versionName = versionName;
-            notificationSet.add(testUtil.createVulnerability(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion,
-                    componentName, componentVersion, addedList, updatedList, deletedList));
+            notificationSet.add(testUtil.createVulnerability(dateTime.plusSeconds(1 + secondOffset).toDate(), projectName, projectVersion, componentName, componentVersion, addedList, updatedList, deletedList));
             secondOffset++;
         }
 
