@@ -30,15 +30,18 @@ then
    	echo "Removing the existing certificate after container restart"
 fi
 
-#Workaround as the hub refresh token is not usuable
+#Workaround as the hub refresh token is not usable
 if [ -f $EMAIL_EXT_HOME/config/oauth.properties ] 
 then
 	rm $EMAIL_EXT_HOME/config/oauth.properties
 fi
 
-keytool -printcert -rfc -sslserver "$PUBLIC_HUB_WEBSERVER_HOST:$PUBLIC_HUB_WEBSERVER_PORT" -v | keytool -importcert -keystore "$JAVA_HOME/lib/security/cacerts" -storepass changeit -alias publichubwebserver -noprompt
-
-echo "Completed importing Hub Certificate"
+if keytool -printcert -rfc -sslserver "$PUBLIC_HUB_WEBSERVER_HOST:$PUBLIC_HUB_WEBSERVER_PORT" -v | keytool -importcert -keystore "$JAVA_HOME/lib/security/cacerts" -storepass changeit -alias publichubwebserver -noprompt > /dev/null 
+then
+	echo "Completed importing Hub Certificate"
+else
+	echo "Unable to add the certificate. Please try to import the certificate manually."
+fi
 }
 
 
