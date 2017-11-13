@@ -34,11 +34,11 @@ import com.blackducksoftware.integration.email.extension.server.oauth.ExtensionT
 import com.blackducksoftware.integration.email.model.JavaMailWrapper;
 import com.blackducksoftware.integration.email.notifier.NotifierManager;
 import com.blackducksoftware.integration.exception.EncryptionException;
-import com.blackducksoftware.integration.hub.builder.HubProxyInfoBuilder;
+import com.blackducksoftware.integration.hub.Credentials;
 import com.blackducksoftware.integration.hub.dataservice.notification.NotificationDataService;
-import com.blackducksoftware.integration.hub.global.HubCredentials;
-import com.blackducksoftware.integration.hub.global.HubProxyInfo;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
+import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
+import com.blackducksoftware.integration.hub.proxy.ProxyInfoBuilder;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
 import com.blackducksoftware.integration.log.IntLogger;
@@ -72,10 +72,10 @@ public class TestEmailEngine extends EmailEngine {
     public HubServerConfig createHubConfig(final String hubUri) {
         HubServerConfig serverConfig = null;
         try {
-            HubCredentials credentials;
-            credentials = new HubCredentials("user", "password");
+            Credentials credentials;
+            credentials = new Credentials("user", "password");
 
-            final HubProxyInfo proxyInfo = new HubProxyInfoBuilder().build();
+            final ProxyInfo proxyInfo = new ProxyInfoBuilder().build();
             serverConfig = new HubServerConfig(new URL("http://localhost"), 120, credentials, proxyInfo, false);
         } catch (final EncryptionException | MalformedURLException e) {
             logger.error("Error creating hub server config", e);

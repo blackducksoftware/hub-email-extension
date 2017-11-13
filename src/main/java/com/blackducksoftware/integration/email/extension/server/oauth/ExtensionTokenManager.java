@@ -23,7 +23,6 @@ package com.blackducksoftware.integration.email.extension.server.oauth;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -41,6 +40,7 @@ import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.api.oauth.Token;
 import com.blackducksoftware.integration.hub.rest.oauth.AccessType;
 import com.blackducksoftware.integration.hub.rest.oauth.OAuthRestConnection;
+import com.blackducksoftware.integration.hub.rest.oauth.OAuthRestConnectionBuilder;
 import com.blackducksoftware.integration.hub.rest.oauth.TokenManager;
 import com.blackducksoftware.integration.log.IntLogger;
 import com.google.gson.JsonObject;
@@ -103,10 +103,8 @@ public class ExtensionTokenManager extends TokenManager {
         getConfiguration().clientId = clientId;
     }
 
-    public void setAddresses(final String hubUri, final String extensionUri, final String oAuthAuthorizeUri,
-            final String oAuthTokenUri) {
-        logger.debug("Received hub addresses hubUri: {}, extensionUri: {}, oAuthAuthorizeUri: {}, oAuthTokenUri: {}",
-                hubUri, extensionUri, oAuthAuthorizeUri, oAuthTokenUri);
+    public void setAddresses(final String hubUri, final String extensionUri, final String oAuthAuthorizeUri, final String oAuthTokenUri) {
+        logger.debug("Received hub addresses hubUri: {}, extensionUri: {}, oAuthAuthorizeUri: {}, oAuthTokenUri: {}", hubUri, extensionUri, oAuthAuthorizeUri, oAuthTokenUri);
         configuration.setAddresses(hubUri, extensionUri, oAuthAuthorizeUri, oAuthTokenUri);
     }
 
@@ -179,8 +177,14 @@ public class ExtensionTokenManager extends TokenManager {
         Response getResponse = null;
         Response putResponse = null;
         try {
-            final URL url = new URL(getConfiguration().extensionUri);
-            final OAuthRestConnection connection = new OAuthRestConnection(getLogger(), url, getTimeout(), this, AccessType.CLIENT);
+            final OAuthRestConnectionBuilder builder = new OAuthRestConnectionBuilder();
+            builder.setLogger(getLogger());
+            builder.setBaseUrl(getConfiguration().extensionUri);
+            builder.setTimeout(getTimeout());
+            builder.setTokenManager(this);
+            builder.setAccessType(AccessType.CLIENT);
+            builder.applyProxyInfo(this.getProxyInfo());
+            final OAuthRestConnection connection = builder.build();
             final HttpUrl httpUrl = connection.createHttpUrl();
             final Request request = connection.createGetRequest(httpUrl);
             // submit the data to the hub

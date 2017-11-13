@@ -64,7 +64,7 @@ import com.blackducksoftware.integration.hub.dataservice.notification.Notificati
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.rest.oauth.AccessType;
-import com.blackducksoftware.integration.hub.rest.oauth.OAuthRestConnection;
+import com.blackducksoftware.integration.hub.rest.oauth.OAuthRestConnectionBuilder;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
 import com.blackducksoftware.integration.hub.util.HostnameHelper;
 import com.blackducksoftware.integration.log.IntLogger;
@@ -313,7 +313,14 @@ public class EmailEngine implements IAuthorizedListener {
 
     public RestConnection initRestConnection(final String hubUri) {
         final IntLogger extLogger = new ExtensionLogger(logger);
-        final RestConnection restConnection = new OAuthRestConnection(extLogger, hubServerConfig.getHubUrl(), hubServerConfig.getTimeout(), tokenManager, AccessType.USER);
+        final OAuthRestConnectionBuilder builder = new OAuthRestConnectionBuilder();
+        builder.setLogger(extLogger);
+        builder.setBaseUrl(hubServerConfig.getHubUrl().toString());
+        builder.setTimeout(hubServerConfig.getTimeout());
+        builder.setTokenManager(tokenManager);
+        builder.setAccessType(AccessType.USER);
+        builder.applyProxyInfo(hubServerConfig.getProxyInfo());
+        final RestConnection restConnection = builder.build();
         return restConnection;
     }
 
