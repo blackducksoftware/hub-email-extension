@@ -62,6 +62,8 @@ import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
 import com.blackducksoftware.integration.hub.dataservice.extension.ExtensionConfigDataService;
 import com.blackducksoftware.integration.hub.dataservice.notification.NotificationDataService;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
+import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
+import com.blackducksoftware.integration.hub.proxy.ProxyInfoBuilder;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.rest.oauth.AccessType;
 import com.blackducksoftware.integration.hub.rest.oauth.OAuthRestConnectionBuilder;
@@ -288,10 +290,6 @@ public class EmailEngine implements IAuthorizedListener {
             // output the configuration details
             logger.info("Hub Server URL          = " + config.getHubUrl());
             logger.info("Hub Timeout             = " + config.getTimeout());
-            logger.info("Hub Proxy Host          = " + config.getProxyInfo().getHost());
-            logger.info("Hub Proxy Port          = " + config.getProxyInfo().getPort());
-            logger.info("Hub Ignored Proxy Hosts = " + config.getProxyInfo().getIgnoredProxyHosts());
-            logger.info("Hub Proxy User          = " + config.getProxyInfo().getUsername());
 
             return config;
         } catch (final IllegalStateException ex) {
@@ -319,7 +317,6 @@ public class EmailEngine implements IAuthorizedListener {
         builder.setTimeout(hubServerConfig.getTimeout());
         builder.setTokenManager(tokenManager);
         builder.setAccessType(AccessType.USER);
-        builder.applyProxyInfo(hubServerConfig.getProxyInfo());
         final RestConnection restConnection = builder.build();
         return restConnection;
     }
@@ -411,7 +408,23 @@ public class EmailEngine implements IAuthorizedListener {
         final String timeoutString = extensionProperties.getHubServerTimeout();
         final int timeout = Integer.parseInt(timeoutString);
         final ExtensionTokenManager tokenManager = new ExtensionTokenManager(serviceLogger, timeout, extensionInfoData);
+        final ProxyInfoBuilder proxyInfoBuilder = new ProxyInfoBuilder();
+        final String proxyHost = extensionProperties.getHubProxyHost();
+        final String proxyPort = extensionProperties.getHubProxyPort();
+        final String proxyIgnoredHosts = extensionProperties.getHubProxyNoHost();
+        final String proxyUser = extensionProperties.getHubProxyUser();
+        final String proxyPassword = extensionProperties.getHubProxyPassword();
+        proxyInfoBuilder.setHost(proxyHost);
+        proxyInfoBuilder.setPort(proxyPort);
+        proxyInfoBuilder.setIgnoredProxyHosts(proxyIgnoredHosts);
+        proxyInfoBuilder.setUsername(proxyUser);
+        proxyInfoBuilder.setPassword(proxyPassword);
+        final ProxyInfo proxyInfo = proxyInfoBuilder.build();
+        tokenManager.setProxyInfo(proxyInfo);
         tokenManager.addAuthorizedListener(this);
+        logger.info("Proxy Host          = " + proxyHost);
+        logger.info("Proxy Port          = " + proxyPort);
+        logger.info("Ignored Proxy Hosts = " + proxyIgnoredHosts);
         return tokenManager;
     }
 
