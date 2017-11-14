@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.concurrent.Future;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -141,7 +142,7 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
                             if (projectsDigest.isEmpty()) {
                                 filteredUsers++;
                             } else {
-                                bdPhoneHome(); // extension used.
+                                final Future<Boolean> phoneHomeTask = bdPhoneHomeStart(); // extension used.
                                 final Map<String, Object> model = new HashMap<>();
                                 model.put(KEY_TOPICS_LIST, projectsDigest);
                                 model.put(KEY_START_DATE, String.valueOf(startDate));
@@ -154,6 +155,7 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
                                 final String templateName = getTemplateName(userConfig);
                                 final EmailTarget emailTarget = new EmailTarget(emailAddress, templateName, model);
                                 getEmailMessagingService().sendEmailMessage(emailTarget, globalConfig);
+                                bdPhoneHomeEnd(phoneHomeTask);
                             }
                         }
 
@@ -264,14 +266,19 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
         }
     }
 
-    private void bdPhoneHome() {
+    private Future<Boolean> bdPhoneHomeStart() {
         try {
             final String pluginVersion = getExtensionProperties().getExtensionVersion();
             final PhoneHomeRequestBody phoneHomeRequestBody = this.phoneHomeService.createInitialPhoneHomeRequestBodyBuilder(ThirdPartyName.EMAIL_EXTENSION, pluginVersion, pluginVersion).build();
-            this.phoneHomeService.phoneHome(phoneHomeRequestBody);
+            return this.phoneHomeService.startPhoneHome(phoneHomeRequestBody);
         } catch (final IllegalStateException ex) {
             logger.debug("Error phone home", ex);
         }
+        return null;
+    }
+
+    private void bdPhoneHomeEnd(final Future<Boolean> task) {
+        this.phoneHomeService.endPhoneHome(task);
     }
 
     @Override
