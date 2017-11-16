@@ -229,23 +229,43 @@ public class ExtensionProperties {
     }
 
     public String getHubProxyHost() {
-        return appProperties.getProperty(HUB_PROXY_HOST_KEY);
+        String proxyHost = System.getenv("HUB_PROXY_HOST");
+        if (StringUtils.isEmpty(proxyHost)) {
+            proxyHost = appProperties.getProperty(HUB_PROXY_HOST_KEY);
+        }
+        return proxyHost;
     }
 
     public String getHubProxyPort() {
-        return appProperties.getProperty(HUB_PROXY_PORT_KEY);
+        String proxyPort = System.getenv("HUB_PROXY_PORT");
+        if (StringUtils.isEmpty(proxyPort)) {
+            proxyPort = appProperties.getProperty(HUB_PROXY_PORT_KEY);
+        }
+        return proxyPort;
     }
 
     public String getHubProxyUser() {
-        return appProperties.getProperty(HUB_PROXY_USER_KEY);
+        String proxyUser = System.getenv("HUB_PROXY_USER");
+        if (StringUtils.isEmpty(proxyUser)) {
+            proxyUser = appProperties.getProperty(HUB_PROXY_USER_KEY);
+        }
+        return proxyUser;
     }
 
     public String getHubProxyPassword() {
-        return appProperties.getProperty(HUB_PROXY_PASSWORD_KEY);
+        String proxyPassword = System.getenv("HUB_PROXY_PASSWORD");
+        if (StringUtils.isEmpty(proxyPassword)) {
+            proxyPassword = appProperties.getProperty(HUB_PROXY_PASSWORD_KEY);
+        }
+        return proxyPassword;
     }
 
     public String getHubProxyNoHost() {
-        return appProperties.getProperty(HUB_PROXY_NOHOST_KEY);
+        final String proxyNoHost = System.getenv("HUB_PROXY_NON_PROXY_HOSTS");
+        if (StringUtils.isEmpty(proxyNoHost)) {
+            appProperties.getProperty(HUB_PROXY_NOHOST_KEY);
+        }
+        return proxyNoHost;
     }
 
     public String getNotificationInterval() {
