@@ -109,8 +109,10 @@ public class EmailEngine implements IAuthorizedListener {
     private HubServicesFactory hubServicesFactory;
 
     private EmailExtensionApplication emailExtensionApplication;
+    private final boolean alwaysTrustServerCertificate;
 
     public EmailEngine() throws FileNotFoundException, IOException {
+        alwaysTrustServerCertificate = getAlwaysTrustServerCertificates();
         appProperties = createAppProperties();
         extensionProperties = createExtensionProperties();
         configuration = createFreemarkerConfig();
@@ -118,6 +120,18 @@ public class EmailEngine implements IAuthorizedListener {
         tokenManager = createTokenManager();
         extConfigManager = createExtensionConfigManager();
         restletComponent = createRestletComponent();
+    }
+
+    public boolean getAlwaysTrustServerCertificates() {
+        boolean alwaysTrustServerCertificate = false;
+        final String alwaysTrust = System.getenv("EXTENSION_ALWAYS_TRUST_SERVER_CERTIFICATE");
+        if (StringUtils.isNotBlank(alwaysTrust)) {
+            alwaysTrustServerCertificate = Boolean.parseBoolean(alwaysTrust);
+            if (alwaysTrustServerCertificate) {
+                logger.warn("Always trust server certificates option enabled");
+            }
+        }
+        return alwaysTrustServerCertificate;
     }
 
     public Logger getLogger() {
@@ -285,6 +299,7 @@ public class EmailEngine implements IAuthorizedListener {
             configBuilder.setIgnoredProxyHosts(extensionProperties.getHubProxyNoHost());
             configBuilder.setProxyUsername(extensionProperties.getHubProxyUser());
             configBuilder.setProxyPassword(extensionProperties.getHubProxyPassword());
+            configBuilder.setAlwaysTrustServerCertificate(alwaysTrustServerCertificate);
 
             final HubServerConfig config = configBuilder.build();
             // output the configuration details
@@ -317,6 +332,7 @@ public class EmailEngine implements IAuthorizedListener {
         builder.setTimeout(hubServerConfig.getTimeout());
         builder.setTokenManager(tokenManager);
         builder.setAccessType(AccessType.USER);
+        builder.setAlwaysTrustServerCertificate(alwaysTrustServerCertificate);
         final RestConnection restConnection = builder.build();
         return restConnection;
     }
@@ -421,6 +437,7 @@ public class EmailEngine implements IAuthorizedListener {
         proxyInfoBuilder.setPassword(proxyPassword);
         final ProxyInfo proxyInfo = proxyInfoBuilder.build();
         tokenManager.setProxyInfo(proxyInfo);
+        tokenManager.setAlwaysTrustServerCertificate(alwaysTrustServerCertificate);
         tokenManager.addAuthorizedListener(this);
         logger.info("Proxy Host          = " + proxyHost);
         logger.info("Proxy Port          = " + proxyPort);

@@ -5,7 +5,7 @@ verifyEnvironment() {
   # Verify JRE is present.
   if [ -n "$JAVA_HOME" ]; then
     if [ -d "$JAVA_HOME" ]; then
-      if [ ! -f "$JAVA_HOME/lib/security/cacerts" ]; then 
+      if [ ! -f "$JAVA_HOME/lib/security/cacerts" ]; then
         echo "ERROR: $JAVA_HOME/lib/security/cacerts is not a file or does not exist."
       fi
     else
@@ -31,12 +31,12 @@ then
 fi
 
 #Workaround as the hub refresh token is not usable
-if [ -f $EMAIL_EXT_HOME/config/oauth.properties ] 
+if [ -f $EMAIL_EXT_HOME/config/oauth.properties ]
 then
 	rm $EMAIL_EXT_HOME/config/oauth.properties
 fi
 
-if keytool -printcert -rfc -sslserver "$PUBLIC_HUB_WEBSERVER_HOST:$PUBLIC_HUB_WEBSERVER_PORT" -v | keytool -importcert -keystore "$JAVA_HOME/lib/security/cacerts" -storepass changeit -alias publichubwebserver -noprompt > /dev/null 
+if keytool -printcert -rfc -sslserver "$PUBLIC_HUB_WEBSERVER_HOST:$PUBLIC_HUB_WEBSERVER_PORT" -v | keytool -importcert -keystore "$JAVA_HOME/lib/security/cacerts" -storepass changeit -alias publichubwebserver -noprompt > /dev/null
 then
 	echo "Completed importing Hub Certificate"
 else
@@ -46,5 +46,10 @@ fi
 
 
 verifyEnvironment
-importCertificate
+if [ "$EMAIL_EXT_IMPORT_CERT" == "false" ]
+then
+    echo "Skipping import of Hub Certificate"
+else
+    importCertificate
+fi
 exec "$@"

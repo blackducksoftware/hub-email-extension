@@ -183,6 +183,7 @@ public class ExtensionTokenManager extends TokenManager {
             builder.setTimeout(getTimeout());
             builder.setTokenManager(this);
             builder.setAccessType(AccessType.CLIENT);
+            builder.setAlwaysTrustServerCertificate(isAlwaysTrustServerCertificate());
             builder.applyProxyInfo(this.getProxyInfo());
             final OAuthRestConnection connection = builder.build();
             final HttpUrl httpUrl = connection.createHttpUrl();
