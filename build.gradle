@@ -19,7 +19,7 @@ tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
 tasks.withType(GroovyCompile) { options.encoding = 'UTF-8' }
 
 group = 'com.blackducksoftware.integration'
-version = '1.2.2-SNAPSHOT'
+version = '1.2.2-PROXYFIX'
 description = ''
 
 mainClassName = 'com.blackducksoftware.integration.email.Application'
@@ -40,7 +40,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.blackducksoftware.integration:hub-common:18.4.1'
+    compile 'com.blackducksoftware.integration:hub-common:20.0.0'
 
     compile 'org.slf4j:slf4j-api:1.7.21'
 	compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.6.2'

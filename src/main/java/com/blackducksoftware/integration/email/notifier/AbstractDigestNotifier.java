@@ -53,6 +53,7 @@ import com.blackducksoftware.integration.hub.dataservice.notification.Notificati
 import com.blackducksoftware.integration.hub.dataservice.notification.model.NotificationContentItem;
 import com.blackducksoftware.integration.hub.dataservice.parallel.ParallelResourceProcessorResults;
 import com.blackducksoftware.integration.hub.dataservice.phonehome.PhoneHomeDataService;
+import com.blackducksoftware.integration.hub.dataservice.phonehome.PhoneHomeResponse;
 import com.blackducksoftware.integration.hub.model.view.UserView;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
 import com.blackducksoftware.integration.hub.service.HubResponseService;
@@ -141,7 +142,7 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
                             if (projectsDigest.isEmpty()) {
                                 filteredUsers++;
                             } else {
-                                bdPhoneHome(); // extension used.
+                                final PhoneHomeResponse phoneHomeTask = bdPhoneHomeStart(); // extension used.
                                 final Map<String, Object> model = new HashMap<>();
                                 model.put(KEY_TOPICS_LIST, projectsDigest);
                                 model.put(KEY_START_DATE, String.valueOf(startDate));
@@ -154,6 +155,7 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
                                 final String templateName = getTemplateName(userConfig);
                                 final EmailTarget emailTarget = new EmailTarget(emailAddress, templateName, model);
                                 getEmailMessagingService().sendEmailMessage(emailTarget, globalConfig);
+                                phoneHomeTask.endPhoneHome();
                             }
                         }
 
@@ -264,14 +266,15 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
         }
     }
 
-    private void bdPhoneHome() {
+    private PhoneHomeResponse bdPhoneHomeStart() {
         try {
             final String pluginVersion = getExtensionProperties().getExtensionVersion();
             final PhoneHomeRequestBody phoneHomeRequestBody = this.phoneHomeService.createInitialPhoneHomeRequestBodyBuilder(ThirdPartyName.EMAIL_EXTENSION, pluginVersion, pluginVersion).build();
-            this.phoneHomeService.phoneHome(phoneHomeRequestBody);
+            return this.phoneHomeService.startPhoneHome(phoneHomeRequestBody);
         } catch (final IllegalStateException ex) {
             logger.debug("Error phone home", ex);
         }
+        return null;
     }
 
     @Override
