@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.concurrent.Future;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -54,6 +53,7 @@ import com.blackducksoftware.integration.hub.dataservice.notification.Notificati
 import com.blackducksoftware.integration.hub.dataservice.notification.model.NotificationContentItem;
 import com.blackducksoftware.integration.hub.dataservice.parallel.ParallelResourceProcessorResults;
 import com.blackducksoftware.integration.hub.dataservice.phonehome.PhoneHomeDataService;
+import com.blackducksoftware.integration.hub.dataservice.phonehome.PhoneHomeResponse;
 import com.blackducksoftware.integration.hub.model.view.UserView;
 import com.blackducksoftware.integration.hub.notification.processor.NotificationCategoryEnum;
 import com.blackducksoftware.integration.hub.service.HubResponseService;
@@ -142,7 +142,7 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
                             if (projectsDigest.isEmpty()) {
                                 filteredUsers++;
                             } else {
-                                final Future<Boolean> phoneHomeTask = bdPhoneHomeStart(); // extension used.
+                                final PhoneHomeResponse phoneHomeTask = bdPhoneHomeStart(); // extension used.
                                 final Map<String, Object> model = new HashMap<>();
                                 model.put(KEY_TOPICS_LIST, projectsDigest);
                                 model.put(KEY_START_DATE, String.valueOf(startDate));
@@ -155,7 +155,7 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
                                 final String templateName = getTemplateName(userConfig);
                                 final EmailTarget emailTarget = new EmailTarget(emailAddress, templateName, model);
                                 getEmailMessagingService().sendEmailMessage(emailTarget, globalConfig);
-                                bdPhoneHomeEnd(phoneHomeTask);
+                                phoneHomeTask.endPhoneHome();
                             }
                         }
 
@@ -266,7 +266,7 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
         }
     }
 
-    private Future<Boolean> bdPhoneHomeStart() {
+    private PhoneHomeResponse bdPhoneHomeStart() {
         try {
             final String pluginVersion = getExtensionProperties().getExtensionVersion();
             final PhoneHomeRequestBody phoneHomeRequestBody = this.phoneHomeService.createInitialPhoneHomeRequestBodyBuilder(ThirdPartyName.EMAIL_EXTENSION, pluginVersion, pluginVersion).build();
@@ -275,10 +275,6 @@ public abstract class AbstractDigestNotifier extends IntervalNotifier {
             logger.debug("Error phone home", ex);
         }
         return null;
-    }
-
-    private void bdPhoneHomeEnd(final Future<Boolean> task) {
-        this.phoneHomeService.endPhoneHome(task);
     }
 
     @Override
