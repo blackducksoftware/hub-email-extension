@@ -24,7 +24,7 @@ echo $PUBLIC_HUB_WEBSERVER_HOST
 echo $PUBLIC_HUB_WEBSERVER_PORT
 
 # In case of email-extension container restart
-if keytool -list -keystore "$JAVA_HOME/lib/security/cacerts" -storepass changeit -alias publichubwebserver >/dev/null
+if keytool -list -keystore "$JAVA_HOME/lib/security/cacerts" -storepass changeit -alias publichubwebserver
 then
     keytool -delete -alias publichubwebserver -keystore "$JAVA_HOME/lib/security/cacerts" -storepass changeit
    	echo "Removing the existing certificate after container restart"
@@ -36,7 +36,7 @@ then
 	rm $EMAIL_EXT_HOME/config/oauth.properties
 fi
 
-if keytool -printcert -rfc -sslserver "$PUBLIC_HUB_WEBSERVER_HOST:$PUBLIC_HUB_WEBSERVER_PORT" -v | keytool -importcert -keystore "$JAVA_HOME/lib/security/cacerts" -storepass changeit -alias publichubwebserver -noprompt > /dev/null
+if keytool -printcert -rfc -sslserver "$PUBLIC_HUB_WEBSERVER_HOST:$PUBLIC_HUB_WEBSERVER_PORT" -v | keytool -importcert -keystore "$JAVA_HOME/lib/security/cacerts" -storepass changeit -alias publichubwebserver -noprompt
 then
 	echo "Completed importing Hub Certificate"
 else
