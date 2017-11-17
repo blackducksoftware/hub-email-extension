@@ -19,7 +19,7 @@ tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
 tasks.withType(GroovyCompile) { options.encoding = 'UTF-8' }
 
 group = 'com.blackducksoftware.integration'
-version = '1.2.2-PROXYFIX'
+version = '1.2.2-SNAPSHOT'
 description = ''
 
 mainClassName = 'com.blackducksoftware.integration.email.Application'
