@@ -134,7 +134,7 @@ distributions {
     }
 }
 
-task stageDocker(type:Copy) {
+task stageDocker(type:Copy, dependsOn: [build]) {
 	into "${project.buildDir}/docker"
 	from("${project.projectDir}") {
 		include 'Dockerfile'
@@ -146,8 +146,7 @@ task stageDocker(type:Copy) {
 	}
 }
 
-task buildDockerImage(type:DockerBuildImage) {
-    dependsOn stageDocker
+task buildDockerImage(type:DockerBuildImage, dependsOn: [stageDocker]) {
     inputDir = file("${project.buildDir}/docker")
     tag = "blackducksoftware/${project.name}:${project.version}"
     buildArgs = [ 'VERSION': "${project.version}" ]
