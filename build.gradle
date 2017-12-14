@@ -25,8 +25,8 @@ description = ''
 mainClassName = 'com.blackducksoftware.integration.email.Application'
 applicationDefaultJvmArgs = [
     '-DAPP_HOME=APP_HOME_VAR_TOKEN',
-    '-Dlog4j.configurationFile=/blackduck-extensions-config-defaults/log4j.xml',
-    '-Dext.config.location=/blackduck-extensions-config-defaults/'
+    '-Dlog4j.configurationFile=/blackduck-extensions-config-volume/log4j.xml',
+    '-Dext.config.location=/blackduck-extensions-config-volume/'
 ]
 
 sourceCompatibility = 1.8
