@@ -1,8 +1,16 @@
 #!/bin/sh
 set -e
 
-# We copy the config defaults into a volume which is mounted at runtime.
-cp -r /blackduck-extensions-config-defaults/* /blackduck-extensions-config-volume/
+bootstrap() {
+	CONFIG_VOLUME=/blackduck-extensions-config-volume/
+	# We copy the config defaults into a volume which is mounted at runtime.
+	if [[ -f ${CONFIG_VOLUME}/BOOTSTRAPPED ]]; then
+		echo "Configuration already was written to this volume.  Not bootstrapping from defaults."	
+	else
+		cp -r /blackduck-extensions-config-defaults/* ${CONFIG_VOLUME}
+		echo "bootstrapped! `date`" > ${CONFIG_VOLUME}/BOOTSTRAPPED
+	fi
+}
 
 verifyEnvironment() {
   # Verify JRE is present.
@@ -22,33 +30,37 @@ verifyEnvironment() {
 }
 
 importCertificate(){
-echo "Attempting to import Hub Certificate"
-echo $PUBLIC_HUB_WEBSERVER_HOST
-echo $PUBLIC_HUB_WEBSERVER_PORT
+	echo "Attempting to import Hub Certificate"
+	echo $PUBLIC_HUB_WEBSERVER_HOST
+	echo $PUBLIC_HUB_WEBSERVER_PORT
 
-# In case of email-extension container restart
-if keytool -list -keystore "$JAVA_HOME/lib/security/cacerts" -storepass changeit -alias publichubwebserver
-then
-    keytool -delete -alias publichubwebserver -keystore "$JAVA_HOME/lib/security/cacerts" -storepass changeit
-   	echo "Removing the existing certificate after container restart"
-fi
+	# In case of email-extension container restart
+	if keytool -list -keystore "$JAVA_HOME/lib/security/cacerts" -storepass changeit -alias publichubwebserver
+	then
+	    keytool -delete -alias publichubwebserver -keystore "$JAVA_HOME/lib/security/cacerts" -storepass changeit
+		echo "Removing the existing certificate after container restart"
+	fi
 
-#Workaround as the hub refresh token is not usable
-if [ -f $EMAIL_EXT_HOME/config/oauth.properties ]
-then
-	rm $EMAIL_EXT_HOME/config/oauth.properties
-fi
+	#Workaround as the hub refresh token is not usable
+	if [ -f $EMAIL_EXT_HOME/config/oauth.properties ]
+	then
+		rm $EMAIL_EXT_HOME/config/oauth.properties
+	fi
 
-if keytool -printcert -rfc -sslserver "$PUBLIC_HUB_WEBSERVER_HOST:$PUBLIC_HUB_WEBSERVER_PORT" -v | keytool -importcert -keystore "$JAVA_HOME/lib/security/cacerts" -storepass changeit -alias publichubwebserver -noprompt
-then
-	echo "Completed importing Hub Certificate"
-else
-	echo "Unable to add the certificate. Please try to import the certificate manually."
-fi
+	if keytool -printcert -rfc -sslserver "$PUBLIC_HUB_WEBSERVER_HOST:$PUBLIC_HUB_WEBSERVER_PORT" -v | keytool -importcert -keystore "$JAVA_HOME/lib/security/cacerts" -storepass changeit -alias publichubwebserver -noprompt
+	then
+		echo "Completed importing Hub Certificate"
+	else
+		echo "Unable to add the certificate. Please try to import the certificate manually."
+	fi
 }
 
+# Bootstrap will optionally configure the config volume if it hasnt been configured yet.
+# After that we verify, import certs, and then launch the webserver.
 
+bootstrap
 verifyEnvironment
+
 if [ "$EMAIL_EXT_IMPORT_CERT" == "false" ]
 then
     echo "Skipping import of Hub Certificate"
