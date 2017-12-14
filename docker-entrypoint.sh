@@ -1,6 +1,9 @@
 #!/bin/sh
 set -e
 
+# We copy the config defaults into a volume which is mounted at runtime.
+cp -r /blackduck-extensions-config-defaults/* /blackduck-extensions-config-volume/
+
 verifyEnvironment() {
   # Verify JRE is present.
   if [ -n "$JAVA_HOME" ]; then
