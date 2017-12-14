@@ -7,26 +7,31 @@
 		<Console name="Console" target="SYSTEM_OUT">
 		   <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
 		</Console>
-        <RollingFile name="hubEmailLogger" fileName="${log4j:configParentLocation}/../logs/${logFilePrefix}.log" filePattern="${log4j:configParentLocation}/../logs/$${date:yyyy-MM}/${logFilePrefix}%d{MM-dd-yyyy}-%i.log.gz">
-           <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
-           <Policies>
-              <OnStartupTriggeringPolicy/>
-              <SizeBasedTriggeringPolicy size="512MB"/>
-           </Policies>
-           <DefaultRolloverStrategy max="10">
-                <Delete basePath="${log4j:configParentLocation}/../logs" maxDepth="2">
-                  <IfFileName glob="*/${logFilePrefix}*.log.gz"/>
-                  <IfLastModified age="90d"/>
-                </Delete>
-           </DefaultRolloverStrategy>
-        </RollingFile>
+
+    <RollingFile name="hubEmailLogger" fileName="${log4j:configParentLocation}/../logs/${logFilePrefix}.log" filePattern="${log4j:configParentLocation}/../logs/$${date:yyyy-MM}/${logFilePrefix}%d{MM-dd-yyyy}-%i.log.gz">
+       <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+       <Policies>
+          <OnStartupTriggeringPolicy/>
+          <SizeBasedTriggeringPolicy size="512MB"/>
+       </Policies>
+       <DefaultRolloverStrategy max="10">
+            <Delete basePath="${log4j:configParentLocation}/../logs" maxDepth="2">
+              <IfFileName glob="*/${logFilePrefix}*.log.gz"/>
+              <IfLastModified age="90d"/>
+            </Delete>
+       </DefaultRolloverStrategy>
+    </RollingFile>
+
 	</Appenders>
 	<Loggers>
-		<Root level="error">
-		  <AppenderRef ref="hubEmailLogger"/>
+
+		<Root>
+		  <AppenderRef ref="Console"/>
 		</Root>
+
 		<Logger name="com.blackducksoftware.integration" level="info" additivity="false">
-		  <AppenderRef ref="hubEmailLogger"/>
+		  <AppenderRef ref="Console"/>
 		</Logger>
+
 	</Loggers>
 </Configuration>
