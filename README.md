@@ -5,7 +5,7 @@ Hub extension for email. This hub extension provides ability to send emails base
 
 [![Build Status](https://travis-ci.org/blackducksoftware/hub-email-extension.svg?branch=master)](https://travis-ci.org/blackducksoftware/hub-email-extension)
 [![Coverage Status](https://coveralls.io/repos/github/blackducksoftware/hub-email-extension/badge.svg?branch=master)](https://coveralls.io/github/blackducksoftware/hub-email-extension?branch=master)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Black Duck Security Risk](https://copilot.blackducksoftware.com/github/groups/blackducksoftware/locations/hub-email-extension/public/results/branches/master/badge-risk.svg)](https://copilot.blackducksoftware.com/github/groups/blackducksoftware/locations/hub-email-extension/public/results/branches/master)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Black Duck Security Risk](https://copilot.blackducksoftware.com/github/repos/blackducksoftware/hub-email-extension/branches/master/badge-risk.svg)](https://copilot.blackducksoftware.com/github/repos/blackducksoftware/hub-email-extension/branches/master)
 
 ### Compile the source: ###
 ./gradlew clean build
