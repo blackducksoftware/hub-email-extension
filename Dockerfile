@@ -14,7 +14,7 @@ RUN set -e \
     && addgroup -S hubext \
     && adduser -h "$EMAIL_EXT_HOME" -g hubext -s /sbin/nologin -G hubext -S -D -H hubext
 
-ADD "build/distributions/hub-email-extension-$VERSION.tar" " /blackduck-extensions-tar/
+ADD "build/distributions/hub-email-extension-$VERSION.tar" /blackduck-extensions-tar/
 
 # Override the default logger settings to match other Hub containers
 
