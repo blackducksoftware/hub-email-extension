@@ -45,9 +45,9 @@ dependencies {
     compile 'org.slf4j:slf4j-api:1.7.21'
 	compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.6.2'
 	compile 'org.apache.logging.log4j:log4j-core:2.6.2'
-	runtime 'org.restlet.jse:org.restlet.ext.slf4j:2.3.7'
-	runtime 'org.restlet.jse:org.restlet.ext.jetty:2.3.7'
-	runtime 'org.restlet.jse:org.restlet.ext.gson:2.3.7'
+	runtime 'org.restlet.jse:org.restlet.ext.slf4j:2.3.12'
+	runtime 'org.restlet.jse:org.restlet.ext.jetty:2.3.12'
+	runtime 'org.restlet.jse:org.restlet.ext.gson:2.3.12'
 
 	compile 'org.apache.commons:commons-lang3:3.4'
 	compile 'commons-io:commons-io:2.5'
@@ -62,8 +62,8 @@ dependencies {
 	// hub-extension specific dependencies.
     compile 'com.google.code.findbugs:jsr305:3.0.1'
     compile 'com.google.guava:guava:19.0'
-    compile 'org.restlet.jse:org.restlet.ext.oauth:2.3.7'
-    compile 'org.restlet.jse:org.restlet.ext.jackson:2.3.7'
+    compile 'org.restlet.jse:org.restlet.ext.oauth:2.3.12'
+    compile 'org.restlet.jse:org.restlet.ext.jackson:2.3.12'
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-all:1.10.19'
