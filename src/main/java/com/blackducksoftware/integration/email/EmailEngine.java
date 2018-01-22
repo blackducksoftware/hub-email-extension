@@ -76,414 +76,420 @@ import freemarker.template.Configuration;
 import freemarker.template.TemplateExceptionHandler;
 
 public class EmailEngine implements IAuthorizedListener {
-    private final Logger logger = LoggerFactory.getLogger(EmailEngine.class);
+	private final Logger logger = LoggerFactory.getLogger(EmailEngine.class);
 
-    private final Configuration configuration;
+	private final Configuration configuration;
 
-    private JavaMailWrapper javaMailWrapper;
+	private JavaMailWrapper javaMailWrapper;
 
-    private EmailMessagingService emailMessagingService;
+	private EmailMessagingService emailMessagingService;
 
-    private HubServerConfig hubServerConfig;
+	private HubServerConfig hubServerConfig;
 
-    private RestConnection restConnection;
+	private RestConnection restConnection;
 
-    private final Properties appProperties;
+	private final Properties appProperties;
 
-    private final ExtensionProperties extensionProperties;
+	private final ExtensionProperties extensionProperties;
 
-    private NotificationDataService notificationDataService;
+	private NotificationDataService notificationDataService;
 
-    private NotifierManager notifierManager;
+	private NotifierManager notifierManager;
 
-    private final ExtensionTokenManager tokenManager;
+	private final ExtensionTokenManager tokenManager;
 
-    private final OAuthEndpoint restletComponent;
+	private final OAuthEndpoint restletComponent;
 
-    private final ExtensionInfo extensionInfoData;
+	private final ExtensionInfo extensionInfoData;
 
-    private final ExtensionConfigManager extConfigManager;
+	private final ExtensionConfigManager extConfigManager;
 
-    private ExtensionConfigDataService extConfigDataService;
+	private ExtensionConfigDataService extConfigDataService;
 
-    private HubServicesFactory hubServicesFactory;
+	private HubServicesFactory hubServicesFactory;
 
-    private EmailExtensionApplication emailExtensionApplication;
-    private final boolean alwaysTrustServerCertificate;
+	private EmailExtensionApplication emailExtensionApplication;
+	private final boolean alwaysTrustServerCertificate;
 
-    public EmailEngine() throws FileNotFoundException, IOException {
-        alwaysTrustServerCertificate = getAlwaysTrustServerCertificates();
-        appProperties = createAppProperties();
-        extensionProperties = createExtensionProperties();
-        configuration = createFreemarkerConfig();
-        extensionInfoData = createExtensionInfoData();
-        tokenManager = createTokenManager();
-        extConfigManager = createExtensionConfigManager();
-        restletComponent = createRestletComponent();
-    }
+	public EmailEngine() throws FileNotFoundException, IOException {
+		alwaysTrustServerCertificate = getAlwaysTrustServerCertificates();
+		appProperties = createAppProperties();
+		extensionProperties = createExtensionProperties();
+		configuration = createFreemarkerConfig();
+		extensionInfoData = createExtensionInfoData();
+		tokenManager = createTokenManager();
+		extConfigManager = createExtensionConfigManager();
+		restletComponent = createRestletComponent();
+	}
 
-    public boolean getAlwaysTrustServerCertificates() {
-        boolean alwaysTrustServerCertificate = false;
-        final String alwaysTrust = System.getenv("EXTENSION_ALWAYS_TRUST_SERVER_CERTIFICATE");
-        if (StringUtils.isNotBlank(alwaysTrust)) {
-            alwaysTrustServerCertificate = Boolean.parseBoolean(alwaysTrust);
-            if (alwaysTrustServerCertificate) {
-                logger.warn("Always trust server certificates option enabled");
-            }
-        }
-        return alwaysTrustServerCertificate;
-    }
+	public boolean getAlwaysTrustServerCertificates() {
+		boolean alwaysTrustServerCertificate = false;
+		final String alwaysTrust = System.getenv("EXTENSION_ALWAYS_TRUST_SERVER_CERTIFICATE");
+		if (StringUtils.isNotBlank(alwaysTrust)) {
+			alwaysTrustServerCertificate = Boolean.parseBoolean(alwaysTrust);
+			if (alwaysTrustServerCertificate) {
+				logger.warn("Always trust server certificates option enabled");
+			}
+		}
+		return alwaysTrustServerCertificate;
+	}
 
-    public Logger getLogger() {
-        return logger;
-    }
+	public Logger getLogger() {
+		return logger;
+	}
 
-    public Configuration getConfiguration() {
-        return configuration;
-    }
+	public Configuration getConfiguration() {
+		return configuration;
+	}
 
-    public JavaMailWrapper getJavaMailWrapper() {
-        return javaMailWrapper;
-    }
+	public JavaMailWrapper getJavaMailWrapper() {
+		return javaMailWrapper;
+	}
 
-    public EmailMessagingService getEmailMessagingService() {
-        return emailMessagingService;
-    }
+	public EmailMessagingService getEmailMessagingService() {
+		return emailMessagingService;
+	}
 
-    public HubServerConfig getHubServerConfig() {
-        return hubServerConfig;
-    }
+	public HubServerConfig getHubServerConfig() {
+		return hubServerConfig;
+	}
 
-    public RestConnection getRestConnection() {
-        return restConnection;
-    }
+	public RestConnection getRestConnection() {
+		return restConnection;
+	}
 
-    public Properties getAppProperties() {
-        return appProperties;
-    }
+	public Properties getAppProperties() {
+		return appProperties;
+	}
 
-    public ExtensionProperties getExtensionProperties() {
-        return extensionProperties;
-    }
+	public ExtensionProperties getExtensionProperties() {
+		return extensionProperties;
+	}
 
-    public NotificationDataService getNotificationDataService() {
-        return notificationDataService;
-    }
+	public NotificationDataService getNotificationDataService() {
+		return notificationDataService;
+	}
 
-    public NotifierManager getNotifierManager() {
-        return notifierManager;
-    }
+	public NotifierManager getNotifierManager() {
+		return notifierManager;
+	}
 
-    public ExtensionTokenManager getTokenManager() {
-        return tokenManager;
-    }
+	public ExtensionTokenManager getTokenManager() {
+		return tokenManager;
+	}
 
-    public OAuthEndpoint getRestletComponent() {
-        return restletComponent;
-    }
+	public OAuthEndpoint getRestletComponent() {
+		return restletComponent;
+	}
 
-    public ExtensionInfo getExtensionInfoData() {
-        return extensionInfoData;
-    }
+	public ExtensionInfo getExtensionInfoData() {
+		return extensionInfoData;
+	}
 
-    public ExtensionConfigManager getExtConfigManager() {
-        return extConfigManager;
-    }
+	public ExtensionConfigManager getExtConfigManager() {
+		return extConfigManager;
+	}
 
-    public ExtensionConfigDataService getExtConfigDataService() {
-        return extConfigDataService;
-    }
+	public ExtensionConfigDataService getExtConfigDataService() {
+		return extConfigDataService;
+	}
 
-    public HubServicesFactory getHubServicesFactory() {
-        return hubServicesFactory;
-    }
+	public HubServicesFactory getHubServicesFactory() {
+		return hubServicesFactory;
+	}
 
-    public void start() {
-        try {
-            restletComponent.start();
-            tokenManager.refreshToken(AccessType.USER);
-        } catch (final Exception e) {
-            logger.error("Error Starting Email Engine", e);
-        }
-    }
+	public void start() {
+		try {
+			restletComponent.start();
+			tokenManager.refreshToken(AccessType.USER);
+		} catch (final Exception e) {
+			logger.error("Error Starting Email Engine", e);
+		}
+	}
 
-    public void shutDown() {
-        try {
-            notifierManager.stop();
-            restletComponent.stop();
-        } catch (final Exception e) {
-            logger.error("Error stopping Email Engine", e);
-        }
-    }
+	public void shutDown() {
+		try {
+			notifierManager.stop();
+			restletComponent.stop();
+		} catch (final Exception e) {
+			logger.error("Error stopping Email Engine", e);
+		}
+	}
 
-    public Properties createAppProperties() throws FileNotFoundException, IOException {
-        final Properties appProperties = new Properties();
-        final String configLocation = System.getProperty(ExtensionConfigManager.PROPERTY_KEY_CONFIG_LOCATION_PATH);
-        final File customerPropertiesFile = new File(configLocation, "extension.properties");
-        try (FileInputStream fileInputStream = new FileInputStream(customerPropertiesFile)) {
-            appProperties.load(fileInputStream);
-        }
+	public Properties createAppProperties() throws FileNotFoundException, IOException {
+		final Properties appProperties = new Properties();
+		final String configLocation = System.getProperty(ExtensionConfigManager.PROPERTY_KEY_CONFIG_LOCATION_PATH);
+		final File customerPropertiesFile = new File(configLocation, "extension.properties");
+		try (FileInputStream fileInputStream = new FileInputStream(customerPropertiesFile)) {
+			appProperties.load(fileInputStream);
+		}
 
-        return appProperties;
-    }
+		return appProperties;
+	}
 
-    public Configuration createFreemarkerConfig() throws IOException {
-        final Configuration cfg = new Configuration(Configuration.VERSION_2_3_25);
-        final File templateDirectory = findTemplateDirectory();
-        cfg.setDirectoryForTemplateLoading(templateDirectory);
-        cfg.setDefaultEncoding("UTF-8");
-        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
-        cfg.setLogTemplateExceptions(false);
+	public Configuration createFreemarkerConfig() throws IOException {
+		final Configuration cfg = new Configuration(Configuration.VERSION_2_3_25);
+		final File templateDirectory = findTemplateDirectory();
+		cfg.setDirectoryForTemplateLoading(templateDirectory);
+		cfg.setDefaultEncoding("UTF-8");
+		cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
+		cfg.setLogTemplateExceptions(false);
 
-        return cfg;
-    }
+		return cfg;
+	}
 
-    private File findTemplateDirectory() {
-        try {
-            File templateDir = null;
-            final String appHomeDir = System.getProperty(EmailExtensionConstants.SYSTEM_PROPERTY_KEY_APP_HOME);
-            if (StringUtils.isNotBlank(appHomeDir)) {
-                templateDir = new File(appHomeDir, "templates");
-            }
+	private File findTemplateDirectory() {
+		try {
+			File templateDir = null;
+			final String appHomeDir = System.getProperty(EmailExtensionConstants.SYSTEM_PROPERTY_KEY_APP_HOME);
+			if (StringUtils.isNotBlank(appHomeDir)) {
+				templateDir = new File(appHomeDir, "templates");
+			}
 
-            final String templateDirProperty = extensionProperties.getEmailTemplateDirectory();
-            if (StringUtils.isNotBlank(templateDirProperty)) {
-                templateDir = new File(templateDirProperty);
-            }
+			final String templateDirProperty = extensionProperties.getEmailTemplateDirectory();
+			if (StringUtils.isNotBlank(templateDirProperty)) {
+				templateDir = new File(templateDirProperty);
+			}
 
-            return templateDir;
-        } catch (final Exception e) {
-            logger.error("Error finding the template directory", e);
-            return null;
-        }
-    }
+			return templateDir;
+		} catch (final Exception e) {
+			logger.error("Error finding the template directory", e);
+			return null;
+		}
+	}
 
-    public DateFormat createNotificationDateFormat() {
-        final DateFormat dateFormat = new SimpleDateFormat(RestConnection.JSON_DATE_FORMAT);
-        dateFormat.setTimeZone(java.util.TimeZone.getTimeZone("Zulu"));
-        return dateFormat;
-    }
+	public DateFormat createNotificationDateFormat() {
+		final DateFormat dateFormat = new SimpleDateFormat(RestConnection.JSON_DATE_FORMAT);
+		dateFormat.setTimeZone(java.util.TimeZone.getTimeZone("Zulu"));
+		return dateFormat;
+	}
 
-    public Date createApplicationStartDate() {
-        return new Date();
-    }
+	public Date createApplicationStartDate() {
+		return new Date();
+	}
 
-    public ExecutorService createExecutorService() {
-        final ThreadFactory threadFactory = Executors.defaultThreadFactory();
-        return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), threadFactory);
-    }
+	public ExecutorService createExecutorService() {
+		final ThreadFactory threadFactory = Executors.defaultThreadFactory();
+		return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), threadFactory);
+	}
 
-    public ExtensionProperties createExtensionProperties() {
-        return new ExtensionProperties(appProperties);
-    }
+	public ExtensionProperties createExtensionProperties() {
+		return new ExtensionProperties(appProperties);
+	}
 
-    public JavaMailWrapper createJavaMailWrapper() {
-        return new JavaMailWrapper();
-    }
+	public JavaMailWrapper createJavaMailWrapper() {
+		return new JavaMailWrapper();
+	}
 
-    public EmailMessagingService createEmailMessagingService() {
-        return new EmailMessagingService(extensionProperties, configuration, javaMailWrapper);
-    }
+	public EmailMessagingService createEmailMessagingService() {
+		return new EmailMessagingService(extensionProperties, configuration, javaMailWrapper);
+	}
 
-    public HubServerConfig createHubConfig(final String hubUri) {
-        try {
-            final HubServerConfigBuilder configBuilder = new HubServerConfigBuilder();
-            configBuilder.setHubUrl(hubUri);
-            // using oauth the username and password aren't used but need to be set
-            // for the builder
-            configBuilder.setUsername("auser");
-            configBuilder.setPassword("apassword");
-            configBuilder.setTimeout(extensionProperties.getHubServerTimeout());
-            configBuilder.setProxyHost(extensionProperties.getHubProxyHost());
-            configBuilder.setProxyPort(extensionProperties.getHubProxyPort());
-            configBuilder.setIgnoredProxyHosts(extensionProperties.getHubProxyNoHost());
-            configBuilder.setProxyUsername(extensionProperties.getHubProxyUser());
-            configBuilder.setProxyPassword(extensionProperties.getHubProxyPassword());
-            configBuilder.setAlwaysTrustServerCertificate(alwaysTrustServerCertificate);
+	public HubServerConfig createHubConfig(final String hubUri) {
+		try {
+			final HubServerConfigBuilder configBuilder = new HubServerConfigBuilder();
+			configBuilder.setHubUrl(hubUri);
+			// using oauth the username and password aren't used but need to be set
+			// for the builder
+			configBuilder.setUsername("auser");
+			configBuilder.setPassword("apassword");
+			configBuilder.setTimeout(extensionProperties.getHubServerTimeout());
+			configBuilder.setProxyHost(extensionProperties.getHubProxyHost());
+			configBuilder.setProxyPort(extensionProperties.getHubProxyPort());
+			configBuilder.setIgnoredProxyHosts(extensionProperties.getHubProxyNoHost());
+			configBuilder.setProxyUsername(extensionProperties.getHubProxyUser());
+			configBuilder.setProxyPassword(extensionProperties.getHubProxyPassword());
+			configBuilder.setAlwaysTrustServerCertificate(alwaysTrustServerCertificate);
 
-            final HubServerConfig config = configBuilder.build();
-            // output the configuration details
-            logger.info("Hub Server URL          = " + config.getHubUrl());
-            logger.info("Hub Timeout             = " + config.getTimeout());
+			final HubServerConfig config = configBuilder.build();
+			// output the configuration details
+			logger.info("Hub Server URL          = " + config.getHubUrl());
+			logger.info("Hub Timeout             = " + config.getTimeout());
 
-            return config;
-        } catch (final IllegalStateException ex) {
-            logger.error("Error with the hub configuration", ex);
-        }
+			return config;
+		} catch (final IllegalStateException ex) {
+			logger.error("Error with the hub configuration", ex);
+		}
 
-        return null;
-    }
+		return null;
+	}
 
-    public RestConnection createRestConnection(final String hubUri) {
-        final RestConnection restConnection = initRestConnection(hubUri);
-        return restConnection;
-    }
+	public RestConnection createRestConnection(final String hubUri) {
+		final RestConnection restConnection = initRestConnection(hubUri);
+		return restConnection;
+	}
 
-    public NotificationDataService createNotificationDataService() {
-        final NotificationDataService notificationDataService = hubServicesFactory.createNotificationDataService();
-        return notificationDataService;
-    }
+	public NotificationDataService createNotificationDataService() {
+		final NotificationDataService notificationDataService = hubServicesFactory.createNotificationDataService();
+		return notificationDataService;
+	}
 
-    public RestConnection initRestConnection(final String hubUri) {
-        final IntLogger extLogger = new ExtensionLogger(logger);
-        final OAuthRestConnectionBuilder builder = new OAuthRestConnectionBuilder();
-        builder.setLogger(extLogger);
-        builder.setBaseUrl(hubServerConfig.getHubUrl().toString());
-        builder.setTimeout(hubServerConfig.getTimeout());
-        builder.setTokenManager(tokenManager);
-        builder.setAccessType(AccessType.USER);
-        builder.setAlwaysTrustServerCertificate(alwaysTrustServerCertificate);
-        final RestConnection restConnection = builder.build();
-        return restConnection;
-    }
+	public RestConnection initRestConnection(final String hubUri) {
+		final IntLogger extLogger = new ExtensionLogger(logger);
+		final OAuthRestConnectionBuilder builder = new OAuthRestConnectionBuilder();
+		builder.setLogger(extLogger);
+		builder.setBaseUrl(hubServerConfig.getHubUrl().toString());
+		builder.setTimeout(hubServerConfig.getTimeout());
+		builder.setTokenManager(tokenManager);
+		builder.setAccessType(AccessType.USER);
+		builder.setAlwaysTrustServerCertificate(alwaysTrustServerCertificate);
+		final RestConnection restConnection = builder.build();
+		return restConnection;
+	}
 
-    public NotifierManager createNotifierManager() {
-        final NotifierManager manager = new NotifierManager();
+	public NotifierManager createNotifierManager() {
+		final NotifierManager manager = new NotifierManager();
 
         final DailyDigestNotifier dailyNotifier = new DailyDigestNotifier(extensionProperties, emailMessagingService, hubServicesFactory, getExtensionInfoData());
         final TestEmailNotifier testNotifier = new TestEmailNotifier(extensionProperties, emailMessagingService, hubServicesFactory, getExtensionInfoData());
         final RealTimeDigestNotifier realTimeNotifier = new RealTimeDigestNotifier(extensionProperties, emailMessagingService, hubServicesFactory, getExtensionInfoData());
         final CustomDigestNotifier customNotifier = new CustomDigestNotifier(extensionProperties, emailMessagingService, hubServicesFactory, getExtensionInfoData());
-        manager.attach(dailyNotifier);
-        manager.attach(realTimeNotifier);
-        manager.attach(testNotifier);
-        manager.attach(customNotifier);
+		manager.attach(dailyNotifier);
+		manager.attach(realTimeNotifier);
+		manager.attach(testNotifier);
+		manager.attach(customNotifier);
         emailExtensionApplication.getContext().getAttributes().put(EmailExtensionConstants.CONTEXT_ATTRIBUTE_KEY_TEST_NOTIFIER, testNotifier);
-        return manager;
-    }
+		return manager;
+	}
 
-    public ExtensionInfo createExtensionInfoData() {
-        final String id = generateExtensionId();
-        final String name = extensionProperties.getExtensionName();
-        final String description = extensionProperties.getExtensionDescription();
-        String baseUrl = extensionProperties.getExtensionBaseUrl();
-        URL extensionUrl;
-        try {
-            extensionUrl = new URL(baseUrl);
-            if (extensionUrl.getHost().equals("localhost")) {
-                final String hostName = Optional.ofNullable(System.getenv("PUBLIC_HUB_WEBSERVER_HOST")).orElseGet(() -> HostnameHelper.getMyHostname());
-                final URL url = new URL(extensionUrl.getProtocol(), hostName, extensionUrl.getPort(), extensionUrl.getFile());
-                baseUrl = url.toString();
-            }
-        } catch (final MalformedURLException e) {
-            baseUrl = extensionProperties.getExtensionBaseUrl();
-        }
-        logger.info("Extension Base URL: {}", baseUrl);
-        return new ExtensionInfo(id, name, description, baseUrl);
-    }
+	public ExtensionInfo createExtensionInfoData() {
+		final String id = generateExtensionId();
+		final String name = extensionProperties.getExtensionName();
+		final String description = extensionProperties.getExtensionDescription();
+		String baseUrl = extensionProperties.getExtensionBaseUrl();
+		URL extensionUrl;
+		try {
+			extensionUrl = new URL(baseUrl);
+			if (extensionUrl.getHost().equals("localhost")) {
+				//If we can't resolve the hostname, look for an explicit env variable.
+				final String hostName = Optional.ofNullable(System.getenv("PUBLIC_EMAIL_EXTENSION_HOST"))
+						//If no explicit hostname is defined, we may be co-located with hub.
+						.orElse(Optional.ofNullable(System.getenv("PUBLIC_HUB_WEBSERVER_HOST"))
+								//When all else fails, look at network interfaces.
+								.orElseGet(() -> HostnameHelper.getMyHostname()));
+				final URL url = new URL(extensionUrl.getProtocol(), hostName, extensionUrl.getPort(),
+						extensionUrl.getFile());
+				baseUrl = url.toString();
+			}
+		} catch (final MalformedURLException e) {
+			baseUrl = extensionProperties.getExtensionBaseUrl();
+		}
+		logger.info("Extension Base URL: {}", baseUrl);
+		return new ExtensionInfo(id, name, description, baseUrl);
+	}
 
-    public String generateExtensionId() {
-        final Class<? extends EmailEngine> engineClass = this.getClass();
-        final Package enginePackage = engineClass.getPackage();
+	public String generateExtensionId() {
+		final Class<? extends EmailEngine> engineClass = this.getClass();
+		final Package enginePackage = engineClass.getPackage();
 
-        final String name = enginePackage.getName();
-        final String version = extensionProperties.getExtensionVersion();
-        final String id = name + ".email-extension." + version;
-        logger.info("Extension ID - {}", id);
-        return id;
-    }
+		final String name = enginePackage.getName();
+		final String version = extensionProperties.getExtensionVersion();
+		final String id = name + ".email-extension." + version;
+		logger.info("Extension ID - {}", id);
+		return id;
+	}
 
-    public OAuthEndpoint createRestletComponent() {
-        emailExtensionApplication = new EmailExtensionApplication(tokenManager, extConfigManager);
-        final OAuthEndpoint endpoint = new OAuthEndpoint(emailExtensionApplication);
-        try {
-            final URL url = new URL(extensionInfoData.getBaseUrl());
-            final int port = url.getPort();
-            if (Protocol.HTTP.getSchemeName().equals(url.getProtocol())) {
-                if (port > 0) {
-                    endpoint.getServers().add(Protocol.HTTP, port);
-                } else {
-                    endpoint.getServers().add(Protocol.HTTP);
-                }
-            } else if (Protocol.HTTPS.getSchemeName().equals(url.getProtocol())) {
-                Server server;
-                if (port > 0) {
-                    server = endpoint.getServers().add(Protocol.HTTPS, port);
-                } else {
-                    server = endpoint.getServers().add(Protocol.HTTPS);
-                }
-                final Series<Parameter> parameters = server.getContext().getParameters();
-                parameters.add("sslContextFactory", "org.restlet.engine.ssl.DefaultSslContextFactory");
-                parameters.add("keyStorePath", extensionProperties.getSSLKeyStorePath());
-                parameters.add("keyStorePassword", extensionProperties.getSSLKeyStorePassword());
-                parameters.add("keyPassword", extensionProperties.getSSLKeyPassword());
-                parameters.add("keyStoreType", extensionProperties.getSSLKeyStoreType());
-            } else {
-                logger.error("URL scheme {} not supported.  Not starting the email extension. ", url.getProtocol());
-            }
-        } catch (final MalformedURLException e) {
-            logger.error("createRestletComponent error with base URL", e);
-        }
+	public OAuthEndpoint createRestletComponent() {
+		emailExtensionApplication = new EmailExtensionApplication(tokenManager, extConfigManager);
+		final OAuthEndpoint endpoint = new OAuthEndpoint(emailExtensionApplication);
+		try {
+			final URL url = new URL(extensionInfoData.getBaseUrl());
+			final int port = url.getPort();
+			if (Protocol.HTTP.getSchemeName().equals(url.getProtocol())) {
+				if (port > 0) {
+					endpoint.getServers().add(Protocol.HTTP, port);
+				} else {
+					endpoint.getServers().add(Protocol.HTTP);
+				}
+			} else if (Protocol.HTTPS.getSchemeName().equals(url.getProtocol())) {
+				Server server;
+				if (port > 0) {
+					server = endpoint.getServers().add(Protocol.HTTPS, port);
+				} else {
+					server = endpoint.getServers().add(Protocol.HTTPS);
+				}
+				final Series<Parameter> parameters = server.getContext().getParameters();
+				parameters.add("sslContextFactory", "org.restlet.engine.ssl.DefaultSslContextFactory");
+				parameters.add("keyStorePath", extensionProperties.getSSLKeyStorePath());
+				parameters.add("keyStorePassword", extensionProperties.getSSLKeyStorePassword());
+				parameters.add("keyPassword", extensionProperties.getSSLKeyPassword());
+				parameters.add("keyStoreType", extensionProperties.getSSLKeyStoreType());
+			} else {
+				logger.error("URL scheme {} not supported.  Not starting the email extension. ", url.getProtocol());
+			}
+		} catch (final MalformedURLException e) {
+			logger.error("createRestletComponent error with base URL", e);
+		}
 
-        return endpoint;
-    }
+		return endpoint;
+	}
 
-    public ExtensionTokenManager createTokenManager() {
-        final Logger tokenManagerLogger = LoggerFactory.getLogger(ExtensionTokenManager.class);
-        final ExtensionLogger serviceLogger = new ExtensionLogger(tokenManagerLogger);
-        final String timeoutString = extensionProperties.getHubServerTimeout();
-        final int timeout = Integer.parseInt(timeoutString);
-        final ExtensionTokenManager tokenManager = new ExtensionTokenManager(serviceLogger, timeout, extensionInfoData);
-        final ProxyInfoBuilder proxyInfoBuilder = new ProxyInfoBuilder();
-        final String proxyHost = extensionProperties.getHubProxyHost();
-        final String proxyPort = extensionProperties.getHubProxyPort();
-        final String proxyIgnoredHosts = extensionProperties.getHubProxyNoHost();
-        final String proxyUser = extensionProperties.getHubProxyUser();
-        final String proxyPassword = extensionProperties.getHubProxyPassword();
-        proxyInfoBuilder.setHost(proxyHost);
-        proxyInfoBuilder.setPort(proxyPort);
-        proxyInfoBuilder.setIgnoredProxyHosts(proxyIgnoredHosts);
-        proxyInfoBuilder.setUsername(proxyUser);
-        proxyInfoBuilder.setPassword(proxyPassword);
-        final ProxyInfo proxyInfo = proxyInfoBuilder.build();
-        tokenManager.setProxyInfo(proxyInfo);
-        tokenManager.setAlwaysTrustServerCertificate(alwaysTrustServerCertificate);
-        tokenManager.addAuthorizedListener(this);
-        logger.info("Proxy Host          = " + proxyHost);
-        logger.info("Proxy Port          = " + proxyPort);
-        logger.info("Ignored Proxy Hosts = " + proxyIgnoredHosts);
-        return tokenManager;
-    }
+	public ExtensionTokenManager createTokenManager() {
+		final Logger tokenManagerLogger = LoggerFactory.getLogger(ExtensionTokenManager.class);
+		final ExtensionLogger serviceLogger = new ExtensionLogger(tokenManagerLogger);
+		final String timeoutString = extensionProperties.getHubServerTimeout();
+		final int timeout = Integer.parseInt(timeoutString);
+		final ExtensionTokenManager tokenManager = new ExtensionTokenManager(serviceLogger, timeout, extensionInfoData);
+		final ProxyInfoBuilder proxyInfoBuilder = new ProxyInfoBuilder();
+		final String proxyHost = extensionProperties.getHubProxyHost();
+		final String proxyPort = extensionProperties.getHubProxyPort();
+		final String proxyIgnoredHosts = extensionProperties.getHubProxyNoHost();
+		final String proxyUser = extensionProperties.getHubProxyUser();
+		final String proxyPassword = extensionProperties.getHubProxyPassword();
+		proxyInfoBuilder.setHost(proxyHost);
+		proxyInfoBuilder.setPort(proxyPort);
+		proxyInfoBuilder.setIgnoredProxyHosts(proxyIgnoredHosts);
+		proxyInfoBuilder.setUsername(proxyUser);
+		proxyInfoBuilder.setPassword(proxyPassword);
+		final ProxyInfo proxyInfo = proxyInfoBuilder.build();
+		tokenManager.setProxyInfo(proxyInfo);
+		tokenManager.setAlwaysTrustServerCertificate(alwaysTrustServerCertificate);
+		tokenManager.addAuthorizedListener(this);
+		logger.info("Proxy Host          = " + proxyHost);
+		logger.info("Proxy Port          = " + proxyPort);
+		logger.info("Ignored Proxy Hosts = " + proxyIgnoredHosts);
+		return tokenManager;
+	}
 
-    public ExtensionConfigManager createExtensionConfigManager() {
-        // has to be separate from the dataservicesfactory otherwise we have a
-        // chicken and egg problem
-        final ExtensionConfigManager extConfigManager = new ExtensionConfigManager(extensionInfoData, new JsonParser());
-        return extConfigManager;
-    }
+	public ExtensionConfigManager createExtensionConfigManager() {
+		// has to be separate from the dataservicesfactory otherwise we have a
+		// chicken and egg problem
+		final ExtensionConfigManager extConfigManager = new ExtensionConfigManager(extensionInfoData, new JsonParser());
+		return extConfigManager;
+	}
 
-    public ExtensionConfigDataService createExtensionConfigDataService() {
-        final ExtensionConfigDataService extConfigDataService = hubServicesFactory.createExtensionConfigDataService();
-        return extConfigDataService;
-    }
+	public ExtensionConfigDataService createExtensionConfigDataService() {
+		final ExtensionConfigDataService extConfigDataService = hubServicesFactory.createExtensionConfigDataService();
+		return extConfigDataService;
+	}
 
-    @Override
-    public void onAuthorized() {
-        try {
-            String hubUri;
-            hubUri = createHubBaseUrl(tokenManager.getConfiguration().hubUri);
-            hubServerConfig = createHubConfig(hubUri);
-            restConnection = createRestConnection(hubUri);
-            javaMailWrapper = createJavaMailWrapper();
-            hubServicesFactory = new HubServicesFactory(restConnection);
-            emailMessagingService = createEmailMessagingService();
-            notificationDataService = createNotificationDataService();
-            extConfigDataService = createExtensionConfigDataService();
-            notifierManager = createNotifierManager();
-            notifierManager.updateHubExtensionUri(tokenManager.getConfiguration().extensionUri);
-            notifierManager.start();
-        } catch (final MalformedURLException e) {
-            logger.error("Error completing extension initialization", e);
-        } finally {
-            tokenManager.removeAuthorizedListener(this);
-        }
-    }
+	@Override
+	public void onAuthorized() {
+		try {
+			String hubUri;
+			hubUri = createHubBaseUrl(tokenManager.getConfiguration().hubUri);
+			hubServerConfig = createHubConfig(hubUri);
+			restConnection = createRestConnection(hubUri);
+			javaMailWrapper = createJavaMailWrapper();
+			hubServicesFactory = new HubServicesFactory(restConnection);
+			emailMessagingService = createEmailMessagingService();
+			notificationDataService = createNotificationDataService();
+			extConfigDataService = createExtensionConfigDataService();
+			notifierManager = createNotifierManager();
+			notifierManager.updateHubExtensionUri(tokenManager.getConfiguration().extensionUri);
+			notifierManager.start();
+		} catch (final MalformedURLException e) {
+			logger.error("Error completing extension initialization", e);
+		} finally {
+			tokenManager.removeAuthorizedListener(this);
+		}
+	}
 
-    // TODO file a ticket against the hub to give me the root URL not with a
-    // path
-    private String createHubBaseUrl(final String hubUri) throws MalformedURLException {
-        final URL original = new URL(hubUri);
-        final URL baseUrl = new URL(original.getProtocol(), original.getHost(), original.getPort(), "");
-        return baseUrl.toString();
-    }
+	// TODO file a ticket against the hub to give me the root URL not with a
+	// path
+	private String createHubBaseUrl(final String hubUri) throws MalformedURLException {
+		final URL original = new URL(hubUri);
+		final URL baseUrl = new URL(original.getProtocol(), original.getHost(), original.getPort(), "");
+		return baseUrl.toString();
+	}
 }
