@@ -4,6 +4,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.bmuschko:gradle-docker-plugin:3.0.11'
+        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.6.1"
     }
 }
 
@@ -12,6 +13,7 @@ apply plugin: 'eclipse'
 apply plugin: 'maven'
 apply plugin: 'application'
 apply plugin: 'com.bmuschko.docker-remote-api'
+apply plugin: 'org.sonarqube'
 
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 
@@ -163,3 +165,11 @@ task pushImage(type:Exec, dependsOn: [buildDockerImage]) {
 tasks.processResources.dependsOn modifyExtVersionProperty
 
 task all(dependsOn: [build, dockerLogin, buildDockerImage, pushImage]) {}
+
+sonarqube {
+    properties {
+        property 'sonar.projectName', 'Integrations - Hub Email Extension'
+        property 'sonar.projectKey', 'com.blackducksoftware:int:hub-email-extension'
+        property 'sonar.verbose', false
+    }
+}
