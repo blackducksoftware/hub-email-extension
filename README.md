@@ -1,3 +1,7 @@
+# Warning
+This product is now deprecated. Please use Alert for notification processing and distribution:
+https://github.com/blackducksoftware/hub-alert
+
 ## Overview ##
 Hub extension for email. This hub extension provides ability to send emails based on notifications from the hub.
 
